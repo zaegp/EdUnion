@@ -1,0 +1,677 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
+		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
+		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
+		51ED0ADE2C916721006322B7 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 51ED0ADD2C916721006322B7 /* Base */; };
+		51ED0AE02C916722006322B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51ED0ADF2C916722006322B7 /* Assets.xcassets */; };
+		51ED0AE32C916722006322B7 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 51ED0AE22C916722006322B7 /* Base */; };
+		51ED0AEE2C916722006322B7 /* EdUnionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AED2C916722006322B7 /* EdUnionTests.swift */; };
+		51ED0AF82C916722006322B7 /* EdUnionUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AF72C916722006322B7 /* EdUnionUITests.swift */; };
+		51ED0AFA2C916722006322B7 /* EdUnionUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AF92C916722006322B7 /* EdUnionUITestsLaunchTests.swift */; };
+		51ED0B072C917A0F006322B7 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B062C917A0F006322B7 /* Message.swift */; };
+		51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B082C917A8F006322B7 /* ChatViewModel.swift */; };
+		51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B0A2C917BE3006322B7 /* ChatVC.swift */; };
+		51ED0B0E2C917E67006322B7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51ED0B0D2C917E67006322B7 /* FirebaseAnalytics */; };
+		51ED0B102C917E67006322B7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51ED0B0F2C917E67006322B7 /* FirebaseAuth */; };
+		51ED0B122C917E67006322B7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 51ED0B112C917E67006322B7 /* FirebaseFirestore */; };
+		51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */; };
+		51ED0B162C918080006322B7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 51ED0B152C918080006322B7 /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		51ED0AEA2C916722006322B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 51ED0ACB2C916721006322B7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51ED0AD22C916721006322B7;
+			remoteInfo = EdUnion;
+		};
+		51ED0AF42C916722006322B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 51ED0ACB2C916721006322B7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51ED0AD22C916721006322B7;
+			remoteInfo = EdUnion;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		51ED0ADA2C916721006322B7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		51ED0ADD2C916721006322B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		51ED0ADF2C916722006322B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		51ED0AE22C916722006322B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		51ED0AE42C916722006322B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		51ED0AE92C916722006322B7 /* EdUnionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EdUnionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51ED0AED2C916722006322B7 /* EdUnionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdUnionTests.swift; sourceTree = "<group>"; };
+		51ED0AF32C916722006322B7 /* EdUnionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EdUnionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51ED0AF72C916722006322B7 /* EdUnionUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdUnionUITests.swift; sourceTree = "<group>"; };
+		51ED0AF92C916722006322B7 /* EdUnionUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdUnionUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		51ED0B062C917A0F006322B7 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		51ED0B082C917A8F006322B7 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		51ED0B0A2C917BE3006322B7 /* ChatVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatVC.swift; sourceTree = "<group>"; };
+		51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTableViewCell.swift; sourceTree = "<group>"; };
+		51ED0B152C918080006322B7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		51ED0AD02C916721006322B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51ED0B0E2C917E67006322B7 /* FirebaseAnalytics in Frameworks */,
+				51ED0B102C917E67006322B7 /* FirebaseAuth in Frameworks */,
+				51ED0B122C917E67006322B7 /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AE62C916722006322B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AF02C916722006322B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		51ED0ACA2C916721006322B7 = {
+			isa = PBXGroup;
+			children = (
+				51ED0AD52C916721006322B7 /* EdUnion */,
+				51ED0AEC2C916722006322B7 /* EdUnionTests */,
+				51ED0AF62C916722006322B7 /* EdUnionUITests */,
+				51ED0AD42C916721006322B7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		51ED0AD42C916721006322B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				51ED0AD32C916721006322B7 /* EdUnion.app */,
+				51ED0AE92C916722006322B7 /* EdUnionTests.xctest */,
+				51ED0AF32C916722006322B7 /* EdUnionUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		51ED0AD52C916721006322B7 /* EdUnion */ = {
+			isa = PBXGroup;
+			children = (
+				51ED0AD62C916721006322B7 /* AppDelegate.swift */,
+				51ED0B062C917A0F006322B7 /* Message.swift */,
+				51ED0B082C917A8F006322B7 /* ChatViewModel.swift */,
+				51ED0B0A2C917BE3006322B7 /* ChatVC.swift */,
+				51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */,
+				51ED0AD82C916721006322B7 /* SceneDelegate.swift */,
+				51ED0ADA2C916721006322B7 /* ViewController.swift */,
+				51ED0ADC2C916721006322B7 /* Main.storyboard */,
+				51ED0ADF2C916722006322B7 /* Assets.xcassets */,
+				51ED0AE12C916722006322B7 /* LaunchScreen.storyboard */,
+				51ED0B152C918080006322B7 /* GoogleService-Info.plist */,
+				51ED0AE42C916722006322B7 /* Info.plist */,
+			);
+			path = EdUnion;
+			sourceTree = "<group>";
+		};
+		51ED0AEC2C916722006322B7 /* EdUnionTests */ = {
+			isa = PBXGroup;
+			children = (
+				51ED0AED2C916722006322B7 /* EdUnionTests.swift */,
+			);
+			path = EdUnionTests;
+			sourceTree = "<group>";
+		};
+		51ED0AF62C916722006322B7 /* EdUnionUITests */ = {
+			isa = PBXGroup;
+			children = (
+				51ED0AF72C916722006322B7 /* EdUnionUITests.swift */,
+				51ED0AF92C916722006322B7 /* EdUnionUITestsLaunchTests.swift */,
+			);
+			path = EdUnionUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		51ED0AD22C916721006322B7 /* EdUnion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51ED0AFD2C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnion" */;
+			buildPhases = (
+				51ED0ACF2C916721006322B7 /* Sources */,
+				51ED0AD02C916721006322B7 /* Frameworks */,
+				51ED0AD12C916721006322B7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EdUnion;
+			packageProductDependencies = (
+				51ED0B0D2C917E67006322B7 /* FirebaseAnalytics */,
+				51ED0B0F2C917E67006322B7 /* FirebaseAuth */,
+				51ED0B112C917E67006322B7 /* FirebaseFirestore */,
+			);
+			productName = EdUnion;
+			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
+			productType = "com.apple.product-type.application";
+		};
+		51ED0AE82C916722006322B7 /* EdUnionTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51ED0B002C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnionTests" */;
+			buildPhases = (
+				51ED0AE52C916722006322B7 /* Sources */,
+				51ED0AE62C916722006322B7 /* Frameworks */,
+				51ED0AE72C916722006322B7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51ED0AEB2C916722006322B7 /* PBXTargetDependency */,
+			);
+			name = EdUnionTests;
+			productName = EdUnionTests;
+			productReference = 51ED0AE92C916722006322B7 /* EdUnionTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		51ED0AF22C916722006322B7 /* EdUnionUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51ED0B032C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnionUITests" */;
+			buildPhases = (
+				51ED0AEF2C916722006322B7 /* Sources */,
+				51ED0AF02C916722006322B7 /* Frameworks */,
+				51ED0AF12C916722006322B7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51ED0AF52C916722006322B7 /* PBXTargetDependency */,
+			);
+			name = EdUnionUITests;
+			productName = EdUnionUITests;
+			productReference = 51ED0AF32C916722006322B7 /* EdUnionUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		51ED0ACB2C916721006322B7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					51ED0AD22C916721006322B7 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					51ED0AE82C916722006322B7 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 51ED0AD22C916721006322B7;
+					};
+					51ED0AF22C916722006322B7 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 51ED0AD22C916721006322B7;
+					};
+				};
+			};
+			buildConfigurationList = 51ED0ACE2C916721006322B7 /* Build configuration list for PBXProject "EdUnion" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 51ED0ACA2C916721006322B7;
+			packageReferences = (
+				51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				51ED0AD22C916721006322B7 /* EdUnion */,
+				51ED0AE82C916722006322B7 /* EdUnionTests */,
+				51ED0AF22C916722006322B7 /* EdUnionUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		51ED0AD12C916721006322B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51ED0AE02C916722006322B7 /* Assets.xcassets in Resources */,
+				51ED0B162C918080006322B7 /* GoogleService-Info.plist in Resources */,
+				51ED0AE32C916722006322B7 /* Base in Resources */,
+				51ED0ADE2C916721006322B7 /* Base in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AE72C916722006322B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AF12C916722006322B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		51ED0ACF2C916721006322B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
+				51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */,
+				51ED0B072C917A0F006322B7 /* Message.swift in Sources */,
+				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
+				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
+				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
+				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AE52C916722006322B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51ED0AEE2C916722006322B7 /* EdUnionTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51ED0AEF2C916722006322B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51ED0AF82C916722006322B7 /* EdUnionUITests.swift in Sources */,
+				51ED0AFA2C916722006322B7 /* EdUnionUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		51ED0AEB2C916722006322B7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51ED0AD22C916721006322B7 /* EdUnion */;
+			targetProxy = 51ED0AEA2C916722006322B7 /* PBXContainerItemProxy */;
+		};
+		51ED0AF52C916722006322B7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51ED0AD22C916721006322B7 /* EdUnion */;
+			targetProxy = 51ED0AF42C916722006322B7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		51ED0ADC2C916721006322B7 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				51ED0ADD2C916721006322B7 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		51ED0AE12C916722006322B7 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				51ED0AE22C916722006322B7 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		51ED0AFB2C916722006322B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		51ED0AFC2C916722006322B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		51ED0AFE2C916722006322B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EdUnion/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		51ED0AFF2C916722006322B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EdUnion/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		51ED0B012C916722006322B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EdUnion.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EdUnion";
+			};
+			name = Debug;
+		};
+		51ED0B022C916722006322B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EdUnion.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EdUnion";
+			};
+			name = Release;
+		};
+		51ED0B042C916722006322B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EdUnion;
+			};
+			name = Debug;
+		};
+		51ED0B052C916722006322B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EdUnion;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		51ED0ACE2C916721006322B7 /* Build configuration list for PBXProject "EdUnion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51ED0AFB2C916722006322B7 /* Debug */,
+				51ED0AFC2C916722006322B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51ED0AFD2C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51ED0AFE2C916722006322B7 /* Debug */,
+				51ED0AFF2C916722006322B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51ED0B002C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnionTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51ED0B012C916722006322B7 /* Debug */,
+				51ED0B022C916722006322B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51ED0B032C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnionUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51ED0B042C916722006322B7 /* Debug */,
+				51ED0B052C916722006322B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		51ED0B0D2C917E67006322B7 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		51ED0B0F2C917E67006322B7 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		51ED0B112C917E67006322B7 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 51ED0ACB2C916721006322B7 /* Project object */;
+}
