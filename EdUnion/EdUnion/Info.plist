@@ -21,5 +21,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>App needs access to microphone for recording audio.</string>
 </dict>
 </plist>

@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseStorage
 
 class ChatViewModel {
     
@@ -70,31 +71,100 @@ class ChatViewModel {
     }
     
     // 從 Firebase 中實時獲取聊天記錄
-    private func fetchMessages() {
+    func fetchMessages() {
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
             .addSnapshotListener { [weak self] (snapshot, error) in
                 guard let self = self else { return }
-                
+
                 if let error = error {
                     print("Error fetching messages: \(error)")
                     return
                 }
-                
+
                 self.messages = snapshot?.documents.compactMap { document in
                     let data = document.data()
+                    // 解析 text, imageURL, audioURL 等字段
                     return Message(
                         id: document.documentID,
                         text: data["text"] as? String ?? "",
+                        imageURL: data["imageURL"] as? String, // 注意這裡要和 Firestore 中的字段名一致
+                        audioURL: data["audioURL"] as? String,
                         senderID: data["senderID"] as? String ?? "",
                         isSentByCurrentUser: (data["senderID"] as? String == self.currentUserID),
                         isSeen: data["isSeen"] as? Bool ?? false,
                         timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
                     )
                 } ?? []
-                
-                // 通知視圖更新
+
+                // 通知 UI 更新
                 self.onMessagesUpdated?()
             }
+    }
+    
+    // 上傳圖片訊息
+    func sendPhotoMessage(_ image: UIImage) {
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else { return }
+        
+        let imageID = UUID().uuidString
+        let storageRef = Storage.storage().reference().child("chat_images/\(imageID).jpg")
+        
+        storageRef.putData(imageData, metadata: nil) { [weak self] (metadata, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error uploading image: \(error)")
+                return
+            }
+            
+            storageRef.downloadURL { (url, error) in
+                if let error = error {
+                    print("Error getting download URL: \(error)")
+                    return
+                }
+                
+                if let url = url {
+                    let messageData: [String: Any] = [
+                        "senderID": self.currentUserID,
+                        "imageURL": url.absoluteString,
+                        "timestamp": FieldValue.serverTimestamp(),
+                        "isSeen": false
+                    ]
+                    
+                    self.db.collection("chats").document(self.chatRoomID).collection("messages").addDocument(data: messageData)
+                }
+            }
+        }
+    }
+
+    // 上傳語音訊息
+    func sendAudioMessage(_ audioData: Data) {
+        let audioID = UUID().uuidString
+        let storageRef = Storage.storage().reference().child("chat_audio/\(audioID).m4a")
+        
+        storageRef.putData(audioData, metadata: nil) { [weak self] (metadata, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error uploading audio: \(error)")
+                return
+            }
+            
+            storageRef.downloadURL { (url, error) in
+                if let error = error {
+                    print("Error getting download URL: \(error)")
+                    return
+                }
+                
+                if let url = url {
+                    let messageData: [String: Any] = [
+                        "senderID": self.currentUserID,
+                        "audioURL": url.absoluteString,
+                        "timestamp": FieldValue.serverTimestamp(),
+                        "isSeen": false
+                    ]
+                    
+                    self.db.collection("chats").document(self.chatRoomID).collection("messages").addDocument(data: messageData)
+                }
+            }
+        }
     }
 }

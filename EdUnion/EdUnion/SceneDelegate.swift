@@ -16,6 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let chatVC = ChatVC(chatRoomID: "exampleRoomID", currentUserID: "currentUserID")
+//        let chatVC = AvailableTimeSlotsVC()
         
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UINavigationController(rootViewController: chatVC)
