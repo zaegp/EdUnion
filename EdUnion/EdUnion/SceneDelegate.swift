@@ -15,9 +15,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let chatVC = ChatVC(chatRoomID: "exampleRoomID", currentUserID: "currentUserID")
-//        let chatVC = AvailableTimeSlotsVC()
-        
+//        let chatVC = ChatVC(chatRoomID: "EvaRowan", currentUserID: "Rowan")
+//        let chatVC = AvailableTimeSlotsVC(teacherID: "001")
+        let chatVC = TabBarController()
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UINavigationController(rootViewController: chatVC)
         window?.makeKeyAndVisible()

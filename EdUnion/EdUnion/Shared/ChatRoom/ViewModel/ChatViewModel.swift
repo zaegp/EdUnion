@@ -55,7 +55,9 @@ class ChatViewModel {
         
         // 同時發送到 Firebase
         let messageData: [String: Any] = [
+            "ID": UUID(),
             "senderID": currentUserID,
+            "type": Int(),
             "text": text,
             "timestamp": FieldValue.serverTimestamp(),
             "isSeen": false

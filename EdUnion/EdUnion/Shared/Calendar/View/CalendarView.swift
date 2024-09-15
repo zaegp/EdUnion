@@ -22,71 +22,85 @@ enum CalendarViewMode: String, CaseIterable {
 }
 
 struct ColorPickerView: View {
-    var selectedDate: Date  // 傳遞選中的日期
-    var onSelectColor: (Color) -> Void  // 選擇顏色的回調
-    
-    let colors: [Color] = [.red, .green, .blue]  // 可以選擇的顏色
-    
+    var selectedDate: Date
+    var existingColor: Color?
+    var availableColors: [Color]
+    var onSelectColor: (Color) -> Void
+
+    @State private var selectedColor: Color
+
+    init(selectedDate: Date, existingColor: Color?, availableColors: [Color], onSelectColor: @escaping (Color) -> Void) {
+        self.selectedDate = selectedDate
+        self.existingColor = existingColor
+        self.availableColors = availableColors
+        self.onSelectColor = onSelectColor
+        _selectedColor = State(initialValue: existingColor ?? availableColors.first ?? .blue)
+    }
+
     var body: some View {
         VStack {
-            Text("選擇顏色")
+            Text("选择颜色")
                 .font(.headline)
                 .padding()
-            
-            HStack(spacing: 30) {
-                ForEach(colors, id: \.self) { color in
-                    Button(action: {
-                        onSelectColor(color)  // 當選擇顏色時，調用回調
-                    }) {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 50, height: 50)
+
+            // 显示可用的颜色选项
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    ForEach(availableColors, id: \.self) { color in
+                        Button(action: {
+                            // 立即调用 onSelectColor 并跳转到下一页
+                            self.selectedColor = color
+                            onSelectColor(color)  // 选择颜色后立即调用
+                        }) {
+                            Circle()
+                                .stroke(self.selectedColor == color ? Color.blue : Color.clear, lineWidth: 2)
+                                .background(Circle().fill(color))
+                                .frame(width: 50, height: 50)
+                        }
                     }
                 }
+                .padding()
             }
-            .padding()
         }
+        .padding()
     }
 }
 
 struct CalendarDayView: View {
-    let day: Date
+    let day: Date?
     let isSelected: Bool
-    let count: Int?  // 顯示該天的事件數量
-    let isCurrentMonth: Bool  // 判斷是否是當前月份
-    let color: Color  // 顯示該日期的顏色
-    
+    let isCurrentMonth: Bool
+    let color: Color  // 显示该日期的颜色
+
     var body: some View {
         VStack(spacing: 5) {
-            // 顯示日期數字
-            Text(day.formatted(.dateTime.day()))
-                .fontWeight(.bold)
-                .foregroundColor(isSelected ? .white : (isCurrentMonth ? .primary : .gray)) // 當前月份為黑色，非當前月份為灰色
-                .frame(maxWidth: .infinity, minHeight: 40)
-                .background(
-                    Circle()
-                        .fill(isSelected ? Color.black : Color.clear)  // 如果選中則填充黑色圓圈
-                )
-            
-            // 如果是當前月份，無論有無顏色點點，都佔用相同的空間
-            if isCurrentMonth {
-                // 使用 `ZStack` 來確保日期框統一高度
-                ZStack {
-                    Circle()
-                        .fill(color != .clear ? color : Color.clear)  // 使用傳遞進來的顏色，默認透明
-                        .frame(width: 8, height: 8)
+                    if let day = day {  // 安全解包，確保 day 有值
+                        // 如果有日期，顯示日期數字
+                        Text(day.formatted(.dateTime.day()))
+                            .fontWeight(.bold)
+                            .foregroundColor(isSelected ? .white : (isCurrentMonth ? .primary : .gray))
+                            .frame(maxWidth: .infinity, minHeight: 40)
+                            .background(
+                                Circle()
+                                    .fill(isSelected ? Color.black : Color.clear)
+                            )
+                        
+                        // 如果是当前月份，显示颜色点
+                        if isCurrentMonth {
+                            ZStack {
+                                Circle()
+                                    .fill(color != .clear ? color : Color.clear)
+                                    .frame(width: 8, height: 8)
+                            }
+                            .frame(height: 10)  // 固定高度
+                        }
+                    } else {
+                        // 如果日期為 nil，顯示為空白
+                        Text("")
+                            .frame(maxWidth: .infinity, minHeight: 40)
+                    }
                 }
-                .frame(height: 10)  // 固定高度
-            }
-            
-            // 如果是當前月份且有事件，顯示事件數量
-            if isCurrentMonth, let count = count {
-                Circle()
-                    .fill(count > 5 ? Color.red : Color.green)  // 根據事件數量變更顏色
-                    .frame(width: 8, height: 8)
-            }
-        }
-        .frame(height: 60) // 保持統一的高度
+        .frame(height: 60)  // 保持统一的高度
     }
 }
 
@@ -94,48 +108,29 @@ struct CalendarView: View {
     @State private var currentDate = Date()
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    @State private var days: [Date] = []
-    
-    // 單選模式
+    @State private var days: [Date?] = []
+    @State private var timeSlots: [AvailableTimeSlot] = []
+    @State private var availableColors: [Color] = []
+    @State private var dateColors: [Date: Color] = [:]
     @State private var selectedDay: Date? = nil
-    
-    @State private var coursesByDay: [Course] = []
-    @State private var showAddCourseSheet = false
-    @State private var courses: [Course] = []
-    @State private var viewMode: CalendarViewMode = .month
-    @State private var counts = [Int: Int]()
-    
-    @State private var showColorPicker: Bool = false  // 顯示顏色選擇器
-    @State private var dayColors: [Date: Color] = [:]  // 每天的顏色映射
-    
+    @State private var showColorPicker: Bool = false
+
     var body: some View {
         VStack {
-            Picker("View Mode", selection: $viewMode) {
-                ForEach(CalendarViewMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
-            
             HStack {
-                Button(action: {
-                    previousPeriod()
-                }) {
+                Button(action: { previousPeriod() }) {
                     Image(systemName: "chevron.left")
                 }
                 Spacer()
-                Text(viewMode == .month ? formattedMonthAndYear(currentDate) : formattedWeekAndYear(currentDate))
+                Text(formattedMonthAndYear(currentDate))
                     .font(.headline)
                 Spacer()
-                Button(action: {
-                    nextPeriod()
-                }) {
+                Button(action: { nextPeriod() }) {
                     Image(systemName: "chevron.right")
                 }
             }
             .padding()
-            
+
             HStack {
                 ForEach(daysOfWeek, id: \.self) { day in
                     Text(day)
@@ -143,165 +138,169 @@ struct CalendarView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            
+
             LazyVGrid(columns: columns) {
                 ForEach(days, id: \.self) { day in
-                    let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
-                    
-                    CalendarDayView(day: day,
-                                    isSelected: selectedDay == day,  // 單選
-                                    count: counts[Calendar.current.component(.day, from: day)],
-                                    isCurrentMonth: isCurrentMonth,
-                                    color: dayColors[day] ?? .clear)  // 傳遞顏色，默認為透明
-                    .onTapGesture {
-                        toggleSingleSelection(for: day)  // 單選模式
-                    }
-                    .onLongPressGesture {
-                        selectedDay = day
-                        showColorPicker = true  // 顯示顏色選擇器
+                    if let day = day {  // 確保 day 不為 nil
+                        let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
+
+                        CalendarDayView(
+                            day: day,
+                            isSelected: selectedDay == day,
+                            isCurrentMonth: isCurrentMonth,
+                            color: dateColors[day] ?? .clear  // 如果 day 為 nil，預設顏色為 .clear
+                        )
+                        .onTapGesture {
+                            toggleSingleSelection(for: day)
+                        }
+                        .onLongPressGesture {
+                            selectedDay = day
+                            showColorPicker = true
+                        }
+                    } else {
+                        // 對應 nil 的情況，顯示空白
+                        CalendarDayView(
+                            day: nil,
+                            isSelected: false,
+                            isCurrentMonth: false,
+                            color: .clear
+                        )
                     }
                 }
             }
-            
-            Spacer()
-        }
-        .padding()
-        .onAppear(perform: setupView)
-        .onChange(of: viewMode) { _ in
-            setupView()
+            .onAppear {
+                setupView()
+                fetchDateColors()
+                fetchTimeSlots()
+            }
         }
         .sheet(isPresented: $showColorPicker) {
-            if let selectedDay = selectedDay {
-                ColorPickerView(selectedDate: selectedDay, onSelectColor: { color in
-                    dayColors[selectedDay] = color  // 設置選擇的顏色
-                    selectNextDay()  // 自動跳到下一天
-                })
-                .presentationDetents([.fraction(0.25)])  // 佔據屏幕 1/4 高度
-            }
-        }
-    }
-    
-    // 單選邏輯
-    private func toggleSingleSelection(for day: Date) {
-        selectedDay = (selectedDay == day) ? nil : day
-        filterCourses(for: day)
-    }
-    
-    // 自動選擇下一天
-    private func selectNextDay() {
-        guard let currentDay = selectedDay else { return }
-        
-        if let nextDayIndex = days.firstIndex(of: currentDay)?.advanced(by: 1), nextDayIndex < days.count {
-            selectedDay = days[nextDayIndex]  // 跳到下一天
-        } else {
-            selectedDay = nil  // 如果是最後一天，取消選擇
-            showColorPicker = false  // 關閉顏色選擇器
-        }
-    }
-    
-    private func setupView() {
-        if viewMode == .month {
-            days = generateMonthDays(for: currentDate)
-        } else {
-            days = generateWeekDays(for: currentDate)
-        }
-        setupCounts()
-    }
-    
-    private func setupCounts() {
-        counts = [:]
-        let currentMonth = Calendar.current.component(.month, from: currentDate)
-        let currentYear = Calendar.current.component(.year, from: currentDate)
-        
-        let filteredCourses = courses.filter { course in
-            let courseMonth = Calendar.current.component(.month, from: course.date)
-            let courseYear = Calendar.current.component(.year, from: course.date)
-            return courseMonth == currentMonth && courseYear == currentYear
-        }
-        
-        let mappedItems = filteredCourses.map { (Calendar.current.component(.day, from: $0.date), 1) }
-        counts = Dictionary(mappedItems, uniquingKeysWith: +)
-    }
-    
-    // 過濾當天的課程
-    private func filterCourses(for day: Date) {
-        coursesByDay = courses.filter { Calendar.current.isDate($0.date, inSameDayAs: day) }
-    }
-    
-    private func generateMonthDays(for date: Date) -> [Date] {
-        guard let startOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: date)),
-              let range = Calendar.current.range(of: .day, in: .month, for: startOfMonth) else {
-            return []
-        }
-        
-        var days: [Date] = []
-        let firstWeekdayOfMonth = Calendar.current.component(.weekday, from: startOfMonth) - 1
-        
-        if let previousMonthEnd = Calendar.current.date(byAdding: .day, value: -1, to: startOfMonth) {
-            for dayOffset in (0..<firstWeekdayOfMonth).reversed(){
-                if let day = Calendar.current.date(byAdding: .day, value: -dayOffset, to: previousMonthEnd) {
-                    days.append(day)
-                }
-            }
-        }
-        
-        for day in range {
-            if let date = Calendar.current.date(byAdding: .day, value: day - 1, to: startOfMonth) {
-                days.append(date)
-            }
-        }
-        
-        if let lastDayOfMonth = days.last {
-            let remainingDays = 7 - (days.count % 7)
-            if remainingDays < 7 {
-                for dayOffset in 1...remainingDays {
-                    if let day = Calendar.current.date(byAdding: .day, value: dayOffset, to: lastDayOfMonth) {
-                        days.append(day)
+                    if let selectedDay = selectedDay {
+                        let existingColor = dateColors[selectedDay]
+                        ColorPickerView(
+                            selectedDate: selectedDay,
+                            existingColor: existingColor,
+                            availableColors: availableColors,
+                            onSelectColor: { color in
+                                dateColors[selectedDay] = color  // 更新颜色
+                                FirebaseService.shared.saveDateColorToFirebase(date: selectedDay, color: color)
+                                selectNextDay()  // 自动选择下一天
+                            }
+                        )
+                        .presentationDetents([.fraction(0.25)])
                     }
                 }
+    }
+
+    private func toggleSingleSelection(for day: Date) {
+        selectedDay = (selectedDay == day) ? nil : day
+    }
+    
+    private func selectNextDay() {
+            guard let currentDay = selectedDay else { return }
+
+            if let nextDayIndex = days.firstIndex(of: currentDay)?.advanced(by: 1), nextDayIndex < days.count {
+                selectedDay = days[nextDayIndex]  // 跳转到下一天
+            } else {
+                selectedDay = nil  // 如果是最后一天，取消选择
+            }
+        }
+
+
+    private func setupView() {
+        days = generateMonthDays(for: currentDate)
+    }
+
+    private func generateMonthDays(for date: Date) -> [Date?] {
+        var days: [Date?] = []
+        var calendar = Calendar.current
+        calendar.firstWeekday = 1  // 設置一周的第一天為星期日
+        
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
+        
+        // 获取该月的范围和天数
+        let range = calendar.range(of: .day, in: .month, for: startOfMonth)!
+        
+        // 获取该月的第一天对应的星期几（1 = 周日，2 = 周一，... 7 = 周六）
+        let firstDayOfWeek = calendar.component(.weekday, from: startOfMonth)
+        
+        // 前置空白天数（按周日作为一周的开始）
+        let paddingDays = firstDayOfWeek - 1
+        
+        // 用 nil 填充前置空白
+        for _ in 0..<paddingDays {
+            days.append(nil)  // 添加空白
+        }
+        
+        // 添加当前月份的天数
+        for day in range {
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
+                days.append(date)
             }
         }
         
         return days
     }
-    
-    private func generateWeekDays(for date: Date) -> [Date] {
-        let startOfWeek = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
-        return (0..<7).compactMap { day -> Date? in
-            Calendar.current.date(byAdding: .day, value: day, to: startOfWeek)
+
+    private func fetchTimeSlots() {
+        FirebaseService.shared.fetchTimeSlots(forTeacher: "001") { result in
+            switch result {
+            case .success(let fetchedTimeSlots):
+                DispatchQueue.main.async {
+                    self.timeSlots = fetchedTimeSlots
+                    self.extractAvailableColors()
+                }
+            case .failure(let error):
+                print("获取时间段时出错：\(error)")
+            }
         }
     }
+
+    private func extractAvailableColors() {
+        let colorHexes = Set(timeSlots.map { $0.colorHex })
+        self.availableColors = colorHexes.map { Color(hex: $0) }
+    }
+
+    
+    private func fetchDateColors() {
+            let teacherRef = FirebaseService.shared.db.collection("teachers").document("001")
+            
+            teacherRef.getDocument { (documentSnapshot, error) in
+                if let error = error {
+                    print("获取日期颜色时出错：\(error)")
+                } else if let document = documentSnapshot, document.exists {
+                    if let data = document.data(), let selectedTimeSlots = data["selectedTimeSlots"] as? [String: String] {
+                        for (dateString, colorHex) in selectedTimeSlots {
+                            if let date = dateFormatter.date(from: dateString) {
+                                self.dateColors[date] = Color(hex: colorHex)  // 将 hex 转换为 Color 并更新 dateColors
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    
+    private let dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = TimeZone.current
+            return formatter
+        }()
     
     private func previousPeriod() {
-        if viewMode == .month {
-            currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
-        } else {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
-        }
+        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
         setupView()
     }
-    
+
     private func nextPeriod() {
-        if viewMode == .month {
-            currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
-        } else {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
-        }
+        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
         setupView()
     }
-    
+
     private func formattedMonthAndYear(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: date)
-    }
-    
-    private func formattedWeekAndYear(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        let startOfWeek = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
-        let endOfWeek = Calendar.current.date(byAdding: .day, value: 6, to: startOfWeek)!
-        return "\(formatter.string(from: startOfWeek)) - \(formatter.string(from: endOfWeek))"
     }
 }
 

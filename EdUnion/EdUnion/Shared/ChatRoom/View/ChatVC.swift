@@ -108,7 +108,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         photoButton.addTarget(self, action: #selector(selectPhoto), for: .touchUpInside)
         photoButton.translatesAutoresizingMaskIntoConstraints = false
         
-        recordButton.setTitle("Record", for: .normal)  // 設置錄音按鈕
+        recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
         recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         recordButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -185,6 +185,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
+    
+    
     @objc private func selectPhoto() {
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
@@ -195,10 +197,10 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @objc private func recordTapped() {
         if audioRecorder == nil {
             startRecording()
-            recordButton.setTitle("Stop", for: .normal)
+            recordButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
         } else {
             finishRecording(success: true)
-            recordButton.setTitle("Record", for: .normal)
+            recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
         }
     }
     
@@ -246,7 +248,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
 extension ChatVC: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selectedImage = info[.originalImage] as? UIImage {
-            // 將圖片發送到 ViewModel 並上傳到 Firebase
             viewModel.sendPhotoMessage(selectedImage)
         }
         dismiss(animated: true, completion: nil)

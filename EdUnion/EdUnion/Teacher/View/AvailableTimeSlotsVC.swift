@@ -8,42 +8,62 @@
 import UIKit
 
 class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
-    struct TimeSlot {
-        var color: UIColor
-        var timeRanges: [String]
-    }
-
-    private var timeSlots: [TimeSlot] = []
+    
+    private var viewModel: AvailableTimeSlotsViewModel!
     private let tableView = UITableView()
-
+    private let teacherID: String  // You should set this when initializing the VC
+    
+    init(teacherID: String) {
+        self.teacherID = teacherID
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel = AvailableTimeSlotsViewModel(teacherID: teacherID)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Time Slots"
+        title = "Available Time Slots"
         view.backgroundColor = .systemGroupedBackground
         
         setupTableView()
         setupAddButton()
+        bindViewModel()
+        viewModel.loadTimeSlots()
     }
-
+    
+    func bindViewModel() {
+        viewModel.onTimeSlotsChanged = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
     func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "TimeSlotCell")
+        tableView.register(AvailableTimeSlotsCell.self, forCellReuseIdentifier: "AvailableTimeSlotsCell")
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = .clear
+        tableView.rowHeight = 60
+        tableView.layer.cornerRadius = 10
+        tableView.clipsToBounds = true
         
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100)
         ])
     }
-
+    
     func setupAddButton() {
         let addButton = UIButton(type: .system)
         addButton.setTitle("Add Time Slot", for: .normal)
@@ -52,7 +72,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         addButton.backgroundColor = .systemBlue
         addButton.layer.cornerRadius = 10
         addButton.addTarget(self, action: #selector(showTimePickerModal), for: .touchUpInside)
-
+        
         view.addSubview(addButton)
         addButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -62,44 +82,56 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
             addButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
-
+    
     @objc func showTimePickerModal() {
-        let modalVC = TimePickerViewController()
-        modalVC.existingTimeRanges = timeSlots.flatMap { $0.timeRanges }
-        modalVC.onTimeSlotSelected = { [weak self] timeRanges, color in
-            let newSlot = TimeSlot(color: color, timeRanges: timeRanges)
-            self?.timeSlots.append(newSlot)
-            self?.tableView.reloadData()
+        let modalVC = ColorTimePickerVC()
+        modalVC.existingTimeRanges = viewModel.timeSlots.flatMap { $0.timeRanges }
+        modalVC.existingColors = viewModel.existingColors() // 传递已有的颜色列表
+        modalVC.onTimeSlotSelected = { [weak self] newTimeSlot in
+            self?.viewModel.addTimeSlot(newTimeSlot)
         }
-        modalVC.modalPresentationStyle = .pageSheet
-        if let sheet = modalVC.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
-        }
+        modalVC.modalPresentationStyle = .fullScreen
         present(modalVC, animated: true, completion: nil)
     }
 
+
+    
     // MARK: - UITableViewDelegate, UITableViewDataSource
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return timeSlots.count
+        viewModel.timeSlots.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TimeSlotCell", for: indexPath)
-        let timeSlot = timeSlots[indexPath.row]
-        cell.textLabel?.text = timeSlot.timeRanges.joined(separator: ", ")
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        cell.backgroundColor = timeSlot.color.withAlphaComponent(0.2)
-        cell.textLabel?.textColor = .label
-        cell.layer.cornerRadius = 10
-        cell.clipsToBounds = true
+
+        // Use your custom cell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AvailableTimeSlotsCell", for: indexPath) as! AvailableTimeSlotsCell
+        let timeSlot = viewModel.timeSlots[indexPath.row]
+        cell.configure(with: timeSlot)
         return cell
     }
-
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    
+    // Handle deletion
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle,     forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            timeSlots.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
+            viewModel.deleteTimeSlot(at: indexPath.row)
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let timeSlot = viewModel.timeSlots[indexPath.row]
+        showEditTimeSlotModal(for: timeSlot, at: indexPath.row)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func showEditTimeSlotModal(for timeSlot: AvailableTimeSlot, at index: Int) {
+        let modalVC = ColorTimePickerVC()
+        modalVC.existingTimeSlots = viewModel.timeSlots // 传递所有已有的时间段
+        modalVC.editingTimeSlot = timeSlot // 传递要编辑的时间段
+        modalVC.onTimeSlotEdited = { [weak self] editedTimeSlot in
+            self?.viewModel.updateTimeSlot(at: index, with: editedTimeSlot)
+        }
+        modalVC.modalPresentationStyle = .fullScreen
+        present(modalVC, animated: true, completion: nil)
     }
 }
