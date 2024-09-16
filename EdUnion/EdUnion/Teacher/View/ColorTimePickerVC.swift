@@ -325,8 +325,6 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
             onTimeSlotSelected?(newTimeSlot)
         }
         
-        onTimeSlotSelected?(newTimeSlot)
-        
         dismiss(animated: true, completion: nil)
     }
     @objc func cancelSelection() {

@@ -12,7 +12,6 @@ class BookingVC: UIViewController {
 
     var teacher: Teacher?
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
                    
@@ -26,7 +25,6 @@ class BookingVC: UIViewController {
             let bookingView = BookingView(selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
             let hostingController = UIHostingController(rootView: bookingView)
             
-            // 設置SwiftUI視圖佈局
             addChild(hostingController)
             view.addSubview(hostingController.view)
             

@@ -14,7 +14,6 @@ class CalendarVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
         
         self.navigationItem.title = "Calendar"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
@@ -22,7 +21,7 @@ class CalendarVC: UIViewController {
         addChild(calendarHostingController)
         view.addSubview(calendarHostingController.view)
         calendarHostingController.didMove(toParent: self)
-        
+//        calendarHostingController.view.backgroundColor = .mainOrange
         setupConstraints()
     }
     
@@ -47,13 +46,11 @@ class CalendarVC: UIViewController {
         }
     
     private func setupConstraints() {
-        // Disable autoresizing mask translation for Auto Layout
         calendarHostingController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        // Layout constraints
         NSLayoutConstraint.activate([
             // 圆形进度条
-            calendarHostingController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            calendarHostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
             calendarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             calendarHostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarHostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),

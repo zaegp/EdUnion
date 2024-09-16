@@ -33,6 +33,9 @@
 		519C8EFF2C95D39C007DFCBA /* TimeSlotsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EFE2C95D39C007DFCBA /* TimeSlotsVC.swift */; };
 		519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F002C95FD2D007DFCBA /* BookingView.swift */; };
 		519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F022C969D3B007DFCBA /* BookingVC.swift */; };
+		519C8F062C96E807007DFCBA /* Appointment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F052C96E807007DFCBA /* Appointment.swift */; };
+		519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F082C97FE18007DFCBA /* ConfirmVC.swift */; };
+		519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F0A2C980570007DFCBA /* ConfirmCell.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -88,6 +91,9 @@
 		519C8EFE2C95D39C007DFCBA /* TimeSlotsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeSlotsVC.swift; sourceTree = "<group>"; };
 		519C8F002C95FD2D007DFCBA /* BookingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingView.swift; sourceTree = "<group>"; };
 		519C8F022C969D3B007DFCBA /* BookingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingVC.swift; sourceTree = "<group>"; };
+		519C8F052C96E807007DFCBA /* Appointment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Appointment.swift; sourceTree = "<group>"; };
+		519C8F082C97FE18007DFCBA /* ConfirmVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmVC.swift; sourceTree = "<group>"; };
+		519C8F0A2C980570007DFCBA /* ConfirmCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmCell.swift; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -187,6 +193,7 @@
 		519C8EC52C939ACF007DFCBA /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
+				519C8F042C96E7EE007DFCBA /* Model */,
 				519C8EC62C939ADE007DFCBA /* View */,
 			);
 			path = Calendar;
@@ -214,6 +221,8 @@
 		519C8ECA2C93A0B7007DFCBA /* View */ = {
 			isa = PBXGroup;
 			children = (
+				519C8F082C97FE18007DFCBA /* ConfirmVC.swift */,
+				519C8F0A2C980570007DFCBA /* ConfirmCell.swift */,
 				519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */,
 				519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */,
 				519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */,
@@ -286,6 +295,14 @@
 			path = Student;
 			sourceTree = "<group>";
 		};
+		519C8F042C96E7EE007DFCBA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				519C8F052C96E807007DFCBA /* Appointment.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		51ED0ACA2C916721006322B7 = {
 			isa = PBXGroup;
 			children = (
@@ -310,10 +327,10 @@
 			isa = PBXGroup;
 			children = (
 				519C8EF32C95C683007DFCBA /* Student */,
-				519C8EE52C954E5A007DFCBA /* Services */,
-				519C8ED32C93EE9B007DFCBA /* Utilities */,
 				519C8EC92C93A09D007DFCBA /* Teacher */,
 				519C8EC02C9399FA007DFCBA /* Shared */,
+				519C8ED32C93EE9B007DFCBA /* Utilities */,
+				519C8EE52C954E5A007DFCBA /* Services */,
 				51ED0AD62C916721006322B7 /* AppDelegate.swift */,
 				51ED0AD82C916721006322B7 /* SceneDelegate.swift */,
 				51ED0ADA2C916721006322B7 /* ViewController.swift */,
@@ -353,6 +370,7 @@
 				51ED0ACF2C916721006322B7 /* Sources */,
 				51ED0AD02C916721006322B7 /* Frameworks */,
 				51ED0AD12C916721006322B7 /* Resources */,
+				519C8F072C97BDC3007DFCBA /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -481,6 +499,27 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		519C8F072C97BDC3007DFCBA /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		51ED0ACF2C916721006322B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -488,6 +527,7 @@
 			files = (
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
+				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* FirebaseService.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
@@ -501,6 +541,7 @@
 				519C8EC82C939AF9007DFCBA /* CalendarView.swift in Sources */,
 				51ED0B072C917A0F006322B7 /* Message.swift in Sources */,
 				519C8EFB2C95CC9A007DFCBA /* Teacher.swift in Sources */,
+				519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
@@ -508,6 +549,7 @@
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
 				519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */,
+				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,
 				519C8EFD2C95CD45007DFCBA /* TeacherDetailVC.swift in Sources */,
 				519C8EF52C95C6A7007DFCBA /* StudentHomeVC.swift in Sources */,
@@ -696,6 +738,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EdUnion/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -725,6 +768,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EdUnion/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

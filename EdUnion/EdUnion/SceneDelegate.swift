@@ -17,9 +17,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
 //        let chatVC = ChatVC(chatRoomID: "EvaRowan", currentUserID: "Rowan")
 //        let chatVC = AvailableTimeSlotsVC(teacherID: "001")
-        let chatVC = TabBarController()
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = UINavigationController(rootViewController: chatVC)
+        window?.rootViewController = TabBarController()
         window?.makeKeyAndVisible()
         window?.makeKeyAndVisible()
     }

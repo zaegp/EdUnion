@@ -66,7 +66,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     func setupAddButton() {
         let addButton = UIButton(type: .system)
-        addButton.setTitle("Add Time Slot", for: .normal)
+        addButton.setTitle("新增顏色", for: .normal)
         addButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         addButton.setTitleColor(.white, for: .normal)
         addButton.backgroundColor = .systemBlue

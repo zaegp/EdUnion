@@ -190,9 +190,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
 //            let resumeVC = ResumeViewController()  // 假设你有一个 ResumeViewController 类
 //            navigationController?.pushViewController(resumeVC, animated: true)
         
-        case "幫助": break
-//            let helpVC = HelpViewController()  // 假设你有一个 HelpViewController 类
-//            navigationController?.pushViewController(helpVC, animated: true)
+        case "幫助": 
+            let confirmVC = ConfirmVC()
+            navigationController?.pushViewController(confirmVC, animated: true)
         
         default:
             break

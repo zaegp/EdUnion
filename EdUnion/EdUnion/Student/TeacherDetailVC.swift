@@ -30,7 +30,7 @@ class TeacherDetailVC: UIViewController {
         view.addSubview(nameLabel)
         
         let bookButton = UIButton(type: .system)
-        bookButton.setTitle("预约", for: .normal)
+        bookButton.setTitle("預約", for: .normal)
         bookButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         bookButton.backgroundColor = .systemBlue
         bookButton.setTitleColor(.white, for: .normal)
