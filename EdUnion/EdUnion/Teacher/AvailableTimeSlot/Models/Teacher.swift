@@ -14,10 +14,5 @@ struct Teacher: Codable {
     var photoURL: String
 //    var uid: String
     let selectedTimeSlots: [String: String]
-    let timeSlots: [TimeSlot]
-}
-
-struct TimeSlot: Codable {
-    let colorHex: String
-    let timeRanges: [String]  
+    let timeSlots: [AvailableTimeSlot]
 }

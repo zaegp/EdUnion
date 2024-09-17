@@ -17,11 +17,10 @@ class BookingVC: UIViewController {
                    
         view.backgroundColor = .white
         
-        self.navigationItem.title = "預約"
         setupBookingView(selectedTimeSlots: teacher!.selectedTimeSlots, timeSlots: teacher!.timeSlots)
     }
     
-    func setupBookingView(selectedTimeSlots: [String: String], timeSlots: [TimeSlot]) {
+    func setupBookingView(selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {
             let bookingView = BookingView(selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
             let hostingController = UIHostingController(rootView: bookingView)
             

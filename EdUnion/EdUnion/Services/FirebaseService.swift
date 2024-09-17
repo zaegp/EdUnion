@@ -216,27 +216,27 @@ class FirebaseService {
     
     // MARK - 聊天室
     func fetchChatRooms(for participantID: String, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
-           db.collection("chats")
-               .whereField("participants", arrayContains: participantID)  // 過濾參與者ID
-               .order(by: "lastMessageTimestamp", descending: true)  // 根據最後一則訊息的時間排序
-               .getDocuments { (snapshot, error) in
-                   if let error = error {
-                       completion(nil, error)
-                       return
-                   }
-                   
-                   guard let documents = snapshot?.documents else {
-                       completion(nil, nil)  // 沒有聊天室
-                       return
-                   }
-                   
-                   let chatRooms: [ChatRoom] = documents.compactMap { document in
-                       let data = document.data()
-                       return ChatRoom(id: document.documentID, data: data)
-                   }
-                   completion(chatRooms, nil)
-               }
-       }
+        db.collection("chats")
+            .whereField("participants", arrayContains: participantID)
+            .order(by: "lastMessageTimestamp", descending: true)
+            .getDocuments { (snapshot, error) in
+                if let error = error {
+                    completion(nil, error)
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    completion(nil, nil)
+                    return
+                }
+                
+                let chatRooms: [ChatRoom] = documents.compactMap { document in
+                    let data = document.data()
+                    return ChatRoom(id: document.documentID, data: data)
+                }
+                completion(chatRooms, nil)
+            }
+    }
     
     func sendMessage(chatRoomID: String, messageData: [String: Any], completion: @escaping (Error?) -> Void) {
         let messageId = UUID().uuidString
@@ -252,7 +252,6 @@ class FirebaseService {
     }
     
     func uploadPhoto(image: UIImage, messageId: String, completion: @escaping (String?, Error?) -> Void) {
-        // 檢查圖片是否能成功轉換為 JPEG 格式
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             let conversionError = NSError(domain: "ImageConversionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG format."])
             completion(nil, conversionError)
@@ -260,33 +259,26 @@ class FirebaseService {
             return
         }
         
-        // 設定圖片存儲位置
         let storageRef = storage.reference().child("chat_images/\(messageId).jpg")
         
-        // 上傳圖片到 Firebase Storage
         storageRef.putData(imageData, metadata: nil) { metadata, error in
             if let error = error {
-                // 上傳失敗，返回錯誤
                 completion(nil, error)
                 print("Error uploading image: \(error.localizedDescription)")
                 return
             }
             
-            // 獲取圖片下載 URL
             storageRef.downloadURL { url, error in
                 if let error = error {
-                    // 無法獲取下載 URL，返回錯誤
                     completion(nil, error)
                     print("Error fetching download URL: \(error.localizedDescription)")
                     return
                 }
                 
-                // 成功獲取 URL，返回圖片的 URL
                 if let urlString = url?.absoluteString {
                     print("Image uploaded successfully. URL: \(urlString)")
                     completion(urlString, nil)
                 } else {
-                    // 當 URL 無法被生成時，返回錯誤
                     let urlError = NSError(domain: "DownloadURLError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to generate download URL."])
                     completion(nil, urlError)
                     print("Error: Failed to generate download URL.")
@@ -294,8 +286,6 @@ class FirebaseService {
             }
         }
     }
-    
-    
     
     func uploadAudio(audioData: Data, audioId: String, completion: @escaping (String?, Error?) -> Void) {
         let storageRef = storage.reference().child("chat_audio/\(audioId).m4a")
@@ -313,7 +303,6 @@ class FirebaseService {
     }
     
     func fetchMessages(chatRoomID: String, currentUserID: String, completion: @escaping ([Message], Error?) -> Void) {
-        // 首次加載歷史訊息
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
             .getDocuments { (snapshot, error) in
@@ -341,10 +330,8 @@ class FirebaseService {
                     )
                     messages.append(newMessage)
                 }
-                // 首次加載所有歷史訊息
                 completion(messages, nil)
                 
-                // 監聽後續的新訊息和變更
                 self.addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
             }
     }
@@ -379,7 +366,6 @@ class FirebaseService {
                         messages.append(newMessage)
                     }
                 }
-                // 傳遞新增或更新的訊息
                 completion(messages, nil)
             }
     }

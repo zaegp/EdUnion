@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
+class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
     
     var editingTimeSlot: AvailableTimeSlot?
     var onTimeSlotSelected: ((AvailableTimeSlot) -> Void)?
@@ -84,51 +84,6 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         timePickersStackView.distribution = .fillEqually
         timePickersStackView.addArrangedSubview(startTimePicker)
         timePickersStackView.addArrangedSubview(endTimePicker)
-    }
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 2
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        if component == 0 {
-            return hours.count
-        } else {
-            return minutes.count
-        }
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-        return 60
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        return 30
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        if component == 0 {
-            return String(format: "%02d", hours[row])
-        } else {
-            return minutes[row]
-        }
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        if pickerView == startTimePicker {
-            if component == 0 {
-                selectedStartHour = hours[row]
-            } else {
-                selectedStartMinute = minutes[row]
-            }
-        } else {
-            if component == 0 {
-                selectedEndHour = hours[row]
-            } else {
-                selectedEndMinute = minutes[row]
-            }
-        }
-        validateTimeSelection()
     }
     
     func validateTimeSelection() {
@@ -360,10 +315,50 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         return cell
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle,     forRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             selectedTimeRanges.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
+    }
+}
+
+extension ColorTimePickerVC: UIPickerViewDelegate, UIPickerViewDataSource {
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 2
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return component == 0 ? hours.count : minutes.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+        return 60
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 30
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return component == 0 ? String(format: "%02d", hours[row]) : minutes[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        if pickerView == startTimePicker {
+            if component == 0 {
+                selectedStartHour = hours[row]
+            } else {
+                selectedStartMinute = minutes[row]
+            }
+        } else {
+            if component == 0 {
+                selectedEndHour = hours[row]
+            } else {
+                selectedEndMinute = minutes[row]
+            }
+        }
+        validateTimeSelection()
     }
 }

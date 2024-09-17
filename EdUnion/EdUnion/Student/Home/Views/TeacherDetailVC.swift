@@ -15,7 +15,6 @@ class TeacherDetailVC: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        title = teacher?.name ?? "Teacher Detail"
         
         setupUI()
     }
@@ -32,7 +31,7 @@ class TeacherDetailVC: UIViewController {
         let bookButton = UIButton(type: .system)
         bookButton.setTitle("預約", for: .normal)
         bookButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-        bookButton.backgroundColor = .systemBlue
+        bookButton.backgroundColor = .mainOrange
         bookButton.setTitleColor(.white, for: .normal)
         bookButton.layer.cornerRadius = 10
         bookButton.translatesAutoresizingMaskIntoConstraints = false

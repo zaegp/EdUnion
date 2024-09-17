@@ -10,14 +10,21 @@ import FirebaseCore
 
 class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
-    var appointments: [Appointment] = []
     var tableView: UITableView!
+    var viewModel: ConfirmViewModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        viewModel = ConfirmViewModel()
+        viewModel.updateUI = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+        
         setupTableView()
-        loadPendingAppointments()
+        viewModel.loadPendingAppointments(teacherID: teacherID)
     }
     
     // MARK: - TableView
@@ -35,71 +42,31 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return appointments.count
+        return viewModel.appointments.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
-            let appointment = appointments[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
+        let appointment = viewModel.appointments[indexPath.row]
         cell.titleLabel.text = appointment.studentID
         cell.timeLabel.text = appointment.date
-            return cell
-        }
-    
-    // MARK: - UITableViewDelegate
+        return cell
+    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let appointment = appointments[indexPath.row]
+        let appointment = viewModel.appointments[indexPath.row]
         let alert = UIAlertController(title: "確認預約", message: "確定接受或拒絕預約？", preferredStyle: .alert)
         
         alert.addAction(UIAlertAction(title: "接受", style: .default, handler: { _ in
-            self.confirmAppointment(appointmentID: appointment.id ?? "")
+            self.viewModel.confirmAppointment(appointmentID: appointment.id ?? "")
         }))
         
         alert.addAction(UIAlertAction(title: "拒絕", style: .destructive, handler: { _ in
-            self.rejectAppointment(appointmentID: appointment.id ?? "")
+            self.viewModel.rejectAppointment(appointmentID: appointment.id ?? "")
         }))
         
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         
         present(alert, animated: true, completion: nil)
-    }
-
-    private func loadPendingAppointments() {
-        FirebaseService.shared.fetchPendingAppointments(forTeacherID: teacherID) { result in
-            switch result {
-            case .success(let fetchedAppointments):
-                self.appointments = fetchedAppointments
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            case .failure(let error):
-                print("加載預約失敗：\(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func confirmAppointment(appointmentID: String) {
-        FirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: "confirmed") { result in
-            switch result {
-            case .success:
-                print("預約已確認")
-                self.loadPendingAppointments()
-            case .failure(let error):
-                print("更新預約狀態失敗: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    private func rejectAppointment(appointmentID: String) {
-        FirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: "rejected") { result in
-            switch result {
-            case .success:
-                print("預約已拒絕")
-                self.loadPendingAppointments()
-            case .failure(let error):
-                print("更新預約狀態失敗: \(error.localizedDescription)")
-            }
-        }
     }
 }

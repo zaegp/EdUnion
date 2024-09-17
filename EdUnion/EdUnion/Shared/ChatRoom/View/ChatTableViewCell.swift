@@ -136,9 +136,8 @@ class ChatTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
-        
-        bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
-        bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
+        bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32)
+        bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
         bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
         bubbleTrailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
         
@@ -177,7 +176,7 @@ class ChatTableViewCell: UITableViewCell {
         ])
         
         imageTopConstraint = messageImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
-        imageBottomConstraint = messageImageView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
+        imageBottomConstraint = messageImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
         
         imageLeadingConstraint = messageImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
         imageTrailingConstraint = messageImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
@@ -203,10 +202,9 @@ class ChatTableViewCell: UITableViewCell {
         ])
         
         NSLayoutConstraint.activate([
-            timestampLabel.topAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: 4),
-            timestampLabel.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor),
-            timestampLabel.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor),
-            timestampLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
+            timestampLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            timestampLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            timestampLabel.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -4)
         ])
     }
     

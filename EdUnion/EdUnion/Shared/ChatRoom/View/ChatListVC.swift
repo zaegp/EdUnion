@@ -11,7 +11,7 @@ class ChatListVC: UIViewController {
 
     private let tableView = UITableView()
     private var chatRooms: [ChatRoom] = []
-    private let participantID: String = teacherID  // 你要過濾的參與者 ID
+    private let participantID: String = teacherID
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,7 +54,6 @@ class ChatListVC: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
 extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return chatRooms.count
@@ -74,19 +73,8 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        // 點擊聊天室進入對應的聊天頁面
         let selectedChatRoom = chatRooms[indexPath.row]
         let chatViewController = ChatVC()
         navigationController?.pushViewController(chatViewController, animated: true)
-    }
-}
-
-// 日期格式化工具
-extension Date {
-    func formattedDate() -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: self)
     }
 }

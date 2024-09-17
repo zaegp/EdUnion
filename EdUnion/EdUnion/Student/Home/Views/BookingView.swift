@@ -10,7 +10,7 @@ import FirebaseCore
 
 struct BookingView: View {
     let selectedTimeSlots: [String: String]
-    let timeSlots: [TimeSlot]
+    let timeSlots: [AvailableTimeSlot]
     
     @State private var selectedDate: String?
     @State private var selectedTimes: [String] = []
@@ -163,6 +163,6 @@ struct BookingView: View {
     }
 }
 
-#Preview {
-    BookingView(selectedTimeSlots: ["2024-09-11": "#FF624F", "2024-09-13": "#FF624F", "2024-09-12": "#000000", "2024-10-10": "#FF624F"], timeSlots: [EdUnion.TimeSlot(colorHex: "#FF624F", timeRanges: ["08:00 - 11:00", "14:00 - 18:00"]), EdUnion.TimeSlot(colorHex: "#000000", timeRanges: ["06:00 - 21:00"])])
-}
+//#Preview {
+//    BookingView(selectedTimeSlots: ["2024-09-11": "#FF624F", "2024-09-13": "#FF624F", "2024-09-12": "#000000", "2024-10-10": "#FF624F"], timeSlots: [EdUnion.TimeSlot(colorHex: "#FF624F", timeRanges: ["08:00 - 11:00", "14:00 - 18:00"]), EdUnion.TimeSlot(colorHex: "#000000", timeRanges: ["06:00 - 21:00"])])
+//}

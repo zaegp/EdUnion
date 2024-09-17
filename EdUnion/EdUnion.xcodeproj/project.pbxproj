@@ -38,6 +38,8 @@
 		519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F112C98859D007DFCBA /* FullScreenImageVC.swift */; };
 		519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F132C996295007DFCBA /* ChatListVC.swift */; };
 		519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F152C9964FE007DFCBA /* ChatRoom.swift */; };
+		519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */; };
+		519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F192C998401007DFCBA /* Date+Ext.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -98,6 +100,8 @@
 		519C8F112C98859D007DFCBA /* FullScreenImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenImageVC.swift; sourceTree = "<group>"; };
 		519C8F132C996295007DFCBA /* ChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListVC.swift; sourceTree = "<group>"; };
 		519C8F152C9964FE007DFCBA /* ChatRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
+		519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmViewModel.swift; sourceTree = "<group>"; };
+		519C8F192C998401007DFCBA /* Date+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Ext.swift"; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -246,6 +250,7 @@
 			isa = PBXGroup;
 			children = (
 				519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */,
+				519C8F192C998401007DFCBA /* Date+Ext.swift */,
 				519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */,
 				519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */,
 			);
@@ -316,8 +321,8 @@
 				519C8EF42C95C6A7007DFCBA /* StudentHomeVC.swift */,
 				519C8EF82C95C701007DFCBA /* TeacherCell.swift */,
 				519C8EFC2C95CD45007DFCBA /* TeacherDetailVC.swift */,
-				519C8F002C95FD2D007DFCBA /* BookingView.swift */,
 				519C8F022C969D3B007DFCBA /* BookingVC.swift */,
+				519C8F002C95FD2D007DFCBA /* BookingView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -333,9 +338,9 @@
 		519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */ = {
 			isa = PBXGroup;
 			children = (
-				519C8ECA2C93A0B7007DFCBA /* Views */,
-				519C8EE12C954D57007DFCBA /* ViewModels */,
 				519C8EE22C954D60007DFCBA /* Models */,
+				519C8EE12C954D57007DFCBA /* ViewModels */,
+				519C8ECA2C93A0B7007DFCBA /* Views */,
 			);
 			path = AvailableTimeSlot;
 			sourceTree = "<group>";
@@ -344,6 +349,7 @@
 			isa = PBXGroup;
 			children = (
 				519C8F082C97FE18007DFCBA /* ConfirmVC.swift */,
+				519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */,
 				519C8F0A2C980570007DFCBA /* ConfirmCell.swift */,
 			);
 			path = Confirm;
@@ -590,12 +596,14 @@
 				519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
+				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
 				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
+				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,
 				519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */,
 				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,

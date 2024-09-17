@@ -8,7 +8,6 @@
 import UIKit
 
 extension UIColor {
-    // Convert UIColor to Hex String
     var hexString: String {
         var red: CGFloat = 0
         var green: CGFloat = 0
@@ -18,7 +17,6 @@ extension UIColor {
         return String(format:"#%06X", rgb)
     }
     
-    // Initialize UIColor from Hex String
     convenience init(hexString: String) {
         var cString:String = hexString.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         if (cString.hasPrefix("#")) { cString.removeFirst() }
