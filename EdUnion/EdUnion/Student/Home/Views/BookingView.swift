@@ -86,18 +86,18 @@ struct BookingView: View {
                 }
                 .disabled(selectedDate == nil || selectedTimes.isEmpty)
             }
-            .navigationBarTitle("預約時間表", displayMode: .inline)
+            .navigationBarTitle("預約", displayMode: .inline)
             .alert(isPresented: $showingAlert) {
                 Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("確定")))
             }
         }
     }
     
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
-    }
+//    func formattedDate(_ date: Date) -> String {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd"
+//        return formatter.string(from: date)
+//    }
     
     func generateTimeSlots(from timeRanges: [String]) -> [String] {
         var timeSlots: [String] = []
@@ -140,7 +140,11 @@ struct BookingView: View {
             return
         }
         
+        let bookingRef = FirebaseService.shared.db.collection("appointments").document()
+        let documentID = bookingRef.documentID
+        
         let bookingData: [String: Any] = [
+            "id": documentID,
             "studentID": studentID,
             "teacherID": teacherID,
             "date": date,
@@ -149,15 +153,15 @@ struct BookingView: View {
             "timestamp": Timestamp(date: Date())
         ]
         
-        FirebaseService.shared.saveBooking(data: bookingData) { success, error in
-            if success {
+        bookingRef.setData(bookingData) { error in
+            if let error = error {
+                alertMessage = "預約失敗：\(error.localizedDescription)"
+                showingAlert = true
+            } else {
                 alertMessage = "預約成功！"
                 showingAlert = true
                 selectedDate = nil
                 selectedTimes = []
-            } else {
-                alertMessage = "預約失敗：\(error?.localizedDescription ?? "未知錯誤")"
-                showingAlert = true
             }
         }
     }

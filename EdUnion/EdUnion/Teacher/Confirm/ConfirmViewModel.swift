@@ -15,9 +15,14 @@ class ConfirmViewModel {
         }
     }
     
+    var teacherID: String 
     var updateUI: (() -> Void)?
     
-    func loadPendingAppointments(teacherID: String) {
+    init(teacherID: String) {
+        self.teacherID = teacherID
+    }
+    
+    func loadPendingAppointments() {
         FirebaseService.shared.fetchPendingAppointments(forTeacherID: teacherID) { result in
             switch result {
             case .success(let fetchedAppointments):
@@ -33,7 +38,7 @@ class ConfirmViewModel {
             switch result {
             case .success:
                 print("預約已確認")
-                self.loadPendingAppointments(teacherID: teacherID)
+                self.loadPendingAppointments()
             case .failure(let error):
                 print("更新預約狀態失敗: \(error.localizedDescription)")
             }
@@ -45,7 +50,7 @@ class ConfirmViewModel {
             switch result {
             case .success:
                 print("預約已拒絕")
-                self.loadPendingAppointments(teacherID: teacherID)
+                self.loadPendingAppointments()  // 使用屬性 teacherID 重新加載
             case .failure(let error):
                 print("更新預約狀態失敗: \(error.localizedDescription)")
             }

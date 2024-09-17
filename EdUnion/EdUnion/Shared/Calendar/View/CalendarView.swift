@@ -161,27 +161,38 @@ struct CalendarView: View {
             Spacer()
             
             if let selectedDay = selectedDay, let activities = activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
-                VStack(alignment: .leading) {
-                    Text("活動詳情:")
-                        .font(.headline)
-                        .padding(.top)
+                ZStack {
+                    // 設置整個背景為白色
+                    Color.white
+                        .edgesIgnoringSafeArea(.all)
                     
                     List {
                         ForEach(activities) { appointment in
-                            Section(header: Text("學生 ID: \(appointment.studentID)")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)) {
-                                    ForEach(appointment.times, id: \.self) { time in
+                            ForEach(appointment.times, id: \.self) { time in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("學生 ID: \(appointment.studentID)")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                        
                                         Text(time)
                                             .font(.body)
-                                            .padding(.leading, 10)
+                                            .padding(.top, 5)
                                     }
+                                    Spacer()
                                 }
+                                .padding()
+                                .background(Color(uiColor: .background))
+                                .cornerRadius(10)
+                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                                .padding(.vertical, 5)
+                                .listRowSeparator(.hidden) 
+                            }
                         }
                     }
-                    .listStyle(InsetGroupedListStyle())
+                    .listStyle(PlainListStyle())
+                    .background(Color.clear)
                 }
-                .padding()
             }
         }
         .sheet(isPresented: $showColorPicker) {
@@ -271,19 +282,6 @@ struct CalendarView: View {
                 } else {
                     activitiesByDate[startOfDay] = [appointment]
                 }
-            }
-        }
-        
-        for (date, appointments) in activitiesByDate {
-            let hasPending = appointments.contains { $0.status.lowercased() == "pending" }
-            let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
-            
-            if hasPending {
-                dateColors[date] = .red
-            } else if hasConfirmed {
-                dateColors[date] = .green
-            } else {
-                dateColors[date] = .clear
             }
         }
     }

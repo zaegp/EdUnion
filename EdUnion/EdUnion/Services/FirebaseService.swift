@@ -158,6 +158,7 @@ class FirebaseService {
     func fetchAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
         db.collection("appointments")
             .whereField("teacherID", isEqualTo: teacherID)
+            .whereField("status", isEqualTo: "confirmed")  // 新增條件：status 必須為 confirmed
             .getDocuments { (querySnapshot, error) in
                 if let error = error {
                     print("查詢失敗：\(error.localizedDescription)")
