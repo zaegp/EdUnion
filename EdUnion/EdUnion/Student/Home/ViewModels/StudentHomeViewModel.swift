@@ -17,6 +17,7 @@ class StudentHomeViewModel {
             switch result {
             case .success(let teachers):
                 self?.teachers = teachers
+                print(teachers)
                 self?.onDataUpdate?()
             case .failure(let error):
                 print("Error fetching teachers: \(error)")

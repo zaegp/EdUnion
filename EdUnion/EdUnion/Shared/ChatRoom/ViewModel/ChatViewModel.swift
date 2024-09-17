@@ -41,7 +41,7 @@ class ChatViewModel {
         let messageData: [String: Any] = [
             "ID": messageId,
             "senderID": currentUserID,
-            "type": 0, // 0 for text
+            "type": 0, 
             "content": text,
             "timestamp": FieldValue.serverTimestamp(),
             "isSeen": false
@@ -95,7 +95,6 @@ class ChatViewModel {
             
             print("Successfully uploaded image. URL: \(url)")
             
-            // 更新 Firestore 中的圖片 URL
             FirebaseService.shared.updateMessage(chatRoomID: self!.chatRoomID, messageId: messageId, updatedData: ["content": url]) { error in
                 if let error = error {
                     print("Error updating message with imageURL in Firestore: \(error.localizedDescription)")
@@ -103,7 +102,6 @@ class ChatViewModel {
                     print("Message updated with imageURL in Firestore successfully")
                     
                     self?.pendingImages.removeValue(forKey: messageId)
-                    self?.onMessagesUpdated?()
                 }
             }
         }

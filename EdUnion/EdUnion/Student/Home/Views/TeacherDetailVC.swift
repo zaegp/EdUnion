@@ -24,7 +24,7 @@ class TeacherDetailVC: UIViewController {
         guard let teacher = teacher else { return }
         
         let nameLabel = UILabel()
-        nameLabel.text = "Teacher: \(teacher.name)"
+        nameLabel.text = teacher.name
         nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nameLabel)

@@ -28,6 +28,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        tabBarController?.tabBar.isHidden = true
         
         setupNavigationBar()
         setupMessageInputBar()
@@ -193,7 +194,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         if success, let audioFilename = audioFilename {
             do {
                 let audioData = try Data(contentsOf: audioFilename)
-                viewModel.sendAudioMessage(audioData) // 傳送音訊
+                viewModel.sendAudioMessage(audioData) 
             } catch {
                 print("無法讀取錄音檔案: \(error.localizedDescription)")
             }

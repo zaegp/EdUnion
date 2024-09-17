@@ -215,6 +215,29 @@ class FirebaseService {
     }
     
     // MARK - 聊天室
+    func fetchChatRooms(for participantID: String, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
+           db.collection("chats")
+               .whereField("participants", arrayContains: participantID)  // 過濾參與者ID
+               .order(by: "lastMessageTimestamp", descending: true)  // 根據最後一則訊息的時間排序
+               .getDocuments { (snapshot, error) in
+                   if let error = error {
+                       completion(nil, error)
+                       return
+                   }
+                   
+                   guard let documents = snapshot?.documents else {
+                       completion(nil, nil)  // 沒有聊天室
+                       return
+                   }
+                   
+                   let chatRooms: [ChatRoom] = documents.compactMap { document in
+                       let data = document.data()
+                       return ChatRoom(id: document.documentID, data: data)
+                   }
+                   completion(chatRooms, nil)
+               }
+       }
+    
     func sendMessage(chatRoomID: String, messageData: [String: Any], completion: @escaping (Error?) -> Void) {
         let messageId = UUID().uuidString
         db.collection("chats").document(chatRoomID).collection("messages").document(messageId).setData(messageData) { error in

@@ -36,6 +36,8 @@
 		519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F082C97FE18007DFCBA /* ConfirmVC.swift */; };
 		519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F0A2C980570007DFCBA /* ConfirmCell.swift */; };
 		519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F112C98859D007DFCBA /* FullScreenImageVC.swift */; };
+		519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F132C996295007DFCBA /* ChatListVC.swift */; };
+		519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F152C9964FE007DFCBA /* ChatRoom.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -94,6 +96,8 @@
 		519C8F082C97FE18007DFCBA /* ConfirmVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmVC.swift; sourceTree = "<group>"; };
 		519C8F0A2C980570007DFCBA /* ConfirmCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmCell.swift; sourceTree = "<group>"; };
 		519C8F112C98859D007DFCBA /* FullScreenImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenImageVC.swift; sourceTree = "<group>"; };
+		519C8F132C996295007DFCBA /* ChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListVC.swift; sourceTree = "<group>"; };
+		519C8F152C9964FE007DFCBA /* ChatRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -169,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				51ED0B062C917A0F006322B7 /* Message.swift */,
+				519C8F152C9964FE007DFCBA /* ChatRoom.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -187,6 +192,7 @@
 				51ED0B0A2C917BE3006322B7 /* ChatVC.swift */,
 				51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */,
 				519C8F112C98859D007DFCBA /* FullScreenImageVC.swift */,
+				519C8F132C996295007DFCBA /* ChatListVC.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -565,6 +571,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */,
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
@@ -585,6 +592,7 @@
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
+				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,

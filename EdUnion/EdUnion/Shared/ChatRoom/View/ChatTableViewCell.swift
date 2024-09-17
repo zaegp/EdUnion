@@ -80,29 +80,23 @@ class ChatTableViewCell: UITableViewCell {
         return button
     }()
     
-    // MARK: - Properties
-    
     weak var delegate: ChatTableViewCellDelegate?
     
     private var audioPlayer: AVAudioPlayer?
     private var message: Message?
     
-    // Constraints for bubbleBackgroundView
     private var bubbleLeadingConstraint: NSLayoutConstraint!
     private var bubbleTrailingConstraint: NSLayoutConstraint!
     
-    // Constraints for messageImageView
     private var imageLeadingConstraint: NSLayoutConstraint!
     private var imageTrailingConstraint: NSLayoutConstraint!
     private var imageWidthConstraint: NSLayoutConstraint!
     private var imageHeightConstraint: NSLayoutConstraint!
     
-    // Constraints for bubbleBackgroundView (when visible)
     private var bubbleTopConstraint: NSLayoutConstraint!
     private var bubbleBottomConstraint: NSLayoutConstraint!
     private var bubbleWidthConstraint: NSLayoutConstraint!
     
-    // Constraints for messageImageView (when visible)
     private var imageTopConstraint: NSLayoutConstraint!
     private var imageBottomConstraint: NSLayoutConstraint!
     
@@ -142,6 +136,7 @@ class ChatTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
+        
         bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
         bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
         bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
@@ -161,7 +156,6 @@ class ChatTableViewCell: UITableViewCell {
             messageLabel.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -8)
         ])
         
-        // Audio Button Constraints
         NSLayoutConstraint.activate([
             audioButton.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 8),
             audioButton.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
@@ -169,7 +163,6 @@ class ChatTableViewCell: UITableViewCell {
             audioButton.heightAnchor.constraint(equalToConstant: 30)
         ])
         
-        // Toggle Image Button Constraints (example positioning)
         NSLayoutConstraint.activate([
             toggleImageButton.topAnchor.constraint(equalTo: audioButton.bottomAnchor, constant: 8),
             toggleImageButton.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
@@ -178,20 +171,18 @@ class ChatTableViewCell: UITableViewCell {
             toggleImageButton.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -8)
         ])
         
-        // Activity Indicator Constraints
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: messageImageView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: messageImageView.centerYAnchor)
         ])
         
-        // Message ImageView Constraints
         imageTopConstraint = messageImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
         imageBottomConstraint = messageImageView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
         
         imageLeadingConstraint = messageImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
         imageTrailingConstraint = messageImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-        imageWidthConstraint = messageImageView.widthAnchor.constraint(equalToConstant: 200) // 可根據需要調整
-        imageHeightConstraint = messageImageView.heightAnchor.constraint(equalToConstant: 200) // 可根據需要調整
+        imageWidthConstraint = messageImageView.widthAnchor.constraint(equalToConstant: 200)
+        imageHeightConstraint = messageImageView.heightAnchor.constraint(equalToConstant: 200)
         
         NSLayoutConstraint.activate([
             imageTopConstraint,
@@ -219,8 +210,6 @@ class ChatTableViewCell: UITableViewCell {
         ])
     }
     
-    // MARK: - Configuration
-    
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
         resetContent()
@@ -233,6 +222,7 @@ class ChatTableViewCell: UITableViewCell {
         }
 
         switch message.type {
+            
         case 0:
             bubbleBackgroundView.isHidden = false
             messageImageView.isHidden = true
@@ -240,6 +230,7 @@ class ChatTableViewCell: UITableViewCell {
             setupBubbleConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
             messageLabel.text = message.content
             messageLabel.isHidden = false
+            
         case 1:
             bubbleBackgroundView.isHidden = true
             messageImageView.isHidden = false
@@ -247,25 +238,21 @@ class ChatTableViewCell: UITableViewCell {
             setupImageConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
             
             if let localImage = image {
-                // 如果有本地圖片，優先顯示
                 messageImageView.image = localImage
                 activityIndicator.startAnimating()
             } else {
-                // 加載圖片連結
                 loadImage(from: message.content)
             }
 
-        case 2: // 音訊訊息
+        case 2:
             bubbleBackgroundView.isHidden = false
             messageImageView.isHidden = true
             toggleImageButton.isHidden = true
             setupBubbleConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
             messageLabel.isHidden = true
             audioButton.isHidden = false
-            // 設置音訊的 UI，例如播放按鈕
 
         default:
-            // 其他未知情況，隱藏所有不相關的內容
             bubbleBackgroundView.isHidden = true
             messageImageView.isHidden = true
             toggleImageButton.isHidden = true
@@ -277,21 +264,17 @@ class ChatTableViewCell: UITableViewCell {
     }
     
     private func shouldShowTimestamp(for message: Message, previousMessage: Message?) -> Bool {
-        // 如果沒有上一條消息，直接顯示時間戳
         guard let previousMessage = previousMessage else {
             return true
         }
         
-        // 設置時間間隔（以秒為單位），這裡為 5 分鐘 = 300 秒
-        let timeInterval: TimeInterval = 300  // 5 分鐘
+        let timeInterval: TimeInterval = 180
         let timeDifference = message.timestamp.timeIntervalSince(previousMessage.timestamp)
         
-        // 如果兩條消息的時間差超過 5 分鐘，顯示時間戳
         return timeDifference > timeInterval
     }
     
     private func resetContent() {
-        // 隱藏所有內容視圖
         messageLabel.isHidden = true
         messageImageView.isHidden = true
         audioButton.isHidden = true
@@ -303,7 +286,6 @@ class ChatTableViewCell: UITableViewCell {
         audioPlayer = nil
         activityIndicator.stopAnimating()
         
-        // 重置約束
         NSLayoutConstraint.deactivate([
             imageTopConstraint,
             imageBottomConstraint,
@@ -318,8 +300,6 @@ class ChatTableViewCell: UITableViewCell {
             bubbleTrailingConstraint
         ])
     }
-    
-    // MARK: - Helper Methods
     
     private func updateBubbleAppearance() {
         guard !bubbleBackgroundView.isHidden else { return }
@@ -385,8 +365,6 @@ class ChatTableViewCell: UITableViewCell {
         return formatter.string(from: date)
     }
     
-    // MARK: - Actions
-    
     @objc private func playAudio() {
         guard let audioURLString = message?.content,
               let url = URL(string: audioURLString) else {
@@ -427,8 +405,6 @@ class ChatTableViewCell: UITableViewCell {
     
     @objc private func toggleImageButtonTapped() {
         toggleImageButton.isSelected.toggle()
-        // 根據選中狀態執行相應操作
-        // 例如更換圖片或觸發其他事件
     }
     
     @objc private func imageTapped() {

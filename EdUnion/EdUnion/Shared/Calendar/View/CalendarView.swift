@@ -5,15 +5,6 @@
 //  Created by Rowan Su on 2024/9/13.
 //
 
-struct Course: Identifiable {
-    var id = UUID()
-    var name: String?
-    var date: Date
-    var startTime: Date
-    var endTime: Date
-    var isCompleted: Bool = false
-}
-
 import SwiftUI
 
 struct ColorPickerView: View {
@@ -134,7 +125,7 @@ struct CalendarView: View {
             
             LazyVGrid(columns: columns) {
                 ForEach(days, id: \.self) { day in
-                    if let day = day {  // 確保 day 不為 nil
+                    if let day = day {
                         let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
                         
                         CalendarDayView(
@@ -167,7 +158,7 @@ struct CalendarView: View {
                 fetchAppointments()
             }
             
-            Spacer() // 將這個 Spacer 放在日曆之後，會將其他內容推到日曆下方
+            Spacer()
             
             if let selectedDay = selectedDay, let activities = activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
                 VStack(alignment: .leading) {
@@ -183,7 +174,7 @@ struct CalendarView: View {
                                     ForEach(appointment.times, id: \.self) { time in
                                         Text(time)
                                             .font(.body)
-                                            .padding(.leading, 10) // 添加縮進以區分
+                                            .padding(.leading, 10)
                                     }
                                 }
                         }

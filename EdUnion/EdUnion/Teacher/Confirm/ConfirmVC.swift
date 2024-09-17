@@ -16,6 +16,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupTableView()
         loadPendingAppointments()
     }
     
@@ -63,8 +64,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         
         present(alert, animated: true, completion: nil)
     }
-    
-    // MARK: - Firebase 加載待確認的預約
+
     private func loadPendingAppointments() {
         FirebaseService.shared.fetchPendingAppointments(forTeacherID: teacherID) { result in
             switch result {
@@ -79,7 +79,6 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    // MARK: - 預約狀態處理
     private func confirmAppointment(appointmentID: String) {
         FirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: "confirmed") { result in
             switch result {

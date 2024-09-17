@@ -80,7 +80,7 @@ struct BookingView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color.orange : Color.gray)
+                        .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color(UIColor(resource: .mainOrange)) : Color.gray)
                         .cornerRadius(10)
                         .padding([.horizontal, .bottom])
                 }
@@ -133,7 +133,6 @@ struct BookingView: View {
         }
     }
     
-    // 提交預約的函數
     func submitBooking() {
         guard let date = selectedDate, !selectedTimes.isEmpty else {
             alertMessage = "請選擇日期和至少一個時間段。"

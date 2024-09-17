@@ -17,7 +17,7 @@ class TabBarController: UITabBarController {
         let firstVC = UINavigationController(rootViewController: StudentHomeVC())
         let secondVC = UINavigationController(rootViewController: CalendarVC())
 //        let thirdVC = UINavigationController(rootViewController: StudentListVC())
-        let thirdVC = UINavigationController(rootViewController: ChatVC())
+        let thirdVC = UINavigationController(rootViewController: ChatListVC())
         let fourthVC = UINavigationController(rootViewController: ProfileVC())
         firstVC.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "house"), selectedImage: UIImage(systemName: "house.fill"))
         secondVC.tabBarItem = UITabBarItem(title: nil, image: UIImage(systemName: "calendar"), selectedImage: UIImage(systemName: "calendar.fill"))
