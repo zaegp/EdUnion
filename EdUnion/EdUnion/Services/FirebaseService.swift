@@ -154,7 +154,7 @@ class FirebaseService {
         }
     }
     
-    // MARK: - 學生：預約頁面扣除已被時段
+    // MARK: - 老師
     func fetchAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
         db.collection("appointments")
             .whereField("teacherID", isEqualTo: teacherID)
