@@ -30,22 +30,20 @@ class AvailableTimeSlotsViewModel {
     }
     
     func addTimeSlot(_ timeSlot: AvailableTimeSlot) {
-            // Check if the timeSlot already exists
-            if timeSlots.contains(timeSlot) {
-                // Handle duplicate (e.g., notify the user)
-                print("TimeSlot already exists.")
-                return
-            }
-            FirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
-                switch result {
-                case .success():
-                    self?.timeSlots.append(timeSlot)
-                    self?.onTimeSlotsChanged?()
-                case .failure(let error):
-                    print("Error adding time slot: \(error)")
-                }
+        if timeSlots.contains(timeSlot) {
+            print("TimeSlot already exists.")
+            return
+        }
+        FirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
+            switch result {
+            case .success():
+                self?.timeSlots.append(timeSlot)
+                self?.onTimeSlotsChanged?()
+            case .failure(let error):
+                print("Error adding time slot: \(error)")
             }
         }
+    }
     
     func deleteTimeSlot(at index: Int) {
         let timeSlot = timeSlots[index]
@@ -61,8 +59,8 @@ class AvailableTimeSlotsViewModel {
     }
     
     func existingColors() -> [String] {
-            return timeSlots.map { $0.colorHex }
-        }
+        return timeSlots.map { $0.colorHex }
+    }
     
     func updateTimeSlot(at index: Int, with newTimeSlot: AvailableTimeSlot) {
         guard index >= 0 && index < timeSlots.count else { return }
@@ -70,14 +68,12 @@ class AvailableTimeSlotsViewModel {
         let oldTimeSlot = timeSlots[index]
         timeSlots[index] = newTimeSlot
         
-        // 更新 Firebase
         FirebaseService.shared.updateTimeSlot(oldTimeSlot: oldTimeSlot, newTimeSlot: newTimeSlot, forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success:
                 self?.onTimeSlotsChanged?()
             case .failure(let error):
                 print("更新时间段时出错：\(error)")
-                // 如果更新失败，可以选择恢复旧的时间段
                 self?.timeSlots[index] = oldTimeSlot
             }
         }

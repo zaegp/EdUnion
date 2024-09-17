@@ -7,48 +7,135 @@
 
 import UIKit
 import AVFoundation
+import FirebaseStorage
+import FirebaseFirestore
 
-class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    private var audioRecorder: AVAudioRecorder?
-    private var recordingSession: AVAudioSession!
-    private var audioFilename: URL?
-    
+    private var viewModel: ChatViewModel!
     private let tableView = UITableView()
+    
     private let messageInputBar = UIView()
     private let messageTextField = UITextField()
     private let sendButton = UIButton(type: .system)
     private let photoButton = UIButton(type: .system)
     private let recordButton = UIButton(type: .system)
     
-    private var viewModel: ChatViewModel!
-    
-    init(chatRoomID: String, currentUserID: String) {
-        super.init(nibName: nil, bundle: nil)
-        viewModel = ChatViewModel(chatRoomID: chatRoomID, currentUserID: currentUserID)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    private var audioRecorder: AVAudioRecorder?
+    private var recordingSession: AVAudioSession!
+    private var audioFilename: URL?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        title = "Chat"
         
+        setupNavigationBar()
         setupMessageInputBar()
         setupTableView()
         setupRecordingSession()
         
+        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
             self?.scrollToBottom()
         }
         
-        // 鍵盤出現時調整視圖
+        messageTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func setupNavigationBar() {
+        let imageView = UIImageView(image: UIImage(systemName: "person.circle"))
+        
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.cornerRadius = 20
+        imageView.layer.masksToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let containerView = UIView()
+        containerView.addSubview(imageView)
+        
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalToConstant: 40),
+            imageView.heightAnchor.constraint(equalToConstant: 40),
+            imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
+        
+        containerView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        
+        navigationItem.titleView = containerView
+    }
+    
+    private func setupMessageInputBar() {
+        messageInputBar.backgroundColor = .white
+        
+        messageTextField.placeholder = "Message"
+        messageTextField.borderStyle = .roundedRect
+        messageTextField.translatesAutoresizingMaskIntoConstraints = false
+        
+        sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
+        sendButton.tintColor = .mainOrange
+        sendButton.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        sendButton.isHidden = true
+        
+        photoButton.setImage(UIImage(systemName: "photo"), for: .normal)
+        photoButton.tintColor = .mainOrange
+        photoButton.addTarget(self, action: #selector(selectPhoto), for: .touchUpInside)
+        photoButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
+        recordButton.tintColor = .mainOrange
+        recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
+        recordButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        messageInputBar.addSubview(messageTextField)
+        messageInputBar.addSubview(sendButton)
+        messageInputBar.addSubview(photoButton)
+        messageInputBar.addSubview(recordButton)
+        
+        view.addSubview(messageInputBar)
+        messageInputBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            messageInputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            messageInputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            messageInputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            messageInputBar.heightAnchor.constraint(equalToConstant: 50),
+            
+            photoButton.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 16),
+            photoButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
+            
+            messageTextField.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 56),
+            messageTextField.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
+            messageTextField.trailingAnchor.constraint(equalTo: messageInputBar.trailingAnchor, constant: -16),
+            messageTextField.heightAnchor.constraint(equalToConstant: 35),
+            
+            sendButton.trailingAnchor.constraint(equalTo: messageTextField.trailingAnchor, constant: -8),
+            sendButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
+            
+            recordButton.trailingAnchor.constraint(equalTo: messageTextField.trailingAnchor, constant: -8),
+            recordButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor)
+        ])
+    }
+    
+    private func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(ChatTableViewCell.self, forCellReuseIdentifier: "ChatCell")
+        tableView.separatorStyle = .none
+        tableView.allowsSelection = false
+        
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: messageInputBar.topAnchor)
+        ])
     }
     
     private func setupRecordingSession() {
@@ -58,7 +145,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             try recordingSession.setCategory(.playAndRecord, mode: .default)
             try recordingSession.setActive(true)
             
-            // 請求錄音權限
             recordingSession.requestRecordPermission { [weak self] allowed in
                 DispatchQueue.main.async {
                     if allowed {
@@ -74,133 +160,10 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    // 設置 TableView
-    private func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(ChatTableViewCell.self, forCellReuseIdentifier: "ChatCell")
-        tableView.separatorStyle = .none
-        tableView.allowsSelection = false
-        
-        view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: messageInputBar.topAnchor)
-        ])
-    }
-    
-    // 設置 Message Input Bar
-    private func setupMessageInputBar() {
-        messageInputBar.backgroundColor = .systemGray5
-        
-        messageTextField.placeholder = "Enter message..."
-        messageTextField.borderStyle = .roundedRect
-        messageTextField.translatesAutoresizingMaskIntoConstraints = false
-        
-        sendButton.setTitle("Send", for: .normal)
-        sendButton.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        photoButton.setImage(UIImage(systemName: "photo"), for: .normal)
-        photoButton.addTarget(self, action: #selector(selectPhoto), for: .touchUpInside)
-        photoButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
-        recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
-        recordButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        messageInputBar.addSubview(messageTextField)
-        messageInputBar.addSubview(sendButton)
-        messageInputBar.addSubview(photoButton)
-        messageInputBar.addSubview(recordButton)  // 添加錄音按鈕
-        
-        view.addSubview(messageInputBar)
-        messageInputBar.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            messageInputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            messageInputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            messageInputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            messageInputBar.heightAnchor.constraint(equalToConstant: 50),
-            
-            messageTextField.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 8),
-            messageTextField.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
-            messageTextField.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -8),
-            messageTextField.heightAnchor.constraint(equalToConstant: 35),
-            
-            sendButton.trailingAnchor.constraint(equalTo: messageInputBar.trailingAnchor, constant: -8),
-            sendButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
-            
-            photoButton.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 8),
-            photoButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
-            
-            recordButton.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -8),
-            recordButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor)
-        ])
-    }
-    
-    // 發送訊息
-    @objc private func sendMessage() {
-        guard let messageText = messageTextField.text, !messageText.isEmpty else {
-            return
-        }
-        
-        // 通知 ViewModel 發送訊息
-        viewModel.sendMessage(messageText)
-        messageTextField.text = nil
-    }
-    
-    // 自動滾動到底部
     private func scrollToBottom() {
         if viewModel.numberOfMessages() > 0 {
             let indexPath = IndexPath(row: viewModel.numberOfMessages() - 1, section: 0)
             tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-        }
-    }
-    
-    @objc private func handleKeyboardWillShow(notification: NSNotification) {
-        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            messageInputBar.frame.origin.y = view.frame.height - keyboardFrame.height - messageInputBar.frame.height
-            tableView.contentInset.bottom = keyboardFrame.height
-            scrollToBottom()
-        }
-    }
-    
-    @objc private func handleKeyboardWillHide(notification: NSNotification) {
-        messageInputBar.frame.origin.y = view.frame.height - messageInputBar.frame.height
-        tableView.contentInset.bottom = 0
-    }
-    
-    // MARK: - UITableViewDelegate, UITableViewDataSource
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.numberOfMessages()
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
-        let message = viewModel.message(at: indexPath.row)
-        cell.configure(with: message)
-        return cell
-    }
-    
-    
-    
-    @objc private func selectPhoto() {
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.sourceType = .photoLibrary
-        present(imagePickerController, animated: true, completion: nil)
-    }
-    
-    @objc private func recordTapped() {
-        if audioRecorder == nil {
-            startRecording()
-            recordButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
-        } else {
-            finishRecording(success: true)
-            recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
         }
     }
     
@@ -239,17 +202,92 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    // 獲取文件路徑
     private func getDocumentsDirectory() -> URL {
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
-}
-
-extension ChatVC: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    @objc private func selectPhoto() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .photoLibrary
+        present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    @objc private func sendMessage() {
+        guard let messageText = messageTextField.text, !messageText.isEmpty else {
+            return
+        }
+        
+        viewModel.sendMessage(messageText)
+        messageTextField.text = nil
+    }
+    
+    @objc private func recordTapped() {
+        if audioRecorder == nil {
+            startRecording()
+            recordButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        } else {
+            finishRecording(success: true)
+            recordButton.setImage(UIImage(systemName: "mic"), for: .normal)
+        }
+    }
+    
+    @objc private func textFieldDidChange() {
+        if let text = messageTextField.text, !text.isEmpty {
+            sendButton.isHidden = false
+            recordButton.isHidden = true
+        } else {
+            sendButton.isHidden = true
+            recordButton.isHidden = false
+        }
+    }
+    
+    @objc private func handleKeyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            messageInputBar.frame.origin.y = view.frame.height - keyboardFrame.height - messageInputBar.frame.height
+            tableView.contentInset.bottom = keyboardFrame.height
+            scrollToBottom()
+        }
+    }
+    
+    @objc private func handleKeyboardWillHide(notification: NSNotification) {
+        messageInputBar.frame.origin.y = view.frame.height - messageInputBar.frame.height
+        tableView.contentInset.bottom = 0
+    }
+    
+    // MARK: - TableView Delegate
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.numberOfMessages()
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
+        let message = viewModel.message(at: indexPath.row)
+        let previousMessage: Message? = indexPath.row > 0 ? viewModel.message(at: indexPath.row - 1) : nil
+        let pendingImage = viewModel.getPendingImage(for: message.ID ?? "nil")
+        cell.configure(with: message, previousMessage: previousMessage, image: pendingImage)
+        cell.delegate = self
+        return cell
+    }
+    
+    // MARK: - ImagePicker Delegate
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selectedImage = info[.originalImage] as? UIImage {
             viewModel.sendPhotoMessage(selectedImage)
         }
         dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+}
+
+
+extension ChatVC: ChatTableViewCellDelegate {
+    func chatTableViewCell(_ cell: ChatTableViewCell, didTapImage image: UIImage) {
+        let fullScreenVC = FullScreenImageVC(image: image)
+        present(fullScreenVC, animated: true, completion: nil)
     }
 }

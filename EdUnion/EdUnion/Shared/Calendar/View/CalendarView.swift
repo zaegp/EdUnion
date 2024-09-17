@@ -67,7 +67,7 @@ struct CalendarDayView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-            if let day = day {  
+            if let day = day {
                 Text(day.formatted(.dateTime.day()))
                     .fontWeight(.bold)
                     .foregroundColor(isSelected ? .white : (isCurrentMonth ? .primary : .gray))
@@ -141,7 +141,7 @@ struct CalendarView: View {
                             day: day,
                             isSelected: selectedDay == day,
                             isCurrentMonth: isCurrentMonth,
-                            color: dateColors[day] ?? .clear  // 如果 day 為 nil，預設顏色為 .clear
+                            color: dateColors[day] ?? .clear
                         )
                         .onTapGesture {
                             toggleSingleSelection(for: day)
@@ -151,7 +151,6 @@ struct CalendarView: View {
                             showColorPicker = true
                         }
                     } else {
-                        // 對應 nil 的情況，顯示空白
                         CalendarDayView(
                             day: nil,
                             isSelected: false,
@@ -202,9 +201,9 @@ struct CalendarView: View {
                     existingColor: existingColor,
                     availableColors: availableColors,
                     onSelectColor: { color in
-                        dateColors[selectedDay] = color  // 更新颜色
-                        FirebaseService.shared.saveDateColorToFirebase(date: selectedDay, color: color)
-                        selectNextDay()  // 自动选择下一天
+                        dateColors[selectedDay] = color
+                        FirebaseService.shared.saveDateColorToFirebase(date: selectedDay, color: color, teacherID: teacherID)
+                        selectNextDay()
                     }
                 )
                 .presentationDetents([.fraction(0.25)])
@@ -220,12 +219,11 @@ struct CalendarView: View {
         guard let currentDay = selectedDay else { return }
         
         if let nextDayIndex = days.firstIndex(of: currentDay)?.advanced(by: 1), nextDayIndex < days.count {
-            selectedDay = days[nextDayIndex]  // 跳转到下一天
+            selectedDay = days[nextDayIndex]
         } else {
-            selectedDay = nil  // 如果是最后一天，取消选择
+            selectedDay = nil
         }
     }
-    
     
     private func setupView() {
         days = generateMonthDays(for: currentDate)
@@ -234,25 +232,20 @@ struct CalendarView: View {
     private func generateMonthDays(for date: Date) -> [Date?] {
         var days: [Date?] = []
         var calendar = Calendar.current
-        calendar.firstWeekday = 1  // 設置一周的第一天為星期日
+        calendar.firstWeekday = 1
         
         let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
         
-        // 获取该月的范围和天数
         let range = calendar.range(of: .day, in: .month, for: startOfMonth)!
         
-        // 获取该月的第一天对应的星期几（1 = 周日，2 = 周一，... 7 = 周六）
         let firstDayOfWeek = calendar.component(.weekday, from: startOfMonth)
         
-        // 前置空白天数（按周日作为一周的开始）
         let paddingDays = firstDayOfWeek - 1
         
-        // 用 nil 填充前置空白
         for _ in 0..<paddingDays {
-            days.append(nil)  // 添加空白
+            days.append(nil)
         }
         
-        // 添加当前月份的天数
         for day in range {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
                 days.append(date)
@@ -263,7 +256,7 @@ struct CalendarView: View {
     }
     
     private func fetchAppointments() {
-        FirebaseService.shared.fetchAppointments(forTeacherID: "001") { result in
+        FirebaseService.shared.fetchAppointments(forTeacherID: teacherID) { result in
             switch result {
             case .success(let fetchedAppointments):
                 DispatchQueue.main.async {
@@ -290,9 +283,7 @@ struct CalendarView: View {
             }
         }
         
-        // 更新 dateColors 基於 appointments
         for (date, appointments) in activitiesByDate {
-            // 根據預約狀態決定顏色，這裡以 "pending" 和 "confirmed" 狀態為例
             let hasPending = appointments.contains { $0.status.lowercased() == "pending" }
             let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
             
@@ -307,7 +298,7 @@ struct CalendarView: View {
     }
     
     private func fetchTimeSlots() {
-        FirebaseService.shared.fetchTimeSlots(forTeacher: "001") { result in
+        FirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { result in
             switch result {
             case .success(let fetchedTimeSlots):
                 DispatchQueue.main.async {
@@ -315,7 +306,7 @@ struct CalendarView: View {
                     self.extractAvailableColors()
                 }
             case .failure(let error):
-                print("获取时间段时出错：\(error)")
+                print("獲取時段時出錯：\(error)")
             }
         }
     }
@@ -325,18 +316,17 @@ struct CalendarView: View {
         self.availableColors = colorHexes.map { Color(hex: $0) }
     }
     
-    
     private func fetchDateColors() {
-        let teacherRef = FirebaseService.shared.db.collection("teachers").document("001")
+        let teacherRef = FirebaseService.shared.db.collection("teachers").document(teacherID)
         
         teacherRef.getDocument { (documentSnapshot, error) in
             if let error = error {
-                print("获取日期颜色时出错：\(error)")
+                print("獲取日期顏色時出錯：\(error)")
             } else if let document = documentSnapshot, document.exists {
                 if let data = document.data(), let selectedTimeSlots = data["selectedTimeSlots"] as? [String: String] {
                     for (dateString, colorHex) in selectedTimeSlots {
                         if let date = dateFormatter.date(from: dateString) {
-                            self.dateColors[date] = Color(hex: colorHex)  // 将 hex 转换为 Color 并更新 dateColors
+                            self.dateColors[date] = Color(hex: colorHex)
                         }
                     }
                 }
@@ -367,23 +357,6 @@ struct CalendarView: View {
         return formatter.string(from: date)
     }
 }
-
-//struct AppointmentSectionView: View {
-//    let appointment: Appointment
-//    
-//    var body: some View {
-//        ForEach(appointment.times, id: \.self) { time in
-//            HStack {
-//                Text(appointment.studentID) // 顯示學生 ID
-//                    .font(.subheadline)
-//                    .foregroundColor(.gray)
-//                Text(time) // 顯示時間
-//                    .font(.body)
-//                    .padding(.leading, 10)
-//            }
-//        }
-//    }
-//}
 
 #Preview {
     CalendarView()

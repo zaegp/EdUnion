@@ -11,7 +11,6 @@ class AvailableTimeSlotsCell: UITableViewCell {
     
     let colorView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 5
         view.clipsToBounds = true
         return view
     }()
@@ -38,7 +37,7 @@ class AvailableTimeSlotsCell: UITableViewCell {
         contentView.addSubview(containerStackView)
         containerStackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            colorView.widthAnchor.constraint(equalToConstant: 10),
+            colorView.widthAnchor.constraint(equalToConstant: 50),
             colorView.heightAnchor.constraint(equalToConstant: 50),
             
             containerStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
@@ -51,7 +50,12 @@ class AvailableTimeSlotsCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        colorView.layer.cornerRadius = colorView.frame.size.width / 2
+    }
+    
     func configure(with timeSlot: AvailableTimeSlot) {
         let color = UIColor(hexString: timeSlot.colorHex)
         colorView.backgroundColor = color

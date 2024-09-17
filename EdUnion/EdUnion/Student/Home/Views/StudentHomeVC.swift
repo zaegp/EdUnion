@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StudentHomeVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class StudentHomeVC: UIViewController, UICollectionViewDelegateFlowLayout {
 
     private let viewModel = StudentHomeViewModel()
     private var collectionView: UICollectionView!
@@ -15,7 +15,6 @@ class StudentHomeVC: UIViewController, UICollectionViewDataSource, UICollectionV
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-//        title = "Booking"
         
         setupCollectionView()
         bindViewModel()
@@ -23,25 +22,21 @@ class StudentHomeVC: UIViewController, UICollectionViewDataSource, UICollectionV
         viewModel.fetchTeachers()
     }
 
-    // 綁定 ViewModel 的數據更新
     private func bindViewModel() {
         viewModel.onDataUpdate = { [weak self] in
             self?.collectionView.reloadData()
         }
     }
 
-    // 初始化 UICollectionView
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         
-        let padding: CGFloat = 16  // 每個卡片之間的間距
-        let itemsPerRow: CGFloat = 2  // 每行顯示兩個項目
+        let padding: CGFloat = 16
+        let itemsPerRow: CGFloat = 2
         
-        // 計算每個項目的寬度（去除左右間距和項目間的間隔）
         let availableWidth = view.frame.width - (padding * (itemsPerRow + 1))
         let itemWidth = availableWidth / itemsPerRow
         
-        // 設置 item 的寬度和高度
         layout.itemSize = CGSize(width: itemWidth, height: itemWidth * 1.5)
         
         layout.minimumInteritemSpacing = padding
@@ -54,23 +49,22 @@ class StudentHomeVC: UIViewController, UICollectionViewDataSource, UICollectionV
         collectionView.delegate = self
         collectionView.dataSource = self
 
-        // 註冊 Cell
         collectionView.register(TeacherCell.self, forCellWithReuseIdentifier: "TeacherCell")
         
         view.addSubview(collectionView)
     }
+}
 
-    // MARK: - UICollectionViewDataSource
-
+extension StudentHomeVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel.numberOfTeachers()
-//        return 10
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TeacherCell", for: indexPath) as? TeacherCell else {
-            return UICollectionViewCell() // 如果轉型失敗，回傳一個空的 UICollectionViewCell
+            return UICollectionViewCell()
         }
+        
         let teacher = viewModel.teacher(at: indexPath.item)
         cell.configure(with: teacher)
         cell.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
@@ -78,11 +72,8 @@ class StudentHomeVC: UIViewController, UICollectionViewDataSource, UICollectionV
     }
 }
 
-// MARK: - UICollectionViewDelegate
 extension StudentHomeVC: UICollectionViewDelegate {
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // 获取选中的 teacher 数据
         let selectedTeacher = viewModel.teacher(at: indexPath.item)
     
         let detailVC = TeacherDetailVC()

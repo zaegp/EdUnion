@@ -8,20 +8,18 @@
 import Foundation
 
 struct Message {
-    let id: String?
-    let text: String?
-    let imageURL: String?
-    let audioURL: String?
+    let ID: String?
+    let type: Int
+    var content: String
     let senderID: String
     let isSentByCurrentUser: Bool
     let isSeen: Bool
     let timestamp: Date
 
-    init(id: String? = nil, text: String? = nil, imageURL: String? = nil, audioURL: String? = nil, senderID: String, isSentByCurrentUser: Bool, isSeen: Bool, timestamp: Date) {
-        self.id = id
-        self.text = text
-        self.imageURL = imageURL
-        self.audioURL = audioURL
+    init(ID: String? = nil, type: Int, content: String, senderID: String, isSentByCurrentUser: Bool, isSeen: Bool, timestamp: Date) {
+        self.ID = ID
+        self.type = type
+        self.content = content
         self.senderID = senderID
         self.isSentByCurrentUser = isSentByCurrentUser
         self.isSeen = isSeen

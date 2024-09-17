@@ -19,7 +19,6 @@ class TeacherCell: UICollectionViewCell {
         contentView.addSubview(nameLabel)
         contentView.addSubview(image)
 
-        // 設置名稱和專業標籤的佈局
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         image.translatesAutoresizingMaskIntoConstraints = false
 
@@ -36,7 +35,6 @@ class TeacherCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // 設置 Cell 的內容
     func configure(with teacher: Teacher) {
         nameLabel.text = teacher.name
         let url = URL(string: teacher.photoURL)

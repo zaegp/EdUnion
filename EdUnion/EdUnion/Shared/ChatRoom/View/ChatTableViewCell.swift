@@ -9,155 +9,439 @@ import UIKit
 import AVFoundation
 import Kingfisher
 
+protocol ChatTableViewCellDelegate: AnyObject {
+    func chatTableViewCell(_ cell: ChatTableViewCell, didTapImage image: UIImage)
+}
+
 class ChatTableViewCell: UITableViewCell {
     
-    private let messageLabel = UILabel()
-    private let bubbleBackgroundView = UIView()
-    private let timestampLabel = UILabel()
+    private var isImageLoaded = false
+    
+    private let bubbleBackgroundView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 16
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let messageLabel: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let messageImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
+    private let audioButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("播放音訊", for: .normal)
+        button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.isHidden = true
+        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.setImage(UIImage(systemName: "stop.fill"), for: .selected)
+        button.semanticContentAttribute = .forceRightToLeft
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+        return button
+    }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
+    private let timestampLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.preferredFont(forTextStyle: .caption2)
+        label.adjustsFontForContentSizeCategory = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .gray
+        return label
+    }()
+    
+    private let toggleImageButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(systemName: "arrow.2.circlepath"), for: .normal)
+        button.setImage(UIImage(systemName: "arrow.2.circlepath.circle"), for: .selected)
+        button.semanticContentAttribute = .forceLeftToRight
+        return button
+    }()
+    
+    // MARK: - Properties
+    
+    weak var delegate: ChatTableViewCellDelegate?
+    
     private var audioPlayer: AVAudioPlayer?
     private var message: Message?
-    private let messageImageView = UIImageView()
-    private let audioButton = UIButton(type: .system)
-    private var imageHeightConstraint: NSLayoutConstraint?
+    
+    // Constraints for bubbleBackgroundView
+    private var bubbleLeadingConstraint: NSLayoutConstraint!
+    private var bubbleTrailingConstraint: NSLayoutConstraint!
+    
+    // Constraints for messageImageView
+    private var imageLeadingConstraint: NSLayoutConstraint!
+    private var imageTrailingConstraint: NSLayoutConstraint!
+    private var imageWidthConstraint: NSLayoutConstraint!
+    private var imageHeightConstraint: NSLayoutConstraint!
+    
+    // Constraints for bubbleBackgroundView (when visible)
+    private var bubbleTopConstraint: NSLayoutConstraint!
+    private var bubbleBottomConstraint: NSLayoutConstraint!
+    private var bubbleWidthConstraint: NSLayoutConstraint!
+    
+    // Constraints for messageImageView (when visible)
+    private var imageTopConstraint: NSLayoutConstraint!
+    private var imageBottomConstraint: NSLayoutConstraint!
     
     var isSentByCurrentUser: Bool = false {
         didSet {
-            bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .systemBlue : .lightGray
-            messageLabel.textColor = isSentByCurrentUser ? .white : .black
-            timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
-            
-            let leadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
-            let trailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-            
-            if isSentByCurrentUser {
-                leadingConstraint.isActive = false
-                trailingConstraint.isActive = true
-            } else {
-                leadingConstraint.isActive = true
-                trailingConstraint.isActive = false
-            }
+            updateBubbleAppearance()
         }
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        bubbleBackgroundView.layer.cornerRadius = 12
-        bubbleBackgroundView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(bubbleBackgroundView)
-        
-        messageLabel.numberOfLines = 0
-        messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        bubbleBackgroundView.addSubview(messageLabel)
-        
-        messageImageView.contentMode = .scaleAspectFill
-        messageImageView.clipsToBounds = true
-        messageImageView.translatesAutoresizingMaskIntoConstraints = false
-        bubbleBackgroundView.addSubview(messageImageView)
-        
-        audioButton.setTitle("Play Audio", for: .normal)
-        audioButton.addTarget(self, action: #selector(playAudio), for: .touchUpInside)
-        audioButton.translatesAutoresizingMaskIntoConstraints = false
-        bubbleBackgroundView.addSubview(audioButton)
-        
+        setupUI()
         setupConstraints()
+        selectionStyle = .none
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func prepareForReuse() {
-            super.prepareForReuse()
-            // Reset content
-            messageLabel.text = nil
-            messageImageView.image = nil
-            audioPlayer = nil
-            message = nil
-            
-            // Reset visibility
-            messageLabel.isHidden = true
-            messageImageView.isHidden = true
-            audioButton.isHidden = true
-            
-            // Deactivate constraints
-            imageHeightConstraint?.isActive = false
-        }
-
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            bubbleBackgroundView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 60),
-            bubbleBackgroundView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -60),
-            bubbleBackgroundView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            bubbleBackgroundView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-        ])
+    private func setupUI() {
+        contentView.addSubview(bubbleBackgroundView)
+        bubbleBackgroundView.addSubview(messageLabel)
+        bubbleBackgroundView.addSubview(audioButton)
+        bubbleBackgroundView.addSubview(toggleImageButton)
+        bubbleBackgroundView.addSubview(activityIndicator)
+        contentView.addSubview(messageImageView)
+        contentView.addSubview(timestampLabel)
         
-        let stackView = UIStackView(arrangedSubviews: [messageLabel, messageImageView, audioButton])
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        bubbleBackgroundView.addSubview(stackView)
+        audioButton.addTarget(self, action: #selector(playAudio), for: .touchUpInside)
+        toggleImageButton.addTarget(self, action: #selector(toggleImageButtonTapped), for: .touchUpInside)
         
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: bubbleBackgroundView.topAnchor, constant: 8),
-            stackView.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -8),
-            stackView.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
-            stackView.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor, constant: -8),
-        ])
-        
-        imageHeightConstraint = messageImageView.heightAnchor.constraint(equalToConstant: 150)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
+        messageImageView.isUserInteractionEnabled = true
+        messageImageView.addGestureRecognizer(tapGesture)
     }
     
-    func configure(with message: Message) {
+    private func setupConstraints() {
+        bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
+        bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
+        bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
+        bubbleTrailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
+        
+        NSLayoutConstraint.activate([
+            bubbleTopConstraint,
+            bubbleBottomConstraint,
+            bubbleLeadingConstraint,
+            bubbleTrailingConstraint
+        ])
+        
+        NSLayoutConstraint.activate([
+            messageLabel.topAnchor.constraint(equalTo: bubbleBackgroundView.topAnchor, constant: 8),
+            messageLabel.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
+            messageLabel.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor, constant: -8),
+            messageLabel.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -8)
+        ])
+        
+        // Audio Button Constraints
+        NSLayoutConstraint.activate([
+            audioButton.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 8),
+            audioButton.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
+            audioButton.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor, constant: -8),
+            audioButton.heightAnchor.constraint(equalToConstant: 30)
+        ])
+        
+        // Toggle Image Button Constraints (example positioning)
+        NSLayoutConstraint.activate([
+            toggleImageButton.topAnchor.constraint(equalTo: audioButton.bottomAnchor, constant: 8),
+            toggleImageButton.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
+            toggleImageButton.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor, constant: -8),
+            toggleImageButton.heightAnchor.constraint(equalToConstant: 30),
+            toggleImageButton.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: -8)
+        ])
+        
+        // Activity Indicator Constraints
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: messageImageView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: messageImageView.centerYAnchor)
+        ])
+        
+        // Message ImageView Constraints
+        imageTopConstraint = messageImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8)
+        imageBottomConstraint = messageImageView.bottomAnchor.constraint(equalTo: timestampLabel.topAnchor, constant: -4)
+        
+        imageLeadingConstraint = messageImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
+        imageTrailingConstraint = messageImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
+        imageWidthConstraint = messageImageView.widthAnchor.constraint(equalToConstant: 200) // 可根據需要調整
+        imageHeightConstraint = messageImageView.heightAnchor.constraint(equalToConstant: 200) // 可根據需要調整
+        
+        NSLayoutConstraint.activate([
+            imageTopConstraint,
+            imageBottomConstraint,
+            imageLeadingConstraint,
+            imageTrailingConstraint,
+            imageWidthConstraint,
+            imageHeightConstraint
+        ])
+        
+        NSLayoutConstraint.deactivate([
+            imageTopConstraint,
+            imageBottomConstraint,
+            imageLeadingConstraint,
+            imageTrailingConstraint,
+            imageWidthConstraint,
+            imageHeightConstraint
+        ])
+        
+        NSLayoutConstraint.activate([
+            timestampLabel.topAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor, constant: 4),
+            timestampLabel.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor),
+            timestampLabel.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor),
+            timestampLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
+        ])
+    }
+    
+    // MARK: - Configuration
+    
+    func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
+        resetContent()
+        
+        if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
+            timestampLabel.text = formatDate(message.timestamp)
+            timestampLabel.isHidden = false
+        } else {
+            timestampLabel.isHidden = true
+        }
+
+        switch message.type {
+        case 0:
+            bubbleBackgroundView.isHidden = false
+            messageImageView.isHidden = true
+            toggleImageButton.isHidden = true
+            setupBubbleConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
+            messageLabel.text = message.content
+            messageLabel.isHidden = false
+        case 1:
+            bubbleBackgroundView.isHidden = true
+            messageImageView.isHidden = false
+            toggleImageButton.isHidden = false
+            setupImageConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
+            
+            if let localImage = image {
+                // 如果有本地圖片，優先顯示
+                messageImageView.image = localImage
+                activityIndicator.startAnimating()
+            } else {
+                // 加載圖片連結
+                loadImage(from: message.content)
+            }
+
+        case 2: // 音訊訊息
+            bubbleBackgroundView.isHidden = false
+            messageImageView.isHidden = true
+            toggleImageButton.isHidden = true
+            setupBubbleConstraints(isSentByCurrentUser: message.isSentByCurrentUser)
+            messageLabel.isHidden = true
+            audioButton.isHidden = false
+            // 設置音訊的 UI，例如播放按鈕
+
+        default:
+            // 其他未知情況，隱藏所有不相關的內容
+            bubbleBackgroundView.isHidden = true
+            messageImageView.isHidden = true
+            toggleImageButton.isHidden = true
+            messageLabel.isHidden = true
+            audioButton.isHidden = true
+        }
+
+        updateBubbleAppearance()
+    }
+    
+    private func shouldShowTimestamp(for message: Message, previousMessage: Message?) -> Bool {
+        // 如果沒有上一條消息，直接顯示時間戳
+        guard let previousMessage = previousMessage else {
+            return true
+        }
+        
+        // 設置時間間隔（以秒為單位），這裡為 5 分鐘 = 300 秒
+        let timeInterval: TimeInterval = 300  // 5 分鐘
+        let timeDifference = message.timestamp.timeIntervalSince(previousMessage.timestamp)
+        
+        // 如果兩條消息的時間差超過 5 分鐘，顯示時間戳
+        return timeDifference > timeInterval
+    }
+    
+    private func resetContent() {
+        // 隱藏所有內容視圖
         messageLabel.isHidden = true
         messageImageView.isHidden = true
         audioButton.isHidden = true
+        toggleImageButton.isHidden = true
+        bubbleBackgroundView.isHidden = false
+        timestampLabel.text = nil
+        messageLabel.text = nil
+        messageImageView.image = nil
+        audioPlayer = nil
+        activityIndicator.stopAnimating()
         
-        imageHeightConstraint?.isActive = false
+        // 重置約束
+        NSLayoutConstraint.deactivate([
+            imageTopConstraint,
+            imageBottomConstraint,
+            imageLeadingConstraint,
+            imageTrailingConstraint,
+            imageWidthConstraint,
+            imageHeightConstraint
+        ])
         
-        if let text = message.text, !text.isEmpty {
-            messageLabel.text = text
-            messageLabel.isHidden = false
-        } else if let imageURL = message.imageURL {
-            imageHeightConstraint?.isActive = true
-            messageImageView.isHidden = false
-            loadImage(from: imageURL)
-        } else if let _ = message.audioURL {
-            audioButton.isHidden = false
+        NSLayoutConstraint.deactivate([
+            bubbleLeadingConstraint,
+            bubbleTrailingConstraint
+        ])
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func updateBubbleAppearance() {
+        guard !bubbleBackgroundView.isHidden else { return }
+        bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .systemOrange : .systemGray5
+        messageLabel.textColor = isSentByCurrentUser ? .white : .black
+        timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
+    }
+    
+    private func setupBubbleConstraints(isSentByCurrentUser: Bool) {
+        if isSentByCurrentUser {
+            bubbleLeadingConstraint.isActive = false
+            bubbleTrailingConstraint.isActive = true
+        } else {
+            bubbleTrailingConstraint.isActive = false
+            bubbleLeadingConstraint.isActive = true
+        }
+    }
+    
+    private func setupImageConstraints(isSentByCurrentUser: Bool) {
+        if isSentByCurrentUser {
+            imageLeadingConstraint.isActive = false
+            imageTrailingConstraint.isActive = true
+        } else {
+            imageTrailingConstraint.isActive = false
+            imageLeadingConstraint.isActive = true
         }
         
-        isSentByCurrentUser = message.isSentByCurrentUser
+        NSLayoutConstraint.activate([
+            imageTopConstraint,
+            imageBottomConstraint,
+            imageWidthConstraint,
+            imageHeightConstraint
+        ])
     }
-
+    
     private func loadImage(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
-        DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: url),
-               let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self.messageImageView.image = image
+        let processor = DownsamplingImageProcessor(size: CGSize(width: 200, height: 200))
+        messageImageView.kf.indicatorType = .activity
+        messageImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(systemName: "photo"),
+            options: [
+                .processor(processor),
+                .scaleFactor(UIScreen.main.scale),
+                .transition(.fade(0.3)),
+                .cacheOriginalImage
+            ]) { [weak self] result in
+                switch result {
+                case .success(_):
+                    self?.activityIndicator.stopAnimating()
+                case .failure(let error):
+                    print("圖片加載失敗: \(error.localizedDescription)")
+                    self?.activityIndicator.stopAnimating()
                 }
+            }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func playAudio() {
+        guard let audioURLString = message?.content,
+              let url = URL(string: audioURLString) else {
+            print("無效的音訊 URL")
+            return
+        }
+        
+        if let player = audioPlayer, player.isPlaying {
+            player.stop()
+            audioPlayer = nil
+            audioButton.setTitle("播放音訊", for: .normal)
+            audioButton.isSelected = false
+            return
+        }
+        
+        audioButton.setTitle("載入中...", for: .normal)
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            do {
+                let audioData = try Data(contentsOf: url)
+                self.audioPlayer = try AVAudioPlayer(data: audioData)
+                self.audioPlayer?.delegate = self
+                self.audioPlayer?.prepareToPlay()
+                DispatchQueue.main.async {
+                    self.audioPlayer?.play()
+                    self.audioButton.setTitle("停止播放", for: .normal)
+                    self.audioButton.isSelected = true
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.audioButton.setTitle("播放音訊", for: .normal)
+                    self.audioButton.isSelected = false
+                }
+                print("無法播放音訊: \(error.localizedDescription)")
             }
         }
     }
     
-    @objc private func playAudio() {
-        guard let audioURLString = message?.audioURL,
-              let url = URL(string: audioURLString) else {
-            print("音訊 URL 無效")
-            return
-        }
-        
-        DispatchQueue.global().async { [weak self] in
-            do {
-                let audioData = try Data(contentsOf: url)
-                self?.audioPlayer = try AVAudioPlayer(data: audioData)
-                self?.audioPlayer?.play()
-            } catch {
-                print("無法播放音訊: \(error.localizedDescription)")
-            }
+    @objc private func toggleImageButtonTapped() {
+        toggleImageButton.isSelected.toggle()
+        // 根據選中狀態執行相應操作
+        // 例如更換圖片或觸發其他事件
+    }
+    
+    @objc private func imageTapped() {
+        guard let image = messageImageView.image else { return }
+        delegate?.chatTableViewCell(self, didTapImage: image)
+    }
+}
+
+extension ChatTableViewCell: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            self?.audioButton.setTitle("播放音訊", for: .normal)
+            self?.audioButton.isSelected = false
         }
     }
 }

@@ -5,14 +5,16 @@
 //  Created by Rowan Su on 2024/9/14.
 //
 
-import FirebaseFirestore
 import SwiftUI
+import FirebaseFirestore
+import FirebaseStorage
 
 class FirebaseService {
     static let shared = FirebaseService()
     private init() {}
     
     let db = Firestore.firestore()
+    let storage = Storage.storage()
     
     // MARK: - 學生：顯示老師資訊
     func fetchTeachers(completion: @escaping (Result<[Teacher], Error>) -> Void) {
@@ -50,7 +52,6 @@ class FirebaseService {
         let timeSlotData = timeSlot.toDictionary()
         let teacherRef = db.collection("teachers").document(teacherID)
         
-        // Use Firestore arrayRemove to delete a timeSlot from the array
         teacherRef.updateData([
             "timeSlots": FieldValue.arrayRemove([timeSlotData])
         ]) { error in
@@ -79,22 +80,20 @@ class FirebaseService {
                     }
                     completion(.success(timeSlots))
                 } else {
-                    // No timeSlots found
                     completion(.success([]))
                 }
             } else {
-                // Document does not exist
                 completion(.success([]))
             }
         }
     }
     
     // MARK: - 老師：存日期顏色對應
-    func saveDateColorToFirebase(date: Date, color: Color) {
-        let colorHex = color.toHex()
-        let dateString = dateFormatter.string(from: date)
+    func saveDateColorToFirebase(date: Date, color: Color, teacherID: String) {
+        let colorHex = color.toHex() // 假設你有擴展 Color 來轉換為 hex
+        let dateString = dateFormatter.string(from: date) // 假設你已經有定義 dateFormatter
         
-        let teacherRef = FirebaseService.shared.db.collection("teachers").document("001")
+        let teacherRef = db.collection("teachers").document(teacherID)
         
         teacherRef.updateData([
             "selectedTimeSlots.\(dateString)": colorHex as Any
@@ -213,5 +212,152 @@ class FirebaseService {
                 completion(.success(()))
             }
         }
+    }
+    
+    // MARK - 聊天室
+    func sendMessage(chatRoomID: String, messageData: [String: Any], completion: @escaping (Error?) -> Void) {
+        let messageId = UUID().uuidString
+        db.collection("chats").document(chatRoomID).collection("messages").document(messageId).setData(messageData) { error in
+            completion(error)
+        }
+    }
+    
+    func updateMessage(chatRoomID: String, messageId: String, updatedData: [String: Any], completion: @escaping (Error?) -> Void) {
+        db.collection("chats").document(chatRoomID).collection("messages").document(messageId).updateData(updatedData) { error in
+            completion(error)
+        }
+    }
+    
+    func uploadPhoto(image: UIImage, messageId: String, completion: @escaping (String?, Error?) -> Void) {
+        // 檢查圖片是否能成功轉換為 JPEG 格式
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            let conversionError = NSError(domain: "ImageConversionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG format."])
+            completion(nil, conversionError)
+            print("Error: Failed to convert image to JPEG format.")
+            return
+        }
+        
+        // 設定圖片存儲位置
+        let storageRef = storage.reference().child("chat_images/\(messageId).jpg")
+        
+        // 上傳圖片到 Firebase Storage
+        storageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                // 上傳失敗，返回錯誤
+                completion(nil, error)
+                print("Error uploading image: \(error.localizedDescription)")
+                return
+            }
+            
+            // 獲取圖片下載 URL
+            storageRef.downloadURL { url, error in
+                if let error = error {
+                    // 無法獲取下載 URL，返回錯誤
+                    completion(nil, error)
+                    print("Error fetching download URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                // 成功獲取 URL，返回圖片的 URL
+                if let urlString = url?.absoluteString {
+                    print("Image uploaded successfully. URL: \(urlString)")
+                    completion(urlString, nil)
+                } else {
+                    // 當 URL 無法被生成時，返回錯誤
+                    let urlError = NSError(domain: "DownloadURLError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to generate download URL."])
+                    completion(nil, urlError)
+                    print("Error: Failed to generate download URL.")
+                }
+            }
+        }
+    }
+    
+    
+    
+    func uploadAudio(audioData: Data, audioId: String, completion: @escaping (String?, Error?) -> Void) {
+        let storageRef = storage.reference().child("chat_audio/\(audioId).m4a")
+        
+        storageRef.putData(audioData, metadata: nil) { _, error in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            
+            storageRef.downloadURL { url, error in
+                completion(url?.absoluteString, error)
+            }
+        }
+    }
+    
+    func fetchMessages(chatRoomID: String, currentUserID: String, completion: @escaping ([Message], Error?) -> Void) {
+        // 首次加載歷史訊息
+        db.collection("chats").document(chatRoomID).collection("messages")
+            .order(by: "timestamp", descending: false)
+            .getDocuments { (snapshot, error) in
+                if let error = error {
+                    completion([], error)
+                    return
+                }
+                
+                guard let snapshot = snapshot else {
+                    completion([], nil)
+                    return
+                }
+                
+                var messages: [Message] = []
+                snapshot.documents.forEach { document in
+                    let data = document.data()
+                    let newMessage = Message(
+                        ID: data["ID"] as? String ?? document.documentID,
+                        type: data["type"] as? Int ?? 0,
+                        content: data["content"] as? String ?? "",
+                        senderID: data["senderID"] as? String ?? "",
+                        isSentByCurrentUser: data["senderID"] as? String == currentUserID,
+                        isSeen: data["isSeen"] as? Bool ?? false,
+                        timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
+                    )
+                    messages.append(newMessage)
+                }
+                // 首次加載所有歷史訊息
+                completion(messages, nil)
+                
+                // 監聽後續的新訊息和變更
+                self.addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
+            }
+    }
+    
+    func addMessageListener(chatRoomID: String, currentUserID: String, completion: @escaping ([Message], Error?) -> Void) {
+        db.collection("chats").document(chatRoomID).collection("messages")
+            .order(by: "timestamp", descending: false)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    completion([], error)
+                    return
+                }
+                
+                guard let snapshot = snapshot else {
+                    completion([], nil)
+                    return
+                }
+                
+                var messages: [Message] = []
+                snapshot.documentChanges.forEach { diff in
+                    if diff.type == .added || diff.type == .modified {
+                        let data = diff.document.data()
+                        let newMessage = Message(
+                            ID: data["ID"] as? String ?? diff.document.documentID,
+                            type: data["type"] as? Int ?? 0,
+                            content: data["content"] as? String ?? "",
+                            senderID: data["senderID"] as? String ?? "",
+                            isSentByCurrentUser: data["senderID"] as? String == currentUserID,
+                            isSeen: data["isSeen"] as? Bool ?? false,
+                            timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
+                        )
+                        messages.append(newMessage)
+                    }
+                }
+                // 傳遞新增或更新的訊息
+                completion(messages, nil)
+            }
     }
 }
