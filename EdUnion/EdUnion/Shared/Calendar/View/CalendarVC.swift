@@ -10,7 +10,10 @@ import SwiftUI
 
 class CalendarVC: UIViewController {
     
-    private let calendarHostingController = UIHostingController(rootView: CalendarViewWithColorPicker(teacherID: teacherID))
+    private let calendarHostingController = UIHostingController(rootView: BaseCalendarView(
+        dateColors: .constant([:])  // 顏色默認為空
+    ))
+//    private let calendarHostingController = UIHostingController(rootView: MyCalendarView())
     
     override func viewDidLoad() {
         super.viewDidLoad()
