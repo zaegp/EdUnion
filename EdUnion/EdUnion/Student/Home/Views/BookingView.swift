@@ -13,9 +13,10 @@ struct BookingView: View {
     let timeSlots: [AvailableTimeSlot]
     
     @State private var selectedDate: String?
-    @State private var selectedTimes: [String] = []
+    @State private var selectedTimes: [String] = []  // 存儲為 String 類型
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var bookedSlots: [String] = []  // 用來存放已預約的時段，也為 String
     
     var availableDates: [String] {
         return Array(selectedTimeSlots.keys).sorted()
@@ -30,6 +31,11 @@ struct BookingView: View {
                             Button(action: {
                                 selectedDate = date
                                 selectedTimes = []
+                                
+                                // 根據選擇的日期加載已預約的時間段
+                                getBookedSlots(for: selectedDate ?? "") { slots in
+                                    bookedSlots = slots
+                                }
                             }) {
                                 Text(date)
                                     .padding()
@@ -51,21 +57,26 @@ struct BookingView: View {
                     } else {
                         ScrollView(.vertical, showsIndicators: false) {
                             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
-                                ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges) }, id: \.self) { timeSlot in
+                                ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }, id: \.self) { timeSlot in
                                     Button(action: {
-                                        toggleSelection(of: timeSlot)
+                                        toggleSelection(of: timeSlot) // 點擊按鈕選擇時間
                                     }) {
                                         Text(timeSlot)
                                             .frame(height: 50)
                                             .frame(maxWidth: .infinity)
-                                            .background(selectedTimes.contains(timeSlot) ? .mainOrange : .background)
-                                            .foregroundColor(selectedTimes.contains(timeSlot) ? .white : .black)
+                                            .background(
+                                                isSelected(timeSlot: timeSlot) ? Color.mainOrange : Color.background
+                                            )
+                                            .foregroundColor(
+                                                isSelected(timeSlot: timeSlot) ? .white : .black
+                                            )
                                             .cornerRadius(10)
                                     }
                                 }
                             }
                             .padding()
                         }
+                        
                     }
                 } else {
                     Text("請選擇日期")
@@ -93,13 +104,32 @@ struct BookingView: View {
         }
     }
     
-//    func formattedDate(_ date: Date) -> String {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "yyyy-MM-dd"
-//        return formatter.string(from: date)
-//    }
+    func getBookedSlots(for date: String, completion: @escaping ([String]) -> Void) {
+            // 從 Firebase 獲取該老師的所有預約
+            AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { result in
+                switch result {
+                case .success(let appointments):
+                    // 過濾出符合指定日期的預約
+                    let filteredAppointments = appointments.filter { appointment in
+                        appointment.date == date  // 比較日期 (已經是 String 格式)
+                    }
+                    
+                    // 提取符合日期的所有已預約時間段，並以字符串返回
+                    let bookedSlots = filteredAppointments.flatMap { $0.times }  // 合併所有已預約時間段
+                    completion(bookedSlots)
+                    
+                case .failure(let error):
+                    print("Error fetching appointments: \(error)")
+                    completion([])  // 如果發生錯誤，返回空數組
+                }
+            }
+        }
     
-    func generateTimeSlots(from timeRanges: [String]) -> [String] {
+    func isSelected(timeSlot: String) -> Bool {
+        return selectedTimes.contains(timeSlot) // 檢查是否包含這個時間
+    }
+    
+    func generateTimeSlots(from timeRanges: [String], bookedSlots: [String]) -> [String] {
         var timeSlots: [String] = []
         
         let dateFormatter = DateFormatter()
@@ -113,7 +143,13 @@ struct BookingView: View {
                 var currentTime = startTime
                 
                 while currentTime < endTime {
-                    timeSlots.append(dateFormatter.string(from: currentTime))
+                    let timeString = dateFormatter.string(from: currentTime)
+                    // 如果當前時間不在已預約時段中，則加入可選時段
+                    if !bookedSlots.contains(timeString) {
+                        timeSlots.append(timeString)
+                    }
+                    
+                    // 將時間加 30 分鐘
                     if let newTime = Calendar.current.date(byAdding: .minute, value: 30, to: currentTime) {
                         currentTime = newTime
                     } else {
@@ -126,11 +162,46 @@ struct BookingView: View {
     }
     
     func toggleSelection(of timeSlot: String) {
+        // 如果已經選擇了這個時間，則取消選擇
         if let index = selectedTimes.firstIndex(of: timeSlot) {
             selectedTimes.remove(at: index)
         } else {
-            selectedTimes.append(timeSlot)
+            // 檢查新的時間是否與已選擇的時間段相差30分鐘
+            if selectedTimes.isEmpty {
+                selectedTimes.append(timeSlot)
+            } else {
+                let sortedTimes = selectedTimes.sorted()
+                if let firstTime = sortedTimes.first,
+                   let lastTime = sortedTimes.last,
+                   let timePlus30 = addMinutes(to: timeSlot, minutes: 30),
+                   let timeMinus30 = subtractMinutes(from: timeSlot, minutes: 30) {
+                    
+                    if timePlus30 == firstTime || timeMinus30 == lastTime {
+                        // 如果新的時間與已選時間段連續，則允許添加
+                        selectedTimes.append(timeSlot)
+                    } else {
+                        // 不連續，顯示錯誤
+                        alertMessage = "請選擇連續的時間段（間隔30分鐘）。"
+                        showingAlert = true
+                    }
+                }
+            }
         }
+    }
+    
+    func addMinutes(to time: String, minutes: Int) -> String? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        
+        if let date = dateFormatter.date(from: time),
+           let newTime = Calendar.current.date(byAdding: .minute, value: minutes, to: date) {
+            return dateFormatter.string(from: newTime)
+        }
+        return nil
+    }
+
+    func subtractMinutes(from time: String, minutes: Int) -> String? {
+        return addMinutes(to: time, minutes: -minutes)
     }
     
     func submitBooking() {
@@ -148,7 +219,7 @@ struct BookingView: View {
             "studentID": studentID,
             "teacherID": teacherID,
             "date": date,
-            "times": selectedTimes,
+            "times": selectedTimes,  // 這裡是 [String]
             "status": "pending",
             "timestamp": Timestamp(date: Date())
         ]

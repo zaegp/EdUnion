@@ -68,19 +68,17 @@ class TodayCoursesCell: UITableViewCell {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // ContainerView 卡片樣式的外框
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
-            // Title Label
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             // Time Label
-            timeLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            timeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            timeLabel.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 16),
+            timeLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             // Confirm Button
             confirmButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),

@@ -50,6 +50,8 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         let appointment = viewModel.appointments[indexPath.row]
         cell.titleLabel.text = appointment.studentID
         cell.timeLabel.text = appointment.date
+        print("1111111")
+        print(appointment)
         return cell
     }
     

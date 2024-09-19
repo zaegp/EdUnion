@@ -26,20 +26,20 @@ struct ProgressBarView: View {
             Circle()
                 .stroke(Color.gray.opacity(0.3), lineWidth: lineWidth)
             
-            // 前景圆环（进度条）使用渐变色
+            // 前景圆环（进度条）使用渐变色，添加动画
             Circle()
                 .trim(from: 0, to: CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound)))
                 .stroke(
                     AngularGradient(
                         gradient: Gradient(colors: [
-                            Color(UIColor(red: 0.92, green: 0.37, blue: 0.16, alpha: 1.00)),
-                            .white
+                            .mainOrange
                         ]),
                         center: .top
                     ),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90)) // 将进度条起点调整到顶部
+                .animation(.easeInOut(duration: 0.8), value: value)  // 添加动画效果
             
             // 分隔线
             ForEach(0..<segments) { i in
@@ -51,21 +51,38 @@ struct ProgressBarView: View {
                     .rotationEffect(angle)
             }
             
-            // 中间的进度百分比
+            // 中间的进度百分比，添加动画
             Text(progressPercentage)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
                 .frame(width: 200, height: 200)
+                .animation(.easeInOut(duration: 0.8), value: value)  // 文字也添加动画效果
         }
         .frame(width: 200, height: 200) // 设定圆形进度条的尺寸
     }
 }
 
 struct ContentView: View {
+    @State private var progressValue = 0.5  // 初始进度值
+    
     var body: some View {
         VStack {
-            ProgressBarView(value: 0.5)
+            ProgressBarView(value: progressValue)  // 将进度值传入
                 .padding()
+            
+            // 添加按钮来测试进度变化时的动画效果
+            Button(action: {
+                withAnimation {
+                    // 模拟进度值变化
+                    progressValue = Double.random(in: 0...1)
+                }
+            }) {
+                Text("Change Progress")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
         }
     }
 }

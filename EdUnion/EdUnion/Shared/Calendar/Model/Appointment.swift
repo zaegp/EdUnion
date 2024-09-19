@@ -19,11 +19,11 @@ enum AppointmentStatus: String {
 struct Appointment: Identifiable, Codable {
     var id: String?
     let date: String
-    let status: String
+    var status: String
     let studentID: String
     let teacherID: String
     let times: [String]
-    let timestamp: Date 
+    let timestamp: Date
     
     enum CodingKeys: String, CodingKey {
         case id

@@ -18,8 +18,8 @@ class TodayCoursesViewModel {
     
     var updateUI: (() -> Void)?
     
-    func fetchTodayConfirmedAppointments() {
-        AppointmentFirebaseService.shared.fetchTodayConfirmedAppointments { [weak self] result in
+    func fetchTodayAppointments() {
+        AppointmentFirebaseService.shared.fetchTodayAppointments { [weak self] result in
             switch result {
             case .success(let fetchedAppointments):
                 self?.appointments = fetchedAppointments
@@ -29,11 +29,26 @@ class TodayCoursesViewModel {
         }
     }
     
+    var completedAppointmentsCount: Int {
+           return appointments.filter { $0.status == "completed" }.count
+       }
+       
+       // 計算進度值
+       var progressValue: Double {
+           guard appointments.count > 0 else { return 0 }
+           return Double(completedAppointmentsCount) / Double(appointments.count)
+       }
+    
     func completeCourse(appointmentID: String, teacherID: String) {
         AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .completed) { [weak self] result in
             switch result {
             case .success:
                 print("預約已完成")
+                
+                // 本地更新課程狀態
+                if let index = self?.appointments.firstIndex(where: { $0.id == appointmentID }) {
+                    self?.appointments[index].status = "completed"
+                }
                 
                 // 更新老師的總課程數
                 AppointmentFirebaseService.shared.incrementTeacherTotalCourses(teacherID: teacherID) { result in

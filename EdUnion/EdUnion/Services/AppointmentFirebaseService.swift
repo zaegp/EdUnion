@@ -7,12 +7,46 @@
 
 import FirebaseFirestore
 
+
 class AppointmentFirebaseService {
     static let shared = AppointmentFirebaseService()
     private init() {}
     
     let db = Firestore.firestore()
+
+    // MARK: - 通用查詢方法
+    private func fetchDocuments<T: Decodable>(_ collection: CollectionReference, where field: String, isEqualTo value: Any, completion: @escaping (Result<[T], Error>) -> Void) {
+        collection.whereField(field, isEqualTo: value).getDocuments { querySnapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let documents = querySnapshot?.documents else {
+                completion(.success([]))
+                return
+            }
+            
+            do {
+                let models = try documents.compactMap { try $0.data(as: T.self) }
+                completion(.success(models))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
     
+    func fetchAllAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
+        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
+            switch result {
+            case .success(let appointments):
+                completion(.success(appointments))  // 不過濾 status，返回所有預約
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
     // MARK: - 保存預約
     func saveBooking(data: [String: Any], completion: @escaping (Bool, Error?) -> Void) {
         db.collection("appointments").addDocument(data: data) { error in
@@ -25,61 +59,32 @@ class AppointmentFirebaseService {
             }
         }
     }
-    
-    // 已確認的預約
+
+    // MARK: - 已確認的預約
     func fetchConfirmedAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        db.collection("appointments")
-            .whereField("teacherID", isEqualTo: teacherID)
-            .whereField("status", isEqualTo: "confirmed")
-            .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    print("查詢失敗：\(error.localizedDescription)")
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let documents = querySnapshot?.documents else {
-                    print("沒有找到符合條件的預約。")
-                    completion(.success([]))
-                    return
-                }
-                
-                do {
-                    let appointments = try documents.compactMap { try $0.data(as: Appointment.self) }
-                    completion(.success(appointments))
-                } catch {
-                    print("解析預約時出錯：\(error)")
-                    completion(.failure(error))
-                }
+        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
+            switch result {
+            case .success(let appointments):
+                // 過濾確認狀態
+                let confirmedAppointments = appointments.filter { $0.status == "confirmed" }
+                completion(.success(confirmedAppointments))
+            case .failure(let error):
+                completion(.failure(error))
             }
+        }
     }
-    
-    // 取得今日課程
-    func fetchTodayConfirmedAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
+
+    // MARK: - 今日已確認的預約
+    func fetchTodayAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
         let todayDate = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let todayDateString = dateFormatter.string(from: todayDate)
         
-        db.collection("appointments")
-            .whereField("date", isEqualTo: todayDateString)
-            .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let documents = querySnapshot?.documents else {
-                    completion(.success([]))  // 沒有數據
-                    return
-                }
-                
-                let appointments = documents.compactMap { try? $0.data(as: Appointment.self) }
-                completion(.success(appointments))
-            }
+        fetchDocuments(db.collection("appointments"), where: "date", isEqualTo: todayDateString, completion: completion)
     }
     
-    // 更新老師的總課程數
+    // MARK: - 更新老師的總課程數
     func incrementTeacherTotalCourses(teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let teacherRef = db.collection("teachers").document(teacherID)
         
@@ -93,29 +98,23 @@ class AppointmentFirebaseService {
             }
         }
     }
-    
-    // 老師：確認預約頁面
+
+    // MARK: - 老師：獲取待確認的預約
     func fetchPendingAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        db.collection("appointments")
-            .whereField("teacherID", isEqualTo: teacherID)
-            .whereField("status", isEqualTo: "pending")
-            .getDocuments { querySnapshot, error in
-                if let error = error {
-                    print("獲取預約失敗：\(error.localizedDescription)")
-                    completion(.failure(error))
-                } else {
-                    guard let documents = querySnapshot?.documents else {
-                        completion(.success([]))
-                        return
-                    }
-                    
-                    let appointments = documents.compactMap { try? $0.data(as: Appointment.self) }
-                    completion(.success(appointments))
-                }
+        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
+            switch result {
+            case .success(let appointments):
+                // 過濾等待確認狀態
+                let pendingAppointments = appointments.filter { $0.status == "pending" }
+                completion(.success(pendingAppointments))
+            case .failure(let error):
+                print("Error fetching pending appointments: \(error.localizedDescription)")
+                completion(.failure(error))
             }
+        }
     }
-    
-    // MARK: - 確認預約後更新
+
+    // MARK: - 更新預約狀態
     func updateAppointmentStatus(appointmentID: String, status: AppointmentStatus, completion: @escaping (Result<Void, Error>) -> Void) {
         let appointmentRef = db.collection("appointments").document(appointmentID)
         appointmentRef.updateData(["status": status.rawValue]) { error in

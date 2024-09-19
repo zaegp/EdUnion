@@ -44,23 +44,23 @@ class ChatListVC: UIViewController {
     }
     
     private func fetchChatRooms() {
-        UserFirebaseService.shared.fetchChatRooms(for: participantID) { [weak self] (chatRooms, error) in
-            if let error = error {
+        UserFirebaseService.shared.fetchChatRooms(for: participantID) { [weak self] result in
+            switch result {
+            case .success(let chatRooms):
+                guard !chatRooms.isEmpty else {
+                    print("No chat rooms returned from Firestore")
+                    return
+                }
+                
+                self?.chatRooms = chatRooms.sorted {
+                    ($0.lastMessageTimestamp ?? Date()) > ($1.lastMessageTimestamp ?? Date())
+                }
+                self?.filteredChatRooms = self?.chatRooms ?? []
+                self?.tableView.reloadData()
+
+            case .failure(let error):
                 print("Error fetching chat rooms: \(error.localizedDescription)")
-                return
             }
-            
-            guard let chatRooms = chatRooms else {
-                print("No chat rooms returned from Firestore")
-                return
-            }
-            
-            // 按最後消息時間排序
-            self?.chatRooms = chatRooms.sorted {
-                ($0.lastMessageTimestamp ?? Date()) > ($1.lastMessageTimestamp ?? Date())
-            }
-            self?.filteredChatRooms = self?.chatRooms ?? []
-            self?.tableView.reloadData()
         }
     }
 }

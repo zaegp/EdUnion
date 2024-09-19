@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+var tag = 1
+
+class CalendarService {
+    static let shared = CalendarService()
+    var activitiesByDate: [Date: [Appointment]] = [:]
+
+    private init() {}  // 私有構造函數，確保是單例
+}
+
 struct CalendarDayView: View {
     let day: Date?
     let isSelected: Bool
@@ -43,11 +52,28 @@ struct CalendarDayView: View {
 }
 
 struct BaseCalendarView: View {
-    @Binding var dateColors: [Date: Color]
+    
+    @Binding var externalDateColors: [Date: Color]?
+        @State private var internalDateColors: [Date: Color] = [:]  // 本地狀態
+
+        // 這裡選擇使用外部綁定還是本地狀態
+        var dateColors: [Date: Color] {
+            get {
+                externalDateColors ?? internalDateColors
+            }
+            set {
+                if externalDateColors != nil {
+                    externalDateColors = newValue
+                } else {
+                    internalDateColors = newValue
+                }
+            }
+        }
+    
     @State private var selectedDay: Date? = nil
     
     @State private var appointments: [Appointment] = []  // 從 Firebase 獲取的預約資料
-    @State private var activitiesByDate: [Date: [Appointment]] = [:]  // 按日期分類的活動
+    /*@State private var activitiesByDate: [Date: [Appointment]] = [:]*/  // 按日期分類的活動
     
     var onDayTap: ((Date) -> Void)? = nil
         var onDayLongPress: ((Date) -> Void)? = nil
@@ -58,6 +84,7 @@ struct BaseCalendarView: View {
     @State private var days: [Date?] = []
 
     var body: some View {
+        let colors = dateColors ?? [:]
         VStack {
             HStack {
                 Button(action: { previousPeriod() }) {
@@ -85,13 +112,14 @@ struct BaseCalendarView: View {
                 ForEach(days, id: \.self) { day in
                     if let day = day {
                         let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
-
-                        CalendarDayView(
-                            day: day,
-                            isSelected: selectedDay == day,
-                            isCurrentMonth: isCurrentMonth,
-                            color: dateColors[day] ?? .clear
-                        )
+            
+                                    
+                                    CalendarDayView(
+                                        day: day,
+                                        isSelected: selectedDay == day,
+                                        isCurrentMonth: isCurrentMonth,
+                                        color: dateColors[day] ?? .clear
+                                    )
                         .onTapGesture {
                             print("點擊了日期：\(day)")  // 調試語句，確認事件是否被觸發
                             toggleSingleSelection(for: day)  // 處理內部日期選擇邏輯
@@ -114,7 +142,7 @@ struct BaseCalendarView: View {
 
             Spacer()
 
-            if let selectedDay = selectedDay, let activities = activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
+            if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
                 ZStack {
                     Color.white
                         .edgesIgnoringSafeArea(.all)
@@ -150,6 +178,12 @@ struct BaseCalendarView: View {
         }
     }
 
+    func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"  // 根據需要設置格式，例如 "HH:mm"
+        return formatter.string(from: date)
+    }
+    
     private func toggleSingleSelection(for day: Date) {
         selectedDay = (selectedDay == day) ? nil : day
     }
@@ -217,16 +251,32 @@ struct BaseCalendarView: View {
 
     // 將預約按日期分類，放入 activitiesByDate 中
     private func mapAppointmentsToDates() {
-        activitiesByDate.removeAll()
+//        CalendarService.shared.activitiesByDate.removeAll()
         
         for appointment in appointments {
             if let date = dateFormatter.date(from: appointment.date) {
                 let startOfDay = Calendar.current.startOfDay(for: date)
-                if activitiesByDate[startOfDay] != nil {
-                    activitiesByDate[startOfDay]?.append(appointment)
+                if CalendarService.shared.activitiesByDate[startOfDay] != nil {
+                    CalendarService.shared.activitiesByDate[startOfDay]?.append(appointment)
                 } else {
-                    activitiesByDate[startOfDay] = [appointment]
+                    CalendarService.shared.activitiesByDate[startOfDay] = [appointment]
                 }
+            }
+        }
+        print("111111")
+        print(CalendarService.shared.activitiesByDate)
+        print("2222222")
+        
+        for (date, appointments) in CalendarService.shared.activitiesByDate {
+            let hasPending = appointments.contains { $0.status.lowercased() == "pending" }
+            let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
+            
+            if hasPending {
+                internalDateColors[date] = .red
+            } else if hasConfirmed {
+                internalDateColors[date] = .green
+            } else {
+                internalDateColors[date] = .clear
             }
         }
     }

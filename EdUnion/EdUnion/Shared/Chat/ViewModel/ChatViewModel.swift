@@ -82,27 +82,22 @@ class ChatViewModel {
     }
     
     private func uploadPhoto(_ image: UIImage, for messageId: String) {
-        UserFirebaseService.shared.uploadPhoto(image: image, messageId: messageId) { [weak self] url, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let url = url else {
-                print("Failed to retrieve image URL after upload")
-                return
-            }
-            
-            print("Successfully uploaded image. URL: \(url)")
-            
-            UserFirebaseService.shared.updateMessage(chatRoomID: self!.chatRoomID, messageId: messageId, updatedData: ["content": url]) { error in
-                if let error = error {
-                    print("Error updating message with imageURL in Firestore: \(error.localizedDescription)")
-                } else {
-                    print("Message updated with imageURL in Firestore successfully")
-                    
-                    self?.pendingImages.removeValue(forKey: messageId)
+        UserFirebaseService.shared.uploadPhoto(image: image, messageId: messageId) { [weak self] result in
+            switch result {
+            case .success(let url):
+                print("Successfully uploaded image. URL: \(url)")
+                
+                // 更新消息的 Firestore URL
+                UserFirebaseService.shared.updateMessage(chatRoomID: self?.chatRoomID ?? "", messageId: messageId, updatedData: ["content": url]) { error in
+                    if let error = error {
+                        print("Error updating message with imageURL in Firestore: \(error.localizedDescription)")
+                    } else {
+                        print("Message updated with imageURL in Firestore successfully")
+                        self?.pendingImages.removeValue(forKey: messageId)
+                    }
                 }
+            case .failure(let error):
+                print("Error uploading image: \(error.localizedDescription)")
             }
         }
     }
@@ -110,44 +105,50 @@ class ChatViewModel {
     func sendAudioMessage(_ audioData: Data) {
         let audioId = UUID().uuidString
         
-        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] url, error in
-            if let error = error {
-                print("Error uploading audio: \(error)")
-                return
-            }
+        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
+            guard let self = self else { return }
             
-            if let url = url {
+            switch result {
+            case .success(let url):
                 let messageData: [String: Any] = [
-                    "senderID": self!.currentUserID,
-                    "type": 2,
+                    "senderID": self.currentUserID,
+                    "type": 2,  // 假設 '2' 代表音訊消息
                     "content": url,
                     "timestamp": FieldValue.serverTimestamp(),
                     "isSeen": false
                 ]
                 
-                UserFirebaseService.shared.sendMessage(chatRoomID: self!.chatRoomID, messageData: messageData) { error in
+                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
                     if let error = error {
-                        print("Error sending audio message: \(error)")
+                        print("Error sending audio message: \(error.localizedDescription)")
+                    } else {
+                        print("Audio message sent successfully")
                     }
                 }
+                
+            case .failure(let error):
+                print("Error uploading audio: \(error.localizedDescription)")
             }
         }
     }
     
     func fetchMessages() {
-        UserFirebaseService.shared.fetchMessages(chatRoomID: chatRoomID, currentUserID: currentUserID) { [weak self] newMessages, error in
-            if let error = error {
-                print("Error fetching messages: \(error)")
-                return
-            }
+        UserFirebaseService.shared.fetchMessages(chatRoomID: chatRoomID, currentUserID: currentUserID) { [weak self] result in
+            guard let self = self else { return }
             
-            newMessages.forEach { newMessage in
-                if !(self?.messages.contains(where: { $0.ID == newMessage.ID }) ?? false) {
-                    self?.messages.append(newMessage)
+            switch result {
+            case .success(let newMessages):
+                newMessages.forEach { newMessage in
+                    if !self.messages.contains(where: { $0.ID == newMessage.ID }) {
+                        self.messages.append(newMessage)
+                    }
                 }
+                
+                self.onMessagesUpdated?()
+                
+            case .failure(let error):
+                print("Error fetching messages: \(error.localizedDescription)")
             }
-            
-            self?.onMessagesUpdated?()
         }
     }
 }

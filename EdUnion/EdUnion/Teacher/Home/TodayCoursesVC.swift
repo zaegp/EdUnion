@@ -19,7 +19,7 @@ class TodayCoursesVC: UIViewController {
     let tableView = UITableView()
     private var viewModel = TodayCoursesViewModel()
     
-    private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.3))
+    private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
     let titleLabel = UILabel()
     var expandedIndexPath: IndexPath?
     
@@ -29,10 +29,12 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
+                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
+
             }
         }
         
-        viewModel.fetchTodayConfirmedAppointments()
+        viewModel.fetchTodayAppointments()
         
         view.backgroundColor = .systemBackground
         tableView.separatorStyle = .none
@@ -88,39 +90,48 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         return 80    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return viewModel.appointments.count
-        }
-        
+        return viewModel.appointments.count
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
-            let appointment = viewModel.appointments[indexPath.row]
-            
-            UserFirebaseService.shared.fetchStudentName(by: appointment.studentID) { studentName, error in
-                if let studentName = studentName {
-                    DispatchQueue.main.async {
-                        cell.titleLabel.text = studentName
-                    }
-                } else {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
+        let appointment = viewModel.appointments[indexPath.row]
+        
+        UserFirebaseService.shared.fetchStudentName(by: appointment.studentID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let studentName):
+                    cell.titleLabel.text = studentName ?? "Unknown Student" // 如果 studentName 是 nil，顯示 "Unknown Student"
+                case .failure:
                     cell.titleLabel.text = "Unknown Student"
                 }
             }
-            
-            cell.timeLabel.text = "Time: \(appointment.times.joined(separator: ", "))"
-            
-            // 設置完成確認的邏輯
-            cell.confirmCompletion = { [weak self] in
-                let alert = UIAlertController(title: "Confirm Completion", message: "Do you want to mark this course as completed?", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
-                    cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-                    // 更新課程狀態
-                    self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
-                }))
-                self?.present(alert, animated: true, completion: nil)
-            }
-            
-            return cell
         }
+        
+        if let firstTime = appointment.times.first, let lastTime = appointment.times.last {
+            if appointment.times.count > 1 {
+                // 如果有多個時間，顯示最早和最晚的時間
+                cell.timeLabel.text = "Time: \(firstTime) - \(lastTime)"
+            } else {
+                // 如果只有一個時間，顯示單個時間
+//                cell.timeLabel.text = firstTime
+            }
+        }
+        
+        // 設置完成確認的邏輯
+        cell.confirmCompletion = { [weak self] in
+            let alert = UIAlertController(title: "Confirm Completion", message: "Do you want to mark this course as completed?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+                cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+                // 更新課程狀態
+                self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
+            }))
+            self?.present(alert, animated: true, completion: nil)
+        }
+        
+        return cell
+    }
     
     //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     //        let datePickerVC = DatePickerViewController()
@@ -158,13 +169,13 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete {
-//            sampleCourses.remove(at: indexPath.row)
-//            
-//            tableView.deleteRows(at: [indexPath], with: .automatic)
-//        }
-//    }
+    //    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    //        if editingStyle == .delete {
+    //            sampleCourses.remove(at: indexPath.row)
+    //
+    //            tableView.deleteRows(at: [indexPath], with: .automatic)
+    //        }
+    //    }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .delete

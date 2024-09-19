@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MyCalendarView: View {
+struct ColorPickerCalendarView: View {
     @State private var dateColors: [Date: Color] = [:]
     @State private var selectedDay: Date? = nil
     @State private var showColorPicker: Bool = false
@@ -18,7 +18,10 @@ struct MyCalendarView: View {
 
     var body: some View {
         BaseCalendarView(
-            dateColors: $dateColors,
+            externalDateColors: Binding(
+                            get: { dateColors },             // 獲取非可選的 @State
+                            set: { dateColors = $0 ?? [:] }  // 處理可能的 nil，設置為空字典
+                        ),
 //            selectedDay: $selectedDay,
 //            appointments: appointments,
 //            activitiesByDate: activitiesByDate,
@@ -187,7 +190,7 @@ struct ColorPickerView: View {
 }
 
 #Preview {
-    MyCalendarView()
+    ColorPickerCalendarView()
 }
 
 let dateFormatter: DateFormatter = {
