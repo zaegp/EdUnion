@@ -10,6 +10,7 @@ import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
 
+
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     private var viewModel: ChatViewModel!
@@ -42,6 +43,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         
         messageTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        
+        
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)

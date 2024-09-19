@@ -10,24 +10,38 @@ import Kingfisher
 
 class TeacherCell: UICollectionViewCell {
 
-    private let nameLabel = UILabel()
     private let image = UIImageView()
+    private let nameLabel = UILabel()
+    private let totalCoursesLabel = UILabel()
+    private let highlightsLabel = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        highlightsLabel.numberOfLines = 0
 
-        contentView.addSubview(nameLabel)
         contentView.addSubview(image)
+        contentView.addSubview(nameLabel)
+        contentView.addSubview(totalCoursesLabel)
+        contentView.addSubview(highlightsLabel)
 
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
         image.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        totalCoursesLabel.translatesAutoresizingMaskIntoConstraints = false
+        highlightsLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            image.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            image.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
-            image.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5),
-            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10)
+            nameLabel.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 8),
+            nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
+            totalCoursesLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            totalCoursesLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+
+            highlightsLabel.topAnchor.constraint(equalTo: totalCoursesLabel.bottomAnchor, constant: 8),
+            highlightsLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
         ])
     }
 
@@ -36,9 +50,13 @@ class TeacherCell: UICollectionViewCell {
     }
 
     func configure(with teacher: Teacher) {
-        nameLabel.text = teacher.name
         let url = URL(string: teacher.photoURL)
         image.kf.setImage(with: url)
+        
+        nameLabel.text = teacher.name
+        
+        totalCoursesLabel.text = String(teacher.totalCourses)
+        
+        highlightsLabel.text = teacher.resume[3]
     }
 }
-

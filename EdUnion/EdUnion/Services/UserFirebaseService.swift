@@ -1,5 +1,5 @@
 //
-//  FirebaseService.swift
+//  UserFirebaseService.swift
 //  EdUnion
 //
 //  Created by Rowan Su on 2024/9/14.
@@ -9,8 +9,8 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseStorage
 
-class FirebaseService {
-    static let shared = FirebaseService()
+class UserFirebaseService {
+    static let shared = UserFirebaseService()
     private init() {}
     
     let db = Firestore.firestore()
@@ -137,80 +137,6 @@ class FirebaseService {
                         completion(.success(()))
                     }
                 }
-            }
-        }
-    }
-    
-    // MARK: - 學生：存預約資訊
-    func saveBooking(data: [String: Any], completion: @escaping (Bool, Error?) -> Void) {
-        db.collection("appointments").addDocument(data: data) { error in
-            if let error = error {
-                print("Error adding document: \(error)")
-                completion(false, error)
-            } else {
-                print("Document successfully added!")
-                completion(true, nil)
-            }
-        }
-    }
-    
-    // MARK: - 老師
-    func fetchAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        db.collection("appointments")
-            .whereField("teacherID", isEqualTo: teacherID)
-            .whereField("status", isEqualTo: "confirmed")  // 新增條件：status 必須為 confirmed
-            .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    print("查詢失敗：\(error.localizedDescription)")
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let documents = querySnapshot?.documents else {
-                    print("沒有找到符合條件的預約。")
-                    completion(.success([]))
-                    return
-                }
-                
-                do {
-                    let appointments = try documents.compactMap { try $0.data(as: Appointment.self) }
-                    completion(.success(appointments))
-                } catch {
-                    print("解析預約時出錯：\(error)")
-                    completion(.failure(error))
-                }
-            }
-    }
-    
-    // 老師：確認預約頁面
-    func fetchPendingAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        db.collection("appointments")
-            .whereField("teacherID", isEqualTo: teacherID)
-            .whereField("status", isEqualTo: "pending")
-            .getDocuments { querySnapshot, error in
-                if let error = error {
-                    print("獲取預約失敗：\(error.localizedDescription)")
-                    completion(.failure(error))
-                } else {
-                    guard let documents = querySnapshot?.documents else {
-                        completion(.success([]))
-                        return
-                    }
-                    
-                    let appointments = documents.compactMap { try? $0.data(as: Appointment.self) }
-                    completion(.success(appointments))
-                }
-            }
-    }
-    
-    // MARK: - 老師：確認預約後更新
-    func updateAppointmentStatus(appointmentID: String, status: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let appointmentRef = db.collection("appointments").document(appointmentID)
-        appointmentRef.updateData(["status": status]) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
             }
         }
     }
@@ -369,5 +295,62 @@ class FirebaseService {
                 }
                 completion(messages, nil)
             }
+    }
+    
+    // 老師：取今日課程
+    func fetchTodayConfirmedAppointments(completion: @escaping ([Appointment]?, Error?) -> Void) {
+        let db = Firestore.firestore()
+        
+        let todayDate = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let todayDateString = dateFormatter.string(from: todayDate)
+        
+        db.collection("appointments")
+            .whereField("date", isEqualTo: todayDateString)
+            .whereField("status", isEqualTo: "confirmed")
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error fetching appointments: \(error.localizedDescription)")
+                    completion(nil, error)
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No confirmed appointments found for today.")
+                    completion([], nil)
+                    return
+                }
+                
+                var appointments: [Appointment] = []
+                for document in documents {
+                    if let appointment = try? document.data(as: Appointment.self) {
+                        appointments.append(appointment)
+                    }
+                }
+                
+                completion(appointments, nil)
+            }
+    }
+    
+    // 使用者 ID 搜名字
+    func fetchStudentName(by id: String, completion: @escaping (String?, Error?) -> Void) {
+        let db = Firestore.firestore()
+        
+        // 查詢 students 集合中指定 id 的文檔
+        db.collection("students").document(id).getDocument { (document, error) in
+            if let error = error {
+                // 如果出現錯誤，返回錯誤信息
+                completion(nil, error)
+            } else if let document = document, document.exists {
+                // 成功查詢到文檔，並提取學生的名字
+                let data = document.data()
+                let studentName = data?["name"] as? String
+                completion(studentName, nil)
+            } else {
+                // 文檔不存在
+                completion(nil, nil)
+            }
+        }
     }
 }

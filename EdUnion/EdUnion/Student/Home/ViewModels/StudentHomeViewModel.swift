@@ -13,7 +13,7 @@ class StudentHomeViewModel {
     var onDataUpdate: (() -> Void)?
     
     func fetchTeachers() {
-        FirebaseService.shared.fetchTeachers { [weak self] result in
+        UserFirebaseService.shared.fetchTeachers { [weak self] result in
             switch result {
             case .success(let teachers):
                 self?.teachers = teachers

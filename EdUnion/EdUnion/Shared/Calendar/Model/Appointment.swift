@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum AppointmentStatus: String {
+    case pending
+    case confirmed
+    case completed
+    case Canceling
+    case canceled
+    case rejected
+}
+
 struct Appointment: Identifiable, Codable {
     var id: String?
     let date: String

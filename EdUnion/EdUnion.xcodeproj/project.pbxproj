@@ -19,7 +19,7 @@
 		519C8ED92C943668007DFCBA /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8ED82C943668007DFCBA /* Kingfisher */; };
 		519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */; };
 		519C8EE42C954D82007DFCBA /* AvailableTimeSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE32C954D82007DFCBA /* AvailableTimeSlot.swift */; };
-		519C8EE72C954E73007DFCBA /* FirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE62C954E73007DFCBA /* FirebaseService.swift */; };
+		519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */; };
 		519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE82C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift */; };
 		519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */; };
 		519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */; };
@@ -40,6 +40,16 @@
 		519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F152C9964FE007DFCBA /* ChatRoom.swift */; };
 		519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */; };
 		519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F192C998401007DFCBA /* Date+Ext.swift */; };
+		51D25C792C9A6BAB0083EECF /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */; };
+		51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7B2C9A81D80083EECF /* ResumeVC.swift */; };
+		51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */; };
+		51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */; };
+		51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C822C9AC2170083EECF /* ProgressBarView.swift */; };
+		51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */; };
+		51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */; };
+		51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C892C9B32570083EECF /* BaseCalendarView.swift */; };
+		51D25C8C2C9B32AA0083EECF /* CourseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */; };
+		51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -81,7 +91,7 @@
 		519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+LoadImage.swift"; sourceTree = "<group>"; };
 		519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+HexConvert.swift"; sourceTree = "<group>"; };
 		519C8EE32C954D82007DFCBA /* AvailableTimeSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlot.swift; sourceTree = "<group>"; };
-		519C8EE62C954E73007DFCBA /* FirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseService.swift; sourceTree = "<group>"; };
+		519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFirebaseService.swift; sourceTree = "<group>"; };
 		519C8EE82C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsViewModel.swift; sourceTree = "<group>"; };
 		519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+HexConvert.swift"; sourceTree = "<group>"; };
 		519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarVC.swift; sourceTree = "<group>"; };
@@ -102,6 +112,15 @@
 		519C8F152C9964FE007DFCBA /* ChatRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmViewModel.swift; sourceTree = "<group>"; };
 		519C8F192C998401007DFCBA /* Date+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Ext.swift"; sourceTree = "<group>"; };
+		51D25C7B2C9A81D80083EECF /* ResumeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeVC.swift; sourceTree = "<group>"; };
+		51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesVC.swift; sourceTree = "<group>"; };
+		51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesCell.swift; sourceTree = "<group>"; };
+		51D25C822C9AC2170083EECF /* ProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBarView.swift; sourceTree = "<group>"; };
+		51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesViewModel.swift; sourceTree = "<group>"; };
+		51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentFirebaseService.swift; sourceTree = "<group>"; };
+		51D25C892C9B32570083EECF /* BaseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCalendarView.swift; sourceTree = "<group>"; };
+		51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseCalendarView.swift; sourceTree = "<group>"; };
+		51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerCalendarView.swift; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -132,6 +151,7 @@
 				519C8EBB2C92D354007DFCBA /* FirebaseAuth in Frameworks */,
 				519C8EBD2C92D354007DFCBA /* FirebaseFirestore in Frameworks */,
 				519C8ED92C943668007DFCBA /* Kingfisher in Frameworks */,
+				51D25C792C9A6BAB0083EECF /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,22 +175,23 @@
 		519C8EC02C9399FA007DFCBA /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				51D25C882C9B320E0083EECF /* Base Views */,
 				519C8EF02C95C36B007DFCBA /* Profile */,
 				519C8EC52C939ACF007DFCBA /* Calendar */,
-				519C8EC12C939A29007DFCBA /* ChatRoom */,
+				519C8EC12C939A29007DFCBA /* Chat */,
 				519C8EEE2C95C31B007DFCBA /* TabBarController.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		519C8EC12C939A29007DFCBA /* ChatRoom */ = {
+		519C8EC12C939A29007DFCBA /* Chat */ = {
 			isa = PBXGroup;
 			children = (
 				519C8EC22C939A3B007DFCBA /* Model */,
 				519C8EC32C939A46007DFCBA /* ViewModel */,
 				519C8EC42C939A72007DFCBA /* View */,
 			);
-			path = ChatRoom;
+			path = Chat;
 			sourceTree = "<group>";
 		};
 		519C8EC22C939A3B007DFCBA /* Model */ = {
@@ -215,6 +236,7 @@
 			children = (
 				519C8EC72C939AF9007DFCBA /* CalendarView.swift */,
 				519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */,
+				51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -222,6 +244,8 @@
 		519C8EC92C93A09D007DFCBA /* Teacher */ = {
 			isa = PBXGroup;
 			children = (
+				51D25C7D2C9AC1870083EECF /* Home */,
+				51D25C7A2C9A81B40083EECF /* Resume */,
 				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 			);
@@ -234,6 +258,7 @@
 				519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */,
 				519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */,
 				519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */,
+				51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -277,7 +302,8 @@
 		519C8EE52C954E5A007DFCBA /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				519C8EE62C954E73007DFCBA /* FirebaseService.swift */,
+				519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */,
+				51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -353,6 +379,33 @@
 				519C8F0A2C980570007DFCBA /* ConfirmCell.swift */,
 			);
 			path = Confirm;
+			sourceTree = "<group>";
+		};
+		51D25C7A2C9A81B40083EECF /* Resume */ = {
+			isa = PBXGroup;
+			children = (
+				51D25C7B2C9A81D80083EECF /* ResumeVC.swift */,
+			);
+			path = Resume;
+			sourceTree = "<group>";
+		};
+		51D25C7D2C9AC1870083EECF /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */,
+				51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */,
+				51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */,
+				51D25C822C9AC2170083EECF /* ProgressBarView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		51D25C882C9B320E0083EECF /* Base Views */ = {
+			isa = PBXGroup;
+			children = (
+				51D25C892C9B32570083EECF /* BaseCalendarView.swift */,
+			);
+			path = "Base Views";
 			sourceTree = "<group>";
 		};
 		51ED0ACA2C916721006322B7 = {
@@ -435,6 +488,7 @@
 				519C8EBC2C92D354007DFCBA /* FirebaseFirestore */,
 				519C8EBE2C92D354007DFCBA /* FirebaseStorage */,
 				519C8ED82C943668007DFCBA /* Kingfisher */,
+				51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -511,6 +565,7 @@
 			packageReferences = (
 				51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				519C8ED72C943668007DFCBA /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -582,18 +637,23 @@
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
-				519C8EE72C954E73007DFCBA /* FirebaseService.swift in Sources */,
+				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
+				51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */,
 				519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */,
 				51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */,
 				519C8EE42C954D82007DFCBA /* AvailableTimeSlot.swift in Sources */,
 				519C8EF92C95C701007DFCBA /* TeacherCell.swift in Sources */,
+				51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */,
+				51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */,
 				519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */,
+				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
 				519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */,
 				519C8EC82C939AF9007DFCBA /* CalendarView.swift in Sources */,
 				51ED0B072C917A0F006322B7 /* Message.swift in Sources */,
 				519C8EFB2C95CC9A007DFCBA /* Teacher.swift in Sources */,
 				519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */,
+				51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
@@ -603,14 +663,18 @@
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
+				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,
 				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,
 				519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */,
+				51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */,
 				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,
 				519C8EFD2C95CD45007DFCBA /* TeacherDetailVC.swift in Sources */,
 				519C8EF52C95C6A7007DFCBA /* StudentHomeVC.swift in Sources */,
 				519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */,
 				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
+				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
+				51D25C8C2C9B32AA0083EECF /* CourseCalendarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* StudentHomeViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -972,6 +1036,14 @@
 				minimumVersion = 7.12.0;
 			};
 		};
+		51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.1.1;
+			};
+		};
 		51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -1007,6 +1079,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 519C8ED72C943668007DFCBA /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

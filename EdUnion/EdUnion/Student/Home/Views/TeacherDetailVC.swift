@@ -38,7 +38,6 @@ class TeacherDetailVC: UIViewController {
         
         bookButton.addTarget(self, action: #selector(bookButtonTapped), for: .touchUpInside)
         
-
         view.addSubview(bookButton)
         
         NSLayoutConstraint.activate([

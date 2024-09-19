@@ -15,4 +15,5 @@ struct Teacher: Codable {
 //    var uid: String
     let selectedTimeSlots: [String: String]
     let timeSlots: [AvailableTimeSlot]
+    var totalCourses: Int
 }

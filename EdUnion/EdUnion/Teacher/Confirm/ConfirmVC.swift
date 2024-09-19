@@ -16,7 +16,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel = ConfirmViewModel(teacherID: teacherID)
+        viewModel = ConfirmViewModel(userID: studentID)
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -55,7 +55,6 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let appointment = viewModel.appointments[indexPath.row]
-        print("1111111")
         print(appointment.id)
         let alert = UIAlertController(title: "確認預約", message: "確定接受或拒絕預約？", preferredStyle: .alert)
         

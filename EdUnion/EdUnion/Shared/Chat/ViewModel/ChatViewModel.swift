@@ -47,7 +47,7 @@ class ChatViewModel {
             "isSeen": false
         ]
         
-        FirebaseService.shared.sendMessage(chatRoomID: chatRoomID, messageData: messageData) { error in
+        UserFirebaseService.shared.sendMessage(chatRoomID: chatRoomID, messageData: messageData) { error in
             if let error = error {
                 print("Error sending message: \(error)")
             } else {
@@ -58,7 +58,7 @@ class ChatViewModel {
     
     func sendPhotoMessage(_ image: UIImage) {
         let messageId = UUID().uuidString
-        let documentRef = FirebaseService.shared.db.collection("chats").document(chatRoomID).collection("messages").document(messageId)
+        let documentRef = UserFirebaseService.shared.db.collection("chats").document(chatRoomID).collection("messages").document(messageId)
         
         let messageData: [String: Any] = [
             "ID": messageId,
@@ -82,7 +82,7 @@ class ChatViewModel {
     }
     
     private func uploadPhoto(_ image: UIImage, for messageId: String) {
-        FirebaseService.shared.uploadPhoto(image: image, messageId: messageId) { [weak self] url, error in
+        UserFirebaseService.shared.uploadPhoto(image: image, messageId: messageId) { [weak self] url, error in
             if let error = error {
                 print("Error uploading image: \(error.localizedDescription)")
                 return
@@ -95,7 +95,7 @@ class ChatViewModel {
             
             print("Successfully uploaded image. URL: \(url)")
             
-            FirebaseService.shared.updateMessage(chatRoomID: self!.chatRoomID, messageId: messageId, updatedData: ["content": url]) { error in
+            UserFirebaseService.shared.updateMessage(chatRoomID: self!.chatRoomID, messageId: messageId, updatedData: ["content": url]) { error in
                 if let error = error {
                     print("Error updating message with imageURL in Firestore: \(error.localizedDescription)")
                 } else {
@@ -110,7 +110,7 @@ class ChatViewModel {
     func sendAudioMessage(_ audioData: Data) {
         let audioId = UUID().uuidString
         
-        FirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] url, error in
+        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] url, error in
             if let error = error {
                 print("Error uploading audio: \(error)")
                 return
@@ -125,7 +125,7 @@ class ChatViewModel {
                     "isSeen": false
                 ]
                 
-                FirebaseService.shared.sendMessage(chatRoomID: self!.chatRoomID, messageData: messageData) { error in
+                UserFirebaseService.shared.sendMessage(chatRoomID: self!.chatRoomID, messageData: messageData) { error in
                     if let error = error {
                         print("Error sending audio message: \(error)")
                     }
@@ -135,7 +135,7 @@ class ChatViewModel {
     }
     
     func fetchMessages() {
-        FirebaseService.shared.fetchMessages(chatRoomID: chatRoomID, currentUserID: currentUserID) { [weak self] newMessages, error in
+        UserFirebaseService.shared.fetchMessages(chatRoomID: chatRoomID, currentUserID: currentUserID) { [weak self] newMessages, error in
             if let error = error {
                 print("Error fetching messages: \(error)")
                 return

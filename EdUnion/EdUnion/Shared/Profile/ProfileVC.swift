@@ -162,7 +162,8 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             let timeSlotsVC = AvailableTimeSlotsVC(teacherID: teacherID)
             navigationController?.pushViewController(timeSlotsVC, animated: true)
         case "履歷":
-            break
+            let resumeVC = ResumeVC()
+            navigationController?.pushViewController(resumeVC, animated: true)
         case "待確認的預約":
             let confirmVC = ConfirmVC()
             navigationController?.pushViewController(confirmVC, animated: true)

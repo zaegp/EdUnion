@@ -140,7 +140,7 @@ struct BookingView: View {
             return
         }
         
-        let bookingRef = FirebaseService.shared.db.collection("appointments").document()
+        let bookingRef = UserFirebaseService.shared.db.collection("appointments").document()
         let documentID = bookingRef.documentID
         
         let bookingData: [String: Any] = [

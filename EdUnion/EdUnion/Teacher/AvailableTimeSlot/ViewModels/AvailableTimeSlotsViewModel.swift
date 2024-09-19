@@ -18,7 +18,7 @@ class AvailableTimeSlotsViewModel {
     }
     
     func loadTimeSlots() {
-        FirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success(let timeSlots):
                 self?.timeSlots = timeSlots
@@ -34,7 +34,7 @@ class AvailableTimeSlotsViewModel {
             print("TimeSlot already exists.")
             return
         }
-        FirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success():
                 self?.timeSlots.append(timeSlot)
@@ -47,7 +47,7 @@ class AvailableTimeSlotsViewModel {
     
     func deleteTimeSlot(at index: Int) {
         let timeSlot = timeSlots[index]
-        FirebaseService.shared.deleteTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.deleteTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success():
                 self?.timeSlots.remove(at: index)
@@ -68,7 +68,7 @@ class AvailableTimeSlotsViewModel {
         let oldTimeSlot = timeSlots[index]
         timeSlots[index] = newTimeSlot
         
-        FirebaseService.shared.updateTimeSlot(oldTimeSlot: oldTimeSlot, newTimeSlot: newTimeSlot, forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.updateTimeSlot(oldTimeSlot: oldTimeSlot, newTimeSlot: newTimeSlot, forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success:
                 self?.onTimeSlotsChanged?()
