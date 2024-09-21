@@ -44,6 +44,47 @@ class UserFirebaseService {
             }
         }
     }
+    
+    func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void) {
+            let studentRef = db.collection("students").document(studentID)
+            
+            studentRef.getDocument { document, error in
+                if let error = error {
+                    completion(nil, error)
+                } else if let document = document, document.exists {
+                    let followList = document.data()?["followList"] as? [String] ?? []
+                    completion(followList, nil)
+                } else {
+                    completion([], nil)
+                }
+            }
+        }
+    
+    func removeTeacherFromFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
+            let studentRef = db.collection("students").document(studentID)
+            
+            studentRef.updateData([
+                "followList": FieldValue.arrayRemove([teacherID])
+            ]) { error in
+                completion(error)
+            }
+        }
+    
+    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
+            let studentRef = db.collection("students").document(studentID)
+            
+            studentRef.updateData([
+                "followList": FieldValue.arrayUnion([teacherID])
+            ]) { error in
+                if let error = error {
+                    print("更新 followList 時出錯: \(error.localizedDescription)")
+                    completion(error)
+                } else {
+                    print("成功添加老師到 followList")
+                    completion(nil)  // 更新成功
+                }
+            }
+        }
 
     // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
@@ -281,8 +322,7 @@ class UserFirebaseService {
                 }
                 
                 let chatRooms: [ChatRoom] = documents.compactMap { document in
-                    let data = document.data()
-                    return ChatRoom(id: document.documentID, data: data)
+                    return try? document.data(as: ChatRoom.self)  // 自動解碼 ChatRoom
                 }
                 completion(chatRooms, nil)
             }
@@ -357,6 +397,7 @@ class UserFirebaseService {
     
     // 取消息
     func fetchMessages(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
+        // 首次加載歷史消息
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
             .getDocuments { (snapshot, error) in
@@ -366,50 +407,37 @@ class UserFirebaseService {
                 }
                 
                 let messages: [Message] = snapshot?.documents.compactMap { doc in
-                    let data = doc.data()
-                    return Message(
-                        ID: data["ID"] as? String ?? doc.documentID,
-                        type: data["type"] as? Int ?? 0,
-                        content: data["content"] as? String ?? "",
-                        senderID: data["senderID"] as? String ?? "",
-                        isSentByCurrentUser: data["senderID"] as? String == currentUserID,
-                        isSeen: data["isSeen"] as? Bool ?? false,
-                        timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
-                    )
+                    return try? doc.data(as: Message.self)
                 } ?? []
-                completion(.success(messages))
                 
-                // 添加消息監聽器
-                self.addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
+                // 傳遞加載完成的歷史消息
+                completion(.success(messages))
             }
+        
+        // 開始監聽新消息
+        addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
     }
     
     // 添加消息監聽器
     func addMessageListener(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
-            .addSnapshotListener { snapshot, error in
+            .addSnapshotListener { (snapshot, error) in
                 if let error = error {
                     completion(.failure(error))
                     return
                 }
-                
-                let messages: [Message] = snapshot?.documentChanges.compactMap { diff in
+
+                let newMessages: [Message] = snapshot?.documentChanges.compactMap { diff in
+                    // 只處理新增或更新的消息
                     if diff.type == .added || diff.type == .modified {
-                        let data = diff.document.data()
-                        return Message(
-                            ID: data["ID"] as? String ?? diff.document.documentID,
-                            type: data["type"] as? Int ?? 0,
-                            content: data["content"] as? String ?? "",
-                            senderID: data["senderID"] as? String ?? "",
-                            isSentByCurrentUser: data["senderID"] as? String == currentUserID,
-                            isSeen: data["isSeen"] as? Bool ?? false,
-                            timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
-                        )
+                        return try? diff.document.data(as: Message.self)
                     }
                     return nil
                 } ?? []
-                completion(.success(messages))
+                
+                // 傳遞新消息
+                completion(.success(newMessages))
             }
     }
     

@@ -12,16 +12,31 @@ class ChatViewModel {
     
     private var messages: [Message] = []
     private let chatRoomID: String
-    private let currentUserID: String
+    let currentUserID: String
     private var pendingImages: [String: UIImage] = [:]
-    private let otherParticipantID: String  // 可以是 teacherID 或 studentID，取決於誰是當前用戶
+    private var participants: [String] = []
+    private let otherParticipantID: String
     
     var onMessagesUpdated: (() -> Void)?
     
     init(chatRoomID: String, currentUserID: String, otherParticipantID: String) {
-        self.chatRoomID = teacherID + "_" + studentID
-        self.currentUserID = teacherID
+        self.chatRoomID = chatRoomID
+        self.currentUserID = currentUserID
         self.otherParticipantID = otherParticipantID
+        
+        var currentUserIsOdd = false
+        if let userIDInt = Int(currentUserID) {  // 將 String 轉換為 Int
+            currentUserIsOdd = userIDInt % 2 != 0  // 判斷是否為奇數
+        } else {
+            print("currentUserID 轉換失敗: \(currentUserID)")
+            currentUserIsOdd = false
+        }
+        
+        if currentUserIsOdd {
+            participants = [currentUserID, otherParticipantID]  // 當前用戶是老師
+        } else {
+            participants = [otherParticipantID, currentUserID]  // 當前用戶是學生
+        }
         fetchMessages()
     }
     
@@ -59,7 +74,8 @@ class ChatViewModel {
                 
                 // 更新 chatRoom 集合的 participants、lastMessage 和 lastMessageTimestamp
                 chatRoomRef.setData([
-                    "participants": [self.currentUserID, self.otherParticipantID],  // 老師和學生ID
+                    "id": self.chatRoomID,
+                    "participants": self.participants,  // 老師和學生ID
                     "lastMessage": text,
                     "lastMessageTimestamp": FieldValue.serverTimestamp()
                 ], merge: true)  // 使用 merge 來更新字段，而不會覆蓋現有數據
@@ -92,7 +108,8 @@ class ChatViewModel {
             
             // 更新 chatRoom 集合的 participants、lastMessage 和 lastMessageTimestamp
             chatRoomRef.setData([
-                "participants": [self.currentUserID, self.otherParticipantID],
+                "id": self.chatRoomID,
+                "participants": self.participants,
                 "lastMessage": "圖片",  // 可以用"圖片"或者其他提示
                 "lastMessageTimestamp": FieldValue.serverTimestamp()
             ], merge: true)
@@ -161,12 +178,15 @@ class ChatViewModel {
             
             switch result {
             case .success(let newMessages):
+                print("Fetched newMessages: \(newMessages)")
                 newMessages.forEach { newMessage in
+                    // 避免重複添加相同的消息
                     if !self.messages.contains(where: { $0.ID == newMessage.ID }) {
                         self.messages.append(newMessage)
                     }
                 }
                 
+                // 通知 UI 刷新
                 self.onMessagesUpdated?()
                 
             case .failure(let error):

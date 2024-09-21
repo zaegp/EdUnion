@@ -17,7 +17,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     private let tableView = UITableView()
     
     var teacherID: String = ""  // 從 TeacherDetailVC 傳遞
-        var studentID: String = ""
+    var studentID: String = ""
     
     private let messageInputBar = UIView()
     private let messageTextField = UITextField()
@@ -39,8 +39,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupTableView()
         setupRecordingSession()
         
-        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID, otherParticipantID: studentID)
-       
+        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID, otherParticipantID: teacherID)
         
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
@@ -290,6 +289,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
         let message = viewModel.message(at: indexPath.row)
         let previousMessage: Message? = indexPath.row > 0 ? viewModel.message(at: indexPath.row - 1) : nil
+        print("1111111")
+        print(message)
         let pendingImage = viewModel.getPendingImage(for: message.ID ?? "nil")
         cell.configure(with: message, previousMessage: previousMessage, image: pendingImage)
         cell.delegate = self

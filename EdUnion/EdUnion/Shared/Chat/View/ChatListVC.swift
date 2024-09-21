@@ -7,24 +7,33 @@
 
 import UIKit
 
+import UIKit
+import FirebaseFirestore
+
 class ChatListVC: UIViewController {
     
     private let tableView = UITableView()
     private let searchBar = UISearchBar()
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
-    private let participantID: String = teacherID
+    private let participantID: String = studentID
+    private var chatRoomListener: ListenerRegistration?  // 用於監聽實時更新
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
-        fetchChatRooms()
+        observeChatRooms()  // 監聽聊天室變化
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = false
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        chatRoomListener?.remove()  // 停止監聽，避免內存泄漏
     }
     
     private func setupUI() {
@@ -43,25 +52,41 @@ class ChatListVC: UIViewController {
         self.view.addSubview(tableView)
     }
     
-    private func fetchChatRooms() {
-        UserFirebaseService.shared.fetchChatRooms(for: participantID) { [weak self] (chatRooms, error) in
-            if let error = error {
-                print("Error fetching chat rooms: \(error.localizedDescription)")
-                return
+    // 監聽聊天室變化
+    private func observeChatRooms() {
+        chatRoomListener = UserFirebaseService.shared.db.collection("chats")
+            .whereField("participants", arrayContains: participantID)
+            .addSnapshotListener { [weak self] (snapshot, error) in
+                if let error = error {
+                    print("Error fetching chat rooms: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("No chat rooms found.")
+                    return
+                }
+                print("Fetched \(documents.count) chat rooms")
+                self?.chatRooms = documents.compactMap { doc -> ChatRoom? in
+                    do {
+                        let chatRoom = try doc.data(as: ChatRoom.self)
+                        print("Successfully parsed chat room: \(chatRoom)")  // 確認解析成功
+                        return chatRoom
+                    } catch {
+                        print("Error parsing chat room: \(error)")  // 捕獲解析錯誤
+                        return nil
+                    }
+                }
+                
+                // 默認情況下顯示全部聊天列表
+                self?.filteredChatRooms = self?.chatRooms ?? []
+                
+                // 更新 UI
+                DispatchQueue.main.async {
+                    print("Filtered chat rooms: \(self!.filteredChatRooms)")
+                    self?.tableView.reloadData()
+                }
             }
-            
-            guard let chatRooms = chatRooms else {
-                print("No chat rooms returned from Firestore")
-                return
-            }
-            
-            if chatRooms.isEmpty {
-                print("No chat rooms matched the query.")
-            }
-            
-            self?.chatRooms = chatRooms
-            self?.tableView.reloadData()
-        }
     }
 }
 
@@ -82,7 +107,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         // 配置 cell 顯示對方名字、最後一則消息和時間
         let participantName = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
-        let lastMessageTime = chatRoom.lastMessageTimestamp?.formattedChatDate() ?? ""
+        let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
         cell.configure(name: participantName, lastMessage: lastMessage, time: lastMessageTime)
         return cell
@@ -92,8 +117,10 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         
         let selectedChatRoom = filteredChatRooms[indexPath.row]
-        let chatViewController = ChatVC()
-        navigationController?.pushViewController(chatViewController, animated: true)
+        let chatVC = ChatVC()
+        chatVC.teacherID = selectedChatRoom.participants[0]
+        chatVC.studentID = selectedChatRoom.participants[1]
+        navigationController?.pushViewController(chatVC, animated: true)
     }
 }
 
@@ -159,5 +186,4 @@ extension ChatListVC: UISearchBarDelegate {
         tableView.reloadData()
     }
 }
-
 

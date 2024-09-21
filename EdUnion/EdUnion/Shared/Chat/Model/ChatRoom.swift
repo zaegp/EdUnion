@@ -8,24 +8,34 @@
 import Foundation
 import FirebaseFirestore
 
-struct ChatRoom {
+struct ChatRoom: Decodable {
     let id: String
     let participants: [String]
-    let messages: [Message]
+    let messages: [Message]?
     let lastMessage: String?
-    let lastMessageTimestamp: Date? 
+    let lastMessageTimestamp: Timestamp?
 
-    init?(id: String, data: [String: Any]) {
-        guard let participants = data["participants"] as? [String],
-              let lastMessage = data["lastMessage"] as? String?,
-              let lastMessageTimestamp = (data["lastMessageTimestamp"] as? Timestamp)?.dateValue() else {
-            return nil
-        }
-        
-        self.id = id
-        self.participants = participants
-        self.lastMessage = lastMessage
-        self.lastMessageTimestamp = lastMessageTimestamp
-        self.messages = [] 
+    // Firestore 自動解碼時使用的鍵對應
+    enum CodingKeys: String, CodingKey {
+        case id
+        case participants
+        case lastMessage
+        case lastMessageTimestamp
+        case messages
     }
 }
+
+//    init?(id: String, data: [String: Any]) {
+//        guard let participants = data["participants"] as? [String],
+//              let lastMessage = data["lastMessage"] as? String?,
+//              let lastMessageTimestamp = (data["lastMessageTimestamp"] as? Timestamp)?.dateValue() else {
+//            return nil
+//        }
+//        
+//        self.id = id
+//        self.participants = participants
+//        self.lastMessage = lastMessage
+//        self.lastMessageTimestamp = lastMessageTimestamp
+//        self.messages = [] 
+//    }
+
