@@ -14,7 +14,7 @@ class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let firstVC = UINavigationController(rootViewController: StudentHomeVC())
+        let firstVC = UINavigationController(rootViewController: StudentHomePageVC())
         let secondVC = UINavigationController(rootViewController: CalendarVC())
         //        let thirdVC = UINavigationController(rootViewController: StudentListVC())
         let thirdVC = UINavigationController(rootViewController: ChatListVC())

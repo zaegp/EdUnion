@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -30,11 +31,17 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         view.backgroundColor = .white
         tabBarController?.tabBar.isHidden = true
         
+        setupNavigationBar()
         setupTableView()
         setupAddButton()
         
         bindViewModel()
         viewModel.loadTimeSlots()
+    }
+    
+    func setupNavigationBar() {
+        let iconImage = UIImage(systemName: "calendar")
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: iconImage, style: .plain, target: self, action: #selector(pushToCalendarVC))
     }
     
     func setupTableView() {
@@ -133,5 +140,11 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         let timeSlot = viewModel.timeSlots[indexPath.row]
         showEditTimeSlotModal(for: timeSlot, at: indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    @objc func pushToCalendarVC() {
+        let calendarView = ColorPickerCalendarView()
+        let hostingController = UIHostingController(rootView: calendarView)
+        navigationController?.pushViewController(hostingController, animated: true)
     }
 }

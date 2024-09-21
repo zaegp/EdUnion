@@ -29,6 +29,88 @@ class UserFirebaseService {
             }
         }
     }
+    
+    func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(teacherID)
+        
+        // 使用 Firestore 的 `updateData` 方法更新或創建 studentsNotes 欄位
+        teacherRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                // 檢查 studentsNotes 欄位是否存在
+                if var studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
+                    let studentExists = studentsNotes[studentID] != nil  // 檢查 studentID 是否已存在
+                    
+                    // 更新已有的 studentsNotes
+                    studentsNotes[studentID] = note
+                    teacherRef.updateData(["studentsNotes": studentsNotes]) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            // 返回 student 是否存在的結果
+                            completion(.success(studentExists))
+                        }
+                    }
+                } else {
+                    // 如果欄位不存在，創建它並返回 student 不存在
+                    let newNotes = [studentID: note]
+                    teacherRef.updateData(["studentsNotes": newNotes]) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            // 返回 student 不存在，因為是新創建的
+                            completion(.success(false))
+                        }
+                    }
+                }
+            } else if let error = error {
+                // 如果獲取老師文檔時出現錯誤
+                completion(.failure(error))
+            } else {
+                // 如果文檔不存在
+                completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+            }
+        }
+    }
+    
+    func fetchTeacherStudentList(teacherID: String, completion: @escaping (Result<[String: String], Error>) -> Void) {
+            let teacherRef = db.collection("teachers").document(teacherID)
+            
+            teacherRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    // 取出 studentsNotes 欄位
+                    if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
+                        completion(.success(studentsNotes))
+                    } else {
+                        completion(.success([:]))  // 如果 studentsNotes 不存在，返回空字典
+                    }
+                } else if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+                }
+            }
+        }
+    
+    func fetchStudentNote(teacherID: String, studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
+            let teacherRef = db.collection("teachers").document(teacherID)
+            
+            teacherRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    // 取出 studentsNotes 欄位
+                    if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
+                        // 查找特定學生的備註
+                        let studentNote = studentsNotes[studentID]
+                        completion(.success(studentNote))  // 如果找到，返回備註
+                    } else {
+                        completion(.success(nil))  // 如果沒有找到該學生，返回 nil
+                    }
+                } else if let error = error {
+                    completion(.failure(error))  // 發生錯誤時返回錯誤信息
+                } else {
+                    completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+                }
+            }
+        }
 
     // MARK: - 學生：顯示老師資訊
     func fetchTeachers(completion: @escaping (Result<[Teacher], Error>) -> Void) {

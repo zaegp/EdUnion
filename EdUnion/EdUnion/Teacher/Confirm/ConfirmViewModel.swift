@@ -22,6 +22,17 @@ class ConfirmViewModel {
         self.userID = userID
     }
     
+    func fetchStudentName(for appointment: Appointment, completion: @escaping (String) -> Void) {
+        UserFirebaseService.shared.fetchStudentName(by: appointment.studentID) { result in
+            switch result {
+            case .success(let studentName):
+                completion(studentName ?? "Unknown Student")
+            case .failure:
+                completion("Unknown Student")
+            }
+        }
+    }
+    
     func loadPendingAppointments() {
         AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: teacherID) { result in
             switch result {
@@ -56,4 +67,17 @@ class ConfirmViewModel {
             }
         }
     }
+    
+    func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        UserFirebaseService.shared.updateStudentNotes(forTeacher: teacherID, studentID: studentID, note: note) { result in
+                switch result {
+                case .success(let studentExists):
+                    // 成功處理，返回 student 是否存在
+                    completion(.success(studentExists))
+                case .failure(let error):
+                    // 如果有錯誤，返回錯誤結果
+                    completion(.failure(error))
+                }
+            }
+        }
 }

@@ -21,7 +21,7 @@ struct ColorPickerCalendarView: View {
             externalDateColors: Binding(
                             get: { dateColors },             // 獲取非可選的 @State
                             set: { dateColors = $0 ?? [:] }  // 處理可能的 nil，設置為空字典
-                        ),
+            ), viewModel: BaseCalendarViewModel(),
 //            selectedDay: $selectedDay,
 //            appointments: appointments,
 //            activitiesByDate: activitiesByDate,

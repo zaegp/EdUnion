@@ -50,6 +50,9 @@
 		51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C892C9B32570083EECF /* BaseCalendarView.swift */; };
 		51D25C8C2C9B32AA0083EECF /* CourseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */; };
 		51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */; };
+		51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C932C9D4C2D0083EECF /* TimeService.swift */; };
+		51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C972C9E40790083EECF /* BaseCalendarViewModel.swift */; };
+		51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C992C9E4F370083EECF /* DetailView.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -121,6 +124,9 @@
 		51D25C892C9B32570083EECF /* BaseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCalendarView.swift; sourceTree = "<group>"; };
 		51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseCalendarView.swift; sourceTree = "<group>"; };
 		51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerCalendarView.swift; sourceTree = "<group>"; };
+		51D25C932C9D4C2D0083EECF /* TimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeService.swift; sourceTree = "<group>"; };
+		51D25C972C9E40790083EECF /* BaseCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCalendarViewModel.swift; sourceTree = "<group>"; };
+		51D25C992C9E4F370083EECF /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -304,6 +310,7 @@
 			children = (
 				519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */,
 				51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */,
+				51D25C932C9D4C2D0083EECF /* TimeService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -404,6 +411,8 @@
 			isa = PBXGroup;
 			children = (
 				51D25C892C9B32570083EECF /* BaseCalendarView.swift */,
+				51D25C972C9E40790083EECF /* BaseCalendarViewModel.swift */,
+				51D25C992C9E4F370083EECF /* DetailView.swift */,
 			);
 			path = "Base Views";
 			sourceTree = "<group>";
@@ -648,6 +657,7 @@
 				51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */,
 				519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */,
 				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
+				51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */,
 				519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */,
 				519C8EC82C939AF9007DFCBA /* CalendarView.swift in Sources */,
 				51ED0B072C917A0F006322B7 /* Message.swift in Sources */,
@@ -659,9 +669,11 @@
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
+				51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */,
 				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
+				51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
 				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,
 				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,

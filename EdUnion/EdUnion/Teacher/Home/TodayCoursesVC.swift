@@ -96,25 +96,11 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
         let appointment = viewModel.appointments[indexPath.row]
+        viewModel.fetchStudentNote(teacherID: teacherID, studentID: appointment.studentID)
         
-        UserFirebaseService.shared.fetchStudentName(by: appointment.studentID) { result in
+        viewModel.fetchStudentName(for: appointment) { studentName in
             DispatchQueue.main.async {
-                switch result {
-                case .success(let studentName):
-                    cell.titleLabel.text = studentName ?? "Unknown Student" // 如果 studentName 是 nil，顯示 "Unknown Student"
-                case .failure:
-                    cell.titleLabel.text = "Unknown Student"
-                }
-            }
-        }
-        
-        if let firstTime = appointment.times.first, let lastTime = appointment.times.last {
-            if appointment.times.count > 1 {
-                // 如果有多個時間，顯示最早和最晚的時間
-                cell.timeLabel.text = "Time: \(firstTime) - \(lastTime)"
-            } else {
-                // 如果只有一個時間，顯示單個時間
-//                cell.timeLabel.text = firstTime
+                cell.configureCell(name: studentName, times: appointment.times, note: self.viewModel.studentNote, isExpanded: self.expandedIndexPath == indexPath)
             }
         }
         
@@ -124,7 +110,6 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
                 cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-                // 更新課程狀態
                 self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
             }))
             self?.present(alert, animated: true, completion: nil)
@@ -133,40 +118,50 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
-    //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    //        let datePickerVC = DatePickerViewController()
-    //
-    //        datePickerVC.modalPresentationStyle = .pageSheet
-    //        if let sheet = datePickerVC.sheetPresentationController {
-    //            sheet.detents = [.medium()]
-    //        }
-    //
-    //        datePickerVC.saveHandler = { [weak self] newDate in
-    //            let formatter = DateFormatter()
-    //            formatter.dateFormat = "hh:mm a"
-    //            let newTime = formatter.string(from: newDate)
-    //            self?.sampleCourses[indexPath.row].time = newTime
-    //            tableView.reloadRows(at: [indexPath], with: .automatic)
-    //        }
-    //
-    //        present(datePickerVC, animated: true, completion: nil)
-    //    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        tableView.deselectRow(at: indexPath, animated: true)
+//        
+//        let previousExpandedIndexPath = expandedIndexPath
+//        
+//        if expandedIndexPath == indexPath {
+//            expandedIndexPath = nil
+//        } else {
+//            expandedIndexPath = indexPath
+//        }
+//        
+//        UIView.animate(withDuration: 0.3, animations: {
+//                tableView.beginUpdates()
+//                if let previousIndexPath = previousExpandedIndexPath {
+//                    tableView.reloadRows(at: [previousIndexPath], with: .automatic)
+//                }
+//                tableView.reloadRows(at: [indexPath], with: .automatic)
+//                tableView.endUpdates()
+//                tableView.layoutIfNeeded() // 強制更新佈局，確保動畫平滑
+//            })
+//    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if expandedIndexPath == indexPath {
-            // Collapse if it's already expanded
-            expandedIndexPath = nil
-        } else {
-            // Expand the selected cell
-            expandedIndexPath = indexPath
+        var indexPathsToReload = [indexPath] // 需要重新加載的 cell 列表
+        
+        // 檢查當前是否有已展開的 cell 並且與當前選中的不同
+        if let expandedIndexPath = expandedIndexPath, expandedIndexPath != indexPath {
+            // 如果有展開的 cell，並且點擊了不同的 cell，則將舊的展開 cell 加入到重新加載的列表中
+            indexPathsToReload.append(expandedIndexPath)
         }
         
-        UIView.animate(withDuration: 0.3) {
-            tableView.beginUpdates()
-            tableView.endUpdates()
+        // 如果點擊的是已展開的 cell，則收起；否則設置為新展開的 cell
+        if expandedIndexPath == indexPath {
+            self.expandedIndexPath = nil
+        } else {
+            self.expandedIndexPath = indexPath
         }
+
+        // 執行動畫來更新表格視圖
+        tableView.beginUpdates()
+        tableView.reloadRows(at: indexPathsToReload, with: UITableView.RowAnimation.fade) // 同時重新加載新舊的 cell
+        tableView.endUpdates()
     }
     
     //    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -180,7 +175,4 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .delete
     }
-    
 }
-
-

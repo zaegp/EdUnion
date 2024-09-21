@@ -13,7 +13,8 @@ struct Teacher: Codable {
     var name: String
     var photoURL: String
 //    var uid: String
-    let selectedTimeSlots: [String: String]
+    let selectedTimeSlots: [String : String]
     let timeSlots: [AvailableTimeSlot]
     var totalCourses: Int
+    var studentsNotes: [String : String]
 }
