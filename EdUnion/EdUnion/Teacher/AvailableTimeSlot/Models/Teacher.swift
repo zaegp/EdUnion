@@ -8,13 +8,14 @@
 import Foundation
 
 struct Teacher: Codable {
+    var id: String
     var resume : [String]
 //    var lastLogin: Date
     var name: String
-    var photoURL: String
+    var photoURL: String?
 //    var uid: String
-    let selectedTimeSlots: [String : String]
+    let selectedTimeSlots: [String : String]?
     let timeSlots: [AvailableTimeSlot]
     var totalCourses: Int
-    var studentsNotes: [String : String]
+    var studentsNotes: [String : String]?
 }

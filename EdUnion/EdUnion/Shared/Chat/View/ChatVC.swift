@@ -16,6 +16,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     private var viewModel: ChatViewModel!
     private let tableView = UITableView()
     
+    var teacherID: String = ""  // 從 TeacherDetailVC 傳遞
+        var studentID: String = ""
+    
     private let messageInputBar = UIView()
     private let messageTextField = UITextField()
     private let sendButton = UIButton(type: .system)
@@ -36,7 +39,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupTableView()
         setupRecordingSession()
         
-        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
+        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID, otherParticipantID: studentID)
+       
+        
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
             self?.scrollToBottom()
@@ -44,10 +49,26 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         messageTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
+//        self.navigationItem.hidesBackButton = true
+           
+           // 添加自定義的 back 按鈕
+//           let customBackButton = UIBarButtonItem(title: "Back to Chat List", style: .plain, target: self, action: #selector(backToChatList))
+//           self.navigationItem.leftBarButtonItem = customBackButton
         
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if self.isMovingFromParent {
+            // 如果是因為點擊返回按鈕而觸發的
+            if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
+                navigationController?.popToViewController(chatListVC, animated: true)
+            }
+        }
     }
     
     private func setupNavigationBar() {
@@ -286,6 +307,12 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
     }
+    
+    @objc private func backToChatList() {
+        if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
+            navigationController?.popToViewController(chatListVC, animated: true)
+        }
+    }
 }
 
 
@@ -294,4 +321,5 @@ extension ChatVC: ChatTableViewCellDelegate {
         let fullScreenVC = FullScreenImageVC(image: image)
         present(fullScreenVC, animated: true, completion: nil)
     }
+    
 }

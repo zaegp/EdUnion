@@ -15,3 +15,7 @@ line_length:
 identifier_name:
   min_length: 1   # 允許變數名稱最短為 1 個字元
   max_length: 50  # 允許變數名稱最長為 50 個字元
+
+type_body_length:
+  warning: 350
+  error: 600

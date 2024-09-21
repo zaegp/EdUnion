@@ -17,7 +17,12 @@ class BookingVC: UIViewController {
                    
         view.backgroundColor = .white
         
-        setupBookingView(selectedTimeSlots: teacher!.selectedTimeSlots, timeSlots: teacher!.timeSlots)
+        guard let selectedTimeSlots = teacher?.selectedTimeSlots, let timeSlots = teacher?.timeSlots else {
+            print("Teacher's selected time slots or time slots are missing.")
+            return
+        }
+        
+        setupBookingView(selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
     }
     
     func setupBookingView(selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {

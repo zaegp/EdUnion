@@ -34,7 +34,7 @@ class AvailableTimeSlotsViewModel {
             print("TimeSlot already exists.")
             return
         }
-        UserFirebaseService.shared.saveTimeSlot(timeSlot, for: teacherID) { [weak self] result in
+        UserFirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
             switch result {
             case .success():
                 self?.timeSlots.append(timeSlot)

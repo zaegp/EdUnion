@@ -266,6 +266,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         
         dismiss(animated: true, completion: nil)
     }
+    
     @objc func cancelSelection() {
         dismiss(animated: true, completion: nil)
     }

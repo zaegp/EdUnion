@@ -30,6 +30,48 @@ class UserFirebaseService {
         }
     }
     
+    // 在 UserFirebaseService 中新增方法
+    func fetchFollowedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
+        // 首先根據學生 ID 獲取 followList
+        db.collection("students").document(studentID).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = snapshot?.data(), let followList = data["followList"] as? [String] {
+                // 查詢 followList 中的所有老師
+                self.fetchTeachers(for: followList, completion: completion)
+            } else {
+                completion(.failure(NSError(domain: "Invalid followList", code: 404, userInfo: nil)))
+            }
+        }
+    }
+
+    // 查詢 followList 中的所有老師資料
+    private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
+        var teachers: [Teacher] = []
+        let group = DispatchGroup()  // 用來處理多個查詢結果
+
+        for id in ids {
+            group.enter()
+            db.collection("teachers").document(id).getDocument { snapshot, error in
+                if let error = error {
+                    print("Error fetching teacher with id \(id): \(error)")
+                } else if let teacher = try? snapshot?.data(as: Teacher.self) {
+                    teachers.append(teacher)
+                }
+                group.leave()  // 結束一個查詢
+            }
+        }
+
+        // 當所有查詢完成後回傳結果
+        group.notify(queue: .main) {
+            if !teachers.isEmpty {
+                completion(.success(teachers))
+            } else {
+                completion(.failure(NSError(domain: "No teachers found", code: 404, userInfo: nil)))
+            }
+        }
+    }
+    
     func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
         let teacherRef = db.collection("teachers").document(teacherID)
         
@@ -122,20 +164,54 @@ class UserFirebaseService {
         let timeSlotData = timeSlot.toDictionary()
         let teacherRef = db.collection("teachers").document(teacherID)
         
-        teacherRef.updateData([
-            "timeSlots": operation == .arrayUnion([timeSlotData]) ? FieldValue.arrayUnion([timeSlotData]) : FieldValue.arrayRemove([timeSlotData])
-        ]) { error in
-            if let error = error {
+        // 先檢查是否有 timeSlots 欄位
+        teacherRef.getDocument { document, error in
+            if let document = document, document.exists {
+                // 如果欄位存在，進行正常操作
+                if let timeSlots = document.data()?["timeSlots"] as? [[String: Any]] {
+                    // 正常更新 timeSlots 欄位
+                    teacherRef.updateData([
+                        "timeSlots": operation == .arrayUnion([timeSlotData]) ? FieldValue.arrayUnion([timeSlotData]) : FieldValue.arrayRemove([timeSlotData])
+                    ]) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(()))
+                        }
+                    }
+                } else {
+                    // 如果 timeSlots 欄位不存在，創建 timeSlots 並執行 arrayUnion 操作
+                    teacherRef.setData([
+                        "timeSlots": FieldValue.arrayUnion([timeSlotData])
+                    ], merge: true) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(()))
+                        }
+                    }
+                }
+            } else if let error = error {
                 completion(.failure(error))
-            } else {
-                completion(.success(()))
             }
         }
     }
 
     // 保存時段（新增）
-    func saveTimeSlot(_ timeSlot: AvailableTimeSlot, for teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        updateTimeSlot(timeSlot, for: teacherID, operation: .arrayUnion([timeSlot.toDictionary()]), completion: completion)
+    func saveTimeSlot(_ timeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let timeSlotData = timeSlot.toDictionary()
+        let teacherRef = db.collection("teachers").document(teacherID)
+        
+        teacherRef.setData([
+            "timeSlots": FieldValue.arrayUnion([timeSlotData])
+        ], merge: true) { error in
+            if let error = error {
+                print("Error adding time slot: \(error)")
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
     }
     
     // 刪除時段
@@ -181,7 +257,7 @@ class UserFirebaseService {
         deleteTimeSlot(oldTimeSlot, for: teacherID) { result in
             switch result {
             case .success:
-                self.saveTimeSlot(newTimeSlot, for: teacherID, completion: completion)
+                self.saveTimeSlot(newTimeSlot, forTeacher: teacherID, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -189,19 +265,26 @@ class UserFirebaseService {
     }
     
     // MARK - 聊天室
-    func fetchChatRooms(for participantID: String, completion: @escaping (Result<[ChatRoom], Error>) -> Void) {
+    func fetchChatRooms(for participantID: String, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
         db.collection("chats")
             .whereField("participants", arrayContains: participantID)
             .order(by: "lastMessageTimestamp", descending: true)
-            .getDocuments { snapshot, error in
+            .getDocuments { (snapshot, error) in
                 if let error = error {
-                    completion(.failure(error))
+                    completion(nil, error)
                     return
                 }
-                let chatRooms: [ChatRoom] = snapshot?.documents.compactMap {
-                    return ChatRoom(id: $0.documentID, data: $0.data())
-                } ?? []
-                completion(.success(chatRooms))
+                
+                guard let documents = snapshot?.documents else {
+                    completion(nil, nil)
+                    return
+                }
+                
+                let chatRooms: [ChatRoom] = documents.compactMap { document in
+                    let data = document.data()
+                    return ChatRoom(id: document.documentID, data: data)
+                }
+                completion(chatRooms, nil)
             }
     }
     
@@ -217,28 +300,37 @@ class UserFirebaseService {
     }
     
     // 上傳照片
-    func uploadPhoto(image: UIImage, messageId: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func uploadPhoto(image: UIImage, messageId: String, completion: @escaping (String?, Error?) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             let conversionError = NSError(domain: "ImageConversionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG format."])
-            completion(.failure(conversionError))
+            completion(nil, conversionError)
+            print("Error: Failed to convert image to JPEG format.")
             return
         }
         
         let storageRef = storage.reference().child("chat_images/\(messageId).jpg")
         
-        storageRef.putData(imageData, metadata: nil) { _, error in
+        storageRef.putData(imageData, metadata: nil) { metadata, error in
             if let error = error {
-                completion(.failure(error))
+                completion(nil, error)
+                print("Error uploading image: \(error.localizedDescription)")
                 return
             }
+            
             storageRef.downloadURL { url, error in
                 if let error = error {
-                    completion(.failure(error))
-                } else if let urlString = url?.absoluteString {
-                    completion(.success(urlString))
+                    completion(nil, error)
+                    print("Error fetching download URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let urlString = url?.absoluteString {
+                    print("Image uploaded successfully. URL: \(urlString)")
+                    completion(urlString, nil)
                 } else {
                     let urlError = NSError(domain: "DownloadURLError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to generate download URL."])
-                    completion(.failure(urlError))
+                    completion(nil, urlError)
+                    print("Error: Failed to generate download URL.")
                 }
             }
         }
@@ -358,11 +450,11 @@ class UserFirebaseService {
     }
     
     // MARK: - 日期格式
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        formatter.locale = Locale.current
-        return formatter
-    }()
+//    private let dateFormatter: DateFormatter = {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd"
+//        formatter.timeZone = TimeZone.current
+//        formatter.locale = Locale.current
+//        return formatter
+//    }()
 }
