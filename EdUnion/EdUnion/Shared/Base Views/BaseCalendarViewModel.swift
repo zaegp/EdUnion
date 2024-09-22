@@ -12,7 +12,7 @@ class BaseCalendarViewModel: ObservableObject {
     @Published var studentNames: [String: String] = [:]  // 儲存學生的名字
     
     func fetchStudentName(for studentID: String) {
-        UserFirebaseService.shared.fetchStudentName(by: studentID) { result in
+        UserFirebaseService.shared.fetchName(from: "students", by: studentID) { result in
             switch result {
             case .success(let studentName):
                 DispatchQueue.main.async {

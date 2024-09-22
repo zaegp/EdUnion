@@ -148,7 +148,7 @@ class TeacherDetailVC: UIViewController {
         }
     
     @objc private func favoriteButtonTapped() {
-            
+       
             if isFavorite {
                 // 如果已收藏，則移除收藏
                 UserFirebaseService.shared.removeTeacherFromFollowList(studentID: studentID, teacherID: teacher!.id) { error in

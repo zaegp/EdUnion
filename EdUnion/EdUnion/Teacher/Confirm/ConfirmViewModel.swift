@@ -23,7 +23,7 @@ class ConfirmViewModel {
     }
     
     func fetchStudentName(for appointment: Appointment, completion: @escaping (String) -> Void) {
-        UserFirebaseService.shared.fetchStudentName(by: appointment.studentID) { result in
+        UserFirebaseService.shared.fetchName(from: "students", by: appointment.studentID) { result in
             switch result {
             case .success(let studentName):
                 completion(studentName ?? "Unknown Student")

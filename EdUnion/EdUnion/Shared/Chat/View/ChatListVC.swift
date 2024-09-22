@@ -6,8 +6,6 @@
 //
 
 import UIKit
-
-import UIKit
 import FirebaseFirestore
 
 class ChatListVC: UIViewController {
@@ -17,7 +15,7 @@ class ChatListVC: UIViewController {
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
     private let participantID: String = studentID
-    private var chatRoomListener: ListenerRegistration?  // 用於監聽實時更新
+    private var chatRoomListener: ListenerRegistration?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +31,7 @@ class ChatListVC: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        chatRoomListener?.remove()  // 停止監聽，避免內存泄漏
+        chatRoomListener?.remove()
     }
     
     private func setupUI() {
@@ -78,10 +76,8 @@ class ChatListVC: UIViewController {
                     }
                 }
                 
-                // 默認情況下顯示全部聊天列表
                 self?.filteredChatRooms = self?.chatRooms ?? []
                 
-                // 更新 UI
                 DispatchQueue.main.async {
                     print("Filtered chat rooms: \(self!.filteredChatRooms)")
                     self?.tableView.reloadData()
@@ -104,12 +100,51 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: "chatRoomCell", for: indexPath) as! ChatRoomCell
         let chatRoom = filteredChatRooms[indexPath.row]
         
-        // 配置 cell 顯示對方名字、最後一則消息和時間
-        let participantName = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
+        let participantId = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
+        print("111111")
+        print(participantId)
+        
+        
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
-        cell.configure(name: participantName, lastMessage: lastMessage, time: lastMessageTime)
+        if let intID = Int(participantId) {
+            if intID % 2 == 0 {
+                // 偶數 -> 查詢學生
+                UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
+                    switch result {
+                    case .success(let studentName):
+                        DispatchQueue.main.async {
+                            let name = studentName ?? "Unknown Student"
+                            // 更新 cell 的名稱
+                            cell.configure(name: name, lastMessage: lastMessage, time: lastMessageTime)
+                        }
+                    case .failure:
+                        DispatchQueue.main.async {
+                            // 更新 cell 的名稱
+                            cell.configure(name: "Unknown Student", lastMessage: lastMessage, time: lastMessageTime)
+                        }
+                    }
+                }
+            } else {
+                // 奇數 -> 查詢老師
+                UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
+                    switch result {
+                    case .success(let teacherName):
+                        DispatchQueue.main.async {
+                            let name = teacherName ?? "Unknown Teacher"
+                            // 更新 cell 的名稱
+                            cell.configure(name: name, lastMessage: lastMessage, time: lastMessageTime)
+                        }
+                    case .failure:
+                        DispatchQueue.main.async {
+                            // 更新 cell 的名稱
+                            cell.configure(name: "Unknown Teacher", lastMessage: lastMessage, time: lastMessageTime)
+                        }
+                    }
+                }
+            }
+        }
         return cell
     }
     

@@ -23,32 +23,34 @@ struct CalendarDayView: View {
     let color: Color
     
     var body: some View {
-        VStack(spacing: 5) {
-            if let day = day {
-                Text(day.formatted(.dateTime.day()))
-                    .fontWeight(.bold)
-                    .foregroundColor(isSelected ? .white : (isCurrentMonth ? .primary : .gray))
-                    .frame(maxWidth: .infinity, minHeight: 40)
-                    .background(
-                        Circle()
-                            .fill(isSelected ? Color.black : Color.clear)
-                    )
-                
-                if isCurrentMonth {
-                    ZStack {
-                        Circle()
-                            .fill(color != .clear ? color : Color.clear)
-                            .frame(width: 8, height: 8)
+            VStack(spacing: 5) {
+                if let day = day {
+                    let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
+                    
+                    Text(day.formatted(.dateTime.day()))
+                        .fontWeight(.bold)
+                        .foregroundColor(isSelected ? .white : (isPastDate ? .gray : (isCurrentMonth ? .primary : .gray)))
+                        .frame(maxWidth: .infinity, minHeight: 40)
+                        .background(
+                            Circle()
+                                .fill(isSelected ? Color.black : Color.clear)
+                        )
+                    
+                    if isCurrentMonth && !isPastDate {
+                        ZStack {
+                            Circle()
+                                .fill(color != .clear ? color : Color.clear)
+                                .frame(width: 8, height: 8)
+                        }
+                        .frame(height: 10)
                     }
-                    .frame(height: 10)
+                } else {
+                    Text("")
+                        .frame(maxWidth: .infinity, minHeight: 40)
                 }
-            } else {
-                Text("")
-                    .frame(maxWidth: .infinity, minHeight: 40)
             }
+            .frame(height: 60)
         }
-        .frame(height: 60)
-    }
 }
 
 struct BaseCalendarView: View {

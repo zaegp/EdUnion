@@ -56,6 +56,16 @@
 		51D25C9C2C9E5D0A0083EECF /* BaseCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9B2C9E5D0A0083EECF /* BaseCollectionVC.swift */; };
 		51D25C9E2C9E60C00083EECF /* FollowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */; };
 		51D25CA02C9E90B30083EECF /* FollowVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9F2C9E90B30083EECF /* FollowVC.swift */; };
+		51D25CA82C9F27310083EECF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D25CA72C9F27310083EECF /* WidgetKit.framework */; };
+		51D25CAA2C9F27310083EECF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D25CA92C9F27310083EECF /* SwiftUI.framework */; };
+		51D25CAD2C9F27310083EECF /* TodayCoursesWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */; };
+		51D25CAF2C9F27310083EECF /* TodayCoursesWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */; };
+		51D25CB12C9F27310083EECF /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CB02C9F27310083EECF /* AppIntent.swift */; };
+		51D25CB32C9F27320083EECF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51D25CB22C9F27320083EECF /* Assets.xcassets */; };
+		51D25CB72C9F27320083EECF /* TodayCoursesWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 51D25CA52C9F27310083EECF /* TodayCoursesWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */; };
+		51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */; };
+		51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC22C9F3BA10083EECF /* NavigationController.swift */; };
 		51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD62C916721006322B7 /* AppDelegate.swift */; };
 		51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0AD82C916721006322B7 /* SceneDelegate.swift */; };
 		51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0ADA2C916721006322B7 /* ViewController.swift */; };
@@ -73,6 +83,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		51D25CB52C9F27320083EECF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 51ED0ACB2C916721006322B7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51D25CA42C9F27310083EECF;
+			remoteInfo = TodayCoursesWidgetExtension;
+		};
 		51ED0AEA2C916722006322B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 51ED0ACB2C916721006322B7 /* Project object */;
@@ -88,6 +105,20 @@
 			remoteInfo = EdUnion;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		51D25CBB2C9F27320083EECF /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				51D25CB72C9F27320083EECF /* TodayCoursesWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		519C8EC72C939AF9007DFCBA /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -133,6 +164,17 @@
 		51D25C9B2C9E5D0A0083EECF /* BaseCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionVC.swift; sourceTree = "<group>"; };
 		51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowViewModel.swift; sourceTree = "<group>"; };
 		51D25C9F2C9E90B30083EECF /* FollowVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowVC.swift; sourceTree = "<group>"; };
+		51D25CA52C9F27310083EECF /* TodayCoursesWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodayCoursesWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		51D25CA72C9F27310083EECF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		51D25CA92C9F27310083EECF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidgetBundle.swift; sourceTree = "<group>"; };
+		51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidget.swift; sourceTree = "<group>"; };
+		51D25CB02C9F27310083EECF /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
+		51D25CB22C9F27320083EECF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		51D25CB42C9F27320083EECF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseWidgetView.swift; sourceTree = "<group>"; };
+		51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Ext.swift"; sourceTree = "<group>"; };
+		51D25CC22C9F3BA10083EECF /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		51ED0AD32C916721006322B7 /* EdUnion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EdUnion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51ED0AD62C916721006322B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51ED0AD82C916721006322B7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -154,6 +196,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		51D25CA22C9F27310083EECF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51D25CAA2C9F27310083EECF /* SwiftUI.framework in Frameworks */,
+				51D25CA82C9F27310083EECF /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		51ED0AD02C916721006322B7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -192,6 +243,7 @@
 				519C8EC52C939ACF007DFCBA /* Calendar */,
 				519C8EC12C939A29007DFCBA /* Chat */,
 				519C8EEE2C95C31B007DFCBA /* TabBarController.swift */,
+				51D25CC22C9F3BA10083EECF /* NavigationController.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -288,6 +340,7 @@
 			children = (
 				519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */,
 				519C8F192C998401007DFCBA /* Date+Ext.swift */,
+				51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */,
 				519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */,
 				519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */,
 			);
@@ -426,12 +479,36 @@
 			path = "Base Views";
 			sourceTree = "<group>";
 		};
+		51D25CA62C9F27310083EECF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				51D25CA72C9F27310083EECF /* WidgetKit.framework */,
+				51D25CA92C9F27310083EECF /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		51D25CAB2C9F27310083EECF /* TodayCoursesWidget */ = {
+			isa = PBXGroup;
+			children = (
+				51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */,
+				51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */,
+				51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */,
+				51D25CB02C9F27310083EECF /* AppIntent.swift */,
+				51D25CB22C9F27320083EECF /* Assets.xcassets */,
+				51D25CB42C9F27320083EECF /* Info.plist */,
+			);
+			path = TodayCoursesWidget;
+			sourceTree = "<group>";
+		};
 		51ED0ACA2C916721006322B7 = {
 			isa = PBXGroup;
 			children = (
 				51ED0AD52C916721006322B7 /* EdUnion */,
 				51ED0AEC2C916722006322B7 /* EdUnionTests */,
 				51ED0AF62C916722006322B7 /* EdUnionUITests */,
+				51D25CAB2C9F27310083EECF /* TodayCoursesWidget */,
+				51D25CA62C9F27310083EECF /* Frameworks */,
 				51ED0AD42C916721006322B7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -442,6 +519,7 @@
 				51ED0AD32C916721006322B7 /* EdUnion.app */,
 				51ED0AE92C916722006322B7 /* EdUnionTests.xctest */,
 				51ED0AF32C916722006322B7 /* EdUnionUITests.xctest */,
+				51D25CA52C9F27310083EECF /* TodayCoursesWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -486,6 +564,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		51D25CA42C9F27310083EECF /* TodayCoursesWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51D25CB82C9F27320083EECF /* Build configuration list for PBXNativeTarget "TodayCoursesWidgetExtension" */;
+			buildPhases = (
+				51D25CA12C9F27310083EECF /* Sources */,
+				51D25CA22C9F27310083EECF /* Frameworks */,
+				51D25CA32C9F27310083EECF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TodayCoursesWidgetExtension;
+			productName = TodayCoursesWidgetExtension;
+			productReference = 51D25CA52C9F27310083EECF /* TodayCoursesWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		51ED0AD22C916721006322B7 /* EdUnion */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 51ED0AFD2C916722006322B7 /* Build configuration list for PBXNativeTarget "EdUnion" */;
@@ -494,10 +589,12 @@
 				51ED0AD02C916721006322B7 /* Frameworks */,
 				51ED0AD12C916721006322B7 /* Resources */,
 				519C8F072C97BDC3007DFCBA /* ShellScript */,
+				51D25CBB2C9F27320083EECF /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				51D25CB62C9F27320083EECF /* PBXTargetDependency */,
 			);
 			name = EdUnion;
 			packageProductDependencies = (
@@ -558,6 +655,9 @@
 				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
+					51D25CA42C9F27310083EECF = {
+						CreatedOnToolsVersion = 15.4;
+					};
 					51ED0AD22C916721006322B7 = {
 						CreatedOnToolsVersion = 15.4;
 					};
@@ -592,11 +692,20 @@
 				51ED0AD22C916721006322B7 /* EdUnion */,
 				51ED0AE82C916722006322B7 /* EdUnionTests */,
 				51ED0AF22C916722006322B7 /* EdUnionUITests */,
+				51D25CA42C9F27310083EECF /* TodayCoursesWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		51D25CA32C9F27310083EECF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51D25CB32C9F27320083EECF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		51ED0AD12C916721006322B7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -646,6 +755,16 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		51D25CA12C9F27310083EECF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51D25CAF2C9F27310083EECF /* TodayCoursesWidget.swift in Sources */,
+				51D25CAD2C9F27310083EECF /* TodayCoursesWidgetBundle.swift in Sources */,
+				51D25CB12C9F27310083EECF /* AppIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		51ED0ACF2C916721006322B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -653,9 +772,11 @@
 				519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */,
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
+				51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
+				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
 				51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */,
 				519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */,
@@ -674,6 +795,7 @@
 				519C8EFB2C95CC9A007DFCBA /* Teacher.swift in Sources */,
 				519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */,
 				51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */,
+				51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
@@ -723,6 +845,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		51D25CB62C9F27320083EECF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51D25CA42C9F27310083EECF /* TodayCoursesWidgetExtension */;
+			targetProxy = 51D25CB52C9F27320083EECF /* PBXContainerItemProxy */;
+		};
 		51ED0AEB2C916722006322B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 51ED0AD22C916721006322B7 /* EdUnion */;
@@ -755,6 +882,60 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		51D25CB92C9F27320083EECF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TodayCoursesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TodayCoursesWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion.TodayCoursesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		51D25CBA2C9F27320083EECF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PYY5QH5MCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TodayCoursesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TodayCoursesWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion.TodayCoursesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		51ED0AFB2C916722006322B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -877,6 +1058,7 @@
 		51ED0AFE2C916722006322B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -907,6 +1089,7 @@
 		51ED0AFF2C916722006322B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -1013,6 +1196,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		51D25CB82C9F27320083EECF /* Build configuration list for PBXNativeTarget "TodayCoursesWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51D25CB92C9F27320083EECF /* Debug */,
+				51D25CBA2C9F27320083EECF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		51ED0ACE2C916721006322B7 /* Build configuration list for PBXProject "EdUnion" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

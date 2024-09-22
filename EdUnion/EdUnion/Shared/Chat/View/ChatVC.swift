@@ -10,7 +10,6 @@ import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
 
-
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     private var viewModel: ChatViewModel!

@@ -462,20 +462,35 @@ class UserFirebaseService {
             }
     }
     
-    // 使用者 ID 搜名字
-    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
-        let studentRef = db.collection("students").document(id)
-        studentRef.getDocument { document, error in
+    func fetchName(from collection: String, by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
+        let ref = db.collection(collection).document(id)
+        ref.getDocument { document, error in
             if let error = error {
                 completion(.failure(error))
             } else if let document = document, document.exists {
-                let studentName = document.data()?["name"] as? String
-                completion(.success(studentName))
+                let name = document.data()?["name"] as? String
+                completion(.success(name))
             } else {
                 completion(.success(nil))
             }
         }
     }
+    
+    
+//    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
+//        let studentRef = db.collection("students").document(id)
+//        studentRef.getDocument { document, error in
+//            if let error = error {
+//                completion(.failure(error))
+//            } else if let document = document, document.exists {
+//                let studentName = document.data()?["name"] as? String
+//                completion(.success(studentName))
+//            } else {
+//                completion(.success(nil))
+//            }
+//        }
+//    }
+    
     
     // MARK: - 日期格式
 //    private let dateFormatter: DateFormatter = {
