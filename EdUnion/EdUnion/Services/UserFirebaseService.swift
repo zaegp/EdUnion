@@ -475,8 +475,6 @@ class UserFirebaseService {
             }
         }
     }
-    
-    
 //    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
 //        let studentRef = db.collection("students").document(id)
 //        studentRef.getDocument { document, error in

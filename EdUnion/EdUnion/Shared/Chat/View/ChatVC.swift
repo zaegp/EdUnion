@@ -10,6 +10,11 @@ import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
 
+import UIKit
+import AVFoundation
+import FirebaseStorage
+import FirebaseFirestore
+
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     private var viewModel: ChatViewModel!
@@ -216,7 +221,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         if success, let audioFilename = audioFilename {
             do {
                 let audioData = try Data(contentsOf: audioFilename)
-                viewModel.sendAudioMessage(audioData) 
+                viewModel.sendAudioMessage(audioData)
             } catch {
                 print("無法讀取錄音檔案: \(error.localizedDescription)")
             }

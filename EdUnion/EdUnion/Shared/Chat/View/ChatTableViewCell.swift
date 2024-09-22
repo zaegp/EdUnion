@@ -209,9 +209,10 @@ class ChatTableViewCell: UITableViewCell {
     
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
-        if message.senderID == studentID {
-            self.isSentByCurrentUser = true
-        }// 添加這一行
+//        if message.senderID == studentID {
+//            self.isSentByCurrentUser = true
+//        }// 添加這一行
+        self.isSentByCurrentUser = (message.senderID == studentID)
         resetContent()
         
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
@@ -245,11 +246,11 @@ class ChatTableViewCell: UITableViewCell {
 
         case 2:
             bubbleBackgroundView.isHidden = false
-            messageImageView.isHidden = true
-            toggleImageButton.isHidden = true
-            setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            messageLabel.isHidden = true
-            audioButton.isHidden = false
+                messageLabel.isHidden = true
+                messageImageView.isHidden = true
+                audioButton.isHidden = false
+                toggleImageButton.isHidden = true
+                setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
 
         default:
             bubbleBackgroundView.isHidden = true
@@ -336,7 +337,7 @@ class ChatTableViewCell: UITableViewCell {
         messageImageView.kf.indicatorType = .activity
         messageImageView.kf.setImage(
             with: url,
-            placeholder: UIImage(systemName: "photo"),
+//            placeholder: UIImage(systemName: "photo"),
             options: [
                 .processor(processor),
                 .scaleFactor(UIScreen.main.scale),

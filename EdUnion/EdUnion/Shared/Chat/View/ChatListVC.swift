@@ -21,11 +21,12 @@ class ChatListVC: UIViewController {
         super.viewDidLoad()
         
         setupUI()
-        observeChatRooms()  // 監聽聊天室變化
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        observeChatRooms()
         tabBarController?.tabBar.isHidden = false
     }
     

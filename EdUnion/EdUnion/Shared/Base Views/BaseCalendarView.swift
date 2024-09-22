@@ -91,11 +91,12 @@ struct BaseCalendarView: View {
     @State private var days: [Date?] = []
     
     var body: some View {
-        let colors = dateColors ?? [:]
+        let colors = dateColors
         VStack {
             HStack {
                 Button(action: { previousPeriod() }) {
                     Image(systemName: "chevron.left")
+                        .foregroundColor(Color(.backButton))
                 }
                 Spacer()
                 Text(formattedMonthAndYear(currentDate))
@@ -103,6 +104,7 @@ struct BaseCalendarView: View {
                 Spacer()
                 Button(action: { nextPeriod() }) {
                     Image(systemName: "chevron.right")
+                        .foregroundColor(Color(.backButton))
                 }
             }
             .padding()
@@ -163,7 +165,7 @@ struct BaseCalendarView: View {
                                 VStack(alignment: .leading) {
                                     HStack {
                                         // 名字和時間橫向排列
-                                        Text(viewModel.studentNames[appointment.studentID] ?? "Loading...")
+                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
                                             .onAppear {
                                                 if viewModel.studentNames[appointment.studentID] == nil {
                                                     viewModel.fetchStudentName(for: appointment.studentID)

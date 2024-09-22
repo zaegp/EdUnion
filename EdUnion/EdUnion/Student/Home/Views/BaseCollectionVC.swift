@@ -2,7 +2,7 @@
 //  BaseCollectionVC.swift
 //  EdUnion
 //
-//  Created by Rowan Su on 2024/9/21.
+//  Created by Rowan Su on 2024/9/22.
 //
 
 import UIKit

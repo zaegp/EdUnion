@@ -16,26 +16,16 @@ class CalendarVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
-        
         addChild(calendarHostingController)
         view.addSubview(calendarHostingController.view)
         calendarHostingController.didMove(toParent: self)
         setupConstraints()
     }
     
-    @objc func shareTapped() {
-        let itemsToShare = ["這是我要分享的內容", URL(string: "https://www.example.com")!] as [Any]
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        let activityViewController = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
-        
-        activityViewController.excludedActivityTypes = [
-            .print,
-            .assignToContact,
-            .addToReadingList
-        ]
-        
-        present(activityViewController, animated: true, completion: nil)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     private func setupConstraints() {
