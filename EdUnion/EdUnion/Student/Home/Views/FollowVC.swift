@@ -13,4 +13,9 @@ class FollowVC: BaseCollectionVC {
         self.viewModel = FollowViewModel()
         super.viewDidLoad()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchData()
+    }
 }

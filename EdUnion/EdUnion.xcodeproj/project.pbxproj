@@ -42,6 +42,8 @@
 		51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619DC2CA06C1A00EAC4B8 /* BaseCollectionVC.swift */; };
 		51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619DE2CA06C6D00EAC4B8 /* AllTeacherVC.swift */; };
 		51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */; };
+		51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */; };
+		51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */; };
 		51D25C792C9A6BAB0083EECF /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */; };
 		51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7B2C9A81D80083EECF /* ResumeVC.swift */; };
 		51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */; };
@@ -153,6 +155,8 @@
 		51B619DC2CA06C1A00EAC4B8 /* BaseCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionVC.swift; sourceTree = "<group>"; };
 		51B619DE2CA06C6D00EAC4B8 /* AllTeacherVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllTeacherVC.swift; sourceTree = "<group>"; };
 		51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentHomeVC.swift; sourceTree = "<group>"; };
+		51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequentlyUsedViewModel.swift; sourceTree = "<group>"; };
+		51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		51D25C7B2C9A81D80083EECF /* ResumeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeVC.swift; sourceTree = "<group>"; };
 		51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesVC.swift; sourceTree = "<group>"; };
 		51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesCell.swift; sourceTree = "<group>"; };
@@ -347,6 +351,7 @@
 				51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */,
 				519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */,
 				519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */,
+				51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -432,6 +437,7 @@
 			children = (
 				519C8EF62C95C6D6007DFCBA /* AllTeacherViewModel.swift */,
 				51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */,
+				51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -813,12 +819,14 @@
 				51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */,
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
+				51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */,
 				51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
 				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,
 				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,
 				519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */,
 				51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */,
+				51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */,
 				51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */,
 				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
 				51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */,

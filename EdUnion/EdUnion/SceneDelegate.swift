@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        let chatVC = AvailableTimeSlotsVC(teacherID: "001")
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = TabBarController()
-        window?.makeKeyAndVisible()
+        
         window?.makeKeyAndVisible()
     }
 

@@ -40,7 +40,6 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         }
     }
 
-    // 設置 UICollectionView 和佈局
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         

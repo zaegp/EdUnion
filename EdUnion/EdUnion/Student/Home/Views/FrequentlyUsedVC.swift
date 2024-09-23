@@ -7,10 +7,15 @@
 
 import UIKit
 
-class FrequentlyUsedVC: UIViewController {
+class FrequentlyUsedVC: BaseCollectionVC {
     override func viewDidLoad() {
+        self.viewModel = FrequentlyUsedViewModel()
         super.viewDidLoad()
-        view.backgroundColor = .green  // 測試背景色
-        // 這裡可以添加常用頁面的內容
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        viewModel.fetchData()
     }
 }

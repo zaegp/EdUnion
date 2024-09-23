@@ -9,18 +9,14 @@ import UIKit
 import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
+import IQKeyboardManagerSwift
 
-import UIKit
-import AVFoundation
-import FirebaseStorage
-import FirebaseFirestore
-
-class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     private var viewModel: ChatViewModel!
     private let tableView = UITableView()
     
-    var teacherID: String = ""  // 從 TeacherDetailVC 傳遞
+    var teacherID: String = ""  
     var studentID: String = ""
     
     private let messageInputBar = UIView()
@@ -33,6 +29,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     private var recordingSession: AVAudioSession!
     private var audioFilename: URL?
     
+    private var bottomConstraint: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -42,6 +40,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupMessageInputBar()
         setupTableView()
         setupRecordingSession()
+        setupKeyboardNotifications()
         
         viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID, otherParticipantID: teacherID)
         
@@ -51,27 +50,42 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         
         messageTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        messageTextField.delegate = self
         
-//        self.navigationItem.hidesBackButton = true
-           
-           // 添加自定義的 back 按鈕
-//           let customBackButton = UIBarButtonItem(title: "Back to Chat List", style: .plain, target: self, action: #selector(backToChatList))
-//           self.navigationItem.leftBarButtonItem = customBackButton
+        //        self.navigationItem.hidesBackButton = true
         
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        // 添加自定義的 back 按鈕
+        //           let customBackButton = UIBarButtonItem(title: "Back to Chat List", style: .plain, target: self, action: #selector(backToChatList))
+        //           self.navigationItem.leftBarButtonItem = customBackButton
     }
+    override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            
+            // 禁用 IQKeyboardManager
+            IQKeyboardManager.shared.enable = false
+            setupKeyboardDismissRecognizer()
+        }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
+        IQKeyboardManager.shared.enable = true
+        
         if self.isMovingFromParent {
-            // 如果是因為點擊返回按鈕而觸發的
             if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
                 navigationController?.popToViewController(chatListVC, animated: true)
             }
         }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        sendMessage()
+        return true
+    }
+    
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     private func setupNavigationBar() {
@@ -124,10 +138,13 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         messageInputBar.addSubview(sendButton)
         messageInputBar.addSubview(photoButton)
         messageInputBar.addSubview(recordButton)
+        messageInputBar.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(messageInputBar)
-        messageInputBar.translatesAutoresizingMaskIntoConstraints = false
+        bottomConstraint = messageInputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        
         NSLayoutConstraint.activate([
+            bottomConstraint,
             messageInputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             messageInputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             messageInputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -272,14 +289,23 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     @objc private func handleKeyboardWillShow(notification: NSNotification) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            messageInputBar.frame.origin.y = view.frame.height - keyboardFrame.height - messageInputBar.frame.height
-            tableView.contentInset.bottom = keyboardFrame.height
+            let keyboardHeight = keyboardFrame.height
+            
+            UIView.animate(withDuration: 0.3) {
+                self.bottomConstraint.constant = -keyboardHeight
+                self.view.layoutIfNeeded()
+            }
+            
+            tableView.contentInset.bottom = keyboardHeight
             scrollToBottom()
         }
     }
     
     @objc private func handleKeyboardWillHide(notification: NSNotification) {
-        messageInputBar.frame.origin.y = view.frame.height - messageInputBar.frame.height
+        UIView.animate(withDuration: 0.3) {
+            self.bottomConstraint.constant = 0
+            self.view.layoutIfNeeded()
+        }
         tableView.contentInset.bottom = 0
     }
     
@@ -319,7 +345,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
     }
 }
-
 
 extension ChatVC: ChatTableViewCellDelegate {
     func chatTableViewCell(_ cell: ChatTableViewCell, didTapImage image: UIImage) {

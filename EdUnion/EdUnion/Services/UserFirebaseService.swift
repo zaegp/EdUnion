@@ -45,6 +45,20 @@ class UserFirebaseService {
         }
     }
     
+    func fetchFrequentlyUsedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
+        // 首先根據學生 ID 獲取 followList
+        db.collection("students").document(studentID).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = snapshot?.data(), let usedList = data["usedList"] as? [String] {
+                // 查詢 followList 中的所有老師
+                self.fetchTeachers(for: usedList, completion: completion)
+            } else {
+                completion(.failure(NSError(domain: "Invalid usedList", code: 404, userInfo: nil)))
+            }
+        }
+    }
+    
     func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void) {
             let studentRef = db.collection("students").document(studentID)
             

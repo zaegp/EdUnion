@@ -12,6 +12,9 @@ class ChatListVC: UIViewController {
     
     private let tableView = UITableView()
     private let searchBar = UISearchBar()
+    private let cancelButton = UIButton(type: .system)
+    private var searchBarWidthConstraint: NSLayoutConstraint?
+    
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
     private let participantID: String = studentID
@@ -19,6 +22,7 @@ class ChatListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         
         setupUI()
 
@@ -27,6 +31,7 @@ class ChatListVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         observeChatRooms()
+        
         tabBarController?.tabBar.isHidden = false
     }
     
@@ -40,16 +45,86 @@ class ChatListVC: UIViewController {
         searchBar.delegate = self
         searchBar.placeholder = "搜尋"
         searchBar.sizeToFit()
-        navigationItem.titleView = searchBar
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 設置取消按鈕
+        cancelButton.setTitle("取消", for: .normal)
+        cancelButton.tintColor = .backButton
+        cancelButton.isHidden = true  // 初始狀態隱藏
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // 創建一個容器來包含 searchBar 和 cancelButton
+        let searchContainer = UIView()
+        searchContainer.translatesAutoresizingMaskIntoConstraints = false
+        searchContainer.addSubview(searchBar)
+        searchContainer.addSubview(cancelButton)
+
+        // 設置 searchContainer 作為 navigationItem 的 titleView
+        navigationItem.titleView = searchContainer
+
+        // 設置 searchBar 和 cancelButton 的約束
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)  // 初始時寬度等於容器寬度
+
+        NSLayoutConstraint.activate([
+            searchContainer.widthAnchor.constraint(equalToConstant: view.frame.width),  // 根據需要調整這個寬度
+            searchContainer.heightAnchor.constraint(equalToConstant: 44),
+            // 設置 searchBar 的約束
+            searchBar.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor),
+            searchBar.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor),
+            searchBarWidthConstraint!,  // 設置初始寬度
+
+            // 設置取消按鈕的約束
+            cancelButton.leadingAnchor.constraint(equalTo: searchBar.trailingAnchor),
+            cancelButton.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
+            cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor)
+        ])
         
         // 設置 TableView
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ChatRoomCell.self, forCellReuseIdentifier: "chatRoomCell")
         tableView.frame = self.view.bounds
-        tableView.tableFooterView = UIView() // 移除空行的分隔線
+        tableView.tableFooterView = UIView()
         self.view.addSubview(tableView)
     }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+            cancelButton.isHidden = false
+
+            searchBarWidthConstraint?.isActive = false
+            searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor, multiplier: 0.85)
+            searchBarWidthConstraint?.isActive = true
+
+            // 使用動畫效果
+            UIView.animate(withDuration: 0.3) {
+                self.navigationItem.titleView?.layoutIfNeeded()
+            }
+        }
+
+        @objc private func cancelButtonTapped() {
+            searchBar.text = ""
+            searchBar.resignFirstResponder()  // 隱藏鍵盤
+
+            // 恢復 searchBar 寬度
+            searchBarWidthConstraint?.isActive = false
+            searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor)
+            searchBarWidthConstraint?.isActive = true
+
+            // 隱藏取消按鈕
+            UIView.animate(withDuration: 0.3) {
+                self.cancelButton.isHidden = true
+                self.navigationItem.titleView?.layoutIfNeeded()
+            }
+
+            // 重新加載數據
+            tableView.reloadData()
+        }
+
+        // 當點擊 Return 按鈕時隱藏鍵盤
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
     
     // 監聽聊天室變化
     private func observeChatRooms() {
@@ -221,5 +296,7 @@ extension ChatListVC: UISearchBarDelegate {
         }
         tableView.reloadData()
     }
+       
 }
+
 

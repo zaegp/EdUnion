@@ -31,15 +31,16 @@ class ResumeVC: UIViewController {
         
         setupUI()
         fetchResumeData()
+        setupKeyboardDismissRecognizer()
     }
     
     // 設置 UI 布局
     func setupUI() {
             // 配置標籤內容
-            label1.text = "學校"
-            label2.text = "工作經驗"
-            label3.text = "問候語"  // 這個將用來對應 UITextView
-            label4.text = "首頁的一句話"
+            label1.text = "學歷"
+            label2.text = "家教經驗"
+            label3.text = "自我介紹" 
+            label4.text = "教學科目"
             
             // 配置文本框樣式
             for textField in [textField1, textField2, textField4] {
@@ -99,13 +100,11 @@ class ResumeVC: UIViewController {
             
             if let document = document, document.exists {
                 if let resume = document.data()?["resume"] as? [String] {
-                    // 設置文本框初始值
-                    if resume.count >= 4 {
-                        self.textField1.text = resume[0]
-                        self.textField2.text = resume[1]
-                        self.textView3.text = resume[2]
-                        self.textField4.text = resume[3]
-                    }
+                    self.textField1.text = resume[0]
+                    self.textField2.text = resume[1]
+                    self.textView3.text = resume[2]
+                    self.textField4.text = resume[3]
+                    
                 }
             }
         }
