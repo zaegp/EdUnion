@@ -35,7 +35,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         super.viewDidLoad()
         view.backgroundColor = .white
         tabBarController?.tabBar.isHidden = true
-        
+            
         setupNavigationBar()
         setupMessageInputBar()
         setupTableView()
@@ -89,7 +89,22 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func setupNavigationBar() {
-        let imageView = UIImageView(image: UIImage(systemName: "person.circle"))
+        
+        let imageView = UIImageView()
+        
+        UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
+            switch result {
+            case .success(let teacher):
+                print("查詢成功: \(teacher.name)")
+                if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
+                    imageView.kf.setImage(with: url)
+                } else {
+                    print("沒有圖片 URL")
+                }
+            case .failure(let error):
+                print("查詢失敗: \(error.localizedDescription)")
+            }
+        }
         
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 20
@@ -100,11 +115,11 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         containerView.addSubview(imageView)
         
         NSLayoutConstraint.activate([
-            imageView.widthAnchor.constraint(equalToConstant: 40),
-            imageView.heightAnchor.constraint(equalToConstant: 40),
-            imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
-        ])
+                imageView.widthAnchor.constraint(equalToConstant: 40),
+                imageView.heightAnchor.constraint(equalToConstant: 40),
+                imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+                imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+            ])
         
         containerView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         

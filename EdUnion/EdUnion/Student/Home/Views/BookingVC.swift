@@ -22,11 +22,11 @@ class BookingVC: UIViewController {
             return
         }
         
-        setupBookingView(selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
+        setupBookingView(teacherID: teacher!.id, selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
     }
     
-    func setupBookingView(selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {
-            let bookingView = BookingView(selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
+    func setupBookingView(teacherID: String, selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {
+        let bookingView = BookingView(teacherID: teacherID, selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
             let hostingController = UIHostingController(rootView: bookingView)
             
             addChild(hostingController)

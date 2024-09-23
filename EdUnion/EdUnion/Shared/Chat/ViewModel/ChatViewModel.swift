@@ -16,6 +16,7 @@ class ChatViewModel {
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []
     private let otherParticipantID: String
+
     
     var onMessagesUpdated: (() -> Void)?
     
@@ -194,4 +195,5 @@ class ChatViewModel {
             }
         }
     }
+
 }

@@ -11,12 +11,14 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     private let tableView = UITableView()
     private var userImageView: UIImageView!
+    let nameLabel = UILabel()
     
     let data = [
         ("分析", "chart.bar"),
         ("可選時段", "calendar.badge.plus"),
         ("履歷", "list.bullet.clipboard"),
-        ("待確認的預約", "bell")
+        ("待確認的預約", "bell"),
+        ("所有學生列表", "person.3.fill")
     ]
     
     override func viewDidLoad() {
@@ -52,23 +54,37 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func setupTableHeaderView() {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 150))
-        headerView.backgroundColor = UIColor.systemGray6
+        headerView.backgroundColor = .white
         
-        userImageView = UIImageView(image: UIImage(systemName: "person.circle"))
-        userImageView.tintColor = UIColor(red: 0.92, green: 0.37, blue: 0.16, alpha: 1.00)
+        userImageView = UIImageView()
         userImageView.contentMode = .scaleAspectFit
         userImageView.translatesAutoresizingMaskIntoConstraints = false
         userImageView.layer.cornerRadius = 40
         userImageView.clipsToBounds = true
         userImageView.isUserInteractionEnabled = true
         
+        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
+            switch result {
+            case .success(let student):
+                let imageUrlString = student.photoURL
+                if let url = URL(string: imageUrlString) {
+                    self.userImageView.kf.setImage(with: url)
+                    
+                } else {
+                    self.userImageView.image = UIImage(systemName: "person.circle")
+                }
+                self.nameLabel.text = student.name
+            case .failure(let error):
+                print("查詢失敗: \(error.localizedDescription)")
+            }
+        }
+        
         headerView.addSubview(userImageView)
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
         userImageView.addGestureRecognizer(tapGesture)
         
-        let nameLabel = UILabel()
-        nameLabel.text = "姓名"
+        
         nameLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -167,6 +183,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         case "待確認的預約":
             let confirmVC = ConfirmVC()
             navigationController?.pushViewController(confirmVC, animated: true)
+        case "所有學生列表":
+                let studentListVC = AllStudentVC()
+                navigationController?.pushViewController(studentListVC, animated: true)
         default:
             break
         }

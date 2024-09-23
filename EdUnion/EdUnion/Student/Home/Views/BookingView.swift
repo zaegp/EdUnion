@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseCore
 
 struct BookingView: View {
+    let teacherID: String 
     let selectedTimeSlots: [String: String]
     let timeSlots: [AvailableTimeSlot]
     
@@ -19,8 +20,17 @@ struct BookingView: View {
     @State private var bookedSlots: [String] = []
     
     var availableDates: [String] {
-        return Array(selectedTimeSlots.keys).sorted()
-    }
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd" // 假設你的日期是這個格式，根據實際情況調整
+            
+            let today = Date()
+            return Array(selectedTimeSlots.keys).filter { dateString in
+                if let date = dateFormatter.date(from: dateString) {
+                    return date >= today  // 過濾掉早於今天的日期
+                }
+                return false
+            }.sorted()
+        }
     
     var body: some View {
         VStack {
@@ -221,6 +231,14 @@ struct BookingView: View {
                 showingAlert = true
                 selectedDate = nil
                 selectedTimes = []
+            }
+        }
+        
+        UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacherID, listName: "usedList") { error in
+            if let error = error {
+                print("更新 usedList 失敗: \(error)")
+            } else {
+                print("成功更新 usedList")
             }
         }
     }

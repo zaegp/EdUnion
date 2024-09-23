@@ -13,7 +13,7 @@ class CalendarService {
     static let shared = CalendarService()
     var activitiesByDate: [Date: [Appointment]] = [:]
     
-    private init() {}  // 私有構造函數，確保是單例
+    private init() {}  
 }
 
 struct CalendarDayView: View {
@@ -21,36 +21,42 @@ struct CalendarDayView: View {
     let isSelected: Bool
     let isCurrentMonth: Bool
     let color: Color
-    
+
     var body: some View {
-            VStack(spacing: 5) {
-                if let day = day {
-                    let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
-                    
-                    Text(day.formatted(.dateTime.day()))
-                        .fontWeight(.bold)
-                        .foregroundColor(isSelected ? .white : (isPastDate ? .gray : (isCurrentMonth ? .primary : .gray)))
-                        .frame(maxWidth: .infinity, minHeight: 40)
-                        .background(
-                            Circle()
-                                .fill(isSelected ? Color.black : Color.clear)
-                        )
-                    
-                    if isCurrentMonth && !isPastDate {
-                        ZStack {
-                            Circle()
-                                .fill(color != .clear ? color : Color.clear)
-                                .frame(width: 8, height: 8)
-                        }
-                        .frame(height: 10)
-                    }
-                } else {
-                    Text("")
-                        .frame(maxWidth: .infinity, minHeight: 40)
+        VStack(spacing: 5) {
+            if let day = day {
+                let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
+                
+                Text(day.formatted(.dateTime.day()))
+                    .fontWeight(.bold)
+                    .foregroundColor(isSelected ? .white : (isPastDate ? .gray : (isCurrentMonth ? .primary : .gray)))
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                    .background(
+                        Circle()
+                            .fill(isSelected ? Color.black : Color.clear)
+                    )
+                
+                ZStack {
+                    Circle()
+                        .fill(isCurrentMonth && !isPastDate && color != .clear ? color : Color.clear)
+                        .frame(width: 8, height: 8)
                 }
+                .frame(height: 10)  // 保持每個日期的圓點佔位符高度一致
+            } else {
+                Text("")
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                
+                ZStack {
+                    // 空的圓點佔位符，確保所有日期佈局一致
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 8, height: 8)
+                }
+                .frame(height: 10)
             }
-            .frame(height: 60)
         }
+        .frame(height: 60)
+    }
 }
 
 struct BaseCalendarView: View {
@@ -62,8 +68,6 @@ struct BaseCalendarView: View {
     @State private var isShowingDetail = false
     @State private var selectedAppointment: Appointment?
     
-    
-    // 這裡選擇使用外部綁定還是本地狀態
     var dateColors: [Date: Color] {
         get {
             externalDateColors ?? internalDateColors

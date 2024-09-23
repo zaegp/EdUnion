@@ -11,7 +11,6 @@
 		519C8EBB2C92D354007DFCBA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBA2C92D354007DFCBA /* FirebaseAuth */; };
 		519C8EBD2C92D354007DFCBA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBC2C92D354007DFCBA /* FirebaseFirestore */; };
 		519C8EBF2C92D354007DFCBA /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBE2C92D354007DFCBA /* FirebaseStorage */; };
-		519C8EC82C939AF9007DFCBA /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EC72C939AF9007DFCBA /* CalendarView.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
 		519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */; };
 		519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */; };
@@ -39,6 +38,8 @@
 		519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F152C9964FE007DFCBA /* ChatRoom.swift */; };
 		519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */; };
 		519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8F192C998401007DFCBA /* Date+Ext.swift */; };
+		519E14962CA16CF100E344CE /* Student.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519E14952CA16CF100E344CE /* Student.swift */; };
+		519E14982CA1884200E344CE /* AllStudentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519E14972CA1884200E344CE /* AllStudentVC.swift */; };
 		51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619DC2CA06C1A00EAC4B8 /* BaseCollectionVC.swift */; };
 		51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619DE2CA06C6D00EAC4B8 /* AllTeacherVC.swift */; };
 		51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */; };
@@ -52,7 +53,6 @@
 		51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */; };
 		51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */; };
 		51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C892C9B32570083EECF /* BaseCalendarView.swift */; };
-		51D25C8C2C9B32AA0083EECF /* CourseCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */; };
 		51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */; };
 		51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C932C9D4C2D0083EECF /* TimeService.swift */; };
 		51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C972C9E40790083EECF /* BaseCalendarViewModel.swift */; };
@@ -125,7 +125,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		519C8EC72C939AF9007DFCBA /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsCell.swift; sourceTree = "<group>"; };
 		519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsVC.swift; sourceTree = "<group>"; };
 		519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTimePickerVC.swift; sourceTree = "<group>"; };
@@ -152,6 +151,8 @@
 		519C8F152C9964FE007DFCBA /* ChatRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		519C8F172C997FC3007DFCBA /* ConfirmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmViewModel.swift; sourceTree = "<group>"; };
 		519C8F192C998401007DFCBA /* Date+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Ext.swift"; sourceTree = "<group>"; };
+		519E14952CA16CF100E344CE /* Student.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Student.swift; sourceTree = "<group>"; };
+		519E14972CA1884200E344CE /* AllStudentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllStudentVC.swift; sourceTree = "<group>"; };
 		51B619DC2CA06C1A00EAC4B8 /* BaseCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionVC.swift; sourceTree = "<group>"; };
 		51B619DE2CA06C6D00EAC4B8 /* AllTeacherVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllTeacherVC.swift; sourceTree = "<group>"; };
 		51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentHomeVC.swift; sourceTree = "<group>"; };
@@ -164,7 +165,6 @@
 		51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesViewModel.swift; sourceTree = "<group>"; };
 		51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentFirebaseService.swift; sourceTree = "<group>"; };
 		51D25C892C9B32570083EECF /* BaseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCalendarView.swift; sourceTree = "<group>"; };
-		51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseCalendarView.swift; sourceTree = "<group>"; };
 		51D25C8D2C9BC3030083EECF /* ColorPickerCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerCalendarView.swift; sourceTree = "<group>"; };
 		51D25C932C9D4C2D0083EECF /* TimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeService.swift; sourceTree = "<group>"; };
 		51D25C972C9E40790083EECF /* BaseCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCalendarViewModel.swift; sourceTree = "<group>"; };
@@ -306,9 +306,7 @@
 		519C8EC62C939ADE007DFCBA /* View */ = {
 			isa = PBXGroup;
 			children = (
-				519C8EC72C939AF9007DFCBA /* CalendarView.swift */,
 				519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */,
-				51D25C8B2C9B32AA0083EECF /* CourseCalendarView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -320,6 +318,7 @@
 				51D25C7A2C9A81B40083EECF /* Resume */,
 				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
+				519E14972CA1884200E344CE /* AllStudentVC.swift */,
 			);
 			path = Teacher;
 			sourceTree = "<group>";
@@ -552,6 +551,7 @@
 				51ED0AE12C916722006322B7 /* LaunchScreen.storyboard */,
 				51ED0B152C918080006322B7 /* GoogleService-Info.plist */,
 				51ED0AE42C916722006322B7 /* Info.plist */,
+				519E14952CA16CF100E344CE /* Student.swift */,
 			);
 			path = EdUnion;
 			sourceTree = "<group>";
@@ -802,7 +802,6 @@
 				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
 				51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */,
 				519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */,
-				519C8EC82C939AF9007DFCBA /* CalendarView.swift in Sources */,
 				51ED0B072C917A0F006322B7 /* Message.swift in Sources */,
 				519C8EFB2C95CC9A007DFCBA /* Teacher.swift in Sources */,
 				519C8F092C97FE18007DFCBA /* ConfirmVC.swift in Sources */,
@@ -829,14 +828,15 @@
 				51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */,
 				51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */,
 				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
+				519E14962CA16CF100E344CE /* Student.swift in Sources */,
 				51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,
 				519C8EFD2C95CD45007DFCBA /* TeacherDetailVC.swift in Sources */,
 				519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */,
 				51D25C9E2C9E60C00083EECF /* FollowViewModel.swift in Sources */,
+				519E14982CA1884200E344CE /* AllStudentVC.swift in Sources */,
 				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
 				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
-				51D25C8C2C9B32AA0083EECF /* CourseCalendarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* AllTeacherViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

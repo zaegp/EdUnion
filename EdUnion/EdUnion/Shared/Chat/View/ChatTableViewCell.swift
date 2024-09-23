@@ -203,7 +203,7 @@ class ChatTableViewCell: UITableViewCell {
         
         NSLayoutConstraint.activate([
             timestampLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
-            timestampLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            timestampLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
         ])
     }
     
@@ -231,18 +231,26 @@ class ChatTableViewCell: UITableViewCell {
             messageLabel.text = message.content
             messageLabel.isHidden = false
 
+//        case 1:
+//            bubbleBackgroundView.isHidden = true
+//            messageImageView.isHidden = false
+//            toggleImageButton.isHidden = false
+//            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+//            
+//            if let localImage = image {
+//                messageImageView.image = localImage
+//                activityIndicator.startAnimating()
+//            } else {
+//                loadImage(from: message.content)
+//            }
         case 1:
-            bubbleBackgroundView.isHidden = true
-            messageImageView.isHidden = false
-            toggleImageButton.isHidden = false
-            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            
-            if let localImage = image {
-                messageImageView.image = localImage
-                activityIndicator.startAnimating()
-            } else {
+                bubbleBackgroundView.isHidden = true
+                messageImageView.isHidden = false
+                toggleImageButton.isHidden = false
+                setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+
+                // 直接從 message.content 重新載入圖片
                 loadImage(from: message.content)
-            }
 
         case 2:
             bubbleBackgroundView.isHidden = false
@@ -330,28 +338,43 @@ class ChatTableViewCell: UITableViewCell {
         ])
     }
     
+//    private func loadImage(from urlString: String) {
+//        guard let url = URL(string: urlString) else { return }
+//        
+//        let processor = DownsamplingImageProcessor(size: CGSize(width: 200, height: 200))
+//        messageImageView.kf.indicatorType = .activity
+//        messageImageView.kf.setImage(
+//            with: url,
+////            placeholder: UIImage(systemName: "photo"),
+//            options: [
+//                .processor(processor),
+//                .scaleFactor(UIScreen.main.scale),
+//                .transition(.fade(0.3)),
+//                .cacheOriginalImage
+//            ]) { [weak self] result in
+//                switch result {
+//                case .success(_):
+//                    self?.activityIndicator.stopAnimating()
+//                case .failure(let error):
+//                    print("圖片加載失敗: \(error.localizedDescription)")
+//                    self?.activityIndicator.stopAnimating()
+//                }
+//            }
+//    }
+    
     private func loadImage(from urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        
-        let processor = DownsamplingImageProcessor(size: CGSize(width: 200, height: 200))
-        messageImageView.kf.indicatorType = .activity
-        messageImageView.kf.setImage(
-            with: url,
-//            placeholder: UIImage(systemName: "photo"),
-            options: [
-                .processor(processor),
-                .scaleFactor(UIScreen.main.scale),
-                .transition(.fade(0.3)),
-                .cacheOriginalImage
-            ]) { [weak self] result in
+        if let url = URL(string: urlString) {
+            // 使用您選擇的網路圖片加載庫，例如 Kingfisher 或 SDWebImage
+            messageImageView.kf.setImage(with: url) { result in
                 switch result {
                 case .success(_):
-                    self?.activityIndicator.stopAnimating()
+                    self.activityIndicator.stopAnimating()
                 case .failure(let error):
-                    print("圖片加載失敗: \(error.localizedDescription)")
-                    self?.activityIndicator.stopAnimating()
+                    print("圖片加載失敗: \(error)")
+                    self.activityIndicator.stopAnimating()
                 }
             }
+        }
     }
     
     private func formatDate(_ date: Date) -> String {

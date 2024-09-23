@@ -30,6 +30,30 @@ class UserFirebaseService {
         }
     }
     
+    func fetchTeacher(by id: String, completion: @escaping (Result<Teacher, Error>) -> Void) {
+        db.collection("teachers").document(id).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let teacher = try? snapshot?.data(as: Teacher.self) {
+                completion(.success(teacher))
+            } else {
+                completion(.failure(NSError(domain: "No teacher found", code: 404, userInfo: nil)))
+            }
+        }
+    }
+    
+    func fetchStudent(by id: String, completion: @escaping (Result<Student, Error>) -> Void) {
+        db.collection("students").document(id).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let student = try? snapshot?.data(as: Student.self) {
+                completion(.success(student))
+            } else {
+                completion(.failure(NSError(domain: "No student found", code: 404, userInfo: nil)))
+            }
+        }
+    }
+        
     // 在 UserFirebaseService 中新增方法
     func fetchFollowedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
         // 首先根據學生 ID 獲取 followList
@@ -84,21 +108,37 @@ class UserFirebaseService {
             }
         }
     
-    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
-            let studentRef = db.collection("students").document(studentID)
-            
-            studentRef.updateData([
-                "followList": FieldValue.arrayUnion([teacherID])
-            ]) { error in
-                if let error = error {
-                    print("更新 followList 時出錯: \(error.localizedDescription)")
-                    completion(error)
-                } else {
-                    print("成功添加老師到 followList")
-                    completion(nil)  // 更新成功
-                }
+    func updateStudentList(studentID: String, teacherID: String, listName: String, completion: @escaping (Error?) -> Void) {
+        let studentRef = db.collection("students").document(studentID)
+        
+        studentRef.updateData([
+            listName: FieldValue.arrayUnion([teacherID])
+        ]) { error in
+            if let error = error {
+                print("更新 \(listName) 時出錯: \(error.localizedDescription)")
+                completion(error)
+            } else {
+                print("成功添加老師到 \(listName)")
+                completion(nil)  // 更新成功
             }
         }
+    }
+    
+//    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
+//            let studentRef = db.collection("students").document(studentID)
+//            
+//            studentRef.updateData([
+//                "followList": FieldValue.arrayUnion([teacherID])
+//            ]) { error in
+//                if let error = error {
+//                    print("更新 followList 時出錯: \(error.localizedDescription)")
+//                    completion(error)
+//                } else {
+//                    print("成功添加老師到 followList")
+//                    completion(nil)  // 更新成功
+//                }
+//            }
+//        }
 
     // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
