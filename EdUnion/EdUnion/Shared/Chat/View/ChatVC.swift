@@ -55,7 +55,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         //        self.navigationItem.hidesBackButton = true
         
-        // 添加自定義的 back 按鈕
         //           let customBackButton = UIBarButtonItem(title: "Back to Chat List", style: .plain, target: self, action: #selector(backToChatList))
         //           self.navigationItem.leftBarButtonItem = customBackButton
     }
@@ -157,7 +156,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         messageTextView.isScrollEnabled = false
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 32)
-        
         
         sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
         sendButton.tintColor = .mainOrange
@@ -390,19 +388,16 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     func textViewDidChange(_ textView: UITextView) {
         let size = textView.sizeThatFits(CGSize(width: textView.frame.width, height: CGFloat.greatestFiniteMagnitude))
         
-        // 限制高度最大值，比如 100
         let maxHeight: CGFloat = 100
         let newHeight = min(size.height, maxHeight)
         
-        // 更新 messageInputBar 的高度
         if newHeight != messageInputBar.frame.height {
             UIView.animate(withDuration: 0.2) {
-                self.messageInputBar.frame.size.height = newHeight + 16 // 添加上下 margin
+                self.messageInputBar.frame.size.height = newHeight + 16
                 self.view.layoutIfNeeded()
             }
         }
         
-        // 控制 sendButton 和 recordButton 的顯示
         if let text = textView.text, !text.isEmpty {
             sendButton.isHidden = false
             recordButton.isHidden = true
@@ -420,3 +415,4 @@ extension ChatVC: ChatTableViewCellDelegate {
     }
     
 }
+

@@ -10,6 +10,7 @@ import SwiftUI
 
 class CalendarVC: UIViewController {
     
+//    @State private var selectedDay: Date = Date()
     private let calendarHostingController = UIHostingController(rootView: BaseCalendarView(externalDateColors: .constant(nil), viewModel: BaseCalendarViewModel()))
 //    private let calendarHostingController = UIHostingController(rootView: ColorPickerCalendarView())
     

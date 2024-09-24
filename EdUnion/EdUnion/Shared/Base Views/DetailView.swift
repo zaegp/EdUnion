@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DetailView: View {
-    let appointment: Appointment  // 需要傳遞的預約數據
+    let appointment: Appointment
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -20,7 +20,6 @@ struct DetailView: View {
                 .font(.body)
                 .padding()
 
-            // 根據需要展示其他預約詳情
             Spacer()
         }
         .navigationTitle("Appointment Details")

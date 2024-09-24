@@ -35,11 +35,11 @@ class TodayCoursesViewModel {
                 switch result {
                 case .success(let studentNote):
                     self?.studentNote = studentNote ?? "沒有備註"
-                    self?.updateUI?() // 成功後更新 UI
+                    self?.updateUI?()
                 case .failure(let error):
                     print("獲取學生備註時出錯: \(error.localizedDescription)")
                     self?.studentNote = "Unknown Student"
-                    self?.updateUI?() // 更新 UI 以反映錯誤狀況
+                    self?.updateUI?()
                 }
             }
         }
@@ -59,7 +59,6 @@ class TodayCoursesViewModel {
            return appointments.filter { $0.status == "completed" }.count
        }
        
-       // 計算進度值
        var progressValue: Double {
            guard appointments.count > 0 else { return 0 }
            return Double(completedAppointmentsCount) / Double(appointments.count)
@@ -69,12 +68,10 @@ class TodayCoursesViewModel {
         AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .completed) { [weak self] result in
             switch result {
             case .success:
-                // 本地更新課程狀態
                 if let index = self?.appointments.firstIndex(where: { $0.id == appointmentID }) {
                     self?.appointments[index].status = "completed"
                 }
                 
-                // 更新老師的總課程數
                 AppointmentFirebaseService.shared.incrementTeacherTotalCourses(teacherID: teacherID) { result in
                     switch result {
                     case .success:

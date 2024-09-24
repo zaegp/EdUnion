@@ -134,7 +134,7 @@ class TeacherDetailVC: UIViewController {
         
         chatButton.setTitle("進入聊天室", for: .normal)
         chatButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-        chatButton.backgroundColor = .blue
+        chatButton.backgroundColor = .mainOrange
         chatButton.setTitleColor(.white, for: .normal)
         chatButton.layer.cornerRadius = 10
         chatButton.translatesAutoresizingMaskIntoConstraints = false
@@ -196,15 +196,14 @@ class TeacherDetailVC: UIViewController {
     
     @objc private func chatButtonTapped() {
         let chatVC = ChatVC()
-        chatVC.teacherID = teacher?.id ?? ""  // 傳遞老師的 ID
-        chatVC.studentID = studentID ?? ""    // 傳遞學生的 ID
+        chatVC.teacherID = teacher?.id ?? ""
+        chatVC.studentID = studentID ?? ""    
         navigationController?.pushViewController(chatVC, animated: true)
     }
     
     @objc private func favoriteButtonTapped() {
         
         if isFavorite {
-            // 如果已收藏，則移除收藏
             UserFirebaseService.shared.removeTeacherFromFollowList(studentID: studentID, teacherID: teacher!.id) { error in
                 if let error = error {
                     print("從 followList 中移除老師時出錯: \(error.localizedDescription)")
@@ -215,7 +214,6 @@ class TeacherDetailVC: UIViewController {
                 }
             }
         } else {
-            // 如果未收藏，則添加到收藏
             UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacher!.id, listName: "followList") { error in
                 if let error = error {
                     print("更新 followList 失敗: \(error)")

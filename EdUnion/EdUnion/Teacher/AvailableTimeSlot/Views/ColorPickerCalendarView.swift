@@ -15,18 +15,18 @@ struct ColorPickerCalendarView: View {
     @State private var availableColors: [Color] = []
     @State private var activitiesByDate: [Date: [Appointment]] = [:]
     @State private var timeSlots: [AvailableTimeSlot] = []
-
+    
     var body: some View {
         BaseCalendarView(
             externalDateColors: Binding(
-                            get: { dateColors },             // 獲取非可選的 @State
-                            set: { dateColors = $0 ?? [:] }  // 處理可能的 nil，設置為空字典
+                get: { dateColors },
+                set: { dateColors = $0 ?? [:] }
             ), viewModel: BaseCalendarViewModel(),
 //            selectedDay: $selectedDay,
-//            appointments: appointments,
-//            activitiesByDate: activitiesByDate,
+            //            appointments: appointments,
+            //            activitiesByDate: activitiesByDate,
             onDayTap: { day in
-                selectedDay = day
+                self.selectedDay = day
             },
             onDayLongPress: { day in
                 selectedDay = day
@@ -34,28 +34,35 @@ struct ColorPickerCalendarView: View {
             }
         )
         .sheet(isPresented: $showColorPicker) {
-                    if let selectedDay = selectedDay {
-                        let existingColor = dateColors[selectedDay]
-                        ColorPickerView(
-                            selectedDate: selectedDay,
-                            existingColor: existingColor,
-                            availableColors: availableColors,
-                            onSelectColor: { color in
-                                dateColors[selectedDay] = color
-                                saveDateColorToFirebase(date: selectedDay, color: color)
-                                selectNextDay()  // 選擇顏色後自動跳到下一天
-                            }
-                        )
-                        .presentationDetents([.fraction(0.25)])
-                    }
+            Group {
+                if let selectedDay = selectedDay {
+                    let existingColor = dateColors[selectedDay]
+                    ColorPickerView(
+                        selectedDate: selectedDay,
+                        existingColor: existingColor,
+                        availableColors: availableColors,
+                        onSelectColor: { color in
+                            dateColors[selectedDay] = color
+                            saveDateColorToFirebase(date: selectedDay, color: color)
+                            selectNextDay(onDayTap: { nextDay in
+                                // 更新選中的日期
+                                self.selectedDay = nextDay
+                            })
+                        }
+                    )
+                } else {
+                    Text("No date selected")
                 }
+            }
+            .presentationDetents([.fraction(0.25)])
+        }
         .onAppear {
             fetchDateColors()
             fetchTimeSlots()
             fetchAppointments()
         }
     }
-
+    
     private func fetchDateColors() {
         let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(teacherID)
         
@@ -74,22 +81,29 @@ struct ColorPickerCalendarView: View {
         }
     }
     
-    private func selectNextDay() {
-            guard let currentDay = selectedDay else { return }
-            
-            // 使用 Calendar 計算下一天的日期
-            if let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: currentDay) {
-                selectedDay = nextDay
+    private func selectNextDay(onDayTap: ((Date) -> Void)?) {
+        guard let currentDay = selectedDay else { return }
+        
+        if let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: currentDay) {
+            DispatchQueue.main.async {
+                // 更新當前選中的日期
+                self.selectedDay = nextDay
+                
+                // 調用傳入的 onDayTap 閉包
+                if let onDayTap = onDayTap {
+                    onDayTap(nextDay)  // 這裡實際調用了閉包，觸發 BaseCalendarView 的邏輯
+                }
             }
         }
-
+    }
+    
     private func fetchTimeSlots() {
         UserFirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { result in
             switch result {
             case .success(let fetchedTimeSlots):
                 DispatchQueue.main.async {
                     self.timeSlots = fetchedTimeSlots
-                    self.extractAvailableColors() // 這裡調用 extractAvailableColors() 方法來從時段中提取顏色
+                    self.extractAvailableColors()
                 }
             case .failure(let error):
                 print("獲取時段時出錯：\(error)")
@@ -98,13 +112,11 @@ struct ColorPickerCalendarView: View {
     }
     
     private func extractAvailableColors() {
-            // 假設每個 timeSlot 有一個 colorHex 屬性來表示顏色
-            let colorHexes = Set(timeSlots.map { $0.colorHex })  // 使用 Set 確保顏色唯一
-            self.availableColors = colorHexes.map { Color(hex: $0) }
-        }
-
+        let colorHexes = Set(timeSlots.map { $0.colorHex })
+        self.availableColors = colorHexes.map { Color(hex: $0) }
+    }
+    
     private func fetchAppointments() {
-        // Implement your method to fetch appointments
         AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: teacherID) { result in
             switch result {
             case .success(let fetchedAppointments):
@@ -117,10 +129,10 @@ struct ColorPickerCalendarView: View {
             }
         }
     }
-
+    
     private func mapAppointmentsToDates() {
         activitiesByDate.removeAll()
-
+        
         for appointment in appointments {
             if let date = dateFormatter.date(from: appointment.date) {
                 let startOfDay = Calendar.current.startOfDay(for: date)
@@ -132,12 +144,11 @@ struct ColorPickerCalendarView: View {
             }
         }
     }
-
+    
     private func saveDateColorToFirebase(date: Date, color: Color) {
-        // Implement your method to save the selected color to Firebase
         UserFirebaseService.shared.saveDateColorToFirebase(date: date, color: color, teacherID: teacherID)
     }
-
+    
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

@@ -13,12 +13,10 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
     var items: [Teacher] = []
     var onDataUpdate: (() -> Void)?
     private var listener: ListenerRegistration?
-        
-        deinit {
-            // 移除實時監聽，防止內存泄漏
-            listener?.remove()
-        }
-
+    
+    deinit {
+        listener?.remove()
+    }
     
     func fetchData() {
         UserFirebaseService.shared.fetchTeachersRealTime { [weak self] result in

@@ -33,8 +33,8 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
         return items[index]
     }
     
-    private func fetchFollowedTeachers() -> [Teacher] {
-        // 從數據源加載關注的老師列表
-        return []  // 返回測試數據或實際數據
-    }
+//    private func fetchFollowedTeachers() -> [Teacher] {
+//       
+//        return []
+//    }
 }

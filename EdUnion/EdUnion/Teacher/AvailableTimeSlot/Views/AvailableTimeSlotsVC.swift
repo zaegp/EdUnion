@@ -147,8 +147,8 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         let hostingController = UIHostingController(rootView: calendarView)
         //        navigationController?.pushViewController(hostingController, animated: true)
         hostingController.modalPresentationStyle = .pageSheet  // 或者 .pageSheet, .formSheet 等等
-            hostingController.modalTransitionStyle = .coverVertical  // 可以改成其他如 .flipHorizontal, .crossDissolve
-            
-            present(hostingController, animated: true, completion: nil)
+        hostingController.modalTransitionStyle = .coverVertical  // 可以改成其他如 .flipHorizontal, .crossDissolve
+        
+        present(hostingController, animated: true, completion: nil)
     }
 }

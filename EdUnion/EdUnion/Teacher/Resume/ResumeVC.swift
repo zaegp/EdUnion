@@ -10,7 +10,6 @@ import FirebaseFirestore
 
 class ResumeVC: UIViewController {
     
-    // 四個文本輸入框和對應的標籤
     let label1 = UILabel()
     let textField1 = UITextField()
     
@@ -34,51 +33,42 @@ class ResumeVC: UIViewController {
         setupKeyboardDismissRecognizer()
     }
     
-    // 設置 UI 布局
     func setupUI() {
-        // 配置標籤內容
         label1.text = "學歷"
         label2.text = "家教經驗"
-        label3.text = "教學科目"  // 這裡改成第四個的標題
-        label4.text = "自我介紹"  // 這裡改成第三個的標題
+        label3.text = "教學科目"
+        label4.text = "自我介紹"
         
-        // 配置文本框樣式
         for textField in [textField1, textField2, textField4] {
             textField.borderStyle = .roundedRect
         }
         
-        // 配置 UITextView 樣式
         textView3.layer.borderColor = UIColor.gray.cgColor
         textView3.layer.borderWidth = 1.0
         textView3.layer.cornerRadius = 8.0
         textView3.font = UIFont.systemFont(ofSize: 16)
         textView3.isScrollEnabled = true
-        textView3.heightAnchor.constraint(equalToConstant: 100).isActive = true // 設置高度
+        textView3.heightAnchor.constraint(equalToConstant: 100).isActive = true
         
-        // 配置保存按鈕
         saveButton.setTitle("保存更改", for: .normal)
         saveButton.addTarget(self, action: #selector(saveChanges), for: .touchUpInside)
         
-        // 將標籤和文本框組合成垂直堆疊
         let stackView1 = UIStackView(arrangedSubviews: [label1, textField1])
         let stackView2 = UIStackView(arrangedSubviews: [label2, textField2])
-        let stackView3 = UIStackView(arrangedSubviews: [label4, textView3]) // 這裡使用 UITextView，並且是自我介紹
-        let stackView4 = UIStackView(arrangedSubviews: [label3, textField4]) // 這裡是教學科目
+        let stackView3 = UIStackView(arrangedSubviews: [label4, textView3])
+        let stackView4 = UIStackView(arrangedSubviews: [label3, textField4])
         
-        // 設置每個 stackView 的屬性
         for stackView in [stackView1, stackView2, stackView3, stackView4] {
             stackView.axis = .vertical
             stackView.spacing = 5
         }
         
-        // 最終將所有 stackView 和保存按鈕加入主 stackView
-        let mainStackView = UIStackView(arrangedSubviews: [stackView1, stackView2, stackView4, stackView3, saveButton]) // 調整了順序
+        let mainStackView = UIStackView(arrangedSubviews: [stackView1, stackView2, stackView4, stackView3, saveButton])
         mainStackView.axis = .vertical
         mainStackView.spacing = 20
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(mainStackView)
         
-        // 設置主 stackView 的約束
         NSLayoutConstraint.activate([
             mainStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             mainStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -87,7 +77,6 @@ class ResumeVC: UIViewController {
         ])
     }
     
-    // 從 Firebase 獲取 resume 資料
     func fetchResumeData() {
         let db = Firestore.firestore()
         let teacherRef = db.collection("teachers").document(teacherID)
@@ -110,12 +99,10 @@ class ResumeVC: UIViewController {
         }
     }
     
-    // 保存更改到 Firebase
     @objc func saveChanges() {
         let db = Firestore.firestore()
         let teacherRef = db.collection("teachers").document(teacherID)
         
-        // 取得使用者輸入的資料
         let updatedResume = [
             textField1.text ?? "",
             textField2.text ?? "",

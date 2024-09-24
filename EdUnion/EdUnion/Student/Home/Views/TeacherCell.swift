@@ -32,7 +32,6 @@ class TeacherCell: UICollectionViewCell {
         image.layer.cornerRadius = 40
         image.clipsToBounds = true
         image.contentMode = .scaleAspectFill
-        /*image.backgroundColor = .lightGray*/  // 預設背景顏色以防圖片加載失敗
         contentView.addSubview(image)
         
         nameLabel.textAlignment = .center

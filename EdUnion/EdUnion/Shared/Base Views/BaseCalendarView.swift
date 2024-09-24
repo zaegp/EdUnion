@@ -14,7 +14,7 @@ class CalendarService {
     static let shared = CalendarService()
     var activitiesByDate: [Date: [Appointment]] = [:]
     
-    private init() {}  
+    private init() {}
 }
 
 struct CalendarDayView: View {
@@ -22,7 +22,7 @@ struct CalendarDayView: View {
     let isSelected: Bool
     let isCurrentMonth: Bool
     let color: Color
-
+    
     var body: some View {
         VStack(spacing: 5) {
             if let day = day {
@@ -38,18 +38,16 @@ struct CalendarDayView: View {
                     )
                 
                 ZStack {
-                    // 去掉過去日期的檢查，直接顯示顏色點點
                     Circle()
                         .fill(color != .clear ? color : Color.clear)
                         .frame(width: 8, height: 8)
                 }
-                .frame(height: 10)  // 保持每個日期的圓點佔位符高度一致
+                .frame(height: 10)
             } else {
                 Text("")
                     .frame(maxWidth: .infinity, minHeight: 40)
                 
                 ZStack {
-                    // 空的圓點佔位符，確保所有日期佈局一致
                     Circle()
                         .fill(Color.clear)
                         .frame(width: 8, height: 8)
@@ -63,7 +61,7 @@ struct CalendarDayView: View {
 struct BaseCalendarView: View {
     
     @Binding var externalDateColors: [Date: Color]?
-    @State private var internalDateColors: [Date: Color] = [:]  // 本地狀態
+    @State private var internalDateColors: [Date: Color] = [:]
     @ObservedObject var viewModel: BaseCalendarViewModel
     @State private var isDataLoaded = false
     @State private var isShowingDetail = false
@@ -84,9 +82,10 @@ struct BaseCalendarView: View {
     }
     
     @State private var selectedDay: Date? = nil
+    //    @Binding var selectedDay: Date?
     
-    @State private var appointments: [Appointment] = []  // 從 Firebase 獲取的預約資料
-    /*@State private var activitiesByDate: [Date: [Appointment]] = [:]*/  // 按日期分類的活動
+    @State private var appointments: [Appointment] = []
+    /*@State private var activitiesByDate: [Date: [Appointment]] = [:]*/
     
     var onDayTap: ((Date) -> Void)? = nil
     var onDayLongPress: ((Date) -> Void)? = nil
@@ -135,13 +134,13 @@ struct BaseCalendarView: View {
                             color: dateColors[day] ?? .clear
                         )
                         .onTapGesture {
-                            print("點擊了日期：\(day)")  
-                            toggleSingleSelection(for: day)  // 處理內部日期選擇邏輯
-                            onDayTap?(day)  // 如果外部傳入了 onDayTap 閉包，則調用
+                            print("點擊了日期：\(day)")
+                            toggleSingleSelection(for: day)
+                            onDayTap?(day)
                         }
                         .onLongPressGesture {
                             onDayLongPress?(day)
-                            selectedDay = day// 長按事件
+                            //                            selectedDay = day
                         }
                     } else {
                         CalendarDayView(day: nil, isSelected: false, isCurrentMonth: false, color: .clear)
@@ -170,12 +169,12 @@ struct BaseCalendarView: View {
                                 VStack(alignment: .leading) {
                                     HStack {
                                         // 要換
-//                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
-//                                            .onAppear {
-//                                                if viewModel.studentNames[appointment.studentID] == nil {
-//                                                    viewModel.fetchStudentName(for: appointment.studentID)
-//                                                }
-//                                            }
+                                        //                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
+                                        //                                            .onAppear {
+                                        //                                                if viewModel.studentNames[appointment.studentID] == nil {
+                                        //                                                    viewModel.fetchStudentName(for: appointment.studentID)
+                                        //                                                }
+                                        //                                            }
                                         Text(viewModel.teacherNames[appointment.teacherID] ?? "")
                                             .onAppear {
                                                 if viewModel.teacherNames[appointment.teacherID] == nil {
@@ -185,7 +184,7 @@ struct BaseCalendarView: View {
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
                                         
-                                        Spacer() // 保持時間靠右
+                                        Spacer()
                                         
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
@@ -195,7 +194,7 @@ struct BaseCalendarView: View {
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                                        .foregroundColor(.gray)
+                                    .foregroundColor(.gray)
                             }
                             .padding()
                             .background(Color(uiColor: .systemBackground))
@@ -212,10 +211,10 @@ struct BaseCalendarView: View {
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
                     .sheet(isPresented: $isShowingDetail) {
-                                if let selectedAppointment = selectedAppointment {
-                                    DetailView(appointment: selectedAppointment)  // 展示詳細頁
-                                }
-                            }
+                        if let selectedAppointment = selectedAppointment {
+                            DetailView(appointment: selectedAppointment)
+                        }
+                    }
                 }
             }
         }
@@ -301,10 +300,8 @@ struct BaseCalendarView: View {
         
         for appointment in appointments {
             if seenAppointments.contains(appointment.id!) {
-                // 如果重複，將該預約加入到重複列表
                 duplicateAppointments.append(appointment)
             } else {
-                // 如果不重複，將 id 加入已處理的列表
                 seenAppointments.insert(appointment.id!)
             }
             
@@ -318,7 +315,6 @@ struct BaseCalendarView: View {
             }
         }
         
-        // 打印重複的預約
         if !duplicateAppointments.isEmpty {
             print("重複的預約: \(duplicateAppointments.map { $0.id })")
         }

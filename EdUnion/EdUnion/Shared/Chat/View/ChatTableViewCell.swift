@@ -330,19 +330,15 @@ class ChatTableViewCell: UITableViewCell {
     // 根據發送者啟用約束
     private func setupBubbleConstraints(isSentByCurrentUser: Bool) {
         if isSentByCurrentUser {
-            // 激活当前用户发送消息的约束
             bubbleTrailingConstraint.isActive = true
             bubbleLeadingConstraintGreater.isActive = true
 
-            // 禁用他人发送消息的约束
             bubbleLeadingConstraint.isActive = false
             bubbleTrailingConstraintLess.isActive = false
         } else {
-            // 激活他人发送消息的约束
             bubbleLeadingConstraint.isActive = true
             bubbleTrailingConstraintLess.isActive = true
 
-            // 禁用当前用户发送消息的约束
             bubbleTrailingConstraint.isActive = false
             bubbleLeadingConstraintGreater.isActive = false
         }
@@ -391,7 +387,6 @@ class ChatTableViewCell: UITableViewCell {
     
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {
-            // 使用您選擇的網路圖片加載庫，例如 Kingfisher 或 SDWebImage
             messageImageView.kf.setImage(with: url) { result in
                 switch result {
                 case .success(_):

@@ -15,7 +15,7 @@ class UserFirebaseService {
     
     let db = Firestore.firestore()
     let storage = Storage.storage()
-
+    
     // MARK: - 通用查詢方法
     private func fetchDocuments<T: Decodable>(from collection: String, completion: @escaping (Result<[T], Error>) -> Void) {
         db.collection(collection).getDocuments { snapshot, error in
@@ -53,7 +53,7 @@ class UserFirebaseService {
             }
         }
     }
-        
+    
     // 在 UserFirebaseService 中新增方法
     func fetchFollowedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
         // 首先根據學生 ID 獲取 followList
@@ -84,29 +84,29 @@ class UserFirebaseService {
     }
     
     func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void) {
-            let studentRef = db.collection("students").document(studentID)
-            
-            studentRef.getDocument { document, error in
-                if let error = error {
-                    completion(nil, error)
-                } else if let document = document, document.exists {
-                    let followList = document.data()?["followList"] as? [String] ?? []
-                    completion(followList, nil)
-                } else {
-                    completion([], nil)
-                }
+        let studentRef = db.collection("students").document(studentID)
+        
+        studentRef.getDocument { document, error in
+            if let error = error {
+                completion(nil, error)
+            } else if let document = document, document.exists {
+                let followList = document.data()?["followList"] as? [String] ?? []
+                completion(followList, nil)
+            } else {
+                completion([], nil)
             }
         }
+    }
     
     func removeTeacherFromFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
-            let studentRef = db.collection("students").document(studentID)
-            
-            studentRef.updateData([
-                "followList": FieldValue.arrayRemove([teacherID])
-            ]) { error in
-                completion(error)
-            }
+        let studentRef = db.collection("students").document(studentID)
+        
+        studentRef.updateData([
+            "followList": FieldValue.arrayRemove([teacherID])
+        ]) { error in
+            completion(error)
         }
+    }
     
     func updateStudentList(studentID: String, teacherID: String, listName: String, completion: @escaping (Error?) -> Void) {
         let studentRef = db.collection("students").document(studentID)
@@ -124,27 +124,27 @@ class UserFirebaseService {
         }
     }
     
-//    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
-//            let studentRef = db.collection("students").document(studentID)
-//            
-//            studentRef.updateData([
-//                "followList": FieldValue.arrayUnion([teacherID])
-//            ]) { error in
-//                if let error = error {
-//                    print("更新 followList 時出錯: \(error.localizedDescription)")
-//                    completion(error)
-//                } else {
-//                    print("成功添加老師到 followList")
-//                    completion(nil)  // 更新成功
-//                }
-//            }
-//        }
-
+    //    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
+    //            let studentRef = db.collection("students").document(studentID)
+    //
+    //            studentRef.updateData([
+    //                "followList": FieldValue.arrayUnion([teacherID])
+    //            ]) { error in
+    //                if let error = error {
+    //                    print("更新 followList 時出錯: \(error.localizedDescription)")
+    //                    completion(error)
+    //                } else {
+    //                    print("成功添加老師到 followList")
+    //                    completion(nil)  // 更新成功
+    //                }
+    //            }
+    //        }
+    
     // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
         var teachers: [Teacher] = []
         let group = DispatchGroup()  // 用來處理多個查詢結果
-
+        
         for id in ids {
             group.enter()
             db.collection("teachers").document(id).getDocument { snapshot, error in
@@ -156,7 +156,7 @@ class UserFirebaseService {
                 group.leave()  // 結束一個查詢
             }
         }
-
+        
         // 當所有查詢完成後回傳結果
         group.notify(queue: .main) {
             if !teachers.isEmpty {
@@ -210,45 +210,45 @@ class UserFirebaseService {
     }
     
     func fetchTeacherStudentList(teacherID: String, completion: @escaping (Result<[String: String], Error>) -> Void) {
-            let teacherRef = db.collection("teachers").document(teacherID)
-            
-            teacherRef.getDocument { (document, error) in
-                if let document = document, document.exists {
-                    // 取出 studentsNotes 欄位
-                    if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
-                        completion(.success(studentsNotes))
-                    } else {
-                        completion(.success([:]))  // 如果 studentsNotes 不存在，返回空字典
-                    }
-                } else if let error = error {
-                    completion(.failure(error))
+        let teacherRef = db.collection("teachers").document(teacherID)
+        
+        teacherRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                // 取出 studentsNotes 欄位
+                if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
+                    completion(.success(studentsNotes))
                 } else {
-                    completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+                    completion(.success([:]))  // 如果 studentsNotes 不存在，返回空字典
                 }
+            } else if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
             }
         }
+    }
     
     func fetchStudentNote(teacherID: String, studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
-            let teacherRef = db.collection("teachers").document(teacherID)
-            
-            teacherRef.getDocument { (document, error) in
-                if let document = document, document.exists {
-                    // 取出 studentsNotes 欄位
-                    if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
-                        // 查找特定學生的備註
-                        let studentNote = studentsNotes[studentID]
-                        completion(.success(studentNote))  // 如果找到，返回備註
-                    } else {
-                        completion(.success(nil))  // 如果沒有找到該學生，返回 nil
-                    }
-                } else if let error = error {
-                    completion(.failure(error))  // 發生錯誤時返回錯誤信息
+        let teacherRef = db.collection("teachers").document(teacherID)
+        
+        teacherRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                // 取出 studentsNotes 欄位
+                if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
+                    // 查找特定學生的備註
+                    let studentNote = studentsNotes[studentID]
+                    completion(.success(studentNote))  // 如果找到，返回備註
                 } else {
-                    completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+                    completion(.success(nil))  // 如果沒有找到該學生，返回 nil
                 }
+            } else if let error = error {
+                completion(.failure(error))  // 發生錯誤時返回錯誤信息
+            } else {
+                completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
             }
         }
-
+    }
+    
     // MARK: - 學生：顯示老師資訊
     func fetchTeachersRealTime(completion: @escaping (Result<[Teacher], Error>) -> Void) -> ListenerRegistration? {
         let teachersRef = db.collection("teachers")
@@ -305,7 +305,7 @@ class UserFirebaseService {
             }
         }
     }
-
+    
     // 保存時段（新增）
     func saveTimeSlot(_ timeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let timeSlotData = timeSlot.toDictionary()
@@ -343,7 +343,7 @@ class UserFirebaseService {
             }
         }
     }
-
+    
     // MARK: - 老師：存日期顏色對應
     func saveDateColorToFirebase(date: Date, color: Color, teacherID: String) {
         let colorHex = color.toHex()
@@ -443,7 +443,7 @@ class UserFirebaseService {
             }
         }
     }
-
+    
     // 上傳音檔
     func uploadAudio(audioData: Data, audioId: String, completion: @escaping (Result<String, Error>) -> Void) {
         let storageRef = storage.reference().child("chat_audio/\(audioId).m4a")
@@ -463,9 +463,7 @@ class UserFirebaseService {
         }
     }
     
-    // 取消息
     func fetchMessages(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
-        // 首次加載歷史消息
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
             .getDocuments { (snapshot, error) in
@@ -478,15 +476,12 @@ class UserFirebaseService {
                     return try? doc.data(as: Message.self)
                 } ?? []
                 
-                // 傳遞加載完成的歷史消息
                 completion(.success(messages))
             }
         
-        // 開始監聽新消息
         addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
     }
     
-    // 添加消息監聽器
     func addMessageListener(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
@@ -495,7 +490,7 @@ class UserFirebaseService {
                     completion(.failure(error))
                     return
                 }
-
+                
                 let newMessages: [Message] = snapshot?.documentChanges.compactMap { diff in
                     // 只處理新增或更新的消息
                     if diff.type == .added || diff.type == .modified {
@@ -543,27 +538,27 @@ class UserFirebaseService {
             }
         }
     }
-//    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
-//        let studentRef = db.collection("students").document(id)
-//        studentRef.getDocument { document, error in
-//            if let error = error {
-//                completion(.failure(error))
-//            } else if let document = document, document.exists {
-//                let studentName = document.data()?["name"] as? String
-//                completion(.success(studentName))
-//            } else {
-//                completion(.success(nil))
-//            }
-//        }
-//    }
+    //    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
+    //        let studentRef = db.collection("students").document(id)
+    //        studentRef.getDocument { document, error in
+    //            if let error = error {
+    //                completion(.failure(error))
+    //            } else if let document = document, document.exists {
+    //                let studentName = document.data()?["name"] as? String
+    //                completion(.success(studentName))
+    //            } else {
+    //                completion(.success(nil))
+    //            }
+    //        }
+    //    }
     
     
     // MARK: - 日期格式
-//    private let dateFormatter: DateFormatter = {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "yyyy-MM-dd"
-//        formatter.timeZone = TimeZone.current
-//        formatter.locale = Locale.current
-//        return formatter
-//    }()
+    //    private let dateFormatter: DateFormatter = {
+    //        let formatter = DateFormatter()
+    //        formatter.dateFormat = "yyyy-MM-dd"
+    //        formatter.timeZone = TimeZone.current
+    //        formatter.locale = Locale.current
+    //        return formatter
+    //    }()
 }

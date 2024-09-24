@@ -11,16 +11,15 @@ protocol BaseCollectionViewModelProtocol {
     var items: [Teacher] { get set }
     var onDataUpdate: (() -> Void)? { get set }
 
-    func fetchData()  // 用於從不同的數據源加載數據
-    func numberOfItems() -> Int  // 返回項目數量
-    func item(at index: Int) -> Teacher  // 返回指定索引處的數據
+    func fetchData()
+    func numberOfItems() -> Int
+    func item(at index: Int) -> Teacher
 }
 
 class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
 
     var collectionView: UICollectionView!
     
-    // 用於加載不同內容的 ViewModel
     var viewModel: BaseCollectionViewModelProtocol!
 
     override func viewDidLoad() {
@@ -33,7 +32,6 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         viewModel.fetchData()
     }
 
-    // 綁定 ViewModel 的更新
     private func bindViewModel() {
         viewModel.onDataUpdate = { [weak self] in
             self?.collectionView.reloadData()

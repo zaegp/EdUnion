@@ -75,7 +75,7 @@ class TodayCoursesVC: UIViewController {
             tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 100),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)  // 填滿剩餘空間
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 }
@@ -85,7 +85,7 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if expandedIndexPath == indexPath {
-            return 200 // Expanded height
+            return 200
         }
         return 80    }
     
@@ -104,7 +104,6 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
             }
         }
         
-        // 設置完成確認的邏輯
         cell.confirmCompletion = { [weak self] in
             let alert = UIAlertController(title: "Confirm Completion", message: "Do you want to mark this course as completed?", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -143,24 +142,20 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        var indexPathsToReload = [indexPath] // 需要重新加載的 cell 列表
+        var indexPathsToReload = [indexPath]
         
-        // 檢查當前是否有已展開的 cell 並且與當前選中的不同
         if let expandedIndexPath = expandedIndexPath, expandedIndexPath != indexPath {
-            // 如果有展開的 cell，並且點擊了不同的 cell，則將舊的展開 cell 加入到重新加載的列表中
             indexPathsToReload.append(expandedIndexPath)
         }
         
-        // 如果點擊的是已展開的 cell，則收起；否則設置為新展開的 cell
         if expandedIndexPath == indexPath {
             self.expandedIndexPath = nil
         } else {
             self.expandedIndexPath = indexPath
         }
 
-        // 執行動畫來更新表格視圖
         tableView.beginUpdates()
-        tableView.reloadRows(at: indexPathsToReload, with: UITableView.RowAnimation.fade) // 同時重新加載新舊的 cell
+        tableView.reloadRows(at: indexPathsToReload, with: UITableView.RowAnimation.fade) 
         tableView.endUpdates()
     }
     

@@ -10,9 +10,7 @@ import UIKit
 class AllTeacherVC: BaseCollectionVC {
     
     override func viewDidLoad() {
-        self.viewModel = AllTeacherViewModel()  // 使用 StudentHomeViewModel
+        self.viewModel = AllTeacherViewModel()
         super.viewDidLoad()
-    }
-    
-    
+    }    
 }

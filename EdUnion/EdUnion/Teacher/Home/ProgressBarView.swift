@@ -19,14 +19,12 @@ struct ProgressBarView: View {
         let percentage = (value - range.lowerBound) / (range.upperBound - range.lowerBound) * 100
         return String(format: "%.0f%%", percentage)
     }
-
+    
     var body: some View {
         ZStack {
-            // 背景圆环
             Circle()
                 .stroke(Color.gray.opacity(0.3), lineWidth: lineWidth)
             
-            // 前景圆环（进度条）使用渐变色，添加动画
             Circle()
                 .trim(from: 0, to: CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound)))
                 .stroke(
@@ -38,10 +36,9 @@ struct ProgressBarView: View {
                     ),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
-                .rotationEffect(.degrees(-90)) // 将进度条起点调整到顶部
-                .animation(.easeInOut(duration: 0.8), value: value)  // 添加动画效果
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 0.8), value: value)
             
-            // 分隔线
             ForEach(0..<segments) { i in
                 let angle = Angle(degrees: (360.0 / Double(segments)) * Double(i))
                 Rectangle()
@@ -51,29 +48,26 @@ struct ProgressBarView: View {
                     .rotationEffect(angle)
             }
             
-            // 中间的进度百分比，添加动画
             Text(progressPercentage)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
                 .frame(width: 200, height: 200)
-                .animation(.easeInOut(duration: 0.8), value: value)  // 文字也添加动画效果
+                .animation(.easeInOut(duration: 0.8), value: value)
         }
-        .frame(width: 200, height: 200) // 设定圆形进度条的尺寸
+        .frame(width: 200, height: 200)
     }
 }
 
 struct ContentView: View {
-    @State private var progressValue = 0.5  // 初始进度值
+    @State private var progressValue = 0.5
     
     var body: some View {
         VStack {
-            ProgressBarView(value: progressValue)  // 将进度值传入
+            ProgressBarView(value: progressValue)
                 .padding()
             
-            // 添加按钮来测试进度变化时的动画效果
             Button(action: {
                 withAnimation {
-                    // 模拟进度值变化
                     progressValue = Double.random(in: 0...1)
                 }
             }) {
@@ -92,5 +86,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
-

@@ -49,24 +49,20 @@ class ChatListVC: UIViewController {
         searchBar.sizeToFit()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         
-        // 設置取消按鈕
         cancelButton.setTitle("取消", for: .normal)
         cancelButton.tintColor = .backButton
-        cancelButton.isHidden = true  // 初始狀態隱藏
+        cancelButton.isHidden = true
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         
-        // 創建一個容器來包含 searchBar 和 cancelButton
         let searchContainer = UIView()
         searchContainer.translatesAutoresizingMaskIntoConstraints = false
         searchContainer.addSubview(searchBar)
         searchContainer.addSubview(cancelButton)
         
-        // 設置 searchContainer 作為 navigationItem 的 titleView
         navigationItem.titleView = searchContainer
         
-        // 設置 searchBar 和 cancelButton 的約束
-        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)  // 初始時寬度等於容器寬度
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)
         
         NSLayoutConstraint.activate([
             searchContainer.widthAnchor.constraint(equalToConstant: view.frame.width),
@@ -81,7 +77,6 @@ class ChatListVC: UIViewController {
             cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor)
         ])
         
-        // 設置 TableView
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ChatRoomCell.self, forCellReuseIdentifier: "chatRoomCell")
@@ -97,7 +92,6 @@ class ChatListVC: UIViewController {
         searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor, multiplier: 0.85)
         searchBarWidthConstraint?.isActive = true
         
-        // 使用動畫效果
         UIView.animate(withDuration: 0.3) {
             self.navigationItem.titleView?.layoutIfNeeded()
         }
@@ -105,20 +99,17 @@ class ChatListVC: UIViewController {
     
     @objc private func cancelButtonTapped() {
         searchBar.text = ""
-        searchBar.resignFirstResponder()  // 隱藏鍵盤
+        searchBar.resignFirstResponder()
         
-        // 恢復 searchBar 寬度
         searchBarWidthConstraint?.isActive = false
         searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor)
         searchBarWidthConstraint?.isActive = true
         
-        // 隱藏取消按鈕
         UIView.animate(withDuration: 0.3) {
             self.cancelButton.isHidden = true
             self.navigationItem.titleView?.layoutIfNeeded()
         }
         
-        // 重新加載數據
         tableView.reloadData()
     }
     
@@ -160,11 +151,10 @@ class ChatListVC: UIViewController {
                                     }
                                 }
                             } else {
-                                // 查詢老師
                                 UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
                                     switch result {
                                     case .success(let teacherName):
-                                        self?.participantNames[chatRoom.id] = teacherName  // 使用 chatRoom.id 做為鍵
+                                        self?.participantNames[chatRoom.id] = teacherName
                                     case .failure:
                                         self?.participantNames[chatRoom.id] = "Unknown Teacher"
                                     }
@@ -220,12 +210,10 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
                     case .success(let studentName):
                         DispatchQueue.main.async {
                             let name = studentName ?? "Unknown Student"
-                            // 更新 cell 的名稱
                             cell.configure(name: name, lastMessage: lastMessage, time: lastMessageTime)
                         }
                     case .failure:
                         DispatchQueue.main.async {
-                            // 更新 cell 的名稱
                             cell.configure(name: "Unknown Student", lastMessage: lastMessage, time: lastMessageTime)
                         }
                     }

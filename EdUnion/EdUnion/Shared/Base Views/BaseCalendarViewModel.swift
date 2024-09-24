@@ -9,10 +9,9 @@ import SwiftUI
 
 class BaseCalendarViewModel: ObservableObject {
     
-    @Published var studentNames: [String: String] = [:]  // 儲存學生的名字
-    @Published var teacherNames: [String: String] = [:]  // 儲存老師的名字
+    @Published var studentNames: [String: String] = [:]
+    @Published var teacherNames: [String: String] = [:]
     
-    // 用於根據學生ID查詢名稱
     func fetchStudentName(for studentID: String) {
         UserFirebaseService.shared.fetchName(from: "students", by: studentID) { result in
             switch result {
@@ -28,7 +27,6 @@ class BaseCalendarViewModel: ObservableObject {
         }
     }
     
-    // 用於根據老師ID查詢名稱
     func fetchTeacherName(for teacherID: String) {
         UserFirebaseService.shared.fetchName(from: "teachers", by: teacherID) { result in
             switch result {
