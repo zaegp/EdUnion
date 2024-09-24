@@ -17,15 +17,17 @@ class ChatListVC: UIViewController {
     
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
+    // 假資料
+    // 要換
     private let participantID: String = studentID
+    private var participantNames: [String: String] = [:]
     private var chatRoomListener: ListenerRegistration?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        
+    
         setupUI()
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -53,28 +55,27 @@ class ChatListVC: UIViewController {
         cancelButton.isHidden = true  // 初始狀態隱藏
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // 創建一個容器來包含 searchBar 和 cancelButton
         let searchContainer = UIView()
         searchContainer.translatesAutoresizingMaskIntoConstraints = false
         searchContainer.addSubview(searchBar)
         searchContainer.addSubview(cancelButton)
-
+        
         // 設置 searchContainer 作為 navigationItem 的 titleView
         navigationItem.titleView = searchContainer
-
+        
         // 設置 searchBar 和 cancelButton 的約束
         searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)  // 初始時寬度等於容器寬度
-
+        
         NSLayoutConstraint.activate([
-            searchContainer.widthAnchor.constraint(equalToConstant: view.frame.width),  // 根據需要調整這個寬度
+            searchContainer.widthAnchor.constraint(equalToConstant: view.frame.width),
             searchContainer.heightAnchor.constraint(equalToConstant: 44),
-            // 設置 searchBar 的約束
+            
             searchBar.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor),
             searchBar.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor),
-            searchBarWidthConstraint!,  // 設置初始寬度
-
-            // 設置取消按鈕的約束
+            searchBarWidthConstraint!,
+            
             cancelButton.leadingAnchor.constraint(equalTo: searchBar.trailingAnchor),
             cancelButton.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
             cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor)
@@ -90,43 +91,41 @@ class ChatListVC: UIViewController {
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-            cancelButton.isHidden = false
-
-            searchBarWidthConstraint?.isActive = false
-            searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor, multiplier: 0.85)
-            searchBarWidthConstraint?.isActive = true
-
-            // 使用動畫效果
-            UIView.animate(withDuration: 0.3) {
-                self.navigationItem.titleView?.layoutIfNeeded()
-            }
+        cancelButton.isHidden = false
+        
+        searchBarWidthConstraint?.isActive = false
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor, multiplier: 0.85)
+        searchBarWidthConstraint?.isActive = true
+        
+        // 使用動畫效果
+        UIView.animate(withDuration: 0.3) {
+            self.navigationItem.titleView?.layoutIfNeeded()
         }
-
-        @objc private func cancelButtonTapped() {
-            searchBar.text = ""
-            searchBar.resignFirstResponder()  // 隱藏鍵盤
-
-            // 恢復 searchBar 寬度
-            searchBarWidthConstraint?.isActive = false
-            searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor)
-            searchBarWidthConstraint?.isActive = true
-
-            // 隱藏取消按鈕
-            UIView.animate(withDuration: 0.3) {
-                self.cancelButton.isHidden = true
-                self.navigationItem.titleView?.layoutIfNeeded()
-            }
-
-            // 重新加載數據
-            tableView.reloadData()
-        }
-
-        // 當點擊 Return 按鈕時隱藏鍵盤
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.resignFirstResponder()
-        }
+    }
     
-    // 監聽聊天室變化
+    @objc private func cancelButtonTapped() {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()  // 隱藏鍵盤
+        
+        // 恢復 searchBar 寬度
+        searchBarWidthConstraint?.isActive = false
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor)
+        searchBarWidthConstraint?.isActive = true
+        
+        // 隱藏取消按鈕
+        UIView.animate(withDuration: 0.3) {
+            self.cancelButton.isHidden = true
+            self.navigationItem.titleView?.layoutIfNeeded()
+        }
+        
+        // 重新加載數據
+        tableView.reloadData()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+    
     private func observeChatRooms() {
         chatRoomListener = UserFirebaseService.shared.db.collection("chats")
             .whereField("participants", arrayContains: participantID)
@@ -140,14 +139,45 @@ class ChatListVC: UIViewController {
                     print("No chat rooms found.")
                     return
                 }
-                print("Fetched \(documents.count) chat rooms")
+                
                 self?.chatRooms = documents.compactMap { doc -> ChatRoom? in
                     do {
                         let chatRoom = try doc.data(as: ChatRoom.self)
-                        print("Successfully parsed chat room: \(chatRoom)")  // 確認解析成功
+                        
+                        let participantId = chatRoom.participants.filter { $0 != self?.participantID }.first ?? "未知用戶"
+                        
+                        if let intID = Int(participantId) {
+                            if intID % 2 == 0 {
+                                UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
+                                    switch result {
+                                    case .success(let studentName):
+                                        self?.participantNames[chatRoom.id] = studentName  // 使用 chatRoom.id 做為鍵
+                                    case .failure:
+                                        self?.participantNames[chatRoom.id] = "Unknown Student"
+                                    }
+                                    DispatchQueue.main.async {
+                                        self?.tableView.reloadData()
+                                    }
+                                }
+                            } else {
+                                // 查詢老師
+                                UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
+                                    switch result {
+                                    case .success(let teacherName):
+                                        self?.participantNames[chatRoom.id] = teacherName  // 使用 chatRoom.id 做為鍵
+                                    case .failure:
+                                        self?.participantNames[chatRoom.id] = "Unknown Teacher"
+                                    }
+                                    DispatchQueue.main.async {
+                                        self?.tableView.reloadData()
+                                    }
+                                }
+                            }
+                        }
+                        
                         return chatRoom
                     } catch {
-                        print("Error parsing chat room: \(error)")  // 捕獲解析錯誤
+                        print("Error parsing chat room: \(error)")
                         return nil
                     }
                 }
@@ -155,7 +185,6 @@ class ChatListVC: UIViewController {
                 self?.filteredChatRooms = self?.chatRooms ?? []
                 
                 DispatchQueue.main.async {
-                    print("Filtered chat rooms: \(self!.filteredChatRooms)")
                     self?.tableView.reloadData()
                 }
             }
@@ -290,13 +319,11 @@ extension ChatListVC: UISearchBarDelegate {
             filteredChatRooms = chatRooms
         } else {
             filteredChatRooms = chatRooms.filter { chatRoom in
-                let participantName = chatRoom.participants.filter { $0 != participantID }.first ?? ""
+                let participantName = participantNames[chatRoom.id] ?? ""
                 return participantName.lowercased().contains(searchText.lowercased())
             }
         }
         tableView.reloadData()
     }
-       
 }
-
 

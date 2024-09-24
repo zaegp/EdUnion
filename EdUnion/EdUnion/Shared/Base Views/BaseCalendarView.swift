@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 var tag = 1
 
@@ -37,8 +38,9 @@ struct CalendarDayView: View {
                     )
                 
                 ZStack {
+                    // 去掉過去日期的檢查，直接顯示顏色點點
                     Circle()
-                        .fill(isCurrentMonth && !isPastDate && color != .clear ? color : Color.clear)
+                        .fill(color != .clear ? color : Color.clear)
                         .frame(width: 8, height: 8)
                 }
                 .frame(height: 10)  // 保持每個日期的圓點佔位符高度一致
@@ -58,7 +60,6 @@ struct CalendarDayView: View {
         .frame(height: 60)
     }
 }
-
 struct BaseCalendarView: View {
     
     @Binding var externalDateColors: [Date: Color]?
@@ -67,6 +68,7 @@ struct BaseCalendarView: View {
     @State private var isDataLoaded = false
     @State private var isShowingDetail = false
     @State private var selectedAppointment: Appointment?
+    @State private var appointmentListener: ListenerRegistration?
     
     var dateColors: [Date: Color] {
         get {
@@ -126,7 +128,6 @@ struct BaseCalendarView: View {
                     if let day = day {
                         let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
                         
-                        
                         CalendarDayView(
                             day: day,
                             isSelected: selectedDay == day,
@@ -152,7 +153,7 @@ struct BaseCalendarView: View {
                 setupView()
                 if !isDataLoaded {
                     fetchAppointments()
-                    isDataLoaded = true // 設置數據已加載
+                    isDataLoaded = true
                 }
             }
             
@@ -168,11 +169,10 @@ struct BaseCalendarView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        // 名字和時間橫向排列
-                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
+                                        Text(viewModel.teacherNames[appointment.teacherID] ?? "")
                                             .onAppear {
-                                                if viewModel.studentNames[appointment.studentID] == nil {
-                                                    viewModel.fetchStudentName(for: appointment.studentID)
+                                                if viewModel.teacherNames[appointment.teacherID] == nil {
+                                                    viewModel.fetchTeacherName(for: appointment.teacherID)
                                                 }
                                             }
                                             .font(.subheadline)
@@ -270,13 +270,16 @@ struct BaseCalendarView: View {
         return formatter.string(from: date)
     }
     
+    // 要換
     private func fetchAppointments() {
-        AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: teacherID) { result in
+        appointmentListener?.remove()
+        
+        appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: nil, studentID: studentID) { result in
             switch result {
             case .success(let fetchedAppointments):
                 DispatchQueue.main.async {
                     self.appointments = fetchedAppointments
-                    self.mapAppointmentsToDates()  // 將預約資料按日期分類
+                    self.mapAppointmentsToDates()  // 更新 UI 或處理預約資料
                 }
             case .failure(let error):
                 print("獲取預約時出錯：\(error)")
@@ -286,8 +289,8 @@ struct BaseCalendarView: View {
     
     private func mapAppointmentsToDates() {
         CalendarService.shared.activitiesByDate.removeAll()
-        var seenAppointments = Set<String>()  // 用來追蹤已經處理過的 appointment id
-        var duplicateAppointments = [Appointment]()  // 存儲重複的預約
+        var seenAppointments = Set<String>()
+        var duplicateAppointments = [Appointment]()
         
         for appointment in appointments {
             if seenAppointments.contains(appointment.id!) {

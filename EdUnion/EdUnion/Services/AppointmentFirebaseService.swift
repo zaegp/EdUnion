@@ -61,15 +61,34 @@ class AppointmentFirebaseService {
     }
 
     // MARK: - 已確認的預約
-    func fetchConfirmedAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
-            switch result {
-            case .success(let appointments):
-                // 過濾確認狀態
-                let confirmedAppointments = appointments.filter { $0.status == "confirmed" }
-                completion(.success(confirmedAppointments))
-            case .failure(let error):
+    func fetchConfirmedAppointments(forTeacherID teacherID: String? = nil, studentID: String? = nil, completion: @escaping (Result<[Appointment], Error>) -> Void) -> ListenerRegistration? {
+        var query: Query = db.collection("appointments").whereField("status", isEqualTo: "confirmed")
+
+        // 如果有提供 teacherID，則加上 teacherID 的篩選條件
+        if let teacherID = teacherID {
+            query = query.whereField("teacherID", isEqualTo: teacherID)
+        }
+
+        // 如果有提供 studentID，則加上 studentID 的篩選條件
+        if let studentID = studentID {
+            query = query.whereField("studentID", isEqualTo: studentID)
+        }
+
+        // 如果沒有提供任何一個 ID，則回傳錯誤
+        guard teacherID != nil || studentID != nil else {
+            completion(.failure(NSError(domain: "Missing teacherID or studentID", code: 400, userInfo: nil)))
+            return nil
+        }
+
+        // 添加監聽器並處理結果
+        return query.addSnapshotListener { snapshot, error in
+            if let error = error {
                 completion(.failure(error))
+            } else if let snapshot = snapshot {
+                let appointments = snapshot.documents.compactMap { doc -> Appointment? in
+                    try? doc.data(as: Appointment.self)
+                }
+                completion(.success(appointments))
             }
         }
     }

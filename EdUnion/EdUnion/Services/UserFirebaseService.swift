@@ -250,8 +250,22 @@ class UserFirebaseService {
         }
 
     // MARK: - 學生：顯示老師資訊
-    func fetchTeachers(completion: @escaping (Result<[Teacher], Error>) -> Void) {
-        fetchDocuments(from: "teachers", completion: completion)
+    func fetchTeachersRealTime(completion: @escaping (Result<[Teacher], Error>) -> Void) -> ListenerRegistration? {
+        let teachersRef = db.collection("teachers")
+        
+        // 添加實時監聽器
+        let listener = teachersRef.addSnapshotListener { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let snapshot = snapshot {
+                let teachers: [Teacher] = snapshot.documents.compactMap { doc in
+                    return try? doc.data(as: Teacher.self)
+                }
+                completion(.success(teachers))
+            }
+        }
+        
+        return listener  // 返回監聽器，稍後可以根據需要移除監聽
     }
     
     // MARK: - 老師：存可選時段

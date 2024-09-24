@@ -21,12 +21,12 @@ struct BookingView: View {
     
     var availableDates: [String] {
             let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd" // 假設你的日期是這個格式，根據實際情況調整
+            dateFormatter.dateFormat = "yyyy-MM-dd"
             
             let today = Date()
             return Array(selectedTimeSlots.keys).filter { dateString in
                 if let date = dateFormatter.date(from: dateString) {
-                    return date >= today  // 過濾掉早於今天的日期
+                    return date > today  
                 }
                 return false
             }.sorted()
