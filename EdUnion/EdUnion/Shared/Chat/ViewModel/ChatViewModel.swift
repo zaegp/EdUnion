@@ -14,30 +14,29 @@ class ChatViewModel {
     private let chatRoomID: String
     let currentUserID: String
     private var pendingImages: [String: UIImage] = [:]
-    private var participants: [String] = []
-    private let otherParticipantID: String
+//    private var participants: [String] = []
+//    private let otherParticipantID: String
 
-    
     var onMessagesUpdated: (() -> Void)?
     
-    init(chatRoomID: String, currentUserID: String, otherParticipantID: String) {
+    init(chatRoomID: String, currentUserID: String) {
         self.chatRoomID = chatRoomID
         self.currentUserID = currentUserID
-        self.otherParticipantID = otherParticipantID
-        
-        var currentUserIsOdd = false
-        if let userIDInt = Int(currentUserID) {  // 將 String 轉換為 Int
-            currentUserIsOdd = userIDInt % 2 != 0  // 判斷是否為奇數
-        } else {
-            print("currentUserID 轉換失敗: \(currentUserID)")
-            currentUserIsOdd = false
-        }
-        
-        if currentUserIsOdd {
-            participants = [currentUserID, otherParticipantID]  // 當前用戶是老師
-        } else {
-            participants = [otherParticipantID, currentUserID]  // 當前用戶是學生
-        }
+//        self.otherParticipantID = otherParticipantID
+//        
+//        var currentUserIsOdd = false
+//        if let userIDInt = Int(currentUserID) {  // 將 String 轉換為 Int
+//            currentUserIsOdd = userIDInt % 2 != 0  // 判斷是否為奇數
+//        } else {
+//            print("currentUserID 轉換失敗: \(currentUserID)")
+//            currentUserIsOdd = false
+//        }
+//        
+//        if currentUserIsOdd {
+//            participants = [currentUserID, otherParticipantID]  // 當前用戶是老師
+//        } else {
+//            participants = [otherParticipantID, currentUserID]  // 當前用戶是學生
+//        }
         fetchMessages()
     }
     
@@ -73,10 +72,9 @@ class ChatViewModel {
             } else {
                 print("Message sent successfully")
                 
-                // 更新 chatRoom 集合的 participants、lastMessage 和 lastMessageTimestamp
                 chatRoomRef.setData([
-                    "id": self.chatRoomID,
-                    "participants": self.participants,  // 老師和學生ID
+//                    "id": self.chatRoomID,
+//                    "participants": self.participants,  // 老師和學生ID
                     "lastMessage": text,
                     "lastMessageTimestamp": FieldValue.serverTimestamp()
                 ], merge: true)  // 使用 merge 來更新字段，而不會覆蓋現有數據
@@ -109,8 +107,8 @@ class ChatViewModel {
             
             // 更新 chatRoom 集合的 participants、lastMessage 和 lastMessageTimestamp
             chatRoomRef.setData([
-                "id": self.chatRoomID,
-                "participants": self.participants,
+//                "id": self.chatRoomID,
+//                "participants": self.participants,
                 "lastMessage": "圖片",  // 可以用"圖片"或者其他提示
                 "lastMessageTimestamp": FieldValue.serverTimestamp()
             ], merge: true)

@@ -19,7 +19,7 @@ class ChatListVC: UIViewController {
     private var filteredChatRooms: [ChatRoom] = []
     // 假資料
     // 要換
-    private let participantID: String = studentID
+    private let participantID: String = teacherID
     private var participantNames: [String: String] = [:]
     private var chatRoomListener: ListenerRegistration?
     
@@ -208,7 +208,6 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         let participantId = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
         print("111111")
         print(participantId)
-        
         
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""

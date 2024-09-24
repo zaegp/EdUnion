@@ -11,16 +11,16 @@ import FirebaseStorage
 import FirebaseFirestore
 import IQKeyboardManagerSwift
 
-class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
+class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
     
     private var viewModel: ChatViewModel!
     private let tableView = UITableView()
     
-    var teacherID: String = ""  
+    var teacherID: String = ""
     var studentID: String = ""
     
     private let messageInputBar = UIView()
-    private let messageTextField = UITextField()
+    private let messageTextView = UITextView()
     private let sendButton = UIButton(type: .system)
     private let photoButton = UIButton(type: .system)
     private let recordButton = UIButton(type: .system)
@@ -35,7 +35,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         super.viewDidLoad()
         view.backgroundColor = .white
         tabBarController?.tabBar.isHidden = true
-            
+        
         setupNavigationBar()
         setupMessageInputBar()
         setupTableView()
@@ -43,16 +43,15 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupKeyboardNotifications()
         
         // 要換
-        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID, otherParticipantID: teacherID)
-//        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID, otherParticipantID: studentID)
+        //        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID)
+        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
         
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
             self?.scrollToBottom()
         }
         
-        messageTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        messageTextField.delegate = self
+        messageTextView.delegate = self
         
         //        self.navigationItem.hidesBackButton = true
         
@@ -61,12 +60,12 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         //           self.navigationItem.leftBarButtonItem = customBackButton
     }
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            
-            // 禁用 IQKeyboardManager
-            IQKeyboardManager.shared.enable = false
-            setupKeyboardDismissRecognizer()
-        }
+        super.viewWillAppear(animated)
+        
+        // 禁用 IQKeyboardManager
+        IQKeyboardManager.shared.enable = false
+        setupKeyboardDismissRecognizer()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -94,39 +93,39 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         let imageView = UIImageView()
         // 要換
-        UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
+        //        UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
+        //            switch result {
+        //            case .success(let teacher):
+        //                print("查詢成功: \(teacher.name)")
+        //                if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
+        //                    imageView.kf.setImage(with: url)
+        //                } else {
+        //                    print("沒有圖片 URL")
+        //                }
+        //            case .failure(let error):
+        //                print("查詢失敗: \(error.localizedDescription)")
+        //            }
+        //        }
+        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
             switch result {
-            case .success(let teacher):
-                print("查詢成功: \(teacher.name)")
-                if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
-                    imageView.kf.setImage(with: url)
+            case .success(let student):
+                print("查詢成功: \(student.name)")
+                if let photoURL = student.photoURL, let url = URL(string: photoURL) {
+                    imageView.kf.setImage(
+                        with: url,
+                        placeholder: UIImage(systemName: "person.circle.fill")?
+                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                        
+                    )
                 } else {
+                    imageView.image = UIImage(systemName: "person.circle.fill")
+                    imageView.tintColor = .backButton
                     print("沒有圖片 URL")
                 }
             case .failure(let error):
                 print("查詢失敗: \(error.localizedDescription)")
             }
         }
-//        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
-//            switch result {
-//            case .success(let student):
-//                print("查詢成功: \(student.name)")
-//                if let photoURL = student.photoURL, let url = URL(string: photoURL) {
-//                    imageView.kf.setImage(
-//                        with: url,
-//                        placeholder: UIImage(systemName: "person.circle.fill")?
-//                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
-//                            
-//                    )
-//                } else {
-//                    imageView.image = UIImage(systemName: "person.circle.fill")
-//                    imageView.tintColor = .backButton
-//                    print("沒有圖片 URL")
-//                }
-//            case .failure(let error):
-//                print("查詢失敗: \(error.localizedDescription)")
-//            }
-//        }
         
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 20
@@ -137,11 +136,11 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         containerView.addSubview(imageView)
         
         NSLayoutConstraint.activate([
-                imageView.widthAnchor.constraint(equalToConstant: 40),
-                imageView.heightAnchor.constraint(equalToConstant: 40),
-                imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-                imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
-            ])
+            imageView.widthAnchor.constraint(equalToConstant: 40),
+            imageView.heightAnchor.constraint(equalToConstant: 40),
+            imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
         
         containerView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         
@@ -151,9 +150,14 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     private func setupMessageInputBar() {
         messageInputBar.backgroundColor = .white
         
-        messageTextField.placeholder = "Message"
-        messageTextField.borderStyle = .roundedRect
-        messageTextField.translatesAutoresizingMaskIntoConstraints = false
+        messageTextView.font = UIFont.systemFont(ofSize: 16)
+        messageTextView.layer.borderWidth = 1.0
+        messageTextView.layer.borderColor = UIColor.lightGray.cgColor
+        messageTextView.layer.cornerRadius = 10
+        messageTextView.isScrollEnabled = false
+        messageTextView.translatesAutoresizingMaskIntoConstraints = false
+        messageTextView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 32)
+        
         
         sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
         sendButton.tintColor = .mainOrange
@@ -171,7 +175,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         recordButton.translatesAutoresizingMaskIntoConstraints = false
         
-        messageInputBar.addSubview(messageTextField)
+        messageInputBar.addSubview(messageTextView)
         messageInputBar.addSubview(sendButton)
         messageInputBar.addSubview(photoButton)
         messageInputBar.addSubview(recordButton)
@@ -182,23 +186,24 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         NSLayoutConstraint.activate([
             bottomConstraint,
-            messageInputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
             messageInputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             messageInputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            messageInputBar.heightAnchor.constraint(equalToConstant: 50),
             
             photoButton.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 16),
             photoButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
             
-            messageTextField.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 56),
-            messageTextField.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
-            messageTextField.trailingAnchor.constraint(equalTo: messageInputBar.trailingAnchor, constant: -16),
-            messageTextField.heightAnchor.constraint(equalToConstant: 35),
+            messageTextView.leadingAnchor.constraint(equalTo: messageInputBar.leadingAnchor, constant: 56),
+            //            messageTextView.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
+            messageTextView.trailingAnchor.constraint(equalTo: messageInputBar.trailingAnchor, constant: -16),
+            messageTextView.topAnchor.constraint(equalTo: messageInputBar.topAnchor, constant: 8),
+            messageTextView.bottomAnchor.constraint(equalTo: messageInputBar.bottomAnchor, constant: -8),
             
-            sendButton.trailingAnchor.constraint(equalTo: messageTextField.trailingAnchor, constant: -8),
+            
+            sendButton.trailingAnchor.constraint(equalTo: messageTextView.trailingAnchor, constant: -8),
             sendButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
             
-            recordButton.trailingAnchor.constraint(equalTo: messageTextField.trailingAnchor, constant: -8),
+            recordButton.trailingAnchor.constraint(equalTo: messageTextView.trailingAnchor, constant: -8),
             recordButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor)
         ])
     }
@@ -296,12 +301,12 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @objc private func sendMessage() {
-        guard let messageText = messageTextField.text, !messageText.isEmpty else {
+        guard let messageText = messageTextView.text, !messageText.isEmpty else {
             return
         }
         
         viewModel.sendMessage(messageText)
-        messageTextField.text = nil
+        messageTextView.text = nil
     }
     
     @objc private func recordTapped() {
@@ -315,7 +320,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @objc private func textFieldDidChange() {
-        if let text = messageTextField.text, !text.isEmpty {
+        if let text = messageTextView.text, !text.isEmpty {
             sendButton.isHidden = false
             recordButton.isHidden = true
         } else {
@@ -379,6 +384,31 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     @objc private func backToChatList() {
         if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
             navigationController?.popToViewController(chatListVC, animated: true)
+        }
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        let size = textView.sizeThatFits(CGSize(width: textView.frame.width, height: CGFloat.greatestFiniteMagnitude))
+        
+        // 限制高度最大值，比如 100
+        let maxHeight: CGFloat = 100
+        let newHeight = min(size.height, maxHeight)
+        
+        // 更新 messageInputBar 的高度
+        if newHeight != messageInputBar.frame.height {
+            UIView.animate(withDuration: 0.2) {
+                self.messageInputBar.frame.size.height = newHeight + 16 // 添加上下 margin
+                self.view.layoutIfNeeded()
+            }
+        }
+        
+        // 控制 sendButton 和 recordButton 的顯示
+        if let text = textView.text, !text.isEmpty {
+            sendButton.isHidden = false
+            recordButton.isHidden = true
+        } else {
+            sendButton.isHidden = true
+            recordButton.isHidden = false
         }
     }
 }

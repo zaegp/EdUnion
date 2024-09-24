@@ -212,7 +212,7 @@ class ChatTableViewCell: UITableViewCell {
 //        if message.senderID == studentID {
 //            self.isSentByCurrentUser = true
 //        }// 添加這一行
-        self.isSentByCurrentUser = (message.senderID == studentID)
+        self.isSentByCurrentUser = (message.senderID == teacherID)
         resetContent()
         
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {

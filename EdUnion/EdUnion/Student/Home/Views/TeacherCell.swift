@@ -123,6 +123,6 @@ class TeacherCell: UICollectionViewCell {
         subjectLabel.text = teacher.resume[3]
         
         educationLabel.text = "學歷: \(teacher.resume[0])"
-        experienceLabel.text = "家教經驗: \(teacher.resume[1]) 年"
+        experienceLabel.text = "家教經驗: \(teacher.resume[1])"
     }
 }

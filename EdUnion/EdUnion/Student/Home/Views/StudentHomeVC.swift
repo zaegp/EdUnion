@@ -62,17 +62,18 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         return view
     }()
     
-    private var selectedIndex = 1
+    private var selectedIndex: Int?
     private var scrollView: UIScrollView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        selectedIndex = 1
 
         setupLabels()
         setupPageViewController()
         setupSearchIcon()
-
+        
         // 獲取 UIPageViewController 的 scrollView
         if let scrollView = pageViewController.view.subviews.compactMap({ $0 as? UIScrollView }).first {
             self.scrollView = scrollView
@@ -84,6 +85,13 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: animated)
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        labelsStackView.layoutIfNeeded()
+        updateUnderlinePosition(to: selectedIndex!)
+    }
+    
     
     private func setupSearchIcon() {
         // 添加手勢識別器
@@ -140,6 +148,8 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
                 self.searchBar.resignFirstResponder()
             }
         })
+        
+        self.updateUnderlinePosition(to: self.selectedIndex!)
     }
 
     // 根據 searchBar 的顯示狀態來調整 pageViewController 的佈局
@@ -173,10 +183,10 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         // 獲取當前和下一個 Label 的索引
         let totalLabels = labelsStackView.arrangedSubviews.count
         let currentLabelIndex = selectedIndex
-        let nextLabelIndex = min(max(selectedIndex + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
+        let nextLabelIndex = min(max(selectedIndex! + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
         
         // 獲取當前和下一個 Label
-        let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex] as! UILabel
+        let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex!] as! UILabel
         let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as! UILabel
         
         // 計算當前和下一個 Label 的起始 x 位置，並且相對於 labelsStackView
@@ -189,7 +199,6 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         // 更新紅色線條的位置 (相對於 labelsStackView，而不是螢幕的 frame)
         underlineView.frame.origin.x = newX + labelsStackView.frame.origin.x
     }
-
 
     private func setupLabels() {
         // 設置 labelsStackView 到主視圖
@@ -211,7 +220,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
                 underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
                 underlineView.heightAnchor.constraint(equalToConstant: 3),
                 underlineView.widthAnchor.constraint(equalToConstant: 60),  // 固定紅色線條寬度
-                underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex].leadingAnchor)
+                underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex!].leadingAnchor)
         ])
         
         for (index, label) in labelsStackView.arrangedSubviews.enumerated() {
@@ -230,7 +239,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         pageViewController.dataSource = self
 
         // 設置初始頁面
-        pageViewController.setViewControllers([viewControllers[selectedIndex]], direction: .forward, animated: true, completion: nil)
+        pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: true, completion: nil)
 
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
@@ -288,7 +297,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         guard let tappedLabel = sender.view as? UILabel else { return }
         let targetIndex = tappedLabel.tag
 
-        let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex ? .forward : .reverse
+        let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex! ? .forward : .reverse
             
             // 使用 completion handler 來確保動畫完成後執行更新操作
             pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true) { [weak self] completed in

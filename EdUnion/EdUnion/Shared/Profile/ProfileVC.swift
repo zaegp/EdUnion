@@ -18,7 +18,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         ("可選時段", "calendar.badge.plus"),
         ("履歷", "list.bullet.clipboard"),
         ("待確認的預約", "bell"),
-        ("所有學生列表", "person.3.fill")
+        ("所有學生列表", "person.3")
     ]
     
     override func viewDidLoad() {
@@ -84,7 +84,11 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             case .success(let student):
                 let imageUrlString = student.photoURL
                 if let url = URL(string: imageUrlString ?? "") {
-                    self.userImageView.kf.setImage(with: url)
+                    self.userImageView.kf.setImage(
+                        with: url,
+                        placeholder: UIImage(systemName: "person.circle.fill")?
+                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                    )
                     
                 } else {
                     self.userImageView.image = UIImage(systemName: "person.circle")
