@@ -95,7 +95,8 @@ class ChatTableViewCell: UITableViewCell {
     
     private var bubbleTopConstraint: NSLayoutConstraint!
     private var bubbleBottomConstraint: NSLayoutConstraint!
-    private var bubbleWidthConstraint: NSLayoutConstraint!
+    private var bubbleLeadingConstraintGreater: NSLayoutConstraint!
+    private var bubbleTrailingConstraintLess: NSLayoutConstraint!
     
     private var imageTopConstraint: NSLayoutConstraint!
     private var imageBottomConstraint: NSLayoutConstraint!
@@ -138,15 +139,24 @@ class ChatTableViewCell: UITableViewCell {
     private func setupConstraints() {
         bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
         bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
-        bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
+
+        // 当前用户发送消息的约束
         bubbleTrailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-        bubbleWidthConstraint = bubbleBackgroundView.widthAnchor.constraint(lessThanOrEqualToConstant: 250)
-        
+        bubbleLeadingConstraintGreater = bubbleBackgroundView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 100)
+
+        // 他人发送消息的约束
+        bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
+        bubbleTrailingConstraintLess = bubbleBackgroundView.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -100)
+
+        // 激活公共约束
         NSLayoutConstraint.activate([
             bubbleTopConstraint,
-            bubbleBottomConstraint,
-            bubbleWidthConstraint
+            bubbleBottomConstraint
+            // 不要在这里激活 leading 和 trailing 约束
         ])
+        
+        messageLabel.setContentHuggingPriority(.required, for: .horizontal)
+        messageLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         
         NSLayoutConstraint.activate([
             messageLabel.topAnchor.constraint(equalTo: bubbleBackgroundView.topAnchor, constant: 8),
@@ -209,10 +219,9 @@ class ChatTableViewCell: UITableViewCell {
     
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
-//        if message.senderID == studentID {
-//            self.isSentByCurrentUser = true
-//        }// 添加這一行
-        self.isSentByCurrentUser = (message.senderID == teacherID)
+        // 要換
+//        self.isSentByCurrentUser = (message.senderID == teacherID)
+        self.isSentByCurrentUser = (message.senderID == studentID)
         resetContent()
         
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
@@ -231,26 +240,26 @@ class ChatTableViewCell: UITableViewCell {
             messageLabel.text = message.content
             messageLabel.isHidden = false
 
-//        case 1:
-//            bubbleBackgroundView.isHidden = true
-//            messageImageView.isHidden = false
-//            toggleImageButton.isHidden = false
-//            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-//            
-//            if let localImage = image {
-//                messageImageView.image = localImage
-//                activityIndicator.startAnimating()
-//            } else {
-//                loadImage(from: message.content)
-//            }
         case 1:
-                bubbleBackgroundView.isHidden = true
-                messageImageView.isHidden = false
-                toggleImageButton.isHidden = false
-                setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-
-                // 直接從 message.content 重新載入圖片
+            bubbleBackgroundView.isHidden = true
+            messageImageView.isHidden = false
+            toggleImageButton.isHidden = false
+            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+            
+            if let localImage = image {
+                messageImageView.image = localImage
+                activityIndicator.startAnimating()
+            } else {
                 loadImage(from: message.content)
+            }
+//        case 1:
+//                bubbleBackgroundView.isHidden = true
+//                messageImageView.isHidden = false
+//                toggleImageButton.isHidden = false
+//                setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+//
+//                // 直接從 message.content 重新載入圖片
+//                loadImage(from: message.content)
 
         case 2:
             bubbleBackgroundView.isHidden = false
@@ -303,10 +312,10 @@ class ChatTableViewCell: UITableViewCell {
             imageHeightConstraint
         ])
         
-        NSLayoutConstraint.deactivate([
-            bubbleLeadingConstraint,
-            bubbleTrailingConstraint
-        ])
+//        NSLayoutConstraint.deactivate([
+//            bubbleLeadingConstraint,
+//            bubbleTrailingConstraint
+//        ])
     }
     
     private func updateBubbleAppearance() {
@@ -316,9 +325,27 @@ class ChatTableViewCell: UITableViewCell {
         timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
     }
     
+    
+
+    // 根據發送者啟用約束
     private func setupBubbleConstraints(isSentByCurrentUser: Bool) {
-        bubbleLeadingConstraint.isActive = !isSentByCurrentUser
-        bubbleTrailingConstraint.isActive = isSentByCurrentUser
+        if isSentByCurrentUser {
+            // 激活当前用户发送消息的约束
+            bubbleTrailingConstraint.isActive = true
+            bubbleLeadingConstraintGreater.isActive = true
+
+            // 禁用他人发送消息的约束
+            bubbleLeadingConstraint.isActive = false
+            bubbleTrailingConstraintLess.isActive = false
+        } else {
+            // 激活他人发送消息的约束
+            bubbleLeadingConstraint.isActive = true
+            bubbleTrailingConstraintLess.isActive = true
+
+            // 禁用当前用户发送消息的约束
+            bubbleTrailingConstraint.isActive = false
+            bubbleLeadingConstraintGreater.isActive = false
+        }
     }
     
     private func setupImageConstraints(isSentByCurrentUser: Bool) {

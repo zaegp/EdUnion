@@ -43,8 +43,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupKeyboardNotifications()
         
         // 要換
-        //        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID)
-        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
+                viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID)
+//        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
         
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
@@ -93,39 +93,39 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         let imageView = UIImageView()
         // 要換
-        //        UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
-        //            switch result {
-        //            case .success(let teacher):
-        //                print("查詢成功: \(teacher.name)")
-        //                if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
-        //                    imageView.kf.setImage(with: url)
-        //                } else {
-        //                    print("沒有圖片 URL")
-        //                }
-        //            case .failure(let error):
-        //                print("查詢失敗: \(error.localizedDescription)")
-        //            }
-        //        }
-        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
-            switch result {
-            case .success(let student):
-                print("查詢成功: \(student.name)")
-                if let photoURL = student.photoURL, let url = URL(string: photoURL) {
-                    imageView.kf.setImage(
-                        with: url,
-                        placeholder: UIImage(systemName: "person.circle.fill")?
-                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
-                        
-                    )
-                } else {
-                    imageView.image = UIImage(systemName: "person.circle.fill")
-                    imageView.tintColor = .backButton
-                    print("沒有圖片 URL")
+                UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
+                    switch result {
+                    case .success(let teacher):
+                        print("查詢成功: \(teacher.name)")
+                        if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
+                            imageView.kf.setImage(with: url)
+                        } else {
+                            print("沒有圖片 URL")
+                        }
+                    case .failure(let error):
+                        print("查詢失敗: \(error.localizedDescription)")
+                    }
                 }
-            case .failure(let error):
-                print("查詢失敗: \(error.localizedDescription)")
-            }
-        }
+//        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
+//            switch result {
+//            case .success(let student):
+//                print("查詢成功: \(student.name)")
+//                if let photoURL = student.photoURL, let url = URL(string: photoURL) {
+//                    imageView.kf.setImage(
+//                        with: url,
+//                        placeholder: UIImage(systemName: "person.circle.fill")?
+//                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+//                        
+//                    )
+//                } else {
+//                    imageView.image = UIImage(systemName: "person.circle.fill")
+//                    imageView.tintColor = .backButton
+//                    print("沒有圖片 URL")
+//                }
+//            case .failure(let error):
+//                print("查詢失敗: \(error.localizedDescription)")
+//            }
+//        }
         
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 20

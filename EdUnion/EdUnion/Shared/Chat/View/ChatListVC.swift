@@ -19,7 +19,7 @@ class ChatListVC: UIViewController {
     private var filteredChatRooms: [ChatRoom] = []
     // 假資料
     // 要換
-    private let participantID: String = teacherID
+    private let participantID: String = studentID
     private var participantNames: [String: String] = [:]
     private var chatRoomListener: ListenerRegistration?
     

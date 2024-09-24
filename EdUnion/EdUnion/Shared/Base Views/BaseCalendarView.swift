@@ -135,7 +135,7 @@ struct BaseCalendarView: View {
                             color: dateColors[day] ?? .clear
                         )
                         .onTapGesture {
-                            print("點擊了日期：\(day)")  // 調試語句，確認事件是否被觸發
+                            print("點擊了日期：\(day)")  
                             toggleSingleSelection(for: day)  // 處理內部日期選擇邏輯
                             onDayTap?(day)  // 如果外部傳入了 onDayTap 閉包，則調用
                         }
@@ -169,6 +169,13 @@ struct BaseCalendarView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
+                                        // 要換
+//                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
+//                                            .onAppear {
+//                                                if viewModel.studentNames[appointment.studentID] == nil {
+//                                                    viewModel.fetchStudentName(for: appointment.studentID)
+//                                                }
+//                                            }
                                         Text(viewModel.teacherNames[appointment.teacherID] ?? "")
                                             .onAppear {
                                                 if viewModel.teacherNames[appointment.teacherID] == nil {
