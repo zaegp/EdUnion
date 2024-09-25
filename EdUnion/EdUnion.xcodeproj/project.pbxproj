@@ -7,15 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		519C8EB92C92D354007DFCBA /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EB82C92D354007DFCBA /* FirebaseAnalytics */; };
-		519C8EBB2C92D354007DFCBA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBA2C92D354007DFCBA /* FirebaseAuth */; };
-		519C8EBD2C92D354007DFCBA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBC2C92D354007DFCBA /* FirebaseFirestore */; };
-		519C8EBF2C92D354007DFCBA /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8EBE2C92D354007DFCBA /* FirebaseStorage */; };
+		51993AFB2CA393130022C79F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFA2CA393130022C79F /* Kingfisher */; };
+		51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFD2CA393700022C79F /* FirebaseAnalytics */; };
+		51993B002CA393700022C79F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFF2CA393700022C79F /* FirebaseAuth */; };
+		51993B022CA393700022C79F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 51993B012CA393700022C79F /* FirebaseFirestore */; };
+		51993B042CA393700022C79F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 51993B032CA393700022C79F /* FirebaseStorage */; };
+		51993B072CA393800022C79F /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 51993B062CA393800022C79F /* IQKeyboardManagerSwift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
 		519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */; };
 		519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */; };
 		519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */; };
-		519C8ED92C943668007DFCBA /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 519C8ED82C943668007DFCBA /* Kingfisher */; };
 		519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */; };
 		519C8EE42C954D82007DFCBA /* AvailableTimeSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE32C954D82007DFCBA /* AvailableTimeSlot.swift */; };
 		519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */; };
@@ -45,7 +46,6 @@
 		51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */; };
 		51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */; };
 		51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */; };
-		51D25C792C9A6BAB0083EECF /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */; };
 		51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7B2C9A81D80083EECF /* ResumeVC.swift */; };
 		51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */; };
 		51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */; };
@@ -217,12 +217,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				519C8EB92C92D354007DFCBA /* FirebaseAnalytics in Frameworks */,
-				519C8EBF2C92D354007DFCBA /* FirebaseStorage in Frameworks */,
-				519C8EBB2C92D354007DFCBA /* FirebaseAuth in Frameworks */,
-				519C8EBD2C92D354007DFCBA /* FirebaseFirestore in Frameworks */,
-				519C8ED92C943668007DFCBA /* Kingfisher in Frameworks */,
-				51D25C792C9A6BAB0083EECF /* IQKeyboardManagerSwift in Frameworks */,
+				51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */,
+				51993B022CA393700022C79F /* FirebaseFirestore in Frameworks */,
+				51993B002CA393700022C79F /* FirebaseAuth in Frameworks */,
+				51993B042CA393700022C79F /* FirebaseStorage in Frameworks */,
+				51993AFB2CA393130022C79F /* Kingfisher in Frameworks */,
+				51993B072CA393800022C79F /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,12 +610,12 @@
 			);
 			name = EdUnion;
 			packageProductDependencies = (
-				519C8EB82C92D354007DFCBA /* FirebaseAnalytics */,
-				519C8EBA2C92D354007DFCBA /* FirebaseAuth */,
-				519C8EBC2C92D354007DFCBA /* FirebaseFirestore */,
-				519C8EBE2C92D354007DFCBA /* FirebaseStorage */,
-				519C8ED82C943668007DFCBA /* Kingfisher */,
-				51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */,
+				51993AFA2CA393130022C79F /* Kingfisher */,
+				51993AFD2CA393700022C79F /* FirebaseAnalytics */,
+				51993AFF2CA393700022C79F /* FirebaseAuth */,
+				51993B012CA393700022C79F /* FirebaseFirestore */,
+				51993B032CA393700022C79F /* FirebaseStorage */,
+				51993B062CA393800022C79F /* IQKeyboardManagerSwift */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -693,9 +693,9 @@
 			);
 			mainGroup = 51ED0ACA2C916721006322B7;
 			packageReferences = (
-				51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				519C8ED72C943668007DFCBA /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				51993B052CA393800022C79F /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -1260,15 +1260,23 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		519C8ED72C943668007DFCBA /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+		51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 7.12.0;
+				minimumVersion = 8.0.3;
 			};
 		};
-		51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+		51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.2.0;
+			};
+		};
+		51993B052CA393800022C79F /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
 			requirement = {
@@ -1276,45 +1284,37 @@
 				minimumVersion = 7.1.1;
 			};
 		};
-		51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.2.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		519C8EB82C92D354007DFCBA /* FirebaseAnalytics */ = {
+		51993AFA2CA393130022C79F /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
-		519C8EBA2C92D354007DFCBA /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		519C8EBC2C92D354007DFCBA /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		519C8EBE2C92D354007DFCBA /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 51ED0B0C2C917E67006322B7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
-		};
-		519C8ED82C943668007DFCBA /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 519C8ED72C943668007DFCBA /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			package = 51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
-		51D25C782C9A6BAB0083EECF /* IQKeyboardManagerSwift */ = {
+		51993AFD2CA393700022C79F /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 51D25C772C9A6BAB0083EECF /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			package = 51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		51993AFF2CA393700022C79F /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		51993B012CA393700022C79F /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		51993B032CA393700022C79F /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		51993B062CA393800022C79F /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51993B052CA393800022C79F /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
 		};
 /* End XCSwiftPackageProductDependency section */

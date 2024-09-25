@@ -136,6 +136,7 @@ class AppointmentFirebaseService {
     // MARK: - 更新預約狀態
     func updateAppointmentStatus(appointmentID: String, status: AppointmentStatus, completion: @escaping (Result<Void, Error>) -> Void) {
         let appointmentRef = db.collection("appointments").document(appointmentID)
+        print("更新狀態為: \(status.rawValue)")
         appointmentRef.updateData(["status": status.rawValue]) { error in
             if let error = error {
                 completion(.failure(error))

@@ -14,6 +14,8 @@ protocol BaseCollectionViewModelProtocol {
     func fetchData()
     func numberOfItems() -> Int
     func item(at index: Int) -> Teacher
+    
+    func search(query: String)
 }
 
 class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
@@ -99,3 +101,5 @@ extension BaseCollectionVC: UICollectionViewDelegate {
         collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
+
+

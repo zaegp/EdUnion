@@ -126,27 +126,24 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     @objc func didTapProfileImage() {
         let actionSheet = UIAlertController(title: "更換大頭貼照", message: nil, preferredStyle: .actionSheet)
         
+        // 只允許從圖庫選擇
         actionSheet.addAction(UIAlertAction(title: "從圖庫選擇", style: .default, handler: { [weak self] _ in
             self?.presentImagePicker(sourceType: .photoLibrary)
-        }))
-        
-        actionSheet.addAction(UIAlertAction(title: "拍照", style: .default, handler: { [weak self] _ in
-            self?.presentImagePicker(sourceType: .camera)
         }))
         
         actionSheet.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         
         present(actionSheet, animated: true)
     }
-    
+
     func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
-        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else {
-            print("Source type not available")
+        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
+            print("圖庫不可用")
             return
         }
         
         let picker = UIImagePickerController()
-        picker.sourceType = sourceType
+        picker.sourceType = .photoLibrary
         picker.delegate = self
         picker.allowsEditing = true
         present(picker, animated: true)

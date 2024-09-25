@@ -12,5 +12,14 @@ class AllTeacherVC: BaseCollectionVC {
     override func viewDidLoad() {
         self.viewModel = AllTeacherViewModel()
         super.viewDidLoad()
-    }    
+        setupViewModel()
+    }
+    
+    private func setupViewModel() {
+        viewModel.onDataUpdate = { [weak self] in
+            self?.collectionView.reloadData()
+        }
+        viewModel.fetchData()
+    }
+    
 }

@@ -33,7 +33,10 @@ struct ColorPickerCalendarView: View {
                 showColorPicker = true
             }
         )
-        .sheet(isPresented: $showColorPicker) {
+        .sheet(isPresented: Binding<Bool>(
+            get: { selectedDay != nil && showColorPicker },  // 檢查是否有選中的日期
+            set: { showColorPicker = $0 }
+        )) {
             Group {
                 if let selectedDay = selectedDay {
                     let existingColor = dateColors[selectedDay]
@@ -45,13 +48,10 @@ struct ColorPickerCalendarView: View {
                             dateColors[selectedDay] = color
                             saveDateColorToFirebase(date: selectedDay, color: color)
                             selectNextDay(onDayTap: { nextDay in
-                                // 更新選中的日期
                                 self.selectedDay = nextDay
                             })
                         }
                     )
-                } else {
-                    Text("No date selected")
                 }
             }
             .presentationDetents([.fraction(0.25)])

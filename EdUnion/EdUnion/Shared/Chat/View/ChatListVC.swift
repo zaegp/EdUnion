@@ -118,66 +118,59 @@ class ChatListVC: UIViewController {
     }
     
     private func observeChatRooms() {
-        chatRoomListener = UserFirebaseService.shared.db.collection("chats")
-            .whereField("participants", arrayContains: participantID)
-            .addSnapshotListener { [weak self] (snapshot, error) in
-                if let error = error {
-                    print("Error fetching chat rooms: \(error.localizedDescription)")
-                    return
-                }
+        UserFirebaseService.shared.fetchChatRooms(for: participantID) { [weak self] (chatRooms, error) in
+            if let error = error {
+                print("Error fetching chat rooms: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let chatRooms = chatRooms else {
+                print("No chat rooms found.")
+                return
+            }
+            
+            self?.chatRooms = chatRooms
+
+            for chatRoom in chatRooms {
+                let participantId = chatRoom.participants.filter { $0 != self?.participantID }.first ?? "未知用戶"
                 
-                guard let documents = snapshot?.documents else {
-                    print("No chat rooms found.")
-                    return
-                }
-                
-                self?.chatRooms = documents.compactMap { doc -> ChatRoom? in
-                    do {
-                        let chatRoom = try doc.data(as: ChatRoom.self)
-                        
-                        let participantId = chatRoom.participants.filter { $0 != self?.participantID }.first ?? "未知用戶"
-                        
-                        if let intID = Int(participantId) {
-                            if intID % 2 == 0 {
-                                UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
-                                    switch result {
-                                    case .success(let studentName):
-                                        self?.participantNames[chatRoom.id] = studentName  // 使用 chatRoom.id 做為鍵
-                                    case .failure:
-                                        self?.participantNames[chatRoom.id] = "Unknown Student"
-                                    }
-                                    DispatchQueue.main.async {
-                                        self?.tableView.reloadData()
-                                    }
-                                }
-                            } else {
-                                UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
-                                    switch result {
-                                    case .success(let teacherName):
-                                        self?.participantNames[chatRoom.id] = teacherName
-                                    case .failure:
-                                        self?.participantNames[chatRoom.id] = "Unknown Teacher"
-                                    }
-                                    DispatchQueue.main.async {
-                                        self?.tableView.reloadData()
-                                    }
-                                }
+                if let intID = Int(participantId) {
+                    if intID % 2 == 0 {
+                        // Fetch student name
+                        UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
+                            switch result {
+                            case .success(let studentName):
+                                self?.participantNames[chatRoom.id] = studentName
+                            case .failure:
+                                self?.participantNames[chatRoom.id] = "Unknown Student"
+                            }
+                            DispatchQueue.main.async {
+                                self?.tableView.reloadData()
                             }
                         }
-                        
-                        return chatRoom
-                    } catch {
-                        print("Error parsing chat room: \(error)")
-                        return nil
+                    } else {
+                        // Fetch teacher name
+                        UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
+                            switch result {
+                            case .success(let teacherName):
+                                self?.participantNames[chatRoom.id] = teacherName
+                            case .failure:
+                                self?.participantNames[chatRoom.id] = "Unknown Teacher"
+                            }
+                            DispatchQueue.main.async {
+                                self?.tableView.reloadData()
+                            }
+                        }
                     }
                 }
-                
-                self?.filteredChatRooms = self?.chatRooms ?? []
-                
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-                }
             }
+            
+            self?.filteredChatRooms = chatRooms
+            
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
     }
 }
 

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, UIScrollViewDelegate {
+class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, UIScrollViewDelegate, UISearchBarDelegate {
 
     private var pageViewController: UIPageViewController!
     private let viewControllers: [UIViewController] = [FollowVC(), AllTeacherVC(), FrequentlyUsedVC()]
@@ -68,6 +68,9 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+        searchBar.delegate = self
+
         selectedIndex = 1
 
         setupLabels()
@@ -277,5 +280,29 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
                 
                 self?.updateUnderlinePosition(to: targetIndex)
             }
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let query = searchBar.text else { return }
+
+        // 根據當前的頁面來觸發相應的搜尋邏輯
+        if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
+            currentVC.viewModel.search(query: query)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
+            currentVC.viewModel.search(query: query)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
+            currentVC.viewModel.search(query: query)
+        }
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        // 實時搜尋
+        if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
+            currentVC.viewModel.search(query: searchText)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
+            currentVC.viewModel.search(query: searchText)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
+            currentVC.viewModel.search(query: searchText)
+        }
     }
 }
