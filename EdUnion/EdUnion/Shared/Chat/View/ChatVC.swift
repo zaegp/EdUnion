@@ -9,6 +9,7 @@ import UIKit
 import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
+import FirebaseAuth
 import IQKeyboardManagerSwift
 
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
@@ -19,6 +20,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var teacherID: String = ""
     var studentID: String = ""
     
+    private let imageView = UIImageView()
     private let messageInputBar = UIView()
     private let messageTextView = UITextView()
     private let sendButton = UIButton(type: .system)
@@ -89,43 +91,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func setupNavigationBar() {
-        
-        let imageView = UIImageView()
         // 要換
-                UserFirebaseService.shared.fetchTeacher(by: teacherID) { [weak self] result in
-                    switch result {
-                    case .success(let teacher):
-                        print("查詢成功: \(teacher.name)")
-                        if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
-                            imageView.kf.setImage(with: url)
-                        } else {
-                            print("沒有圖片 URL")
-                        }
-                    case .failure(let error):
-                        print("查詢失敗: \(error.localizedDescription)")
-                    }
-                }
-//        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
-//            switch result {
-//            case .success(let student):
-//                print("查詢成功: \(student.name)")
-//                if let photoURL = student.photoURL, let url = URL(string: photoURL) {
-//                    imageView.kf.setImage(
-//                        with: url,
-//                        placeholder: UIImage(systemName: "person.circle.fill")?
-//                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
-//                        
-//                    )
-//                } else {
-//                    imageView.image = UIImage(systemName: "person.circle.fill")
-//                    imageView.tintColor = .backButton
-//                    print("沒有圖片 URL")
-//                }
-//            case .failure(let error):
-//                print("查詢失敗: \(error.localizedDescription)")
-//            }
-//        }
-        
+    
+        fetchUserInfo()
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
@@ -144,6 +112,53 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         containerView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         
         navigationItem.titleView = containerView
+    }
+    
+    func fetchUserInfo() {
+        // 從 UserDefaults 中取得角色
+        guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
+            print("無法取得角色")
+            return
+        }
+        
+        // 從 Firebase Auth 中取得當前使用者的 ID
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("無法取得使用者 ID")
+            return
+        }
+        
+        // 決定集合名稱
+        let collection = userRole == "teacher" ? "teachers" : "students"
+        
+        // 根據角色和 ID 使用泛型方法來獲取資料
+        if userRole == "teacher" {
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Teacher.self) { [weak self] result in
+                self?.handleFetchResult(result)
+            }
+        } else {
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Student.self) { [weak self] result in
+                self?.handleFetchResult(result)
+            }
+        }
+    }
+
+    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>) {
+        switch result {
+        case .success(let user):
+            print("查詢成功: \(user.fullName)")
+            if let photoURL = user.photoURL, let url = URL(string: photoURL) {
+                self.imageView.kf.setImage(
+                    with: url,
+                    placeholder: UIImage(systemName: "person.circle.fill")?.withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                )
+            } else {
+                self.imageView.image = UIImage(systemName: "person.circle.fill")
+                self.imageView.tintColor = .backButton
+                print("沒有圖片 URL")
+            }
+        case .failure(let error):
+            print("查詢失敗: \(error.localizedDescription)")
+        }
     }
     
     private func setupMessageInputBar() {

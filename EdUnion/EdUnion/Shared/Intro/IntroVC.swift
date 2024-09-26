@@ -111,8 +111,11 @@ class IntroVC: UIViewController {
         teacherRef.updateData(["resume": resumeData]) { error in
             if let error = error {
                 if (error as NSError).code == FirestoreErrorCode.notFound.rawValue {
-                    // 如果文件不存在，則創建文件並新增 resume 欄位
-                    teacherRef.setData(["resume": resumeData]) { error in
+                    teacherRef.setData([
+                        "resume": resumeData,
+                        "totalCourseHours": 0,
+                        "timeSlots": []
+                    ]) { error in
                         if let error = error {
                             print("Error creating data: \(error.localizedDescription)")
                         } else {

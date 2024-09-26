@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -63,43 +64,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         userImageView.clipsToBounds = true
         userImageView.isUserInteractionEnabled = true
         
-        if let userRole = UserDefaults.standard.string(forKey: "userRole"), userRole == "teacher" {
-            UserFirebaseService.shared.fetchTeacher(by: teacherID) { result in
-                        switch result {
-                        case .success(let teacher):
-                            let imageUrlString = teacher.photoURL
-                            if let url = URL(string: imageUrlString ?? "") {
-                                self.userImageView.kf.setImage(with: url)
-            
-                            } else {
-                                self.userImageView.image = UIImage(systemName: "person.circle")
-                            }
-                            self.nameLabel.text = teacher.name
-                        case .failure(let error):
-                            print("查詢失敗: \(error.localizedDescription)")
-                        }
-                    }
-        } else {
-            UserFirebaseService.shared.fetchStudent(by: studentID) { result in
-                switch result {
-                case .success(let student):
-                    let imageUrlString = student.photoURL
-                    if let url = URL(string: imageUrlString ?? "") {
-                        self.userImageView.kf.setImage(
-                            with: url,
-                            placeholder: UIImage(systemName: "person.circle.fill")?
-                                .withTintColor(.backButton, renderingMode: .alwaysOriginal)
-                        )
-                        
-                    } else {
-                        self.userImageView.image = UIImage(systemName: "person.circle")
-                    }
-                    self.nameLabel.text = student.name
-                case .failure(let error):
-                    print("查詢失敗: \(error.localizedDescription)")
-                }
-            }
-        }
+        updateUserInfo()
         
         headerView.addSubview(userImageView)
         
@@ -125,6 +90,53 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         tableView.tableHeaderView = headerView
     }
     
+    func updateUserInfo() {
+        guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
+            print("無法取得角色")
+            return
+        }
+        
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("無法取得使用者 ID")
+            return
+        }
+        
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        print("查詢集合: \(collection)，使用者 ID: \(userID)")
+        
+        if userRole == "teacher" {
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Teacher.self) { [weak self] result in
+                self?.handleFetchResult(result)
+            }
+        } else {
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Student.self) { [weak self] result in
+                self?.handleFetchResult(result)
+            }
+        }
+    }
+    
+    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>) {
+        switch result {
+        case .success(let user):
+            self.updateUI(with: user.photoURL, name: user.fullName)
+        case .failure(let error):
+            print("查詢失敗: \(error.localizedDescription)")
+        }
+    }
+    
+    private func updateUI(with imageUrlString: String?, name: String) {
+        if let url = URL(string: imageUrlString ?? "") {
+            self.userImageView.kf.setImage(
+                with: url,
+                placeholder: UIImage(systemName: "person.crop.circle")?.withTintColor(.backButton, renderingMode: .alwaysOriginal)
+            )
+        } else {
+            self.userImageView.image = UIImage(systemName: "person.crop.circle")
+            self.userImageView.tintColor = .mainOrange
+        }
+        self.nameLabel.text = name
+    }
+    
     @objc func didTapProfileImage() {
         let actionSheet = UIAlertController(title: "更換大頭貼照", message: nil, preferredStyle: .actionSheet)
         
@@ -137,7 +149,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         
         present(actionSheet, animated: true)
     }
-
+    
     func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
         guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
             print("圖庫不可用")
@@ -207,8 +219,8 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             let confirmVC = ConfirmVC()
             navigationController?.pushViewController(confirmVC, animated: true)
         case "所有學生列表":
-                let studentListVC = AllStudentVC()
-                navigationController?.pushViewController(studentListVC, animated: true)
+            let studentListVC = AllStudentVC()
+            navigationController?.pushViewController(studentListVC, animated: true)
         default:
             break
         }

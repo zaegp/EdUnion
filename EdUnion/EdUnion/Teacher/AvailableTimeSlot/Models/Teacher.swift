@@ -8,14 +8,27 @@
 import Foundation
 
 struct Teacher: UserProtocol, Codable {
-    var id: String
-    var resume : [String]
-//    var lastLogin: Date
-    var name: String
+    var userID: String
+    var resume: [String]
+    var fullName: String
     var photoURL: String?
-//    var uid: String
-    let selectedTimeSlots: [String : String]?
-    let timeSlots: [AvailableTimeSlot]
+    let selectedTimeSlots: [String: String]?
+    let timeSlots: [AvailableTimeSlot]?
     var totalCourses: Int
-    var studentsNotes: [String : String]?
+    var studentsNotes: [String: String]?
+    var email: String?
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        userID = try container.decodeIfPresent(String.self, forKey: .userID) ?? ""
+        resume = try container.decodeIfPresent([String].self, forKey: .resume) ?? []
+        fullName = try container.decodeIfPresent(String.self, forKey: .fullName) ?? ""
+        photoURL = try container.decodeIfPresent(String.self, forKey: .photoURL)
+        selectedTimeSlots = try container.decodeIfPresent([String: String].self, forKey: .selectedTimeSlots)
+        timeSlots = try container.decodeIfPresent([AvailableTimeSlot].self, forKey: .timeSlots)
+        totalCourses = try container.decodeIfPresent(Int.self, forKey: .totalCourses) ?? 0
+        studentsNotes = try container.decodeIfPresent([String: String].self, forKey: .studentsNotes)
+        email = try container.decodeIfPresent(String.self, forKey: .email)
+    }
 }

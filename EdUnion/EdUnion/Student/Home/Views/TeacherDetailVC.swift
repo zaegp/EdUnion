@@ -48,7 +48,7 @@ class TeacherDetailVC: UIViewController {
             if let error = error {
                 print("檢查 followList 時出錯: \(error.localizedDescription)")
             } else if let followList = followList {
-                self?.isFavorite = followList.contains(self!.teacher!.id)
+                self?.isFavorite = followList.contains(self!.teacher!.userID)
                 self?.updateFavoriteButtonAppearance()
             }
         }
@@ -80,7 +80,7 @@ class TeacherDetailVC: UIViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(imageView)
         
-        nameLabel.text = teacher.name
+        nameLabel.text = teacher.fullName
         nameLabel.textAlignment = .center
         nameLabel.font = UIFont.boldSystemFont(ofSize: 18)
         nameLabel.textColor = .black
@@ -196,7 +196,7 @@ class TeacherDetailVC: UIViewController {
     
     @objc private func chatButtonTapped() {
         let chatVC = ChatVC()
-        chatVC.teacherID = teacher?.id ?? ""
+        chatVC.teacherID = teacher?.userID ?? ""
         chatVC.studentID = studentID ?? ""    
         navigationController?.pushViewController(chatVC, animated: true)
     }
@@ -204,7 +204,7 @@ class TeacherDetailVC: UIViewController {
     @objc private func favoriteButtonTapped() {
         
         if isFavorite {
-            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: studentID, teacherID: teacher!.id) { error in
+            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: studentID, teacherID: teacher!.userID) { error in
                 if let error = error {
                     print("從 followList 中移除老師時出錯: \(error.localizedDescription)")
                 } else {
@@ -214,7 +214,7 @@ class TeacherDetailVC: UIViewController {
                 }
             }
         } else {
-            UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacher!.id, listName: "followList") { error in
+            UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacher!.userID, listName: "followList") { error in
                 if let error = error {
                     print("更新 followList 失敗: \(error)")
                 } else {

@@ -50,22 +50,26 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         students.removeAll()
         
         let dispatchGroup = DispatchGroup()
+        var fetchedStudents: [Student] = []
         
         for (studentID, _) in studentsNotes {
             dispatchGroup.enter()
             
-            UserFirebaseService.shared.fetchStudent(by: studentID) { [weak self] result in
-                switch result {
-                case .success(let student):
-                    self?.students.append(student)
-                case .failure(let error):
-                    print("取得學生 \(studentID) 資料失敗: \(error.localizedDescription)")
-                }
-                dispatchGroup.leave()
-            }
+           
+            UserFirebaseService.shared.fetchUser(from: "students", by: studentID, as: Student.self) { result in
+                        defer { dispatchGroup.leave() }
+                        
+                        switch result {
+                        case .success(let student):
+                            fetchedStudents.append(student)
+                        case .failure(let error):
+                            print("取得學生 \(studentID) 資料失敗: \(error.localizedDescription)")
+                        }
+                    }
         }
         
         dispatchGroup.notify(queue: .main) {
+            self.students = fetchedStudents
             self.updateUI()
         }
     }
@@ -81,7 +85,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             let cell = tableView.dequeueReusableCell(withIdentifier: "studentCell", for: indexPath)
             let student = students[indexPath.row]
-                cell.textLabel?.text = student.name
+                cell.textLabel?.text = student.fullName
             return cell
         }
 }

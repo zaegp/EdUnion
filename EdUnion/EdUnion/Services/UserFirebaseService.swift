@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseStorage
 
 protocol UserProtocol {
-    var name: String { get }
+    var fullName: String { get }
     var photoURL: String? { get }
 }
 

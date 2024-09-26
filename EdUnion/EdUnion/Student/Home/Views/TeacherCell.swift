@@ -117,7 +117,7 @@ class TeacherCell: UICollectionViewCell {
             image.tintColor = .mainOrange
         }
         
-        nameLabel.text = teacher.name
+        nameLabel.text = teacher.fullName
         totalCoursesLabel.text = "總課程數量: \(teacher.totalCourses)"
         subjectLabel.text = teacher.resume[3]
         

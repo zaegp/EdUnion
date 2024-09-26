@@ -22,7 +22,7 @@ class BookingVC: UIViewController {
             return
         }
         
-        setupBookingView(teacherID: teacher!.id, selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
+        setupBookingView(teacherID: teacher!.userID, selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
     }
     
     func setupBookingView(teacherID: String, selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {

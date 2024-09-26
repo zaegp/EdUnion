@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		513BEC0A2CA54ACC000E0DE9 /* IntroVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC092CA54ACC000E0DE9 /* IntroVC.swift */; };
+		513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */; };
 		51993AFB2CA393130022C79F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFA2CA393130022C79F /* Kingfisher */; };
 		51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFD2CA393700022C79F /* FirebaseAnalytics */; };
 		51993B002CA393700022C79F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFF2CA393700022C79F /* FirebaseAuth */; };
@@ -129,6 +130,7 @@
 
 /* Begin PBXFileReference section */
 		513BEC092CA54ACC000E0DE9 /* IntroVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVC.swift; sourceTree = "<group>"; };
+		513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesVC.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -345,6 +347,7 @@
 				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 				519E14972CA1884200E344CE /* AllStudentVC.swift */,
+				513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */,
 			);
 			path = Teacher;
 			sourceTree = "<group>";
@@ -844,6 +847,7 @@
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
 				51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */,
+				513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */,
 				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */,
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,

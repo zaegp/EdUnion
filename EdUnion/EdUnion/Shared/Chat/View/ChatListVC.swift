@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseFirestore
+import FirebaseAuth
 
 class ChatListVC: UIViewController {
     
@@ -17,15 +18,19 @@ class ChatListVC: UIViewController {
     
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
-    // 假資料
-    // 要換
-    private let participantID: String = studentID
+    private var participantID: String?
     private var participantNames: [String: String] = [:]
     private var chatRoomListener: ListenerRegistration?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
+        if let currentUserID = Auth.auth().currentUser?.uid {
+            participantID = currentUserID
+        } else {
+            print("Error: Unable to get current user ID.")
+        }
+        
         setupUI()
         
     }
@@ -43,7 +48,6 @@ class ChatListVC: UIViewController {
     }
     
     private func setupUI() {
-        // 設置 Search Bar
         searchBar.delegate = self
         searchBar.placeholder = "搜尋"
         searchBar.sizeToFit()
@@ -118,7 +122,7 @@ class ChatListVC: UIViewController {
     }
     
     private func observeChatRooms() {
-        UserFirebaseService.shared.fetchChatRooms(for: participantID) { [weak self] (chatRooms, error) in
+        UserFirebaseService.shared.fetchChatRooms(for: participantID ?? "") { [weak self] (chatRooms, error) in
             if let error = error {
                 print("Error fetching chat rooms: \(error.localizedDescription)")
                 return
@@ -130,14 +134,13 @@ class ChatListVC: UIViewController {
             }
             
             self?.chatRooms = chatRooms
-
+            
             for chatRoom in chatRooms {
                 let participantId = chatRoom.participants.filter { $0 != self?.participantID }.first ?? "未知用戶"
                 
-                if let intID = Int(participantId) {
-                    if intID % 2 == 0 {
-                        // Fetch student name
-                        UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
+                if let userRole = UserDefaults.standard.string(forKey: "userRole") {
+                    if userRole == "student" {
+                        UserFirebaseService.shared.fetchName(from: "students", by: participantId) { [weak self] result in
                             switch result {
                             case .success(let studentName):
                                 self?.participantNames[chatRoom.id] = studentName
@@ -148,9 +151,8 @@ class ChatListVC: UIViewController {
                                 self?.tableView.reloadData()
                             }
                         }
-                    } else {
-                        // Fetch teacher name
-                        UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
+                    } else if userRole == "teacher" {
+                        UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { [weak self] result in
                             switch result {
                             case .success(let teacherName):
                                 self?.participantNames[chatRoom.id] = teacherName
@@ -161,7 +163,11 @@ class ChatListVC: UIViewController {
                                 self?.tableView.reloadData()
                             }
                         }
+                    } else {
+                        print("Error: Unknown user role.")
                     }
+                } else {
+                    print("Error: Unable to get user role from UserDefaults.")
                 }
             }
             

@@ -38,7 +38,7 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
         } else {
             filteredItems = items.filter { teacher in
                 // 搜尋名字和 resume 屬性
-                teacher.name.lowercased().contains(query.lowercased()) ||
+                teacher.fullName.lowercased().contains(query.lowercased()) ||
                 teacher.resume[0].lowercased().contains(query.lowercased()) ||
                 teacher.resume[1].lowercased().contains(query.lowercased()) ||
                 teacher.resume[2].lowercased().contains(query.lowercased()) ||
