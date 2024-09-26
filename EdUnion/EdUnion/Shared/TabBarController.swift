@@ -11,14 +11,28 @@ var teacherID = "001"
 var studentID = "002"
 
 class TabBarController: UITabBarController {
+    
+    var userRole: String
+    
+    init(userRole: String) {
+        self.userRole = userRole
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // 要換
-        // 老師
-//        let firstVC = NavigationController(rootViewController: TodayCoursesVC())
-        // 學生
-        let firstVC = NavigationController(rootViewController: StudentHomeVC())
+        let firstVC: UINavigationController
+        if userRole == "teacher" {
+            firstVC = NavigationController(rootViewController: TodayCoursesVC())
+        } else {
+            firstVC = NavigationController(rootViewController: StudentHomeVC())
+        }
         let secondVC = NavigationController(rootViewController: CalendarVC())
         //        let thirdVC = UINavigationController(rootViewController: StudentListVC())
         let thirdVC = NavigationController(rootViewController: ChatListVC())

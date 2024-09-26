@@ -126,7 +126,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
 //            }
 //        }
         
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false

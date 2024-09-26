@@ -223,9 +223,10 @@ class ChatTableViewCell: UITableViewCell {
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
             timestampLabel.text = formatDate(message.timestamp.dateValue())
             timestampLabel.isHidden = false
-        } else {
-            timestampLabel.isHidden = true
         }
+//         else {
+//            timestampLabel.isHidden = true
+//        }
 
         switch message.type {
         case 0:
@@ -318,7 +319,7 @@ class ChatTableViewCell: UITableViewCell {
         guard !bubbleBackgroundView.isHidden else { return }
         bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .systemOrange : .systemGray5
         messageLabel.textColor = isSentByCurrentUser ? .white : .black
-        timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
+//        timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
     }
     
     

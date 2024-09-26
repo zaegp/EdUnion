@@ -9,6 +9,11 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseStorage
 
+protocol UserProtocol {
+    var name: String { get }
+    var photoURL: String? { get }
+}
+
 class UserFirebaseService {
     static let shared = UserFirebaseService()
     private init() {}
@@ -17,42 +22,37 @@ class UserFirebaseService {
     let storage = Storage.storage()
     
     // MARK: - 通用查詢方法
-    private func fetchDocuments<T: Decodable>(from collection: String, completion: @escaping (Result<[T], Error>) -> Void) {
-        db.collection(collection).getDocuments { snapshot, error in
+    func fetchData<T: Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
+            db.collection(collection).document(id).getDocument { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let data = try? snapshot?.data(as: type) {
+                    completion(.success(data))
+                } else {
+                    completion(.failure(NSError(domain: "No data found in \(collection)", code: 404, userInfo: nil)))
+                }
+            }
+        }
+    func fetchUser<T: UserProtocol & Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
+        db.collection(collection).document(id).getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
+            } else if let data = try? snapshot?.data(as: type) {
+                completion(.success(data))
             } else {
-                let models = snapshot?.documents.compactMap { doc -> T? in
-                    return try? doc.data(as: T.self)
-                } ?? []
-                completion(.success(models))
+                completion(.failure(NSError(domain: "No data found in \(collection)", code: 404, userInfo: nil)))
             }
         }
     }
-    
-    func fetchTeacher(by id: String, completion: @escaping (Result<Teacher, Error>) -> Void) {
-        db.collection("teachers").document(id).getDocument { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let teacher = try? snapshot?.data(as: Teacher.self) {
-                completion(.success(teacher))
-            } else {
-                completion(.failure(NSError(domain: "No teacher found", code: 404, userInfo: nil)))
-            }
-        }
-    }
-    
-    func fetchStudent(by id: String, completion: @escaping (Result<Student, Error>) -> Void) {
-        db.collection("students").document(id).getDocument { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let student = try? snapshot?.data(as: Student.self) {
-                completion(.success(student))
-            } else {
-                completion(.failure(NSError(domain: "No student found", code: 404, userInfo: nil)))
-            }
-        }
-    }
+        // 調用泛型方法來獲取老師資料
+//        func fetchTeacher(by id: String, completion: @escaping (Result<Teacher, Error>) -> Void) {
+//            fetchData(from: "teachers", by: id, as: Teacher.self, completion: completion)
+//        }
+//        
+//        // 調用泛型方法來獲取學生資料
+//        func fetchStudent(by id: String, completion: @escaping (Result<Student, Error>) -> Void) {
+//            fetchData(from: "students", by: id, as: Student.self, completion: completion)
+//        }
     
     // 在 UserFirebaseService 中新增方法
     func fetchFollowedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {

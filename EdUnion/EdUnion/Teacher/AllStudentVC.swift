@@ -9,7 +9,7 @@ import UIKit
 
 class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     private let tableView = UITableView()
-        private var students: [Student] = [] // 假設你有一個 `Student` 模型
+        private var students: [Student] = []
 
         override func viewDidLoad() {
             super.viewDidLoad()

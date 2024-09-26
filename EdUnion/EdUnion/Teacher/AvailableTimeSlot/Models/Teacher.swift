@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Teacher: Codable {
+struct Teacher: UserProtocol, Codable {
     var id: String
     var resume : [String]
 //    var lastLogin: Date

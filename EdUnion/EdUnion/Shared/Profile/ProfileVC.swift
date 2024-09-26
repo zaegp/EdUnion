@@ -63,39 +63,41 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         userImageView.clipsToBounds = true
         userImageView.isUserInteractionEnabled = true
         
-//        UserFirebaseService.shared.fetchTeacher(by: teacherID) { result in
-//            switch result {
-//            case .success(let teacher):
-//                let imageUrlString = teacher.photoURL
-//                if let url = URL(string: imageUrlString ?? "") {
-//                    self.userImageView.kf.setImage(with: url)
-//                    
-//                } else {
-//                    self.userImageView.image = UIImage(systemName: "person.circle")
-//                }
-//                self.nameLabel.text = teacher.name
-//            case .failure(let error):
-//                print("查詢失敗: \(error.localizedDescription)")
-//            }
-//        }
-        // 要換
-        UserFirebaseService.shared.fetchStudent(by: studentID) { result in
-            switch result {
-            case .success(let student):
-                let imageUrlString = student.photoURL
-                if let url = URL(string: imageUrlString ?? "") {
-                    self.userImageView.kf.setImage(
-                        with: url,
-                        placeholder: UIImage(systemName: "person.circle.fill")?
-                            .withTintColor(.backButton, renderingMode: .alwaysOriginal)
-                    )
-                    
-                } else {
-                    self.userImageView.image = UIImage(systemName: "person.circle")
+        if let userRole = UserDefaults.standard.string(forKey: "userRole"), userRole == "teacher" {
+            UserFirebaseService.shared.fetchTeacher(by: teacherID) { result in
+                        switch result {
+                        case .success(let teacher):
+                            let imageUrlString = teacher.photoURL
+                            if let url = URL(string: imageUrlString ?? "") {
+                                self.userImageView.kf.setImage(with: url)
+            
+                            } else {
+                                self.userImageView.image = UIImage(systemName: "person.circle")
+                            }
+                            self.nameLabel.text = teacher.name
+                        case .failure(let error):
+                            print("查詢失敗: \(error.localizedDescription)")
+                        }
+                    }
+        } else {
+            UserFirebaseService.shared.fetchStudent(by: studentID) { result in
+                switch result {
+                case .success(let student):
+                    let imageUrlString = student.photoURL
+                    if let url = URL(string: imageUrlString ?? "") {
+                        self.userImageView.kf.setImage(
+                            with: url,
+                            placeholder: UIImage(systemName: "person.circle.fill")?
+                                .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                        )
+                        
+                    } else {
+                        self.userImageView.image = UIImage(systemName: "person.circle")
+                    }
+                    self.nameLabel.text = student.name
+                case .failure(let error):
+                    print("查詢失敗: \(error.localizedDescription)")
                 }
-                self.nameLabel.text = student.name
-            case .failure(let error):
-                print("查詢失敗: \(error.localizedDescription)")
             }
         }
         
@@ -166,7 +168,11 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     // MARK: - TableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return data.count
+        if let userRole = UserDefaults.standard.string(forKey: "userRole"), userRole == "teacher" {
+            return data.count
+        } else {
+            return 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SwiftUI
+import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -13,10 +15,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-       
-//        let chatVC = AvailableTimeSlotsVC(teacherID: "001")
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = TabBarController()
+        
+        if let role = UserDefaults.standard.string(forKey: "userRole") {
+            print("已選擇角色：\(role)")
+            
+            if Auth.auth().currentUser != nil {
+                if let role = UserDefaults.standard.string(forKey: "userRole") {
+                    let tabBarController = TabBarController(userRole: role)
+                    window?.rootViewController = tabBarController
+                } else {
+                    window?.rootViewController = ChooseRoleVC()
+                }
+            } else {
+                print("已選擇角色但未登入，顯示登入畫面。")
+                let authView = AuthenticationView()
+                let hostingController = UIHostingController(rootView: authView)
+                window?.rootViewController = hostingController
+            }
+        } else {
+            print("未選擇角色，顯示角色選擇畫面。")
+            window?.rootViewController = ChooseRoleVC() 
+        }
         
         window?.makeKeyAndVisible()
     }

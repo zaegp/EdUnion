@@ -82,7 +82,6 @@ struct BaseCalendarView: View {
     }
     
     @State private var selectedDay: Date? = nil
-    //    @Binding var selectedDay: Date?
     
     @State private var appointments: [Appointment] = []
     /*@State private var activitiesByDate: [Date: [Appointment]] = [:]*/
@@ -94,6 +93,8 @@ struct BaseCalendarView: View {
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     @State private var days: [Date?] = []
+//    @State private var leftIsActive = false
+//    @State private var rightIsActive = false
     
     var body: some View {
         let colors = dateColors
@@ -102,6 +103,10 @@ struct BaseCalendarView: View {
                 Button(action: { previousPeriod() }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(Color(.backButton))
+//                        .symbolEffect(.bounce.down.byLayer, value: leftIsActive)
+//                        .onTapGesture {
+//                            leftIsActive.toggle()
+//                        }
                 }
                 Spacer()
                 Text(formattedMonthAndYear(currentDate))
@@ -110,6 +115,10 @@ struct BaseCalendarView: View {
                 Button(action: { nextPeriod() }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(Color(.backButton))
+//                        .symbolEffect(.bounce.down.byLayer, value: rightIsActive)
+//                        .onTapGesture {
+//                            rightIsActive.toggle()
+//                        }
                 }
             }
             .padding()
@@ -169,12 +178,12 @@ struct BaseCalendarView: View {
                                 VStack(alignment: .leading) {
                                     HStack {
                                         // 要換
-                                        //                                        Text(viewModel.studentNames[appointment.studentID] ?? "")
-                                        //                                            .onAppear {
-                                        //                                                if viewModel.studentNames[appointment.studentID] == nil {
-                                        //                                                    viewModel.fetchStudentName(for: appointment.studentID)
-                                        //                                                }
-                                        //                                            }
+//                                                                                Text(viewModel.studentNames[appointment.studentID] ?? "")
+//                                                                                    .onAppear {
+//                                                                                        if viewModel.studentNames[appointment.studentID] == nil {
+//                                                                                            viewModel.fetchStudentName(for: appointment.studentID)
+//                                                                                        }
+//                                                                                    }
                                         Text(viewModel.teacherNames[appointment.teacherID] ?? "")
                                             .onAppear {
                                                 if viewModel.teacherNames[appointment.teacherID] == nil {
