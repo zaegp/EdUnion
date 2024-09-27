@@ -8,6 +8,7 @@
 import Foundation
 
 struct Student: UserProtocol, Codable {
+    var id: String
     var followList: [String]  // 這裡用來儲存追蹤的老師ID
     var usedList: [String]    // 這裡用來儲存已預約的老師ID
     var fullName: String          // 學生名字

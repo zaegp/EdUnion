@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		513BEC0A2CA54ACC000E0DE9 /* IntroVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC092CA54ACC000E0DE9 /* IntroVC.swift */; };
 		513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */; };
+		513BEC102CA6820A000E0DE9 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0F2CA6820A000E0DE9 /* UserSession.swift */; };
 		51993AFB2CA393130022C79F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFA2CA393130022C79F /* Kingfisher */; };
 		51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFD2CA393700022C79F /* FirebaseAnalytics */; };
 		51993B002CA393700022C79F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFF2CA393700022C79F /* FirebaseAuth */; };
@@ -131,6 +132,7 @@
 /* Begin PBXFileReference section */
 		513BEC092CA54ACC000E0DE9 /* IntroVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVC.swift; sourceTree = "<group>"; };
 		513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesVC.swift; sourceTree = "<group>"; };
+		513BEC0F2CA6820A000E0DE9 /* UserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSession.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -407,6 +409,7 @@
 				519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */,
 				51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */,
 				51D25C932C9D4C2D0083EECF /* TimeService.swift */,
+				513BEC0F2CA6820A000E0DE9 /* UserSession.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -862,6 +865,7 @@
 				51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */,
 				51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */,
 				519C8F062C96E807007DFCBA /* Appointment.swift in Sources */,
+				513BEC102CA6820A000E0DE9 /* UserSession.swift in Sources */,
 				519E14962CA16CF100E344CE /* Student.swift in Sources */,
 				51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,

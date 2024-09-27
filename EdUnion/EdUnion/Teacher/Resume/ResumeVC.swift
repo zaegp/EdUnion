@@ -7,7 +7,6 @@
 
 import UIKit
 import FirebaseFirestore
-import FirebaseAuth
 
 class ResumeVC: UIViewController {
     
@@ -25,9 +24,7 @@ class ResumeVC: UIViewController {
     
     let saveButton = UIButton(type: .system)
     
-    var teacherID: String? {
-        return Auth.auth().currentUser?.uid
-    }
+    let userID = UserSession.shared.currentUserID
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,7 +81,7 @@ class ResumeVC: UIViewController {
     
     func fetchResumeData() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(teacherID ?? "")
+        let teacherRef = db.collection("teachers").document(userID ?? "")
         
         teacherRef.getDocument { (document, error) in
             if let error = error {
@@ -106,7 +103,7 @@ class ResumeVC: UIViewController {
     
     @objc func saveChanges() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(teacherID ?? "")
+        let teacherRef = db.collection("teachers").document(userID ?? "")
         
         let updatedResume = [
             textField1.text ?? "",

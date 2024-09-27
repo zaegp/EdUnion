@@ -15,6 +15,7 @@ struct ColorPickerCalendarView: View {
     @State private var availableColors: [Color] = []
     @State private var activitiesByDate: [Date: [Appointment]] = [:]
     @State private var timeSlots: [AvailableTimeSlot] = []
+    let userID = UserSession.shared.currentUserID
     
     var body: some View {
         BaseCalendarView(
@@ -64,7 +65,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func fetchDateColors() {
-        let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(teacherID)
+        let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(userID ?? "")
         
         teacherRef.getDocument { (documentSnapshot, error) in
             if let error = error {
@@ -86,19 +87,17 @@ struct ColorPickerCalendarView: View {
         
         if let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: currentDay) {
             DispatchQueue.main.async {
-                // 更新當前選中的日期
                 self.selectedDay = nextDay
                 
-                // 調用傳入的 onDayTap 閉包
                 if let onDayTap = onDayTap {
-                    onDayTap(nextDay)  // 這裡實際調用了閉包，觸發 BaseCalendarView 的邏輯
+                    onDayTap(nextDay)
                 }
             }
         }
     }
     
     private func fetchTimeSlots() {
-        UserFirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { result in
+        UserFirebaseService.shared.fetchTimeSlots(forTeacher: userID ?? "") { result in
             switch result {
             case .success(let fetchedTimeSlots):
                 DispatchQueue.main.async {
@@ -117,7 +116,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func fetchAppointments() {
-        AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: teacherID) { result in
+        AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: userID) { result in
             switch result {
             case .success(let fetchedAppointments):
                 DispatchQueue.main.async {
@@ -146,7 +145,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func saveDateColorToFirebase(date: Date, color: Color) {
-        UserFirebaseService.shared.saveDateColorToFirebase(date: date, color: color, teacherID: teacherID)
+        UserFirebaseService.shared.saveDateColorToFirebase(date: date, color: color, teacherID: userID ?? "")
     }
     
     private let dateFormatter: DateFormatter = {

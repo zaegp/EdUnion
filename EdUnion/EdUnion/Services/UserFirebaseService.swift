@@ -10,6 +10,7 @@ import FirebaseFirestore
 import FirebaseStorage
 
 protocol UserProtocol {
+    var id: String { get set }
     var fullName: String { get }
     var photoURL: String? { get }
 }
@@ -37,7 +38,9 @@ class UserFirebaseService {
         db.collection(collection).document(id).getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
-            } else if let data = try? snapshot?.data(as: type) {
+            } else if var data = try? snapshot?.data(as: type) {
+                // 設置文檔 ID
+                data.id = snapshot?.documentID ?? ""
                 completion(.success(data))
             } else {
                 completion(.failure(NSError(domain: "No data found in \(collection)", code: 404, userInfo: nil)))
@@ -143,14 +146,16 @@ class UserFirebaseService {
     // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
         var teachers: [Teacher] = []
-        let group = DispatchGroup()  // 用來處理多個查詢結果
+        let group = DispatchGroup() 
         
         for id in ids {
             group.enter()
             db.collection("teachers").document(id).getDocument { snapshot, error in
                 if let error = error {
                     print("Error fetching teacher with id \(id): \(error)")
-                } else if let teacher = try? snapshot?.data(as: Teacher.self) {
+                } else if var teacher = try? snapshot?.data(as: Teacher.self) {
+                    // 設置文檔 ID
+                    teacher.id = snapshot?.documentID ?? ""
                     teachers.append(teacher)
                 }
                 group.leave()  // 結束一個查詢
@@ -259,7 +264,10 @@ class UserFirebaseService {
                 completion(.failure(error))
             } else if let snapshot = snapshot {
                 let teachers: [Teacher] = snapshot.documents.compactMap { doc in
-                    return try? doc.data(as: Teacher.self)
+                    var teacher = try? doc.data(as: Teacher.self)
+                    // 設置文檔 ID
+                    teacher?.id = doc.documentID
+                    return teacher
                 }
                 completion(.success(teachers))
             }

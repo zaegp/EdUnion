@@ -33,7 +33,7 @@ class TabBarController: UITabBarController {
         } else {
             firstVC = NavigationController(rootViewController: StudentHomeVC())
         }
-        let secondVC = NavigationController(rootViewController: FilesVC())
+        let secondVC = NavigationController(rootViewController: CalendarVC())
         //        let thirdVC = UINavigationController(rootViewController: StudentListVC())
         let thirdVC = NavigationController(rootViewController: ChatListVC())
         let fourthVC = NavigationController(rootViewController: ProfileVC())

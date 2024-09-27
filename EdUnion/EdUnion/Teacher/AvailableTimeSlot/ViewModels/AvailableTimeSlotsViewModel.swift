@@ -10,15 +10,10 @@ import UIKit
 class AvailableTimeSlotsViewModel {
     private(set) var timeSlots: [AvailableTimeSlot] = []
     var onTimeSlotsChanged: (() -> Void)?
-    
-    private let teacherID: String
-    
-    init(teacherID: String) {
-        self.teacherID = teacherID
-    }
+    let userID = UserSession.shared.currentUserID
     
     func loadTimeSlots() {
-        UserFirebaseService.shared.fetchTimeSlots(forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.fetchTimeSlots(forTeacher: userID ?? "") { [weak self] result in
             switch result {
             case .success(let timeSlots):
                 self?.timeSlots = timeSlots

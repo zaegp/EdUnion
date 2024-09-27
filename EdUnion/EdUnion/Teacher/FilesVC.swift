@@ -10,8 +10,8 @@ import UIKit
 class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     var collectionView: UICollectionView!
-    var selectedFiles: [URL] = [] // 儲存選中的文件
-    var files: [URL] = [] // 模擬文件列表，真實應用中可以從文件系統或網絡獲取
+    var selectedFiles: [URL] = []
+    var files: [URL] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +19,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         setupCollectionView()
         setupLongPressGesture()
         
-        // 添加上傳按鈕
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "上傳文件", style: .plain, target: self, action: #selector(uploadFiles))
         
         print("View did load - FilesViewController initialized.")
@@ -56,7 +55,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     
     @objc func uploadFiles() {
         print("Upload button clicked.")
-        // 使用 UIDocumentPickerViewController 進行文件上傳
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
         documentPicker.delegate = self
         present(documentPicker, animated: true, completion: nil)
@@ -73,12 +71,10 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath)
         
-        // 設置文件縮略圖、名稱等
         if indexPath.item < files.count {
             let fileURL = files[indexPath.item]
             print("Configuring cell for file: \(fileURL.lastPathComponent)")
             
-            // 例如：為 cell 添加一個標籤來顯示文件名稱
             let label = UILabel(frame: cell.contentView.bounds)
             label.text = fileURL.lastPathComponent
             label.textAlignment = .center
@@ -118,13 +114,11 @@ extension FilesVC: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         print("Document picker did pick documents: \(urls)")
         
-        // 檢查文件數組是否為空
         if urls.isEmpty {
             print("Error: No files were selected.")
             return
         }
         
-        // 處理選中的文件
         files.append(contentsOf: urls)
         collectionView.reloadData()
         print("Files added and collection view reloaded. Total files count: \(files.count)")
@@ -134,3 +128,5 @@ extension FilesVC: UIDocumentPickerDelegate {
         print("Document picker was cancelled")
     }
 }
+
+

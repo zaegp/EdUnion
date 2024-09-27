@@ -55,17 +55,16 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         for (studentID, _) in studentsNotes {
             dispatchGroup.enter()
             
-           
             UserFirebaseService.shared.fetchUser(from: "students", by: studentID, as: Student.self) { result in
-                        defer { dispatchGroup.leave() }
-                        
-                        switch result {
-                        case .success(let student):
-                            fetchedStudents.append(student)
-                        case .failure(let error):
-                            print("取得學生 \(studentID) 資料失敗: \(error.localizedDescription)")
-                        }
-                    }
+                defer { dispatchGroup.leave() }
+                
+                switch result {
+                case .success(let student):
+                    fetchedStudents.append(student)
+                case .failure(let error):
+                    print("取得學生 \(studentID) 資料失敗: \(error.localizedDescription)")
+                }
+            }
         }
         
         dispatchGroup.notify(queue: .main) {

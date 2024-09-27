@@ -38,6 +38,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window?.rootViewController = ChooseRoleVC() 
         }
         
+        if let userID = Auth.auth().currentUser?.uid {
+            UserSession.shared.currentUserID = userID
+            print("Current User ID: \(userID)")
+        } else {
+            print("No user is logged in.")
+        }
+        
         window?.makeKeyAndVisible()
     }
 

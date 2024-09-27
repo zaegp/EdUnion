@@ -6,13 +6,13 @@
 //
 
 import UIKit
-import FirebaseAuth
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     private let tableView = UITableView()
     private var userImageView: UIImageView!
     let nameLabel = UILabel()
+    let userID = UserSession.shared.currentUserID
     
     let data = [
         ("分析", "chart.bar"),
@@ -71,7 +71,6 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
         userImageView.addGestureRecognizer(tapGesture)
         
-        
         nameLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -96,20 +95,15 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             return
         }
         
-        guard let userID = Auth.auth().currentUser?.uid else {
-            print("無法取得使用者 ID")
-            return
-        }
-        
         let collection = (userRole == "teacher") ? "teachers" : "students"
         print("查詢集合: \(collection)，使用者 ID: \(userID)")
         
         if userRole == "teacher" {
-            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Teacher.self) { [weak self] result in
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID ?? "", as: Teacher.self) { [weak self] result in
                 self?.handleFetchResult(result)
             }
         } else {
-            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Student.self) { [weak self] result in
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID ?? "", as: Student.self) { [weak self] result in
                 self?.handleFetchResult(result)
             }
         }

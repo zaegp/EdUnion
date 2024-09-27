@@ -9,7 +9,6 @@ import UIKit
 import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
-import FirebaseAuth
 import IQKeyboardManagerSwift
 
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
@@ -19,6 +18,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     var teacherID: String = ""
     var studentID: String = ""
+    let userID = UserSession.shared.currentUserID
     
     private let imageView = UIImageView()
     private let messageInputBar = UIView()
@@ -122,7 +122,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         
         // 從 Firebase Auth 中取得當前使用者的 ID
-        guard let userID = Auth.auth().currentUser?.uid else {
+        guard let userID = userID else {
             print("無法取得使用者 ID")
             return
         }

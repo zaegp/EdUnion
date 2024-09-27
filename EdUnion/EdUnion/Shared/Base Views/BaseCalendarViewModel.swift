@@ -8,35 +8,23 @@
 import SwiftUI
 
 class BaseCalendarViewModel: ObservableObject {
-    
-    @Published var studentNames: [String: String] = [:]
-    @Published var teacherNames: [String: String] = [:]
-    
-    func fetchStudentName(for studentID: String) {
-        UserFirebaseService.shared.fetchName(from: "students", by: studentID) { result in
+    @Published var participantNames: [String: String] = [:]
+
+    func fetchUserData<T: UserProtocol & Decodable>(from collection: String, userID: String, as type: T.Type) {
+        UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: type) { [weak self] result in
             switch result {
-            case .success(let studentName):
+            case .success(let user):
                 DispatchQueue.main.async {
-                    self.studentNames[studentID] = studentName ?? "Unknown Student"
+                    if let student = user as? Student {
+                        self?.participantNames[userID] = student.fullName.isEmpty ? "Unknown Student" : student.fullName
+                    } else if let teacher = user as? Teacher {
+                        self?.participantNames[userID] = teacher.fullName.isEmpty ? "Unknown Teacher" : teacher.fullName
+                    }
                 }
             case .failure:
                 DispatchQueue.main.async {
-                    self.studentNames[studentID] = "Unknown Student"
-                }
-            }
-        }
-    }
-    
-    func fetchTeacherName(for teacherID: String) {
-        UserFirebaseService.shared.fetchName(from: "teachers", by: teacherID) { result in
-            switch result {
-            case .success(let teacherName):
-                DispatchQueue.main.async {
-                    self.teacherNames[teacherID] = teacherName ?? "Unknown Teacher"
-                }
-            case .failure:
-                DispatchQueue.main.async {
-                    self.teacherNames[teacherID] = "Unknown Teacher"
+                    let unknownLabel = collection == "students" ? "Unknown Student" : "Unknown Teacher"
+                    self?.participantNames[userID] = unknownLabel
                 }
             }
         }

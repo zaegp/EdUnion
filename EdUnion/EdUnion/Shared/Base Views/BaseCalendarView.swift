@@ -58,6 +58,7 @@ struct CalendarDayView: View {
         .frame(height: 60)
     }
 }
+
 struct BaseCalendarView: View {
     
     @Binding var externalDateColors: [Date: Color]?
@@ -93,8 +94,8 @@ struct BaseCalendarView: View {
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     @State private var days: [Date?] = []
-//    @State private var leftIsActive = false
-//    @State private var rightIsActive = false
+    //    @State private var leftIsActive = false
+    //    @State private var rightIsActive = false
     
     var body: some View {
         let colors = dateColors
@@ -103,10 +104,10 @@ struct BaseCalendarView: View {
                 Button(action: { previousPeriod() }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(Color(.backButton))
-//                        .symbolEffect(.bounce.down.byLayer, value: leftIsActive)
-//                        .onTapGesture {
-//                            leftIsActive.toggle()
-//                        }
+                    //                        .symbolEffect(.bounce.down.byLayer, value: leftIsActive)
+                    //                        .onTapGesture {
+                    //                            leftIsActive.toggle()
+                    //                        }
                 }
                 Spacer()
                 Text(formattedMonthAndYear(currentDate))
@@ -115,10 +116,10 @@ struct BaseCalendarView: View {
                 Button(action: { nextPeriod() }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(Color(.backButton))
-//                        .symbolEffect(.bounce.down.byLayer, value: rightIsActive)
-//                        .onTapGesture {
-//                            rightIsActive.toggle()
-//                        }
+                    //                        .symbolEffect(.bounce.down.byLayer, value: rightIsActive)
+                    //                        .onTapGesture {
+                    //                            rightIsActive.toggle()
+                    //                        }
                 }
             }
             .padding()
@@ -157,6 +158,21 @@ struct BaseCalendarView: View {
                 }
                 
             }
+            .gesture(
+                DragGesture()
+                    .onEnded { value in
+                        let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+                        feedbackGenerator.prepare()
+                        
+                        if value.translation.width < 0 {
+                            nextPeriod()
+                            feedbackGenerator.impactOccurred()
+                        } else if value.translation.width > 0 {
+                            previousPeriod()
+                            feedbackGenerator.impactOccurred()
+                        }
+                    }
+            )
             .onAppear {
                 setupView()
                 if !isDataLoaded {
@@ -177,31 +193,34 @@ struct BaseCalendarView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        // 要換
-//                                                                                Text(viewModel.studentNames[appointment.studentID] ?? "")
-//                                                                                    .onAppear {
-//                                                                                        if viewModel.studentNames[appointment.studentID] == nil {
-//                                                                                            viewModel.fetchStudentName(for: appointment.studentID)
-//                                                                                        }
-//                                                                                    }
-                                        Text(viewModel.teacherNames[appointment.teacherID] ?? "")
+                                        // 使用通用方法查詢學生或教師的資料
+                                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
                                             .onAppear {
-                                                if viewModel.teacherNames[appointment.teacherID] == nil {
-                                                    viewModel.fetchTeacherName(for: appointment.teacherID)
-                                                }
+                                                if viewModel.participantNames[appointment.studentID] == nil {
+                                                                            // 從 UserDefaults 獲取 userRole
+                                                                            let userRole = UserDefaults.standard.string(forKey: "userRole") ?? ""
+
+                                                                            if userRole == "student" {
+                                                                                // 如果角色是學生，則查詢學生資料
+                                                                                viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
+                                                                            } else if userRole == "teacher" {
+                                                                                // 如果角色是老師，則查詢教師資料
+                                                                                viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
+                                                                            }
+                                                                        }
                                             }
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
-                                        
+
                                         Spacer()
-                                        
+
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
                                             .foregroundColor(.black)
                                     }
                                 }
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.gray)
                             }
@@ -356,3 +375,6 @@ struct BaseCalendarView: View {
 //#Preview {
 //    BaseCalendarView()
 //}
+
+
+

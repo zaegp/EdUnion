@@ -18,6 +18,7 @@ struct BookingView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var bookedSlots: [String] = []
+    let userID = UserSession.shared.currentUserID
     
     var availableDates: [String] {
             let dateFormatter = DateFormatter()
@@ -214,7 +215,7 @@ struct BookingView: View {
         
         let bookingData: [String: Any] = [
             "id": documentID,
-            "studentID": studentID,
+            "studentID": userID,
             "teacherID": teacherID,
             "date": date,
             "times": selectedTimes,

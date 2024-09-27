@@ -8,6 +8,7 @@
 import Foundation
 
 struct Teacher: UserProtocol, Codable {
+    var id: String
     var userID: String
     var resume: [String]
     var fullName: String
@@ -20,6 +21,8 @@ struct Teacher: UserProtocol, Codable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        id = ""
         
         userID = try container.decodeIfPresent(String.self, forKey: .userID) ?? ""
         resume = try container.decodeIfPresent([String].self, forKey: .resume) ?? []

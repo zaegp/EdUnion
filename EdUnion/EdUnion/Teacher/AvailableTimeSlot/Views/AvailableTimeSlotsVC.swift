@@ -18,7 +18,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     init(teacherID: String) {
         self.teacherID = teacherID
         super.init(nibName: nil, bundle: nil)
-        self.viewModel = AvailableTimeSlotsViewModel(teacherID: teacherID)
+        self.viewModel = AvailableTimeSlotsViewModel()
     }
     
     required init?(coder: NSCoder) {

@@ -7,9 +7,9 @@
 
 import UIKit
 import FirebaseFirestore
-import FirebaseAuth
 
 class IntroVC: UIViewController {
+    let userID = UserSession.shared.currentUserID
     
     let educationLabel = UILabel()
     let educationTextField = UITextField()
@@ -92,7 +92,7 @@ class IntroVC: UIViewController {
     }
     
     @objc func saveChanges() {
-        guard let userID = Auth.auth().currentUser?.uid else {
+        guard let userID = userID else {
             print("Error: User not logged in.")
             return
         }
