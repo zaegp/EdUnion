@@ -16,7 +16,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel = ConfirmViewModel(userID: studentID)
+        viewModel = ConfirmViewModel()
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()

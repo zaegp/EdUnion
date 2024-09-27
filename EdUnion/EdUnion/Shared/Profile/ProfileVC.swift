@@ -19,7 +19,8 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         ("可選時段", "calendar.badge.plus"),
         ("履歷", "list.bullet.clipboard"),
         ("待確認的預約", "bell"),
-        ("所有學生列表", "person.3")
+        ("所有學生列表", "person.3"),
+        ("教材", "folder")
     ]
     
     override func viewDidLoad() {
@@ -215,6 +216,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         case "所有學生列表":
             let studentListVC = AllStudentVC()
             navigationController?.pushViewController(studentListVC, animated: true)
+        case "教材":
+            let filesVC = FilesVC()
+            navigationController?.pushViewController(filesVC, animated: true)
         default:
             break
         }

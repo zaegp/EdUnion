@@ -539,7 +539,7 @@ class UserFirebaseService {
             if let error = error {
                 completion(.failure(error))
             } else if let document = document, document.exists {
-                let name = document.data()?["name"] as? String
+                let name = document.data()?["fullName"] as? String
                 completion(.success(name))
             } else {
                 completion(.success(nil))

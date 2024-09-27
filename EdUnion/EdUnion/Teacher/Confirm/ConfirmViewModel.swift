@@ -18,8 +18,8 @@ class ConfirmViewModel {
     var userID: String
     var updateUI: (() -> Void)?
     
-    init(userID: String) {
-        self.userID = userID
+    init() {
+        self.userID = UserSession.shared.currentUserID ?? ""
     }
     
     func fetchStudentName(for appointment: Appointment, completion: @escaping (String) -> Void) {
@@ -34,7 +34,7 @@ class ConfirmViewModel {
     }
     
     func loadPendingAppointments() {
-        AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: teacherID) { result in
+        AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: userID) { result in
             switch result {
             case .success(let fetchedAppointments):
                 self.appointments = fetchedAppointments
