@@ -18,13 +18,20 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     
     let storage = Storage.storage()
     let firestore = Firestore.firestore()
-    
-    var shareButton: UIBarButtonItem!
+    let userID = UserSession.shared.currentUserID
+    var studentTableView: UITableView!
+    var studentInfos: [Student] = []
+    var selectedStudentIDs: Set<String> = []
+    var shareButton: UIButton!
+    var sendButton: UIButton!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupCollectionView()
+        setupStudentTableView()
+        setupSendButton()
         setupLongPressGesture()
         
         let menuButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
@@ -44,51 +51,184 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         menuButton.menu = menu
         menuButton.primaryAction = nil
         
-        shareButton = UIBarButtonItem(title: "分享", style: .plain, target: self, action: #selector(shareSelectedFiles))
+        shareButton = UIButton(type: .system)
+            shareButton.setTitle("分享", for: .normal)
+            shareButton.backgroundColor = .systemBlue
+            shareButton.tintColor = .white
+            shareButton.layer.cornerRadius = 10
+            shareButton.isHidden = true
+            shareButton.addTarget(self, action: #selector(shareSelectedFiles), for: .touchUpInside)
+            
+            view.addSubview(shareButton)
+            shareButton.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                shareButton.heightAnchor.constraint(equalToConstant: 50),
+                shareButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
+                shareButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
+                shareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            ])
         
         uploadAllFiles()
         fetchUserFiles()
     }
-
-    @objc func selectMultipleFilesForSharing() {
-            collectionView.allowsMultipleSelection = true
-            navigationItem.leftBarButtonItem = shareButton // 顯示分享按鈕
-        }
-        
-        @objc func shareSelectedFiles() {
-            if selectedFiles.isEmpty {
-                print("沒有選擇任何文件")
-                return
-            }
+    
+    private func setupSendButton() {
+            sendButton = UIButton(type: .system)
+            sendButton.setTitle("發送文件", for: .normal)
+            sendButton.backgroundColor = .systemBlue
+            sendButton.setTitleColor(.white, for: .normal)
+            sendButton.layer.cornerRadius = 8
+            sendButton.translatesAutoresizingMaskIntoConstraints = false
+            sendButton.addTarget(self, action: #selector(sendFilesToSelectedStudents), for: .touchUpInside)
             
-            // 在這裡實作分享至聊天室的邏輯
-            print("分享文件：\(selectedFiles)")
-            // 這裡可以呼叫您分享至聊天室的功能，並將 `selectedFiles` 作為參數傳入
+            view.addSubview(sendButton)
             
-            // 完成後，退出多選模式
-            collectionView.allowsMultipleSelection = false
-            selectedFiles.removeAll()
-            navigationItem.leftBarButtonItem = nil // 隱藏分享按鈕
-            collectionView.reloadData()
+            // 設置按鈕的 AutoLayout
+            NSLayoutConstraint.activate([
+                sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                sendButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+                sendButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+                sendButton.heightAnchor.constraint(equalToConstant: 50)
+            ])
         }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            if indexPath.item < files.count {
-                let selectedFileURL = files[indexPath.item]
-                selectedFiles.append(selectedFileURL)
-                print("選擇文件：\(selectedFileURL.lastPathComponent)")
-            }
+    private func setupStudentTableView() {
+            studentTableView = UITableView()
+            studentTableView.delegate = self
+            studentTableView.dataSource = self
+            studentTableView.register(StudentTableViewCell.self, forCellReuseIdentifier: "StudentCell")
+            studentTableView.translatesAutoresizingMaskIntoConstraints = false
+            
+            view.addSubview(studentTableView)
+            
+            // 設置學生資訊 TableView 的 AutoLayout
+            NSLayoutConstraint.activate([
+                studentTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                studentTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                studentTableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 200),
+                studentTableView.heightAnchor.constraint(equalToConstant: 300)  // 設定 TableView 的高度
+            ])
+        }
+
+    @objc func selectMultipleFilesForSharing() {
+        collectionView.allowsMultipleSelection = true
+        shareButton.isHidden = false
+    }
+    
+    @objc func shareSelectedFiles() {
+        if selectedFiles.isEmpty {
+            print("沒有選擇任何文件")
+            return
         }
         
-        func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-            if indexPath.item < files.count {
-                let deselectedFileURL = files[indexPath.item]
-                if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
-                    selectedFiles.remove(at: index)
-                    print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+        fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
+                    for (studentID, _) in notes {
+                        self?.fetchUser(from: "students", userID: studentID, as: Student.self)
+                    }
+                }
+        
+        print("分享文件：\(selectedFiles)")
+        
+        collectionView.allowsMultipleSelection = true
+        shareButton.isHidden = true
+        collectionView.reloadData()
+    }
+    
+    func fetchStudentsNotes(completion: @escaping ([String: String]) -> Void) {
+        firestore.collection("teachers").document(userID ?? "").getDocument { (snapshot, error) in
+                if let error = error {
+                    print("Error fetching studentsNotes: \(error.localizedDescription)")
+                    completion([:])
+                    return
+                }
+                
+                guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
+                    print("No studentsNotes found for teacher \(teacherID)")
+                    completion([:])
+                    return
+                }
+                
+                completion(studentsNotes)
+            }
+    }
+
+    func fetchStudentsNotes(forTeacherID teacherID: String, completion: @escaping ([String: String]) -> Void) {
+            firestore.collection("teachers").document(teacherID).getDocument { (snapshot, error) in
+                if let error = error {
+                    print("Error fetching studentsNotes: \(error.localizedDescription)")
+                    completion([:])
+                    return
+                }
+                
+                guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
+                    print("No studentsNotes found for teacher \(teacherID)")
+                    completion([:])
+                    return
+                }
+                
+                completion(studentsNotes)
+            }
+        }
+
+        func fetchUser<T: UserProtocol & Decodable>(from collection: String, userID: String, as type: T.Type) {
+            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: type) { [weak self] result in
+                switch result {
+                case .success(let user):
+                    if let student = user as? Student {
+                        self?.studentInfos.append(student)
+                    }
+                    DispatchQueue.main.async {
+                        self?.studentTableView.reloadData()
+                    }
+                case .failure(let error):
+                    print("Error fetching user: \(error.localizedDescription)")
                 }
             }
         }
+    
+    @objc func sendFilesToSelectedStudents() {
+            guard !selectedFiles.isEmpty, !selectedStudentIDs.isEmpty else {
+                print("沒有選擇任何文件或學生")
+                return
+            }
+            
+            // 發送文件給選中的學生
+            for studentID in selectedStudentIDs {
+                for file in selectedFiles {
+                    // 這裡實現發送文件的邏輯
+                    print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
+                    // 根據需求在這裡實現實際的發送文件到學生的邏輯
+                }
+            }
+        }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item < files.count {
+            let selectedFileURL = files[indexPath.item]
+            selectedFiles.append(selectedFileURL)
+            print("選擇文件：\(selectedFileURL.lastPathComponent)")
+            
+            // 更新 Cell 的視覺效果
+            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                cell.setSelected(true)
+            }
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if indexPath.item < files.count {
+            let deselectedFileURL = files[indexPath.item]
+            if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
+                selectedFiles.remove(at: index)
+                print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+            }
+            
+            // 更新 Cell 的視覺效果
+            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                cell.setSelected(false)
+            }
+        }
+    }
     
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
@@ -140,13 +280,11 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             let localUrl = documentsDirectory.appendingPathComponent(fileName)
             
             do {
-                // 移動文件到文檔目錄
                 if fileManager.fileExists(atPath: localUrl.path) {
                     try fileManager.removeItem(at: localUrl)
                 }
                 try fileManager.moveItem(at: tempLocalUrl, to: localUrl)
                 
-                // 添加文件到 files 陣列
                 DispatchQueue.main.async {
                     self?.files.append(localUrl)
                     self?.collectionView.reloadData()
@@ -310,7 +448,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
-    // 顯示彈出視窗以編輯文件名稱
     func editFileName(at indexPath: IndexPath) {
         let fileURL = files[indexPath.item]
         let alertController = UIAlertController(title: "編輯文件名稱", message: "請輸入新的文件名稱", preferredStyle: .alert)
@@ -384,6 +521,61 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
 }
 
+extension FilesVC: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return studentInfos.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath) as! StudentTableViewCell
+        let student = studentInfos[indexPath.row]
+        cell.configure(with: student)
+        
+        // 設置選擇狀態
+        cell.accessoryType = selectedStudentIDs.contains(student.id) ? .checkmark : .none
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let student = studentInfos[indexPath.row]
+        
+        // 添加或移除選擇的學生
+        if selectedStudentIDs.contains(student.id) {
+            selectedStudentIDs.remove(student.id)
+        } else {
+            selectedStudentIDs.insert(student.id)
+        }
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+    }
+}
+
+// 自定義學生資訊的 TableViewCell
+class StudentTableViewCell: UITableViewCell {
+    let nameLabel = UILabel()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        contentView.addSubview(nameLabel)
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            nameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(with student: Student) {
+        nameLabel.text = student.fullName
+    }
+}
+
 // MARK: - UIDocumentPickerDelegate
 extension FilesVC: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
@@ -450,40 +642,55 @@ extension FilesVC: UIDocumentPickerDelegate {
 class FileCell: UICollectionViewCell {
     let imageView = UIImageView()
     let nameLabel = UILabel()
-    
+    let overlayView = UIView()  // 用於顯示選擇效果
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(imageView)
-        
+
         nameLabel.font = UIFont.systemFont(ofSize: 12)
         nameLabel.textAlignment = .center
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(nameLabel)
-        
+
+        // 添加覆蓋視圖
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        overlayView.isHidden = true
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(overlayView)
+
         // AutoLayout Constraints
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
             imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 50),
             imageView.heightAnchor.constraint(equalToConstant: 50),
-            
+
             nameLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 5),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5)
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5),
+
+            // 覆蓋視圖佈局
+            overlayView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            overlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
         ])
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func configure(with fileURL: URL) {
         nameLabel.text = fileURL.lastPathComponent
-        
         imageView.image = UIImage(systemName: "doc")
-        
+    }
+
+    func setSelected(_ selected: Bool) {
+        overlayView.isHidden = !selected
     }
 }

@@ -11,6 +11,9 @@
 		513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */; };
 		513BEC102CA6820A000E0DE9 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0F2CA6820A000E0DE9 /* UserSession.swift */; };
 		513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC112CA8507C000E0DE9 /* ChatListCell.swift */; };
+		513BEC142CA88C5D000E0DE9 /* FileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC132CA88C5D000E0DE9 /* FileVC.swift */; };
+		513BEC172CA8902B000E0DE9 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 513BEC162CA8902B000E0DE9 /* DGCharts */; };
+		513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC182CA89059000E0DE9 /* LessonChartView.swift */; };
 		51993AFB2CA393130022C79F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFA2CA393130022C79F /* Kingfisher */; };
 		51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFD2CA393700022C79F /* FirebaseAnalytics */; };
 		51993B002CA393700022C79F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFF2CA393700022C79F /* FirebaseAuth */; };
@@ -135,6 +138,8 @@
 		513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesVC.swift; sourceTree = "<group>"; };
 		513BEC0F2CA6820A000E0DE9 /* UserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSession.swift; sourceTree = "<group>"; };
 		513BEC112CA8507C000E0DE9 /* ChatListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListCell.swift; sourceTree = "<group>"; };
+		513BEC132CA88C5D000E0DE9 /* FileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVC.swift; sourceTree = "<group>"; };
+		513BEC182CA89059000E0DE9 /* LessonChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonChartView.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -235,6 +240,7 @@
 				51993B002CA393700022C79F /* FirebaseAuth in Frameworks */,
 				51993B042CA393700022C79F /* FirebaseStorage in Frameworks */,
 				51993AFB2CA393130022C79F /* Kingfisher in Frameworks */,
+				513BEC172CA8902B000E0DE9 /* DGCharts in Frameworks */,
 				51993B072CA393800022C79F /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -353,6 +359,8 @@
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 				519E14972CA1884200E344CE /* AllStudentVC.swift */,
 				513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */,
+				513BEC182CA89059000E0DE9 /* LessonChartView.swift */,
+				513BEC132CA88C5D000E0DE9 /* FileVC.swift */,
 			);
 			path = Teacher;
 			sourceTree = "<group>";
@@ -652,6 +660,7 @@
 				51993B012CA393700022C79F /* FirebaseFirestore */,
 				51993B032CA393700022C79F /* FirebaseStorage */,
 				51993B062CA393800022C79F /* IQKeyboardManagerSwift */,
+				513BEC162CA8902B000E0DE9 /* DGCharts */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -732,6 +741,7 @@
 				51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				51993B052CA393800022C79F /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				513BEC152CA8902B000E0DE9 /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -817,6 +827,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				513BEC142CA88C5D000E0DE9 /* FileVC.swift in Sources */,
 				519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */,
 				51D25CC92CA060100083EECF /* FrequentlyUsedVC.swift in Sources */,
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
@@ -828,6 +839,7 @@
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
+				513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
 				51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */,
@@ -1304,6 +1316,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		513BEC152CA8902B000E0DE9 /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
 		51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
@@ -1331,6 +1351,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		513BEC162CA8902B000E0DE9 /* DGCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 513BEC152CA8902B000E0DE9 /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGCharts;
+		};
 		51993AFA2CA393130022C79F /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */;

@@ -68,6 +68,8 @@ struct BaseCalendarView: View {
     @State private var isShowingDetail = false
     @State private var selectedAppointment: Appointment?
     @State private var appointmentListener: ListenerRegistration?
+    let userID = UserSession.shared.currentUserID
+    let userRole = UserDefaults.standard.string(forKey: "userRole") ?? ""
     
     var dateColors: [Date: Color] {
         get {
@@ -197,30 +199,27 @@ struct BaseCalendarView: View {
                                         Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
                                             .onAppear {
                                                 if viewModel.participantNames[appointment.studentID] == nil {
-                                                                            // 從 UserDefaults 獲取 userRole
-                                                                            let userRole = UserDefaults.standard.string(forKey: "userRole") ?? ""
-
-                                                                            if userRole == "student" {
-                                                                                // 如果角色是學生，則查詢學生資料
-                                                                                viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
-                                                                            } else if userRole == "teacher" {
-                                                                                // 如果角色是老師，則查詢教師資料
-                                                                                viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
-                                                                            }
-                                                                        }
+                                                    if userRole == "teacher" {
+                                                        // 當前使用者是老師，顯示學生資訊
+                                                        viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
+                                                    } else {
+                                                        // 當前使用者是學生，顯示老師資訊
+                                                        viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
+                                                    }
+                                                }
                                             }
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
-
+                                        
                                         Spacer()
-
+                                        
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
                                             .foregroundColor(.black)
                                     }
                                 }
                                 Spacer()
-
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.gray)
                             }
@@ -304,16 +303,18 @@ struct BaseCalendarView: View {
         return formatter.string(from: date)
     }
     
-    // 要換
     private func fetchAppointments() {
         appointmentListener?.remove()
         
-        appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(forTeacherID: nil, studentID: studentID) { result in
+        appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(
+            forTeacherID: (userRole == "teacher") ? userID : nil,
+            studentID: (userRole == "student") ? userID : nil
+        ) { result in
             switch result {
             case .success(let fetchedAppointments):
                 DispatchQueue.main.async {
                     self.appointments = fetchedAppointments
-                    self.mapAppointmentsToDates()  // 更新 UI 或處理預約資料
+                    self.mapAppointmentsToDates()
                 }
             case .failure(let error):
                 print("獲取預約時出錯：\(error)")
