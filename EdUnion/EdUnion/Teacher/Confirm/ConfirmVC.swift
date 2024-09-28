@@ -50,7 +50,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         let appointment = viewModel.appointments[indexPath.row]
         var isStudentExisting = false
         
-        viewModel.updateStudentNotes(forTeacher: teacherID, studentID: appointment.studentID, note: "") { result in
+        viewModel.updateStudentNotes(studentID: appointment.studentID, note: "") { result in
             switch result {
             case .success(let studentExists):
                 if studentExists {

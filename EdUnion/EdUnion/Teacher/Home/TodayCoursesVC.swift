@@ -22,6 +22,7 @@ class TodayCoursesVC: UIViewController {
     private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
     let titleLabel = UILabel()
     var expandedIndexPath: IndexPath?
+    let userID = UserSession.shared.currentUserID
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -96,7 +97,7 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
         let appointment = viewModel.appointments[indexPath.row]
-        viewModel.fetchStudentNote(teacherID: teacherID, studentID: appointment.studentID)
+        viewModel.fetchStudentNote(teacherID: userID ?? "", studentID: appointment.studentID)
         
         viewModel.fetchStudentName(for: appointment) { studentName in
             DispatchQueue.main.async {

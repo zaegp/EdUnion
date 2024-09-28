@@ -10,14 +10,15 @@ import AVFoundation
 import FirebaseStorage
 import FirebaseFirestore
 import IQKeyboardManagerSwift
+import Kingfisher
 
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
     
     private var viewModel: ChatViewModel!
     private let tableView = UITableView()
     
-    var teacherID: String = ""
-    var studentID: String = ""
+    var teacher: Teacher?
+    var student: Student?
     let userID = UserSession.shared.currentUserID
     
     private let imageView = UIImageView()
@@ -44,9 +45,13 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupRecordingSession()
         setupKeyboardNotifications()
         
-        // 要換
-                viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: studentID)
-//        viewModel = ChatViewModel(chatRoomID: teacherID + "_" + studentID, currentUserID: teacherID)
+        if teacher == nil {
+            viewModel = ChatViewModel(chatRoomID: (userID ?? "") + "_" + (student?.id ?? ""))
+//            viewModel.otherParticipantID = student?.id ?? ""
+        } else {
+            viewModel = ChatViewModel(chatRoomID: (teacher?.id ?? "") + "_" + (userID ?? ""))
+//            viewModel.otherParticipantID = teacher?.id ?? ""
+        }
         
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
@@ -91,9 +96,26 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func setupNavigationBar() {
-        // 要換
     
-        fetchUserInfo()
+        if UserDefaults.standard.string(forKey: "userRole") == "teacher" {
+            if let photoURLString = student?.photoURL, let photoURL = URL(string: photoURLString) {
+                imageView.kf.setImage(
+                    with: photoURL,
+                    placeholder: UIImage(systemName: "person.circle")
+                )
+            } else {
+                imageView.image = UIImage(systemName: "person.circle")
+            }
+        } else {
+            if let photoURLString = teacher?.photoURL, let photoURL = URL(string: photoURLString) {
+                imageView.kf.setImage(
+                    with: photoURL,
+                    placeholder: UIImage(systemName: "person.circle")
+                )
+            } else {
+                imageView.image = UIImage(systemName: "person.circle")
+            }
+        }
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
@@ -112,53 +134,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         containerView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         
         navigationItem.titleView = containerView
-    }
-    
-    func fetchUserInfo() {
-        // 從 UserDefaults 中取得角色
-        guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
-            print("無法取得角色")
-            return
-        }
-        
-        // 從 Firebase Auth 中取得當前使用者的 ID
-        guard let userID = userID else {
-            print("無法取得使用者 ID")
-            return
-        }
-        
-        // 決定集合名稱
-        let collection = userRole == "teacher" ? "teachers" : "students"
-        
-        // 根據角色和 ID 使用泛型方法來獲取資料
-        if userRole == "teacher" {
-            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Teacher.self) { [weak self] result in
-                self?.handleFetchResult(result)
-            }
-        } else {
-            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: Student.self) { [weak self] result in
-                self?.handleFetchResult(result)
-            }
-        }
-    }
-
-    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>) {
-        switch result {
-        case .success(let user):
-            print("查詢成功: \(user.fullName)")
-            if let photoURL = user.photoURL, let url = URL(string: photoURL) {
-                self.imageView.kf.setImage(
-                    with: url,
-                    placeholder: UIImage(systemName: "person.circle.fill")?.withTintColor(.backButton, renderingMode: .alwaysOriginal)
-                )
-            } else {
-                self.imageView.image = UIImage(systemName: "person.circle.fill")
-                self.imageView.tintColor = .backButton
-                print("沒有圖片 URL")
-            }
-        case .failure(let error):
-            print("查詢失敗: \(error.localizedDescription)")
-        }
     }
     
     private func setupMessageInputBar() {
@@ -374,8 +349,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
         let message = viewModel.message(at: indexPath.row)
         let previousMessage: Message? = indexPath.row > 0 ? viewModel.message(at: indexPath.row - 1) : nil
-        print("1111111")
-        print(message)
         let pendingImage = viewModel.getPendingImage(for: message.ID ?? "nil")
         cell.configure(with: message, previousMessage: previousMessage, image: pendingImage)
         cell.delegate = self

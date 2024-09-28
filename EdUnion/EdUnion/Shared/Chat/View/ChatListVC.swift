@@ -19,8 +19,11 @@ class ChatListVC: UIViewController {
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
     private var participantID: String?
-    private var participantNames: [String: String] = [:]
+    private var participants: [String: Any] = [:]
     private var chatRoomListener: ListenerRegistration?
+    
+    var theTeacher: Teacher?
+    var theStudent: Student?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +51,8 @@ class ChatListVC: UIViewController {
     }
     
     private func setupUI() {
+        tableView.separatorStyle = .none
+        
         searchBar.delegate = self
         searchBar.placeholder = "搜尋"
         searchBar.sizeToFit()
@@ -83,7 +88,7 @@ class ChatListVC: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(ChatRoomCell.self, forCellReuseIdentifier: "chatRoomCell")
+        tableView.register(ChatListCell.self, forCellReuseIdentifier: "ChatListCell")
         tableView.frame = self.view.bounds
         tableView.tableFooterView = UIView()
         self.view.addSubview(tableView)
@@ -143,9 +148,9 @@ class ChatListVC: UIViewController {
                         UserFirebaseService.shared.fetchName(from: "students", by: participantId) { [weak self] result in
                             switch result {
                             case .success(let studentName):
-                                self?.participantNames[chatRoom.id] = studentName
+                                self?.participants[chatRoom.id] = studentName
                             case .failure:
-                                self?.participantNames[chatRoom.id] = "Unknown Student"
+                                self?.participants[chatRoom.id] = "Unknown Student"
                             }
                             DispatchQueue.main.async {
                                 self?.tableView.reloadData()
@@ -155,9 +160,9 @@ class ChatListVC: UIViewController {
                         UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { [weak self] result in
                             switch result {
                             case .success(let teacherName):
-                                self?.participantNames[chatRoom.id] = teacherName
+                                self?.participants[chatRoom.id] = teacherName
                             case .failure:
-                                self?.participantNames[chatRoom.id] = "Unknown Teacher"
+                                self?.participants[chatRoom.id] = "Unknown Teacher"
                             }
                             DispatchQueue.main.async {
                                 self?.tableView.reloadData()
@@ -191,51 +196,41 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "chatRoomCell", for: indexPath) as! ChatRoomCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
         let chatRoom = filteredChatRooms[indexPath.row]
         
         let participantId = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
-        print("111111")
-        print(participantId)
-        
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
-        if let intID = Int(participantId) {
-            if intID % 2 == 0 {
-                // 偶數 -> 查詢學生
-                UserFirebaseService.shared.fetchName(from: "students", by: participantId) { result in
+        let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "student"
+        
+        if userRole == "teacher" {
+            UserFirebaseService.shared.fetchUser(from: "students", by: participantId, as: Student.self) { result in
+                DispatchQueue.main.async {
                     switch result {
-                    case .success(let studentName):
-                        DispatchQueue.main.async {
-                            let name = studentName ?? "Unknown Student"
-                            cell.configure(name: name, lastMessage: lastMessage, time: lastMessageTime)
-                        }
+                    case .success(let student):
+                        self.participants[chatRoom.id] = student
+                        cell.configure(name: student.fullName, lastMessage: lastMessage, time: lastMessageTime, image: student.photoURL ?? "")
                     case .failure:
-                        DispatchQueue.main.async {
-                            cell.configure(name: "Unknown Student", lastMessage: lastMessage, time: lastMessageTime)
-                        }
+                        cell.configure(name: "Unknown Student", lastMessage: lastMessage, time: lastMessageTime, image: "")
                     }
                 }
-            } else {
-                // 奇數 -> 查詢老師
-                UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { result in
+            }
+        } else {
+            UserFirebaseService.shared.fetchUser(from: "teachers", by: participantId, as: Teacher.self) { result in
+                DispatchQueue.main.async {
                     switch result {
-                    case .success(let teacherName):
-                        DispatchQueue.main.async {
-                            let name = teacherName ?? "Unknown Teacher"
-                            // 更新 cell 的名稱
-                            cell.configure(name: name, lastMessage: lastMessage, time: lastMessageTime)
-                        }
+                    case .success(let teacher):
+                        self.participants[chatRoom.id] = teacher
+                        cell.configure(name: teacher.fullName, lastMessage: lastMessage, time: lastMessageTime, image: teacher.photoURL ?? "")
                     case .failure:
-                        DispatchQueue.main.async {
-                            // 更新 cell 的名稱
-                            cell.configure(name: "Unknown Teacher", lastMessage: lastMessage, time: lastMessageTime)
-                        }
+                        cell.configure(name: "Unknown Teacher", lastMessage: lastMessage, time: lastMessageTime, image: "")
                     }
                 }
             }
         }
+        
         return cell
     }
     
@@ -244,58 +239,20 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         
         let selectedChatRoom = filteredChatRooms[indexPath.row]
         let chatVC = ChatVC()
-        chatVC.teacherID = selectedChatRoom.participants[0]
-        chatVC.studentID = selectedChatRoom.participants[1]
+        
+        if let userRole = UserDefaults.standard.string(forKey: "userRole") {
+            if userRole == "teacher" {
+                if let student = participants[selectedChatRoom.id] as? Student {
+                    chatVC.student = student
+                }
+            } else {
+                if let teacher = participants[selectedChatRoom.id] as? Teacher {
+                    chatVC.teacher = teacher
+                }
+            }
+        }
+        
         navigationController?.pushViewController(chatVC, animated: true)
-    }
-}
-
-class ChatRoomCell: UITableViewCell {
-    
-    private let nameLabel = UILabel()
-    private let lastMessageLabel = UILabel()
-    private let timeLabel = UILabel()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setupUI() {
-        nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        lastMessageLabel.font = UIFont.systemFont(ofSize: 14)
-        lastMessageLabel.textColor = .gray
-        timeLabel.font = UIFont.systemFont(ofSize: 12)
-        timeLabel.textColor = .lightGray
-        
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(timeLabel)
-        contentView.addSubview(lastMessageLabel)
-        
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        lastMessageLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            
-            timeLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            timeLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            
-            lastMessageLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
-            lastMessageLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
-        ])
-    }
-    
-    func configure(name: String, lastMessage: String, time: String) {
-        nameLabel.text = name
-        lastMessageLabel.text = lastMessage
-        timeLabel.text = time
     }
 }
 
@@ -305,11 +262,12 @@ extension ChatListVC: UISearchBarDelegate {
             filteredChatRooms = chatRooms
         } else {
             filteredChatRooms = chatRooms.filter { chatRoom in
-                let participantName = participantNames[chatRoom.id] ?? ""
-                return participantName.lowercased().contains(searchText.lowercased())
+                if let participantName = participants[chatRoom.id] as? String {
+                    return participantName.lowercased().contains(searchText.lowercased())
+                }
+                return false
             }
         }
         tableView.reloadData()
     }
 }
-

@@ -34,7 +34,7 @@ class ConfirmViewModel {
     }
     
     func loadPendingAppointments() {
-        AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: userID) { result in
+        AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: userID ?? "") { result in
             switch result {
             case .success(let fetchedAppointments):
                 self.appointments = fetchedAppointments
@@ -68,14 +68,14 @@ class ConfirmViewModel {
         }
     }
     
-    func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+    func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
         UserFirebaseService.shared.updateStudentNotes(forTeacher: teacherID, studentID: studentID, note: note) { result in
-                switch result {
-                case .success(let studentExists):
-                    completion(.success(studentExists))
-                case .failure(let error):
-                    completion(.failure(error))
-                }
+            switch result {
+            case .success(let studentExists):
+                completion(.success(studentExists))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
+    }
 }

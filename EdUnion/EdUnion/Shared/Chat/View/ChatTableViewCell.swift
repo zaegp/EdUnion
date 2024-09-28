@@ -16,6 +16,7 @@ protocol ChatTableViewCellDelegate: AnyObject {
 class ChatTableViewCell: UITableViewCell {
     
     private var isImageLoaded = false
+    let userID = UserSession.shared.currentUserID
     
     private let bubbleBackgroundView: UIView = {
         let view = UIView()
@@ -126,6 +127,7 @@ class ChatTableViewCell: UITableViewCell {
         bubbleBackgroundView.addSubview(toggleImageButton)
         bubbleBackgroundView.addSubview(activityIndicator)
         contentView.addSubview(messageImageView)
+        messageImageView.addSubview(activityIndicator)
         contentView.addSubview(timestampLabel)
         
         audioButton.addTarget(self, action: #selector(playAudio), for: .touchUpInside)
@@ -215,18 +217,14 @@ class ChatTableViewCell: UITableViewCell {
     
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
-        // 要換
-//        self.isSentByCurrentUser = (message.senderID == teacherID)
-        self.isSentByCurrentUser = (message.senderID == studentID)
+    
+        self.isSentByCurrentUser = (message.senderID == userID)
         resetContent()
         
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
             timestampLabel.text = formatDate(message.timestamp.dateValue())
             timestampLabel.isHidden = false
         }
-//         else {
-//            timestampLabel.isHidden = true
-//        }
 
         switch message.type {
         case 0:
@@ -237,26 +235,26 @@ class ChatTableViewCell: UITableViewCell {
             messageLabel.text = message.content
             messageLabel.isHidden = false
 
-        case 1:
-            bubbleBackgroundView.isHidden = true
-            messageImageView.isHidden = false
-            toggleImageButton.isHidden = false
-            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            
-            if let localImage = image {
-                messageImageView.image = localImage
-                activityIndicator.startAnimating()
-            } else {
-                loadImage(from: message.content)
-            }
 //        case 1:
-//                bubbleBackgroundView.isHidden = true
-//                messageImageView.isHidden = false
-//                toggleImageButton.isHidden = false
-//                setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-//
-//                // 直接從 message.content 重新載入圖片
+//            bubbleBackgroundView.isHidden = true
+//            messageImageView.isHidden = false
+//            toggleImageButton.isHidden = false
+//            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+//            
+//            if let localImage = image {
+//                messageImageView.image = localImage
+//                activityIndicator.startAnimating()
+//            } else {
 //                loadImage(from: message.content)
+//            }
+        case 1:
+                bubbleBackgroundView.isHidden = true
+                messageImageView.isHidden = false
+                toggleImageButton.isHidden = false
+                setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+
+                // 直接從 message.content 重新載入圖片
+                loadImage(from: message.content)
 
         case 2:
             bubbleBackgroundView.isHidden = false
@@ -383,6 +381,7 @@ class ChatTableViewCell: UITableViewCell {
 //    }
     
     private func loadImage(from urlString: String) {
+        activityIndicator.startAnimating() 
         if let url = URL(string: urlString) {
             messageImageView.kf.setImage(with: url) { result in
                 switch result {

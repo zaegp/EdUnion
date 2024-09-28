@@ -64,7 +64,6 @@ class UserFirebaseService {
             if let error = error {
                 completion(.failure(error))
             } else if let data = snapshot?.data(), let followList = data["followList"] as? [String] {
-                // 查詢 followList 中的所有老師
                 self.fetchTeachers(for: followList, completion: completion)
             } else {
                 completion(.failure(NSError(domain: "Invalid followList", code: 404, userInfo: nil)))
@@ -154,15 +153,13 @@ class UserFirebaseService {
                 if let error = error {
                     print("Error fetching teacher with id \(id): \(error)")
                 } else if var teacher = try? snapshot?.data(as: Teacher.self) {
-                    // 設置文檔 ID
                     teacher.id = snapshot?.documentID ?? ""
                     teachers.append(teacher)
                 }
-                group.leave()  // 結束一個查詢
+                group.leave()
             }
         }
         
-        // 當所有查詢完成後回傳結果
         group.notify(queue: .main) {
             if !teachers.isEmpty {
                 completion(.success(teachers))
@@ -265,7 +262,6 @@ class UserFirebaseService {
             } else if let snapshot = snapshot {
                 let teachers: [Teacher] = snapshot.documents.compactMap { doc in
                     var teacher = try? doc.data(as: Teacher.self)
-                    // 設置文檔 ID
                     teacher?.id = doc.documentID
                     return teacher
                 }

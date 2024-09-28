@@ -235,7 +235,7 @@ struct BookingView: View {
             }
         }
         
-        UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacherID, listName: "usedList") { error in
+        UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacherID, listName: "usedList") { error in
             if let error = error {
                 print("更新 usedList 失敗: \(error)")
             } else {

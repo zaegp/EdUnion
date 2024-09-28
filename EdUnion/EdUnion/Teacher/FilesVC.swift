@@ -19,6 +19,8 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     let storage = Storage.storage()
     let firestore = Firestore.firestore()
     
+    var shareButton: UIBarButtonItem!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -30,8 +32,8 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         
         // 建立 UIMenu
         let menu = UIMenu(title: "", children: [
-            UIAction(title: "預覽文件", image: UIImage(systemName: "doc")) { [weak self] _ in
-                self?.previewFiles()
+            UIAction(title: "上傳檔案", image: UIImage(systemName: "doc.badge.plus")) { [weak self] _ in
+                self?.uploadFiles()
             },
             UIAction(title: "選取多個文件分享", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
                 self?.selectMultipleFilesForSharing()
@@ -42,48 +44,51 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         menuButton.menu = menu
         menuButton.primaryAction = nil
         
+        shareButton = UIBarButtonItem(title: "分享", style: .plain, target: self, action: #selector(shareSelectedFiles))
+        
         uploadAllFiles()
         fetchUserFiles()
     }
+
+    @objc func selectMultipleFilesForSharing() {
+            collectionView.allowsMultipleSelection = true
+            navigationItem.leftBarButtonItem = shareButton // 顯示分享按鈕
+        }
+        
+        @objc func shareSelectedFiles() {
+            if selectedFiles.isEmpty {
+                print("沒有選擇任何文件")
+                return
+            }
+            
+            // 在這裡實作分享至聊天室的邏輯
+            print("分享文件：\(selectedFiles)")
+            // 這裡可以呼叫您分享至聊天室的功能，並將 `selectedFiles` 作為參數傳入
+            
+            // 完成後，退出多選模式
+            collectionView.allowsMultipleSelection = false
+            selectedFiles.removeAll()
+            navigationItem.leftBarButtonItem = nil // 隱藏分享按鈕
+            collectionView.reloadData()
+        }
     
-    @objc func showActionSheet() {
-        let actionSheet = UIAlertController(title: "選擇操作", message: "請選擇要執行的操作", preferredStyle: .actionSheet)
-        
-        // 預覽文件
-        let previewAction = UIAlertAction(title: "預覽文件", style: .default) { [weak self] _ in
-            self?.previewFiles()
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+            if indexPath.item < files.count {
+                let selectedFileURL = files[indexPath.item]
+                selectedFiles.append(selectedFileURL)
+                print("選擇文件：\(selectedFileURL.lastPathComponent)")
+            }
         }
         
-        // 選取多個文件分享
-        let shareAction = UIAlertAction(title: "選取多個文件分享", style: .default) { [weak self] _ in
-            self?.selectMultipleFilesForSharing()
+        func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+            if indexPath.item < files.count {
+                let deselectedFileURL = files[indexPath.item]
+                if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
+                    selectedFiles.remove(at: index)
+                    print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+                }
+            }
         }
-        
-        // 取消按鈕
-        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
-        
-        actionSheet.addAction(previewAction)
-        actionSheet.addAction(shareAction)
-        actionSheet.addAction(cancelAction)
-        
-        // 適用於 iPad 的設置
-        if let popoverController = actionSheet.popoverPresentationController {
-            popoverController.barButtonItem = navigationItem.rightBarButtonItem
-        }
-        
-        present(actionSheet, animated: true, completion: nil)
-    }
-
-    func previewFiles() {
-        // 這裡是你的文件預覽代碼
-        print("預覽文件")
-    }
-
-    // 選取多個文件分享的操作
-    func selectMultipleFilesForSharing() {
-        // 這裡是你的選取多個文件分享的代碼
-        print("選取多個文件分享")
-    }
     
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
@@ -104,7 +109,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                     return
                 }
                 
-                self?.files.removeAll() // 清空當前文件列表
+                self?.files.removeAll()
                 
                 for document in documents {
                     guard let urlString = document.data()["downloadURL"] as? String,
@@ -113,7 +118,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                         continue
                     }
                     
-                    // 下載文件到本地
                     self?.downloadFile(from: url, withName: fileName)
                 }
             }
@@ -131,7 +135,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 return
             }
             
-            // 將文件存儲到本地
             let fileManager = FileManager.default
             let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
             let localUrl = documentsDirectory.appendingPathComponent(fileName)
@@ -288,12 +291,12 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     //        }
     //    }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.item < files.count {
-            let selectedFileURL = files[indexPath.item]
-            previewFile(at: selectedFileURL)
-        }
-    }
+//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        if indexPath.item < files.count {
+//            let selectedFileURL = files[indexPath.item]
+//            previewFile(at: selectedFileURL)
+//        }
+//    }
     
     func setupLongPressGesture() {
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))

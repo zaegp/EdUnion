@@ -10,21 +10,46 @@ import Foundation
 class FollowViewModel: BaseCollectionViewModelProtocol {
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
+    var userID: String? {
+        return UserSession.shared.currentUserID
+    }
     
     var onDataUpdate: (() -> Void)?
     
-    
-    
     func fetchData() {
-        UserFirebaseService.shared.fetchFollowedTeachers(forStudentID: studentID) { result in
+        guard let userID = userID else {
+            print("User ID is nil.")
+            return
+        }
+        
+        print(userID)
+        UserFirebaseService.shared.fetchFollowedTeachers(forStudentID: userID) { result in
             switch result {
             case .success(let teachers):
-                print("Fetched teachers: \(teachers)")
-                self.items = teachers
-                self.filteredItems = teachers
-                self.onDataUpdate?()
+                if teachers.isEmpty {
+                    self.items = []
+                    self.filteredItems = []
+                    print("No followed teachers found.")
+                } else {
+                    print("Fetched teachers: \(teachers)")
+                    self.items = teachers
+                    self.filteredItems = teachers
+                }
+                
+                // 確保在主執行緒更新 UI
+                DispatchQueue.main.async {
+                    self.onDataUpdate?() // 通知 UI 更新
+                }
+                
             case .failure(let error):
                 print("Failed to fetch teachers: \(error)")
+                
+                // 處理錯誤的情況，確保 items 和 filteredItems 都被清空
+                DispatchQueue.main.async {
+                    self.items = []
+                    self.filteredItems = []
+                    self.onDataUpdate?() // 通知 UI 更新
+                }
             }
         }
     }
@@ -34,27 +59,19 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
             filteredItems = items
         } else {
             filteredItems = items.filter { teacher in
-                // 搜尋名字和 resume 屬性
-                teacher.fullName.lowercased().contains(query.lowercased()) ||
-                teacher.resume[0].lowercased().contains(query.lowercased()) ||
-                teacher.resume[1].lowercased().contains(query.lowercased()) ||
-                teacher.resume[2].lowercased().contains(query.lowercased()) ||
-                teacher.resume[3].lowercased().contains(query.lowercased())
+                // 安全處理 resume 陣列，防止越界崩潰
+                return teacher.fullName.lowercased().contains(query.lowercased()) ||
+                teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
             }
         }
         onDataUpdate?()
     }
-        
-        func numberOfItems() -> Int {
-            return filteredItems.count
-        }
-        
-        func item(at index: Int) -> Teacher {
-            return filteredItems[index]
-        }
     
-//    private func fetchFollowedTeachers() -> [Teacher] {
-//       
-//        return []
-//    }
+    func numberOfItems() -> Int {
+        return filteredItems.count
+    }
+    
+    func item(at index: Int) -> Teacher {
+        return filteredItems[index]
+    }
 }

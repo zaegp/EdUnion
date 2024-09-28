@@ -74,9 +74,16 @@ extension BaseCollectionVC: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard indexPath.row < viewModel.numberOfItems() else {
+                    print("Index out of bounds. Total items: \(viewModel.numberOfItems()), requested index: \(indexPath.row)")
+                    return UICollectionViewCell()
+                }
+        
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TeacherCell", for: indexPath) as? TeacherCell else {
             return UICollectionViewCell()
         }
+        
+        guard indexPath.row < viewModel.numberOfItems() else { return cell }
         
         let item = viewModel.item(at: indexPath.item)
         cell.configure(with: item)

@@ -77,11 +77,20 @@ struct AuthenticationView: View {
                                     navigateToMainApp()
                                 } else {
                                     // User does not exist, this is the first login
-                                    userRef.setData([
+                                    var userData: [String: Any] = [
                                         "fullName": (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? ""),
                                         "email": appleIDCredential.email ?? "",
                                         "userID": appleIDCredential.user
-                                    ]) { error in
+                                    ]
+                                    
+                                    // Add additional fields if the user is a student
+                                    if userRole == "student" {
+                                        userData["followList"] = [String]()
+                                        userData["usedList"] = [String]()
+                                        userData["photoURL"] = String() 
+                                    }
+                                    
+                                    userRef.setData(userData) { error in
                                         if let error = error {
                                             print("Error saving user data to Firestore: \(error.localizedDescription)")
                                         } else {

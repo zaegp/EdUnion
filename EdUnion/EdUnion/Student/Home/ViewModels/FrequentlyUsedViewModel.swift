@@ -11,11 +11,12 @@ class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
     
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
+    let userID = UserSession.shared.currentUserID
     
     var onDataUpdate: (() -> Void)?
     
     func fetchData() {
-        UserFirebaseService.shared.fetchFrequentlyUsedTeachers(forStudentID: studentID) { result in
+        UserFirebaseService.shared.fetchFrequentlyUsedTeachers(forStudentID: userID ?? "") { result in
             switch result {
             case .success(let teachers):
                 self.items = teachers

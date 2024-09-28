@@ -21,6 +21,7 @@ class TeacherDetailVC: UIViewController {
     private let introduceLabel = UILabel()
     private let bookButton = UIButton(type: .system)
     private let chatButton = UIButton(type: .system)
+    let userID = UserSession.shared.currentUserID
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,7 +45,7 @@ class TeacherDetailVC: UIViewController {
     
     private func checkIfTeacherIsFavorited() {
         
-        UserFirebaseService.shared.getStudentFollowList(studentID: studentID) { [weak self] followList, error in
+        UserFirebaseService.shared.getStudentFollowList(studentID: userID ?? "") { [weak self] followList, error in
             if let error = error {
                 print("檢查 followList 時出錯: \(error.localizedDescription)")
             } else if let followList = followList {
@@ -197,15 +198,14 @@ class TeacherDetailVC: UIViewController {
     
     @objc private func chatButtonTapped() {
         let chatVC = ChatVC()
-        chatVC.teacherID = teacher?.userID ?? ""
-        chatVC.studentID = studentID ?? ""    
+        chatVC.teacher = teacher
+        chatVC.student?.id = userID ?? ""
         navigationController?.pushViewController(chatVC, animated: true)
     }
     
     @objc private func favoriteButtonTapped() {
-        
         if isFavorite {
-            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: studentID, teacherID: teacher!.userID) { error in
+            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: userID ?? "", teacherID: teacher!.userID) { error in
                 if let error = error {
                     print("從 followList 中移除老師時出錯: \(error.localizedDescription)")
                 } else {
@@ -215,7 +215,7 @@ class TeacherDetailVC: UIViewController {
                 }
             }
         } else {
-            UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacher!.userID, listName: "followList") { error in
+            UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacher!.userID, listName: "followList") { error in
                 if let error = error {
                     print("更新 followList 失敗: \(error)")
                 } else {
