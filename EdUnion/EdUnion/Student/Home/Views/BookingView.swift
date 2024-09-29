@@ -9,7 +9,7 @@ import SwiftUI
 import FirebaseCore
 
 struct BookingView: View {
-    let teacherID: String 
+    let teacherID: String
     let selectedTimeSlots: [String: String]
     let timeSlots: [AvailableTimeSlot]
     
@@ -21,17 +21,19 @@ struct BookingView: View {
     let userID = UserSession.shared.currentUserID
     
     var availableDates: [String] {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            
-            let today = Date()
-            return Array(selectedTimeSlots.keys).filter { dateString in
-                if let date = dateFormatter.date(from: dateString) {
-                    return date > today  
-                }
-                return false
-            }.sorted()
-        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let today = Date()
+        let calendar = Calendar.current
+        
+        return Array(selectedTimeSlots.keys).filter { dateString in
+            if let date = dateFormatter.date(from: dateString) {
+                return calendar.isDate(date, inSameDayAs: today) || date > today
+            }
+            return false
+        }.sorted()
+    }
     
     var body: some View {
         VStack {
@@ -44,6 +46,7 @@ struct BookingView: View {
                             
                             getBookedSlots(for: selectedDate ?? "") { slots in
                                 bookedSlots = slots
+                                _ = generateTimeSlots(from: timeSlots.flatMap { $0.timeRanges }, bookedSlots: bookedSlots)
                             }
                         }) {
                             Text(date)
@@ -66,6 +69,7 @@ struct BookingView: View {
                 } else {
                     ScrollView(.vertical, showsIndicators: false) {
                         LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
+                            // 確保 `bookedSlots` 在調用時已經包含最新的已預約時間段
                             ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }, id: \.self) { timeSlot in
                                 Button(action: {
                                     toggleSelection(of: timeSlot)
@@ -85,7 +89,6 @@ struct BookingView: View {
                         }
                         .padding()
                     }
-                    
                 }
             } else {
                 Text("請選擇日期")

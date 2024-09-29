@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -203,7 +204,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         
         switch selectedItem {
         case "分析":
-            break
+            let chartView = ContentViews()
+            let hostingController = UIHostingController(rootView: chartView)
+            navigationController?.pushViewController(hostingController, animated: true)
         case "可選時段":
             let timeSlotsVC = AvailableTimeSlotsVC(teacherID: teacherID)
             navigationController?.pushViewController(timeSlotsVC, animated: true)

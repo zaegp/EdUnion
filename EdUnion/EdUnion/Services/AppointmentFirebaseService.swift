@@ -40,13 +40,15 @@ class AppointmentFirebaseService {
         fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
             switch result {
             case .success(let appointments):
-                completion(.success(appointments))  // 不過濾 status，返回所有預約
+                let filteredAppointments = appointments.filter { appointment in
+                    appointment.status != "canceled" && appointment.status != "rejected"
+                }
+                completion(.success(filteredAppointments))
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
-
     // MARK: - 保存預約
     func saveBooking(data: [String: Any], completion: @escaping (Bool, Error?) -> Void) {
         db.collection("appointments").addDocument(data: data) { error in

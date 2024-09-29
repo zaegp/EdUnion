@@ -65,15 +65,15 @@ class TodayCoursesVC: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 80),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
             progressBarHostingController.view.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 50),
             progressBarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            progressBarHostingController.view.widthAnchor.constraint(equalToConstant: 200),
-            progressBarHostingController.view.heightAnchor.constraint(equalToConstant: 200),
+            progressBarHostingController.view.widthAnchor.constraint(equalToConstant: 150),
+            progressBarHostingController.view.heightAnchor.constraint(equalToConstant: 150),
             
-            tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 100),
+            tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 50),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -102,18 +102,28 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         viewModel.fetchStudentName(for: appointment) { studentName in
             DispatchQueue.main.async {
                 cell.configureCell(name: studentName, times: appointment.times, note: self.viewModel.studentNote, isExpanded: self.expandedIndexPath == indexPath)
+                // 檢查課程是否已完成並設置 UI
+                if appointment.status == "completed" {
+                    cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+                } else {
+                    cell.confirmButton.setImage(UIImage(systemName: "circle"), for: .normal)
+                }
             }
         }
         
         cell.confirmCompletion = { [weak self] in
-            let alert = UIAlertController(title: "Confirm Completion", message: "Do you want to mark this course as completed?", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
-                cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-                self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
-            }))
-            self?.present(alert, animated: true, completion: nil)
-        }
+                if appointment.status == "completed" {
+                    return
+                }
+                
+                let alert = UIAlertController(title: "完成課程", message: "確定要完成課程嗎?", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+                alert.addAction(UIAlertAction(title: "確定", style: .default, handler: { _ in
+                    self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
+                    cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+                }))
+                self?.present(alert, animated: true, completion: nil)
+            }
         
         return cell
     }

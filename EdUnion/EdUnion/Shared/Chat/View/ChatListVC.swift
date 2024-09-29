@@ -127,7 +127,14 @@ class ChatListVC: UIViewController {
     }
     
     private func observeChatRooms() {
-        UserFirebaseService.shared.fetchChatRooms(for: participantID ?? "") { [weak self] (chatRooms, error) in
+        guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
+                print("Error: Unable to get user role from UserDefaults.")
+                return
+            }
+            
+            let isTeacher = (userRole == "teacher")
+        
+        UserFirebaseService.shared.fetchChatRooms(for: participantID ?? "", isTeacher: isTeacher) { [weak self] (chatRooms, error) in
             if let error = error {
                 print("Error fetching chat rooms: \(error.localizedDescription)")
                 return

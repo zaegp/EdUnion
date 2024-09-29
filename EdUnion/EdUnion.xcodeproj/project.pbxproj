@@ -14,6 +14,8 @@
 		513BEC142CA88C5D000E0DE9 /* FileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC132CA88C5D000E0DE9 /* FileVC.swift */; };
 		513BEC172CA8902B000E0DE9 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 513BEC162CA8902B000E0DE9 /* DGCharts */; };
 		513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC182CA89059000E0DE9 /* LessonChartView.swift */; };
+		513BEC1C2CA8FC52000E0DE9 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 513BEC1B2CA8FC52000E0DE9 /* SwiftUIIntrospect */; };
+		513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC1F2CA90361000E0DE9 /* BarChartView.swift */; };
 		51993AFB2CA393130022C79F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFA2CA393130022C79F /* Kingfisher */; };
 		51993AFE2CA393700022C79F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFD2CA393700022C79F /* FirebaseAnalytics */; };
 		51993B002CA393700022C79F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 51993AFF2CA393700022C79F /* FirebaseAuth */; };
@@ -140,6 +142,7 @@
 		513BEC112CA8507C000E0DE9 /* ChatListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListCell.swift; sourceTree = "<group>"; };
 		513BEC132CA88C5D000E0DE9 /* FileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVC.swift; sourceTree = "<group>"; };
 		513BEC182CA89059000E0DE9 /* LessonChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonChartView.swift; sourceTree = "<group>"; };
+		513BEC1F2CA90361000E0DE9 /* BarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarChartView.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -242,6 +245,7 @@
 				51993AFB2CA393130022C79F /* Kingfisher in Frameworks */,
 				513BEC172CA8902B000E0DE9 /* DGCharts in Frameworks */,
 				51993B072CA393800022C79F /* IQKeyboardManagerSwift in Frameworks */,
+				513BEC1C2CA8FC52000E0DE9 /* SwiftUIIntrospect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +364,7 @@
 				519E14972CA1884200E344CE /* AllStudentVC.swift */,
 				513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */,
 				513BEC182CA89059000E0DE9 /* LessonChartView.swift */,
+				513BEC1F2CA90361000E0DE9 /* BarChartView.swift */,
 				513BEC132CA88C5D000E0DE9 /* FileVC.swift */,
 			);
 			path = Teacher;
@@ -661,6 +666,7 @@
 				51993B032CA393700022C79F /* FirebaseStorage */,
 				51993B062CA393800022C79F /* IQKeyboardManagerSwift */,
 				513BEC162CA8902B000E0DE9 /* DGCharts */,
+				513BEC1B2CA8FC52000E0DE9 /* SwiftUIIntrospect */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -742,6 +748,7 @@
 				51993AFC2CA393700022C79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				51993B052CA393800022C79F /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				513BEC152CA8902B000E0DE9 /* XCRemoteSwiftPackageReference "Charts" */,
+				513BEC1A2CA8FC52000E0DE9 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -892,6 +899,7 @@
 				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
 				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* AllTeacherViewModel.swift in Sources */,
+				513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1324,6 +1332,14 @@
 				minimumVersion = 5.1.0;
 			};
 		};
+		513BEC1A2CA8FC52000E0DE9 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		51993AF92CA393130022C79F /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
@@ -1355,6 +1371,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 513BEC152CA8902B000E0DE9 /* XCRemoteSwiftPackageReference "Charts" */;
 			productName = DGCharts;
+		};
+		513BEC1B2CA8FC52000E0DE9 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 513BEC1A2CA8FC52000E0DE9 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 		51993AFA2CA393130022C79F /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;

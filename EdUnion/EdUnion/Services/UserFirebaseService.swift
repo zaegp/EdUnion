@@ -160,6 +160,7 @@ class UserFirebaseService {
             }
         }
         
+        // 當所有查詢完成後回傳結果
         group.notify(queue: .main) {
             if !teachers.isEmpty {
                 completion(.success(teachers))
@@ -378,7 +379,7 @@ class UserFirebaseService {
     }
     
     // MARK - 聊天室
-    func fetchChatRooms(for participantID: String, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
+    func fetchChatRooms(for participantID: String, isTeacher: Bool, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
         db.collection("chats")
             .whereField("participants", arrayContains: participantID)
             .order(by: "lastMessageTimestamp", descending: true)
@@ -394,8 +395,26 @@ class UserFirebaseService {
                 }
                 
                 let chatRooms: [ChatRoom] = documents.compactMap { document in
-                    return try? document.data(as: ChatRoom.self)  // 自動解碼 ChatRoom
+                    guard let chatRoom = try? document.data(as: ChatRoom.self) else {
+                        return nil
+                    }
+                    
+                    // 根據是否為老師來篩選 participants 的位置
+                    if isTeacher {
+                        // 如果是老師，檢查 participantID 是否在索引 0
+                        if chatRoom.participants.indices.contains(0), chatRoom.participants[0] == participantID {
+                            return chatRoom
+                        }
+                    } else {
+                        // 如果是學生，檢查 participantID 是否在索引 1
+                        if chatRoom.participants.indices.contains(1), chatRoom.participants[1] == participantID {
+                            return chatRoom
+                        }
+                    }
+                    
+                    return nil
                 }
+                
                 completion(chatRooms, nil)
             }
     }
