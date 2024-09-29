@@ -10,6 +10,22 @@ import FirebaseFirestore
 
 var tag = 1
 
+struct ChatViewControllerWrapper: UIViewControllerRepresentable {
+    var teacherID: String
+    var studentID: String
+    
+    func makeUIViewController(context: Context) -> ChatVC {
+        let chatVC = ChatVC()
+        chatVC.teacher?.id = teacherID
+        chatVC.student?.id = studentID
+        return chatVC
+    }
+    
+    func updateUIViewController(_ uiViewController: ChatVC, context: Context) {
+        // 更新視圖控制器的狀態
+    }
+}
+
 class CalendarService {
     static let shared = CalendarService()
     var activitiesByDate: [Date: [Appointment]] = [:]
@@ -99,6 +115,8 @@ struct BaseCalendarView: View {
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     @State private var days: [Date?] = []
+    @State private var isShowingChat = false
+        @State private var selectedStudentID: String = ""
     //    @State private var leftIsActive = false
     //    @State private var rightIsActive = false
     
@@ -190,99 +208,125 @@ struct BaseCalendarView: View {
                 Spacer()
                 
                 if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
-                                    List {
-                                        ForEach(activities) { appointment in
-                                            HStack {
-                                                VStack(alignment: .leading) {
-                                                    HStack {
-                                                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
-                                                            .onAppear {
-                                                                if viewModel.participantNames[appointment.studentID] == nil {
-                                                                    if userRole == "teacher" {
-                                                                        viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
-                                                                    } else {
-                                                                        viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
-                                                                    }
-                                                                }
-                                                            }
-                                                            .font(.subheadline)
-                                                            .foregroundColor(.gray)
-                                                        
-                                                        Spacer()
-                                                        
-                                                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                                                            .font(.body)
-                                                            .foregroundColor(.black)
+                    List {
+                        ForEach(activities) { appointment in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
+                                            .onAppear {
+                                                if viewModel.participantNames[appointment.studentID] == nil {
+                                                    if userRole == "teacher" {
+                                                        viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
+                                                    } else {
+                                                        viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
                                                     }
                                                 }
-                                                Spacer()
-                                                
-                                                Image(systemName: "chevron.right")
-                                                    .foregroundColor(.gray)
                                             }
-                                            .padding()
-                                            .background(Color(uiColor: .systemBackground))
-                                            .cornerRadius(10)
-                                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-                                            .padding(.vertical, 5)
-                                            .listRowSeparator(.hidden)
-                                            .onTapGesture {
-                                                selectedAppointment = appointment
-                                                isShowingCard = true
-                                            }
-                                        }
-                                    }
-                                    .listStyle(PlainListStyle())
-                                }
-                            }
-                            
-                            // 卡片視圖放置在 ZStack 中的頂部
-                            if isShowingCard, let appointment = selectedAppointment {
-                                VStack {
-                                    Spacer()
-                                    VStack(spacing: 20) {
-                                        Text(appointment.date)
-                                            .font(.headline)
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
                                         
-                                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
-                                            .font(.title)
+                                        Spacer()
                                         
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                                            .font(.subheadline)
-                                        
-                                        Button(action: {
-                                            cancelAppointment()
-                                        }) {
-                                            Text("取消預約")
-                                                .font(.headline)
-                                                .foregroundColor(.white)
-                                                .padding()
-                                                .frame(maxWidth: .infinity)
-                                                .background(Color.red)
-                                                .cornerRadius(10)
-                                        }
+                                            .font(.body)
+                                            .foregroundColor(.black)
                                     }
-                                    .padding()
-                                    .background(Color.white)
-                                    .cornerRadius(15)
-                                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                                    .padding()
-                                    Spacer()
                                 }
-                                .background(Color.black.opacity(0.5))
-                                .edgesIgnoringSafeArea(.all)
-                                .onTapGesture {
-                                    isShowingCard = false
-                                }
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .background(Color(uiColor: .systemBackground))
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                            .padding(.vertical, 5)
+                            .listRowSeparator(.hidden)
+                            .onTapGesture {
+                                selectedAppointment = appointment
+                                isShowingCard = true
                             }
                         }
                     }
+                    .listStyle(PlainListStyle())
+                }
+            }
+            
+            // 卡片視圖放置在 ZStack 中的頂部
+            if isShowingCard, let appointment = selectedAppointment {
+                VStack {
+                    Spacer()
+                    VStack(spacing: 20) {
+                        Text(appointment.date)
+                            .font(.headline)
+                        
+                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
+                            .font(.title)
+                        
+                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
+                            .font(.subheadline)
+                        
+                        if userRole == "student" {
+                            Button(action: {
+                                let appointmentID = appointment.id ?? ""
+                                cancelAppointment(appointmentID: appointmentID)
+                            }) {
+                                Text("取消預約")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.red)
+                                    .cornerRadius(10)
+                            }
+                        } else if userRole == "teacher" {
+                            Button(action: {
+                                selectedStudentID = appointment.studentID
+                                isShowingChat = true
+                            }) {
+                                Text("前往聊天室")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.blue)
+                                    .cornerRadius(10)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .padding()
+                    Spacer()
+                }
+                .background(Color.black.opacity(0.5))
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    isShowingCard = false
+                }
+            }
+                        }
+        .sheet(isPresented: $isShowingChat) {
+                    ChatViewControllerWrapper(teacherID: userID ?? "", studentID: selectedStudentID)
+            
+        }
+    }
     
-    func cancelAppointment() {
-        // 在這裡添加取消預約的邏輯
-        alertMessage = "已取消預約"
-        showingAlert = true
-        isShowingCard = false
+    func cancelAppointment(appointmentID: String) {
+        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceling) { result in
+            switch result {
+            case .success:
+                alertMessage = "已送出取消預約請求"
+                showingAlert = true
+                isShowingCard = false
+            case .failure(let error):
+                print("更新預約狀態失敗: \(error.localizedDescription)")
+            }
+        }
     }
     
     func formatTime(_ date: Date) -> String {

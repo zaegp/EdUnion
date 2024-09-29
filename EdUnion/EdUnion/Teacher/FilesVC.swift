@@ -187,20 +187,47 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     
     @objc func sendFilesToSelectedStudents() {
-            guard !selectedFiles.isEmpty, !selectedStudentIDs.isEmpty else {
-                print("沒有選擇任何文件或學生")
-                return
-            }
-            
-            // 發送文件給選中的學生
-            for studentID in selectedStudentIDs {
-                for file in selectedFiles {
-                    // 這裡實現發送文件的邏輯
-                    print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
-                    // 根據需求在這裡實現實際的發送文件到學生的邏輯
-                }
+        guard !selectedFiles.isEmpty, !selectedStudentIDs.isEmpty else {
+            print("沒有選擇任何文件或學生")
+            return
+        }
+        
+        // 發送文件給選中的學生
+        for studentID in selectedStudentIDs {
+            for file in selectedFiles {
+                print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
+
+                // 獲取文件的 ID（假設文件 URL 的 lastPathComponent 為文件名）
+                let fileName = file.lastPathComponent
+                
+                // 根據文件名找到該文件在 Firestore 中的 document
+                firestore.collection("files")
+                    .whereField("fileName", isEqualTo: fileName)
+                    .getDocuments { (snapshot, error) in
+                        if let error = error {
+                            print("Error finding file in Firestore: \(error.localizedDescription)")
+                            return
+                        }
+                        
+                        guard let document = snapshot?.documents.first else {
+                            print("File not found in Firestore.")
+                            return
+                        }
+                        
+                        // 更新文件的 authorizedStudents 欄位
+                        document.reference.updateData([
+                            "authorizedStudents": FieldValue.arrayUnion([studentID])
+                        ]) { error in
+                            if let error = error {
+                                print("Error adding student to authorized list: \(error)")
+                            } else {
+                                print("Student \(studentID) added to authorized list for file \(fileName) successfully.")
+                            }
+                        }
+                    }
             }
         }
+    }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item < files.count {
@@ -383,7 +410,8 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             "fileName": fileName,
             "downloadURL": downloadURL,
             "createdAt": Timestamp(),
-            "ownerID": currentUserID
+            "ownerID": currentUserID,
+            "authorizedStudents": []
         ]
         
         firestore.collection("files").addDocument(data: fileData) { error in

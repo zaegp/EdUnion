@@ -5,12 +5,13 @@
 //  Created by Rowan Su on 2024/9/26.
 //
 
-import UIKit
 import SwiftUI
+import UIKit
+
+var teacherID = "001"
 
 class ChooseRoleVC: UIViewController {
     
-    // 創建兩個按鈕分別供學生和家教選擇
     private let studentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("學生", for: .normal)
@@ -31,25 +32,33 @@ class ChooseRoleVC: UIViewController {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
         button.frame = CGRect(x: 0, y: 0, width: 250, height: 50)
-        button.addTarget(self, action: #selector(didTapTutor), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didTapTeacher), for: .touchUpInside)
         return button
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        
+        setupBackground()
         setupButtons()
     }
     
+    private func setupBackground() {
+        let backgroundView = UIHostingController(rootView: GradientBackgroundView())
+        addChild(backgroundView)
+        backgroundView.view.frame = view.bounds
+        backgroundView.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(backgroundView.view)
+        backgroundView.didMove(toParent: self)
+    }
+    
     private func setupButtons() {
-        // 設定按鈕的佈局
         view.addSubview(studentButton)
         view.addSubview(tutorButton)
         
         studentButton.translatesAutoresizingMaskIntoConstraints = false
         tutorButton.translatesAutoresizingMaskIntoConstraints = false
         
-        // 設置按鈕佈局
         NSLayoutConstraint.activate([
             studentButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             studentButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -30),
@@ -68,7 +77,7 @@ class ChooseRoleVC: UIViewController {
         navigateToAuthApp()
     }
     
-    @objc private func didTapTutor() {
+    @objc private func didTapTeacher() {
         UserDefaults.standard.set("teacher", forKey: "userRole")
         navigateToAuthApp()
     }
@@ -83,5 +92,31 @@ class ChooseRoleVC: UIViewController {
             window.rootViewController = hostingController
             window.makeKeyAndVisible()
         }
+    }
+}
+
+struct GradientBackgroundView: View {
+    var body: some View {
+        LinearGradient(gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#14213d")]),
+                       startPoint: .top,
+                       endPoint: .bottom)
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+
+struct RadialGradientView: View {
+    var body: some View {
+        RadialGradient(
+            gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#14213d")]),
+            center: .leading, // 漸變的中心
+            startRadius: 20, // 漸變開始的半徑
+            endRadius: 100   // 漸變結束的半徑
+        )
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+struct ContentsView_Previews: PreviewProvider {
+    static var previews: some View {
+        RadialGradientView()
     }
 }
