@@ -12,118 +12,115 @@ import FirebaseFirestore
 import CryptoKit
 
 struct AuthenticationView: View {
-    @State private var currentNonce: String? // 保存生成的 nonce
+    @State private var currentNonce: String?
     
     var body: some View {
-        SignInWithAppleButton(
-            onRequest: { request in
-                let nonce = randomNonceString() // 生成 nonce
-                currentNonce = nonce // 保存 nonce
-                request.requestedScopes = [.fullName, .email]
-                request.nonce = sha256(nonce) // 將 nonce 哈希化後傳遞
-            },
-            onCompletion: { result in
-                
-                switch result {
-                case .success(let authResults):
-                    
-                    switch authResults.credential {
-                    case let appleIDCredential as ASAuthorizationAppleIDCredential:
-                        guard let nonce = currentNonce else {
-                            print("Invalid state: A login callback was received, but no login request was sent.")
-                            return
-                        }
+        ZStack {
+            RadialGradientView()
+                .edgesIgnoringSafeArea(.all)
+            VStack {
+                SignInWithAppleButton(
+                    onRequest: { request in
+                        let nonce = randomNonceString()
+                        currentNonce = nonce
+                        request.requestedScopes = [.fullName, .email]
+                        request.nonce = sha256(nonce)
+                    },
+                    onCompletion: { result in
                         
-                        guard let appleIDToken = appleIDCredential.identityToken else {
-                            print("Unable to fetch identity token")
-                            return
-                        }
-                        
-                        guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                            print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
-                            return
-                        }
-                        
-                        // Firebase Authentication with Apple
-                        let credential = OAuthProvider.credential(withProviderID: "apple.com",
-                                                                  idToken: idTokenString,
-                                                                  rawNonce: nonce)
-                        
-                        Auth.auth().signIn(with: credential) { (authResult, error) in
-                            if let error = error {
-                                print("Error signing in with Apple: \(error.localizedDescription)")
-                                return
-                            }
+                        switch result {
+                        case .success(let authResults):
                             
-                            // Successfully signed in
-                            guard let uid = authResult?.user.uid else { return }
-                            
-                            // Save user data to Firestore
-                            let userRole = UserDefaults.standard.string(forKey: "userRole")
-                            let db = Firestore.firestore()
-                            // Determine collection name based on user role
-                            let collectionName = (userRole == "teacher") ? "teachers" : "students"
-                            let userRef = db.collection(collectionName).document(uid)
-                            
-                            // Check if the user already exists in the collection
-                            userRef.getDocument { (document, error) in
-                                if let error = error {
-                                    print("Error checking user data: \(error.localizedDescription)")
+                            switch authResults.credential {
+                            case let appleIDCredential as ASAuthorizationAppleIDCredential:
+                                guard let nonce = currentNonce else {
+                                    print("Invalid state: A login callback was received, but no login request was sent.")
                                     return
                                 }
                                 
-                                if document?.exists == true {
-                                    // User exists, navigate to main app
-                                    navigateToMainApp()
-                                } else {
-                                    // User does not exist, this is the first login
-                                    var userData: [String: Any] = [
-                                        "fullName": (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? ""),
-                                        "email": appleIDCredential.email ?? "",
-                                        "userID": appleIDCredential.user
-                                    ]
-                                    
-                                    // Add additional fields if the user is a student
-                                    if userRole == "student" {
-                                        userData["followList"] = [String]()
-                                        userData["usedList"] = [String]()
-                                        userData["photoURL"] = String() 
+                                guard let appleIDToken = appleIDCredential.identityToken else {
+                                    print("Unable to fetch identity token")
+                                    return
+                                }
+                                
+                                guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                                    print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
+                                    return
+                                }
+                                
+                                let credential = OAuthProvider.credential(withProviderID: "apple.com",
+                                                                          idToken: idTokenString,
+                                                                          rawNonce: nonce)
+                                
+                                Auth.auth().signIn(with: credential) { (authResult, error) in
+                                    if let error = error {
+                                        print("Error signing in with Apple: \(error.localizedDescription)")
+                                        return
                                     }
                                     
-                                    userRef.setData(userData) { error in
+                                    guard let uid = authResult?.user.uid else { return }
+                                    
+                                    let userRole = UserDefaults.standard.string(forKey: "userRole")
+                                    let db = Firestore.firestore()
+                                    let collectionName = (userRole == "teacher") ? "teachers" : "students"
+                                    let userRef = db.collection(collectionName).document(uid)
+                                    
+                                    userRef.getDocument { (document, error) in
                                         if let error = error {
-                                            print("Error saving user data to Firestore: \(error.localizedDescription)")
+                                            print("Error checking user data: \(error.localizedDescription)")
+                                            return
+                                        }
+                                        
+                                        if document?.exists == true {
+                                            navigateToMainApp()
                                         } else {
-                                            print("User data successfully saved to Firestore")
+                                            var userData: [String: Any] = [
+                                                "fullName": (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? ""),
+                                                "email": appleIDCredential.email ?? "",
+                                                "userID": appleIDCredential.user
+                                            ]
                                             
-                                            if userRole == "teacher" {
-                                                navigateToIntroVC()
-                                            } else {
-                                                // Otherwise, navigate to main app
-                                                navigateToMainApp()
+                                            if userRole == "student" {
+                                                userData["followList"] = [String]()
+                                                userData["usedList"] = [String]()
+                                                userData["photoURL"] = String()
+                                            }
+                                            
+                                            userRef.setData(userData) { error in
+                                                if let error = error {
+                                                    print("Error saving user data to Firestore: \(error.localizedDescription)")
+                                                } else {
+                                                    print("User data successfully saved to Firestore")
+                                                    
+                                                    if userRole == "teacher" {
+                                                        navigateToIntroVC()
+                                                    } else {
+                                                        navigateToMainApp()
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                
+                            case let passwordCredential as ASPasswordCredential:
+                                let username = passwordCredential.user
+                                let password = passwordCredential.password
+                                print(username, password)
+                                
+                            default:
+                                break
                             }
+                        case .failure(let error):
+                            print("failure", error)
                         }
-                        
-                    case let passwordCredential as ASPasswordCredential:
-                        let username = passwordCredential.user
-                        let password = passwordCredential.password
-                        print(username, password)
-                        
-                    default:
-                        break
                     }
-                case .failure(let error):
-                    print("failure", error)
-                }
+                )
+                .background(Color.myDarkGray)
+                .signInWithAppleButtonStyle(.whiteOutline)
+                .frame(width: 280, height: 45)
             }
-        )
-        .background(Color.white)
-        .signInWithAppleButtonStyle(.whiteOutline)
-        .frame(width: 280, height: 45)
+        }
     }
     
     private func navigateToMainApp() {
@@ -137,7 +134,6 @@ struct AuthenticationView: View {
             }
         } else {
             print("Error: User role not found in UserDefaults.")
-            // 在此處處理沒有角色的情況
         }
     }
     
@@ -150,7 +146,6 @@ struct AuthenticationView: View {
         }
     }
     
-    // Helper functions for nonce
     private func randomNonceString(length: Int = 32) -> String {
         let charset: Array<Character> =
         Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
@@ -190,6 +185,18 @@ struct AuthenticationView: View {
         }.joined()
         
         return hashString
+    }
+}
+
+struct RadialGradientView: View {
+    var body: some View {
+        RadialGradient(
+            gradient: Gradient(colors: [Color(hex: "#eeeeee"), Color(hex: "#ff6347"), Color(hex: "#252525")]),
+            center: .bottomLeading,
+            startRadius: 20,
+            endRadius: 300
+        )
+        .edgesIgnoringSafeArea(.all)
     }
 }
 

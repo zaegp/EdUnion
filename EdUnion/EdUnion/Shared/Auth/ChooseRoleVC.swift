@@ -97,24 +97,13 @@ class ChooseRoleVC: UIViewController {
 
 struct GradientBackgroundView: View {
     var body: some View {
-        LinearGradient(gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#14213d")]),
+        LinearGradient(gradient: Gradient(colors: [Color(hex: "#eeeeee"), Color(hex: "#ff6347"), Color(hex: "#252525")]),
                        startPoint: .top,
                        endPoint: .bottom)
         .edgesIgnoringSafeArea(.all)
     }
 }
 
-struct RadialGradientView: View {
-    var body: some View {
-        RadialGradient(
-            gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#000000")]),
-            center: .bottom, // 漸變的中心
-            startRadius: 20, // 漸變開始的半徑
-            endRadius: 300   // 漸變結束的半徑
-        )
-        .edgesIgnoringSafeArea(.all)
-    }
-}
 struct ContentsView_Previews: PreviewProvider {
     static var previews: some View {
         RadialGradientView()

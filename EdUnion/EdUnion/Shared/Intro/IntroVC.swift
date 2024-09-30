@@ -47,11 +47,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         profileImageView.layer.borderWidth = 1
         profileImageView.layer.borderColor = UIColor.gray.cgColor
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        profileImageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        profileImageView.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
-        // Configure upload button
-        uploadImageButton.setTitle("Upload Profile Picture", for: .normal)
+        uploadImageButton.setTitle("上傳照片", for: .normal)
         uploadImageButton.addTarget(self, action: #selector(uploadImageButtonTapped), for: .touchUpInside)
         uploadImageButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -78,7 +75,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         saveButton.translatesAutoresizingMaskIntoConstraints = false
         
         let stackView = UIStackView(arrangedSubviews: [
-            profileImageView,
             uploadImageButton,
             createStackView(with: educationLabel, and: educationTextField),
             createStackView(with: experienceLabel, and: experienceTextField),
@@ -91,12 +87,18 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         stackView.spacing = 20
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
+        view.addSubview(profileImageView)
         view.addSubview(stackView)
         
         // Set constraints
         NSLayoutConstraint.activate([
+            profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            profileImageView.heightAnchor.constraint(equalToConstant: 100),
+            profileImageView.widthAnchor.constraint(equalToConstant: 100),
+            
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stackView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
@@ -148,7 +150,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             hourlyRateTextField.text ?? ""
         ]
         
-        // Handle profile image upload if available
         if let profileImage = profileImageView.image {
             uploadProfileImage(profileImage) { [weak self] result in
                 switch result {

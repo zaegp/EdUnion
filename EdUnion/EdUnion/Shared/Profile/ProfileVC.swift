@@ -7,6 +7,7 @@
 
 import UIKit
 import SwiftUI
+import FirebaseAuth
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -17,6 +18,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     
     private var menuItems: [(title: String, icon: String, action: () -> Void)] = []
+    private let logoutButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +26,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         view.backgroundColor = .white
         setupTableView()
         setupTableHeaderView()
+        setupLogoutButton()
         setupMenuItems()
         updateUserInfo()
     }
@@ -82,6 +85,43 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         ])
         
         tableView.tableHeaderView = headerView
+    }
+    
+    private func setupLogoutButton() {
+            logoutButton.setTitle("登出", for: .normal)
+            logoutButton.setTitleColor(.white, for: .normal)
+            logoutButton.backgroundColor = .systemRed
+            logoutButton.layer.cornerRadius = 10
+            logoutButton.translatesAutoresizingMaskIntoConstraints = false
+            logoutButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
+            
+            view.addSubview(logoutButton)
+            
+            NSLayoutConstraint.activate([
+                logoutButton.heightAnchor.constraint(equalToConstant: 50),
+                logoutButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20),
+                logoutButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20),
+                logoutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            ])
+        }
+    
+    @objc private func logoutButtonTapped() {
+        do {
+            try Auth.auth().signOut()
+            print("Successfully signed out")
+            
+            let loginView = AuthenticationView()
+            
+            let hostingController = UIHostingController(rootView: loginView)
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = hostingController
+                window.makeKeyAndVisible()
+            }
+        } catch let signOutError as NSError {
+            print("Error signing out: \(signOutError)")
+        }
     }
     
     private func setupMenuItems() {
