@@ -78,7 +78,7 @@ struct BookingView: View {
                                         .frame(height: 50)
                                         .frame(maxWidth: .infinity)
                                         .background(
-                                            isSelected(timeSlot: timeSlot) ? Color.mainOrange : Color.background
+                                            isSelected(timeSlot: timeSlot) ? Color.mainOrange : Color.myGray
                                         )
                                         .foregroundColor(
                                             isSelected(timeSlot: timeSlot) ? .white : .black

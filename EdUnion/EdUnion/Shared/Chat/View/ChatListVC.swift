@@ -55,11 +55,33 @@ class ChatListVC: UIViewController {
         
         searchBar.delegate = self
         searchBar.placeholder = "搜尋"
+        searchBar.tintColor = .white
         searchBar.sizeToFit()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
+
+        searchBar.backgroundImage = UIImage()
+        searchBar.barTintColor = UIColor.blue
+
+        if let searchTextField = searchBar.searchTextField as? UITextField {
+            searchTextField.backgroundColor = UIColor.myDarkGray
+            searchTextField.layer.cornerRadius = 20
+            searchTextField.clipsToBounds = true
+            
+            searchTextField.textColor = UIColor.white
+            searchTextField.tintColor = UIColor.mainOrange
+            
+            let placeholderText = "搜尋"
+            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.myGray]
+            searchTextField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: attributes)
+            
+            if let leftIconView = searchTextField.leftView as? UIImageView {
+                leftIconView.image = leftIconView.image?.withRenderingMode(.alwaysTemplate)
+                leftIconView.tintColor = UIColor.myGray 
+            }
+        }
         
         cancelButton.setTitle("取消", for: .normal)
-        cancelButton.tintColor = .backButton
+        cancelButton.tintColor = .myGray
         cancelButton.isHidden = true
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
@@ -90,6 +112,7 @@ class ChatListVC: UIViewController {
         tableView.delegate = self
         tableView.register(ChatListCell.self, forCellReuseIdentifier: "ChatListCell")
         tableView.frame = self.view.bounds
+        tableView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
         tableView.tableFooterView = UIView()
         self.view.addSubview(tableView)
     }
@@ -204,6 +227,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
+        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
         let chatRoom = filteredChatRooms[indexPath.row]
         
         let participantId = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"

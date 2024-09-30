@@ -9,11 +9,16 @@ import SwiftUI
 import FirebaseFirestore
 import Combine
 
-struct LessonData: Identifiable {
+struct LessonData: Identifiable, Equatable {
     let id = UUID()
     let date: Date
     let count: Int
+
+    static func ==(lhs: LessonData, rhs: LessonData) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
+
 class LessonDataManager: ObservableObject {
     @Published var lessonData: [LessonData] = []
     @Published var selectedRange: RangeType = .week
@@ -159,8 +164,8 @@ struct BarChartView: View {
 
     var body: some View {
         VStack {
-            // 範圍選擇器
-            Picker("範圍", selection: $dataManager.selectedRange) {
+            // 范围选择器
+            Picker("范围", selection: $dataManager.selectedRange) {
                 ForEach(RangeType.allCases) { range in
                     Text(range.rawValue).tag(range)
                 }
@@ -168,39 +173,69 @@ struct BarChartView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding()
 
-            // 顯示選擇的數據詳細信息
+            // 显示选中的数据详细信息
             if let selectedData = dataManager.selectedData {
                 if dataManager.selectedRange == .month {
-                    Text("週日期範圍：\(formattedWeekRange(selectedData.date))，課程數量：\(selectedData.count)")
+                    Text("周日期范围：\(formattedWeekRange(selectedData.date))，课程数量：\(selectedData.count)")
                         .padding()
                 } else {
-                    Text("日期：\(formattedDate(selectedData.date))，課程數量：\(selectedData.count)")
+                    Text("日期：\(formattedDate(selectedData.date))，课程数量：\(selectedData.count)")
                         .padding()
                 }
             }
 
-            // 柱狀圖
+            // 柱状图
             GeometryReader { geometry in
-                HStack(alignment: .bottom, spacing: 8) {
-                    ForEach(dataManager.lessonData) { data in
-                        BarView(data: data, maxValue: maxValue(), selectedData: $dataManager.selectedData, rangeType: dataManager.selectedRange)
-                    }
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .gesture(
-                    DragGesture()
-                        .onEnded { value in
-                            if value.translation.width < 0 {
-                                // 向左滑動，切換到下一週
-                                dataManager.currentWeekOffset += 1
-                            } else if value.translation.width > 0 {
-                                // 向右滑動，切換到上一週
-                                dataManager.currentWeekOffset -= 1
+                            ZStack {
+                                // Y軸
+                                VStack {
+                                    ForEach(0..<6) { i in
+                                        Spacer()
+                                        Text("\(maxValue() * i / 5)")
+                                            .font(.caption)
+                                        Spacer()
+                                    }
+                                }
+                                .frame(width: 30) // 給Y軸一個固定寬度
+                                .padding(.leading, 8)
+
+                                // 柱狀圖和X軸
+                                HStack(alignment: .bottom, spacing: 8) {
+                                    ForEach(dataManager.lessonData) { data in
+                                        BarView(data: data, maxValue: maxValue(), selectedData: $dataManager.selectedData, rangeType: dataManager.selectedRange)
+                                    }
+                                }
+                                .padding(.leading, 40) // 給柱狀圖移動一點空間，以容納Y軸
+                                .gesture(
+                                    DragGesture()
+                                        .onEnded { value in
+                                            if value.translation.width < 0 {
+                                                // 向左滑動，切換到下一周
+                                                dataManager.currentWeekOffset += 1
+                                            } else if value.translation.width > 0 {
+                                                // 向右滑動，切換到上一周
+                                                dataManager.currentWeekOffset -= 1
+                                            }
+                                            dataManager.generateData()
+                                        }
+                                )
+
+                                // X軸標籤
+                                VStack {
+                                    Spacer()
+                                    HStack {
+                                        ForEach(dataManager.lessonData) { data in
+                                            Spacer()
+                                            Text(formattedLabel(for: data.date))
+                                                .font(.caption)
+                                                .rotationEffect(.degrees(-45)) // 旋轉標籤以節省空間
+                                            Spacer()
+                                        }
+                                    }
+                                    .padding(.leading, 40) // 與柱狀圖的移動對齊
+                                }
                             }
-                            dataManager.generateData()
                         }
-                )
-            }
             .padding()
         }
         .onChange(of: dataManager.selectedRange) { _ in
@@ -227,6 +262,12 @@ struct BarChartView: View {
         formatter.dateFormat = "MM/dd"
         return "\(formatter.string(from: weekInterval.start)) - \(formatter.string(from: weekInterval.end))"
     }
+    
+    func formattedLabel(for date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
+        }
 }
 
 struct BarView: View {
@@ -234,23 +275,29 @@ struct BarView: View {
     var maxValue: Int
     @Binding var selectedData: LessonData?
     var rangeType: RangeType
-    
+
     var body: some View {
         VStack {
             Spacer()
+            
+            // 设置颜色和阴影
             Rectangle()
-                .fill(Color.blue)
+                .fill(selectedData == data ? Color.orange : Color.blue) // 使用不同颜色表示选中和未选中的状态
+                .cornerRadius(8) // 圆角
+                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2) // 阴影效果
                 .frame(height: barHeight())
                 .onTapGesture {
                     selectedData = data
                 }
+
             Text(formattedLabel())
                 .font(.caption)
+                .foregroundColor(.white) // 设置标签颜色
         }
     }
     
     func barHeight() -> CGFloat {
-        let height = CGFloat(Double(data.count) / Double(maxValue)) * 200 // 200 為柱狀圖的最大高度
+        let height = CGFloat(Double(data.count) / Double(maxValue)) * 200 // 200 为柱状图的最大高度
         return height.isNaN ? 0 : height
     }
     
@@ -258,11 +305,11 @@ struct BarView: View {
         let formatter = DateFormatter()
         switch rangeType {
         case .week:
-            formatter.dateFormat = "E" // 週幾
+            formatter.dateFormat = "E" // 星期几
         case .month:
-            formatter.dateFormat = "'週'W" // 第幾週
+            formatter.dateFormat = "'周'W" // 第几周
         case .year:
-            formatter.dateFormat = "MMM" // 月份縮寫
+            formatter.dateFormat = "MMM" // 月份缩写
         }
         return formatter.string(from: data.date)
     }

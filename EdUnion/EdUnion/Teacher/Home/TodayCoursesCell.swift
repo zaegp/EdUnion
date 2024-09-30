@@ -150,7 +150,7 @@ class TodayCoursesCell: UITableViewCell {
     
     let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        view.backgroundColor = .myDarkGray
         view.layer.cornerRadius = 16
         view.layer.shadowColor = UIColor(red: 1.00, green: 0.99, blue: 0.95, alpha: 1.00).cgColor
         view.layer.shadowOpacity = 0.1
@@ -162,6 +162,7 @@ class TodayCoursesCell: UITableViewCell {
     
     let nameLabel: UILabel = {
         let label = UILabel()
+        label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -169,6 +170,7 @@ class TodayCoursesCell: UITableViewCell {
     
     let timeLabel: UILabel = {
         let label = UILabel()
+        label.textColor = .myGray
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -185,6 +187,7 @@ class TodayCoursesCell: UITableViewCell {
     let confirmButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "circle"), for: .normal)
+        button.tintColor = .mainOrange
 //        button.layer.cornerRadius = 8
 //        button.backgroundColor = UIColor(red: 0.15, green: 0.14, blue: 0.13, alpha: 1.00)
 //        button.setTitleColor(UIColor(red: 1.00, green: 0.99, blue: 0.95, alpha: 1.00), for: .normal)

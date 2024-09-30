@@ -30,8 +30,11 @@ class ChatListCell: UITableViewCell {
         profileImageView.layer.cornerRadius = 30
         profileImageView.clipsToBounds = true
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
+        profileImageView.tintColor = .white
+        profileImageView.contentMode = .scaleAspectFill
         
         nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        nameLabel.textColor = .white
         lastMessageLabel.font = UIFont.systemFont(ofSize: 14)
         lastMessageLabel.textColor = .gray
         timeLabel.font = UIFont.systemFont(ofSize: 12)
@@ -74,9 +77,9 @@ class ChatListCell: UITableViewCell {
         timeLabel.text = time
         
         if let imageURL = URL(string: image) {
-            profileImageView.kf.setImage(with: imageURL, placeholder: UIImage(systemName: "person.circle"))
+            profileImageView.kf.setImage(with: imageURL, placeholder: UIImage(systemName: "person.crop.circle.fill"))
         } else {
-            profileImageView.image = UIImage(systemName: "person.circle")
+            profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
         }
     }
 }

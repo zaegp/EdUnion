@@ -37,7 +37,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        tabBarController?.tabBar.isHidden = true
         
         setupNavigationBar()
         setupMessageInputBar()
@@ -47,10 +46,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         if teacher == nil {
             viewModel = ChatViewModel(chatRoomID: (userID ?? "") + "_" + (student?.id ?? ""))
-//            viewModel.otherParticipantID = student?.id ?? ""
         } else {
             viewModel = ChatViewModel(chatRoomID: (teacher?.id ?? "") + "_" + (userID ?? ""))
-//            viewModel.otherParticipantID = teacher?.id ?? ""
         }
         
         viewModel.onMessagesUpdated = { [weak self] in
@@ -59,18 +56,17 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         
         messageTextView.delegate = self
-        
-        //        self.navigationItem.hidesBackButton = true
-        
-        //           let customBackButton = UIBarButtonItem(title: "Back to Chat List", style: .plain, target: self, action: #selector(backToChatList))
-        //           self.navigationItem.leftBarButtonItem = customBackButton
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // 禁用 IQKeyboardManager
         IQKeyboardManager.shared.enable = false
         setupKeyboardDismissRecognizer()
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -82,6 +78,10 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
                 navigationController?.popToViewController(chatListVC, animated: true)
             }
+        }
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
         }
     }
     
@@ -96,26 +96,27 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func setupNavigationBar() {
-    
+        
         if UserDefaults.standard.string(forKey: "userRole") == "teacher" {
             if let photoURLString = student?.photoURL, let photoURL = URL(string: photoURLString) {
                 imageView.kf.setImage(
                     with: photoURL,
-                    placeholder: UIImage(systemName: "person.circle")
+                    placeholder: UIImage(systemName: "person.crop.circle.fill")
                 )
             } else {
-                imageView.image = UIImage(systemName: "person.circle")
+                imageView.image = UIImage(systemName: "person.crop.circle.fill")
             }
         } else {
             if let photoURLString = teacher?.photoURL, let photoURL = URL(string: photoURLString) {
                 imageView.kf.setImage(
                     with: photoURL,
-                    placeholder: UIImage(systemName: "person.circle")
+                    placeholder: UIImage(systemName: "person.crop.circle.fill")
                 )
             } else {
-                imageView.image = UIImage(systemName: "person.circle")
+                imageView.image = UIImage(systemName: "person.crop.circle.fill")
             }
         }
+        imageView.tintColor = .white
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true

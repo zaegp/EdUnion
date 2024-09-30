@@ -46,11 +46,12 @@ struct CalendarDayView: View {
                 
                 Text(day.formatted(.dateTime.day()))
                     .fontWeight(.bold)
-                    .foregroundColor(isSelected ? .white : (isPastDate ? .gray : (isCurrentMonth ? .primary : .gray)))
+                    .foregroundColor(isSelected ? .black : .white)
+                    .strikethrough(isPastDate, color: .white)
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
                         Circle()
-                            .fill(isSelected ? Color.black : Color.clear)
+                            .fill(isSelected ? Color(hex: "#fca311") : Color.clear)
                     )
                 
                 ZStack {
@@ -116,7 +117,7 @@ struct BaseCalendarView: View {
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     @State private var days: [Date?] = []
     @State private var isShowingChat = false
-        @State private var selectedStudentID: String = ""
+    @State private var selectedStudentID: String = ""
     //    @State private var leftIsActive = false
     //    @State private var rightIsActive = false
     
@@ -124,96 +125,96 @@ struct BaseCalendarView: View {
         let colors = dateColors
         ZStack {
             VStack {
-                HStack {
-                    Button(action: { previousPeriod() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(Color(.backButton))
-                        //                        .symbolEffect(.bounce.down.byLayer, value: leftIsActive)
-                        //                        .onTapGesture {
-                        //                            leftIsActive.toggle()
-                        //                        }
+                VStack {
+                    HStack {
+                        Button(action: { previousPeriod() }) {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(Color.white)
+                        }
+                        Spacer()
+                        Text(formattedMonthAndYear(currentDate))
+                            .font(.headline)
+                            .foregroundColor(Color.white)
+                        Spacer()
+                        Button(action: { nextPeriod() }) {
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(Color.white)
+                        }
                     }
-                    Spacer()
-                    Text(formattedMonthAndYear(currentDate))
-                        .font(.headline)
-                    Spacer()
-                    Button(action: { nextPeriod() }) {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(Color(.backButton))
-                        //                        .symbolEffect(.bounce.down.byLayer, value: rightIsActive)
-                        //                        .onTapGesture {
-                        //                            rightIsActive.toggle()
-                        //                        }
-                    }
-                }
-                .padding()
-                
-                HStack {
-                    ForEach(daysOfWeek, id: \.self) { day in
-                        Text(day)
-                            .fontWeight(.black)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                
-                LazyVGrid(columns: columns) {
-                    ForEach(days, id: \.self) { day in
-                        if let day = day {
-                            let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
-                            
-                            CalendarDayView(
-                                day: day,
-                                isSelected: selectedDay == day,
-                                isCurrentMonth: isCurrentMonth,
-                                color: dateColors[day] ?? .clear
-                            )
-                            .onTapGesture {
-                                print("點擊了日期：\(day)")
-                                toggleSingleSelection(for: day)
-                                onDayTap?(day)
-                            }
-                            .onLongPressGesture {
-                                onDayLongPress?(day)
-                                //                            selectedDay = day
-                            }
-                        } else {
-                            CalendarDayView(day: nil, isSelected: false, isCurrentMonth: false, color: .clear)
+                    .padding()
+                    
+                    HStack {
+                        ForEach(daysOfWeek, id: \.self) { day in
+                            Text(day)
+                                .fontWeight(.regular)
+                                .frame(maxWidth: .infinity)
+                                .foregroundColor(Color.gray)
                         }
                     }
                     
-                }
-                .gesture(
-                    DragGesture()
-                        .onEnded { value in
-                            let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
-                            feedbackGenerator.prepare()
-                            
-                            if value.translation.width < 0 {
-                                nextPeriod()
-                                feedbackGenerator.impactOccurred()
-                            } else if value.translation.width > 0 {
-                                previousPeriod()
-                                feedbackGenerator.impactOccurred()
+                    LazyVGrid(columns: columns) {
+                        ForEach(days, id: \.self) { day in
+                            if let day = day {
+                                let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
+                                
+                                CalendarDayView(
+                                    day: day,
+                                    isSelected: selectedDay == day,
+                                    isCurrentMonth: isCurrentMonth,
+                                    color: dateColors[day] ?? .clear
+                                )
+                                .onTapGesture {
+                                    print("點擊了日期：\(day)")
+                                    toggleSingleSelection(for: day)
+                                    onDayTap?(day)
+                                }
+                                .onLongPressGesture {
+                                    onDayLongPress?(day)
+                                }
+                            } else {
+                                CalendarDayView(day: nil, isSelected: false, isCurrentMonth: false, color: .clear)
                             }
                         }
-                )
-                .onAppear {
-                    setupView()
-                    if !isDataLoaded {
-                        fetchAppointments()
-                        isDataLoaded = true
+                    }
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+                                feedbackGenerator.prepare()
+                                
+                                if value.translation.width < 0 {
+                                    nextPeriod()
+                                    feedbackGenerator.impactOccurred()
+                                } else if value.translation.width > 0 {
+                                    previousPeriod()
+                                    feedbackGenerator.impactOccurred()
+                                }
+                            }
+                    )
+                    .onAppear {
+                        setupView()
+                        if !isDataLoaded {
+                            fetchAppointments()
+                            isDataLoaded = true
+                        }
                     }
                 }
+                .padding()
+                .background(Color(hex: "#252525"))
+                .cornerRadius(30)
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                .padding()
                 
                 Spacer()
                 
+                // 活動列表部分
                 if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
                     List {
                         ForEach(activities) { appointment in
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
+                                        Text(viewModel.participantNames[appointment.studentID] ?? "")
                                             .onAppear {
                                                 if viewModel.participantNames[appointment.studentID] == nil {
                                                     if userRole == "teacher" {
@@ -224,7 +225,7 @@ struct BaseCalendarView: View {
                                                 }
                                             }
                                             .font(.subheadline)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(.white)
                                         
                                         Spacer()
                                         
@@ -236,7 +237,7 @@ struct BaseCalendarView: View {
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.white)
                             }
                             .padding()
                             .background(Color(uiColor: .systemBackground))
@@ -253,8 +254,9 @@ struct BaseCalendarView: View {
                     .listStyle(PlainListStyle())
                 }
             }
+            .background(Color.myGray)
             
-            // 卡片視圖放置在 ZStack 中的頂部
+            // 彈出卡片視圖
             if isShowingCard, let appointment = selectedAppointment {
                 VStack {
                     Spacer()
@@ -309,10 +311,9 @@ struct BaseCalendarView: View {
                     isShowingCard = false
                 }
             }
-                        }
+        }
         .sheet(isPresented: $isShowingChat) {
-                    ChatViewControllerWrapper(teacherID: userID ?? "", studentID: selectedStudentID)
-            
+            ChatViewControllerWrapper(teacherID: userID ?? "", studentID: selectedStudentID)
         }
     }
     
@@ -328,6 +329,7 @@ struct BaseCalendarView: View {
             }
         }
     }
+    
     
     func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()

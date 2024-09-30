@@ -192,7 +192,6 @@ class TeacherDetailVC: UIViewController {
     @objc private func bookButtonTapped() {
         let bookingVC = BookingVC()
         bookingVC.teacher = teacher
-        print(teacher?.id)
         navigationController?.pushViewController(bookingVC, animated: true)
     }
     

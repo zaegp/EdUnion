@@ -107,10 +107,10 @@ struct GradientBackgroundView: View {
 struct RadialGradientView: View {
     var body: some View {
         RadialGradient(
-            gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#14213d")]),
-            center: .leading, // 漸變的中心
+            gradient: Gradient(colors: [Color(hex: "#fca311"), Color(hex: "#000000")]),
+            center: .bottom, // 漸變的中心
             startRadius: 20, // 漸變開始的半徑
-            endRadius: 100   // 漸變結束的半徑
+            endRadius: 300   // 漸變結束的半徑
         )
         .edgesIgnoringSafeArea(.all)
     }

@@ -12,17 +12,11 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     private let tableView = UITableView()
     private var userImageView: UIImageView!
-    let nameLabel = UILabel()
-    let userID = UserSession.shared.currentUserID
+    private let nameLabel = UILabel()
+    private let userID = UserSession.shared.currentUserID
+    private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     
-    let data = [
-        ("分析", "chart.bar"),
-        ("可選時段", "calendar.badge.plus"),
-        ("履歷", "list.bullet.clipboard"),
-        ("待確認的預約", "bell"),
-        ("所有學生列表", "person.3"),
-        ("教材", "folder")
-    ]
+    private var menuItems: [(title: String, icon: String, action: () -> Void)] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,20 +24,22 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         view.backgroundColor = .white
         setupTableView()
         setupTableHeaderView()
+        setupMenuItems()
+        updateUserInfo()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         tabBarController?.tabBar.isHidden = false
     }
     
-    func setupTableView() {
+    // MARK: - Setup Methods
+    
+    private func setupTableView() {
         view.addSubview(tableView)
         
         tableView.delegate = self
         tableView.dataSource = self
-        
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -55,20 +51,16 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         ])
     }
     
-    func setupTableHeaderView() {
+    private func setupTableHeaderView() {
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 150))
         headerView.backgroundColor = .white
         
         userImageView = UIImageView()
         userImageView.contentMode = .scaleAspectFill
-        userImageView.translatesAutoresizingMaskIntoConstraints = false
         userImageView.layer.cornerRadius = 40
         userImageView.clipsToBounds = true
         userImageView.isUserInteractionEnabled = true
-        
-        updateUserInfo()
-        
-        headerView.addSubview(userImageView)
+        userImageView.translatesAutoresizingMaskIntoConstraints = false
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
         userImageView.addGestureRecognizer(tapGesture)
@@ -76,6 +68,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         nameLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
+        headerView.addSubview(userImageView)
         headerView.addSubview(nameLabel)
         
         NSLayoutConstraint.activate([
@@ -91,14 +84,65 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         tableView.tableHeaderView = headerView
     }
     
-    func updateUserInfo() {
+    private func setupMenuItems() {
+        if userRole == "teacher" {
+            menuItems = [
+                ("分析", "chart.bar", { [weak self] in self?.navigateToChartView() }),
+                ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
+                ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
+                ("待確認的預約", "bell", { [weak self] in self?.navigateToConfirmAppointments() }),
+                ("所有學生列表", "person.3", { [weak self] in self?.navigateToAllStudents() }),
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
+            ]
+        } else {
+            menuItems = [
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
+            ]
+        }
+    }
+    
+    // MARK: - Navigation Methods
+    
+    private func navigateToChartView() {
+        let chartView = ContentViews()
+        let hostingController = UIHostingController(rootView: chartView)
+        navigationController?.pushViewController(hostingController, animated: true)
+    }
+    
+    private func navigateToAvailableTimeSlots() {
+        let timeSlotsVC = AvailableTimeSlotsVC(teacherID: userID ?? "")
+        navigationController?.pushViewController(timeSlotsVC, animated: true)
+    }
+    
+    private func navigateToResume() {
+        let resumeVC = ResumeVC()
+        navigationController?.pushViewController(resumeVC, animated: true)
+    }
+    
+    private func navigateToConfirmAppointments() {
+        let confirmVC = ConfirmVC()
+        navigationController?.pushViewController(confirmVC, animated: true)
+    }
+    
+    private func navigateToAllStudents() {
+        let studentListVC = AllStudentVC()
+        navigationController?.pushViewController(studentListVC, animated: true)
+    }
+    
+    private func navigateToFiles() {
+        let filesVC = FilesVC()
+        navigationController?.pushViewController(filesVC, animated: true)
+    }
+    
+    // MARK: - User Info Methods
+    
+    private func updateUserInfo() {
         guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
             print("無法取得角色")
             return
         }
         
         let collection = (userRole == "teacher") ? "teachers" : "students"
-        print("查詢集合: \(collection)，使用者 ID: \(userID)")
         
         if userRole == "teacher" {
             UserFirebaseService.shared.fetchUser(from: collection, by: userID ?? "", as: Teacher.self) { [weak self] result in
@@ -122,47 +166,60 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     private func updateUI(with imageUrlString: String?, name: String) {
         if let url = URL(string: imageUrlString ?? "") {
-            self.userImageView.kf.setImage(
-                with: url,
-                placeholder: UIImage(systemName: "person.crop.circle")?.withTintColor(.backButton, renderingMode: .alwaysOriginal)
-            )
+            self.userImageView.kf.setImage(with: url, placeholder: UIImage(systemName: "person.crop.circle"))
         } else {
             self.userImageView.image = UIImage(systemName: "person.crop.circle")
-            self.userImageView.tintColor = .mainOrange
         }
         self.nameLabel.text = name
     }
     
-    @objc func didTapProfileImage() {
+    // MARK: - Image Picker Methods
+    
+    @objc private func didTapProfileImage() {
         let actionSheet = UIAlertController(title: "更換大頭貼照", message: nil, preferredStyle: .actionSheet)
-        
-        // 只允許從圖庫選擇
-        actionSheet.addAction(UIAlertAction(title: "從圖庫選擇", style: .default, handler: { [weak self] _ in
+        actionSheet.addAction(UIAlertAction(title: "從圖庫選擇", style: .default) { [weak self] _ in
             self?.presentImagePicker(sourceType: .photoLibrary)
-        }))
-        
+        })
         actionSheet.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        
         present(actionSheet, animated: true)
     }
     
-    func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
-        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
-            print("圖庫不可用")
-            return
-        }
+    private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
+        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else { return }
         
         let picker = UIImagePickerController()
-        picker.sourceType = .photoLibrary
+        picker.sourceType = sourceType
         picker.delegate = self
         picker.allowsEditing = true
         present(picker, animated: true)
     }
     
-    // MARK: - UIImagePickerControllerDelegate
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    // MARK: - UITableViewDelegate & DataSource Methods
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return menuItems.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let menuItem = menuItems[indexPath.row]
+        cell.textLabel?.text = menuItem.title
+        cell.imageView?.image = UIImage(systemName: menuItem.icon)
+        cell.accessoryType = .disclosureIndicator
+        cell.imageView?.tintColor = UIColor.mainOrange
+        cell.selectionStyle = .none
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        menuItems[indexPath.row].action()
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    // MARK: - UIImagePickerControllerDelegate Methods
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
-        
         if let editedImage = info[.editedImage] as? UIImage {
             userImageView.image = editedImage
         } else if let originalImage = info[.originalImage] as? UIImage {
@@ -173,60 +230,4 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
-    
-    // MARK: - TableView
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let userRole = UserDefaults.standard.string(forKey: "userRole"), userRole == "teacher" {
-            return data.count
-        } else {
-            return 0
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
-        cell.textLabel?.text = data[indexPath.row].0
-        cell.imageView?.image = UIImage(systemName: data[indexPath.row].1)
-        cell.accessoryType = .disclosureIndicator
-        cell.imageView?.tintColor = UIColor(red: 0.92, green: 0.37, blue: 0.16, alpha: 1.00)
-        cell.selectionStyle = .none
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedItem = data[indexPath.row].0
-        
-        switch selectedItem {
-        case "分析":
-            let chartView = ContentViews()
-            let hostingController = UIHostingController(rootView: chartView)
-            navigationController?.pushViewController(hostingController, animated: true)
-        case "可選時段":
-            let timeSlotsVC = AvailableTimeSlotsVC(teacherID: teacherID)
-            navigationController?.pushViewController(timeSlotsVC, animated: true)
-        case "履歷":
-            let resumeVC = ResumeVC()
-            navigationController?.pushViewController(resumeVC, animated: true)
-        case "待確認的預約":
-            let confirmVC = ConfirmVC()
-            navigationController?.pushViewController(confirmVC, animated: true)
-        case "所有學生列表":
-            let studentListVC = AllStudentVC()
-            navigationController?.pushViewController(studentListVC, animated: true)
-        case "教材":
-            let filesVC = FilesVC()
-            navigationController?.pushViewController(filesVC, animated: true)
-        default:
-            break
-        }
-        
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
 }
-

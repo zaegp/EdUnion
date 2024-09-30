@@ -108,7 +108,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     func setupColorPicker() {
         colorPreview.layer.cornerRadius = 8
         colorPreview.layer.borderWidth = 1
-        colorPreview.layer.borderColor = UIColor(resource: .background).cgColor
+        colorPreview.layer.borderColor = UIColor(resource: .myGray).cgColor
         colorPreview.backgroundColor = selectedColor
         colorPreview.largeContentTitle = "請選擇顏色"
         
@@ -155,7 +155,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         addTimeSlotButton.setTitle("新增時間段", for: .normal)
         addTimeSlotButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         addTimeSlotButton.setTitleColor(.mainTint, for: .normal)
-        addTimeSlotButton.backgroundColor = .background
+        addTimeSlotButton.backgroundColor = .myGray
         addTimeSlotButton.layer.cornerRadius = 8
         addTimeSlotButton.addTarget(self, action: #selector(addTimeSlotTapped), for: .touchUpInside)
         
@@ -163,7 +163,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         saveButton.setTitle("儲存", for: .normal)
         saveButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         saveButton.setTitleColor(.mainTint, for: .normal)
-        saveButton.backgroundColor = .background
+        saveButton.backgroundColor = .myGray
         saveButton.layer.cornerRadius = 8
         saveButton.addTarget(self, action: #selector(saveAllTimeSlots), for: .touchUpInside)
         
@@ -171,7 +171,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         cancelButton.setTitle("取消", for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         cancelButton.setTitleColor(.mainTint, for: .normal)
-        cancelButton.backgroundColor = .background
+        cancelButton.backgroundColor = .myGray
         cancelButton.layer.cornerRadius = 8
         cancelButton.addTarget(self, action: #selector(cancelSelection), for: .touchUpInside)
         
