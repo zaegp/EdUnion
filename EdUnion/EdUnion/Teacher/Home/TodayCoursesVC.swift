@@ -42,7 +42,7 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func configureUI() {
-        view.backgroundColor = .myGray
+        view.backgroundColor = .white
         
         titleLabel.text = "Today's Courses"
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
