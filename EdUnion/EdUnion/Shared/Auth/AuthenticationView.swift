@@ -13,6 +13,7 @@ import CryptoKit
 
 struct AuthenticationView: View {
     @State private var currentNonce: String?
+    @State private var showSwitchRoleView = false
     
     var body: some View {
         ZStack {
@@ -119,9 +120,31 @@ struct AuthenticationView: View {
                 .background(Color.myDarkGray)
                 .signInWithAppleButtonStyle(.whiteOutline)
                 .frame(width: 280, height: 45)
+                
+                Button(action: {
+                    showSwitchRoleView = true
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.backward")
+                            .foregroundColor(.white)
+                        
+                        Text("切換身份")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                    }
+                }
+                .padding(.top, 30) // 增加一些頂部間距，使其與按鈕分開
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 40)
             }
+            
+            
+        }
+        .sheet(isPresented: $showSwitchRoleView) {
+            SwitchRoleViewControllerRepresentable()
         }
     }
+    
     
     private func navigateToMainApp() {
         if let userRole = UserDefaults.standard.string(forKey: "userRole") {
@@ -197,6 +220,16 @@ struct RadialGradientView: View {
             endRadius: 300
         )
         .edgesIgnoringSafeArea(.all)
+    }
+}
+
+struct SwitchRoleViewControllerRepresentable: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        let chooseRoleVC = ChooseRoleVC()
+        return chooseRoleVC
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
 }
 

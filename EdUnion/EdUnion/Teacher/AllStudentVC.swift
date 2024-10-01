@@ -20,6 +20,23 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         fetchStudents()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+    }
+    
     func setupTableView() {
         view.addSubview(tableView)
         

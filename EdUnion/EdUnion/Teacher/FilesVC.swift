@@ -129,24 +129,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         sendButton.isHidden = false
         studentTableView.isHidden = false
     }
-    //    @objc func shareSelectedFiles() {
-    //        if selectedFiles.isEmpty {
-    //            print("沒有選擇任何文件")
-    //            return
-    //        }
-    //
-    //        fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
-    //                    for (studentID, _) in notes {
-    //                        self?.fetchUser(from: "students", userID: studentID, as: Student.self)
-    //                    }
-    //                }
-    //
-    //        print("分享文件：\(selectedFiles)")
-    //
-    //        collectionView.allowsMultipleSelection = true
-    //        shareButton.isHidden = true
-    //        collectionView.reloadData()
-    //    }
     
     func fetchStudentsNotes(completion: @escaping ([String: String]) -> Void) {
         firestore.collection("teachers").document(userID ?? "").getDocument { (snapshot, error) in
@@ -238,11 +220,9 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             }
         }
         
-        // 清空選擇列表
         selectedFiles.removeAll()
         selectedStudentIDs.removeAll()
         
-        // 隱藏 TableView 和分享按鈕
         studentTableView.isHidden = true
         sendButton.isHidden = true
         
@@ -264,7 +244,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 previewFile(at: selectedFileURL)
             }
             
-            // 更新發送按鈕的狀態
             updateSendButtonState()
         }
     }
@@ -283,7 +262,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 }
             }
             
-            // 更新發送按鈕的狀態
             updateSendButtonState()
         }
     }
@@ -293,7 +271,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     private func previewFile(at url: URL) {
-        // 檢查文件是否存在於本地
         if FileManager.default.fileExists(atPath: url.path) {
             documentInteractionController = UIDocumentInteractionController(url: url)
             documentInteractionController?.delegate = self

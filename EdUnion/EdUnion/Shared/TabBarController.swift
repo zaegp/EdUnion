@@ -27,7 +27,6 @@ class TabBarController: UITabBarController {
         
         setupTabBar()
         setupViewControllers()
-        updateSelectedTab(index: 0)
     }
 
     private func setupTabBar() {
@@ -52,12 +51,15 @@ class TabBarController: UITabBarController {
             let button = UIButton(type: .custom)
             button.frame = CGRect(x: CGFloat(index) * buttonWidth, y: 0, width: buttonWidth, height: customTabBarView.frame.height)
             button.setImage(UIImage(systemName: imageName), for: .normal)
-            button.tintColor = .gray // 默认未选中颜色
+            button.tintColor = .gray
             button.tag = index
             button.addTarget(self, action: #selector(tabBarButtonTapped(_:)), for: .touchUpInside)
             customTabBarView.addSubview(button)
             tabBarButtons.append(button)
         }
+        
+        // 設置第一個按鈕為橘色
+        updateSelectedTab(index: 0)
     }
 
     @objc private func tabBarButtonTapped(_ sender: UIButton) {
@@ -73,40 +75,12 @@ class TabBarController: UITabBarController {
             if i == index {
                 UIView.animate(withDuration: 0.3, animations: {
                     button.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
-                    
-                    let circleSize: CGFloat = 30
-                    let circleLayer = CAShapeLayer()
-                    let circlePath = UIBezierPath(ovalIn: CGRect(x: (button.bounds.width - circleSize) / 2,
-                                                                 y: (button.bounds.height - circleSize) / 2,
-                                                                 width: circleSize,
-                                                                 height: circleSize))
-                    circleLayer.path = circlePath.cgPath
-                    circleLayer.fillColor = UIColor.myGray.cgColor
-                    
-                    if let sublayers = button.layer.sublayers {
-                        for layer in sublayers {
-                            if layer is CAShapeLayer {
-                                layer.removeFromSuperlayer()
-                            }
-                        }
-                    }
-                    
-                    button.layer.insertSublayer(circleLayer, at: 0)
-                    
                     button.tintColor = UIColor(red: 0.92, green: 0.37, blue: 0.16, alpha: 1.00)
                 })
             } else {
                 UIView.animate(withDuration: 0.3, animations: {
                     button.transform = CGAffineTransform.identity
-                    button.tintColor = .gray
-                    
-                    if let sublayers = button.layer.sublayers {
-                        for layer in sublayers {
-                            if layer is CAShapeLayer {
-                                layer.removeFromSuperlayer()
-                            }
-                        }
-                    }
+                    button.tintColor = .gray 
                 })
             }
         }

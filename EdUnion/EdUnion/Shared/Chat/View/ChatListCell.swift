@@ -55,15 +55,12 @@ class ChatListCell: UITableViewCell {
             profileImageView.widthAnchor.constraint(equalToConstant: 60),
             profileImageView.heightAnchor.constraint(equalToConstant: 60),
             
-            // 設置 nameLabel 的約束
             nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             nameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 12),
             
-            // 設置 timeLabel 的約束
             timeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            // 設置 lastMessageLabel 的約束
             lastMessageLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             lastMessageLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 12),
             lastMessageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
