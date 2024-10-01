@@ -10,12 +10,13 @@ import UIKit
 class FileCell: UICollectionViewCell {
     let imageView = UIImageView()
     let nameLabel = UILabel()
-    let overlayView = UIView()
+    let activityIndicator = UIActivityIndicatorView(style: .medium)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
 
         imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .mainOrange
         imageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(imageView)
 
@@ -23,13 +24,10 @@ class FileCell: UICollectionViewCell {
         nameLabel.textAlignment = .center
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(nameLabel)
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+                contentView.addSubview(activityIndicator)
 
-        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        overlayView.isHidden = true
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(overlayView)
-
-        // AutoLayout Constraints
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
             imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -39,12 +37,9 @@ class FileCell: UICollectionViewCell {
             nameLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 5),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5),
-
-            // 覆蓋視圖佈局
-            overlayView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            overlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            overlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            overlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+                        activityIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor)
         ])
     }
 
@@ -52,12 +47,17 @@ class FileCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with fileURL: URL) {
+    func configure(with fileURL: URL, isDownloading: Bool) {
         nameLabel.text = fileURL.lastPathComponent
-        imageView.image = UIImage(systemName: "doc")
+        imageView.image = UIImage(systemName: isDownloading ? "arrow.down.doc" : "doc")
+        if isDownloading {
+                    activityIndicator.startAnimating()
+                } else {
+                    activityIndicator.stopAnimating()
+                }
     }
 
     func setSelected(_ selected: Bool) {
-        overlayView.isHidden = !selected
+        imageView.image = selected ? UIImage(systemName: "doc.fill") : UIImage(systemName: "doc")
     }
 }

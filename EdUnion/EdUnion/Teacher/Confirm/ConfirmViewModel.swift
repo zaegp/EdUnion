@@ -69,7 +69,7 @@ class ConfirmViewModel {
     }
     
     func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-        UserFirebaseService.shared.updateStudentNotes(forTeacher: teacherID, studentID: studentID, note: note) { result in
+        UserFirebaseService.shared.updateStudentNotes(forTeacher: userID, studentID: studentID, note: note) { result in
             switch result {
             case .success(let studentExists):
                 completion(.success(studentExists))

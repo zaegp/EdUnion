@@ -29,7 +29,7 @@ class AvailableTimeSlotsViewModel {
             print("TimeSlot already exists.")
             return
         }
-        UserFirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.saveTimeSlot(timeSlot, forTeacher: userID ?? "") { [weak self] result in
             switch result {
             case .success():
                 self?.timeSlots.append(timeSlot)
@@ -42,7 +42,7 @@ class AvailableTimeSlotsViewModel {
     
     func deleteTimeSlot(at index: Int) {
         let timeSlot = timeSlots[index]
-        UserFirebaseService.shared.deleteTimeSlot(timeSlot, for: teacherID) { [weak self] result in
+        UserFirebaseService.shared.deleteTimeSlot(timeSlot, for: userID ?? "") { [weak self] result in
             switch result {
             case .success():
                 self?.timeSlots.remove(at: index)
@@ -63,7 +63,7 @@ class AvailableTimeSlotsViewModel {
         let oldTimeSlot = timeSlots[index]
         timeSlots[index] = newTimeSlot
         
-        UserFirebaseService.shared.updateTimeSlot(oldTimeSlot: oldTimeSlot, newTimeSlot: newTimeSlot, forTeacher: teacherID) { [weak self] result in
+        UserFirebaseService.shared.updateTimeSlot(oldTimeSlot: oldTimeSlot, newTimeSlot: newTimeSlot, forTeacher: userID ?? "") { [weak self] result in
             switch result {
             case .success:
                 self?.onTimeSlotsChanged?()

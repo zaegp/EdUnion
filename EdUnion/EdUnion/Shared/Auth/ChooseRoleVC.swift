@@ -8,9 +8,18 @@
 import SwiftUI
 import UIKit
 
-var teacherID = "001"
+//var teacherID = "001"
 
 class ChooseRoleVC: UIViewController {
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "你的身份是...?"
+        label.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        label.textColor = .black
+        label.textAlignment = .center
+        return label
+    }()
     
     private let studentButton: UIButton = {
         let button = UIButton(type: .system)
@@ -19,7 +28,6 @@ class ChooseRoleVC: UIViewController {
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
-        button.frame = CGRect(x: 0, y: 0, width: 250, height: 50)
         button.addTarget(self, action: #selector(didTapStudent), for: .touchUpInside)
         return button
     }()
@@ -31,7 +39,6 @@ class ChooseRoleVC: UIViewController {
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
-        button.frame = CGRect(x: 0, y: 0, width: 250, height: 50)
         button.addTarget(self, action: #selector(didTapTeacher), for: .touchUpInside)
         return button
     }()
@@ -40,7 +47,7 @@ class ChooseRoleVC: UIViewController {
         super.viewDidLoad()
         
         setupBackground()
-        setupButtons()
+        setupUI()
     }
     
     private func setupBackground() {
@@ -52,23 +59,27 @@ class ChooseRoleVC: UIViewController {
         backgroundView.didMove(toParent: self)
     }
     
-    private func setupButtons() {
-        view.addSubview(studentButton)
-        view.addSubview(tutorButton)
+    private func setupUI() {
+        view.addSubview(titleLabel)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        studentButton.translatesAutoresizingMaskIntoConstraints = false
-        tutorButton.translatesAutoresizingMaskIntoConstraints = false
+        let buttonStackView = UIStackView(arrangedSubviews: [studentButton, tutorButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.spacing = 20
+        buttonStackView.distribution = .fillEqually
+        buttonStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(buttonStackView)
         
         NSLayoutConstraint.activate([
-            studentButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            studentButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -30),
-            studentButton.widthAnchor.constraint(equalToConstant: 200),
-            studentButton.heightAnchor.constraint(equalToConstant: 50),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
             
-            tutorButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            tutorButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 50),
-            tutorButton.widthAnchor.constraint(equalToConstant: 200),
-            tutorButton.heightAnchor.constraint(equalToConstant: 50)
+            buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStackView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            studentButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     

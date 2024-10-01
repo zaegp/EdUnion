@@ -19,8 +19,9 @@ class TodayCoursesVC: UIViewController {
     let tableView = UITableView()
     private var viewModel = TodayCoursesViewModel()
     
-    private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
+    private let progressBarHostingController = UIHostingController(rootView: ProgressContentView())
     let titleLabel = UILabel()
+    let bellButton = UIButton()
     var expandedIndexPath: IndexPath?
     let userID = UserSession.shared.currentUserID
     
@@ -28,7 +29,6 @@ class TodayCoursesVC: UIViewController {
         super.viewDidLoad()
         
         configureUI()
-        setupNavigationBar()
         setupConstraints()
         setupViewModel()
     }
@@ -48,6 +48,13 @@ class TodayCoursesVC: UIViewController {
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
         
+        bellButton.setImage(UIImage(systemName: "bell"), for: .normal)
+        bellButton.tintColor = .black
+        bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
+        view.addSubview(bellButton)
+        
+        view.bringSubviewToFront(bellButton)
+        
         addChild(progressBarHostingController)
         view.addSubview(progressBarHostingController.view)
         progressBarHostingController.didMove(toParent: self)
@@ -60,20 +67,9 @@ class TodayCoursesVC: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableHeaderView = createTableHeader()
-        tableView.tableHeaderView?.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 20)
         view.addSubview(tableView)
     }
-    
-    private func setupNavigationBar() {
-        let iconButton = UIBarButtonItem(
-            image: UIImage(systemName: "bell"),
-            style: .plain,
-            target: self,
-            action: #selector(pushToConfirmVC)
-        )
-        iconButton.tintColor = .white
-        navigationItem.rightBarButtonItem = iconButton
-    }
+
     
     @objc private func pushToConfirmVC() {
         let confirmVC = ConfirmVC()
@@ -82,19 +78,25 @@ class TodayCoursesVC: UIViewController {
     
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        bellButton.translatesAutoresizingMaskIntoConstraints = false
         progressBarHostingController.view.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            progressBarHostingController.view.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 50),
+            bellButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            bellButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            bellButton.widthAnchor.constraint(equalToConstant: 30),
+            bellButton.heightAnchor.constraint(equalToConstant: 30),
+            
+            progressBarHostingController.view.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             progressBarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             progressBarHostingController.view.widthAnchor.constraint(equalToConstant: 150),
             progressBarHostingController.view.heightAnchor.constraint(equalToConstant: 150),
             
-            tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 50),
+            tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -105,7 +107,7 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
-                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
+//                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
             }
         }
         viewModel.fetchTodayAppointments()
@@ -130,7 +132,8 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
-        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+//        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        cell.backgroundColor = .white
         let appointment = viewModel.appointments[indexPath.row]
         
         viewModel.fetchStudentName(for: appointment) { [weak self] studentName in

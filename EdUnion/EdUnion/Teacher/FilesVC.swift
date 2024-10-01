@@ -16,180 +16,181 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     var files: [URL] = []
     var documentInteractionController: UIDocumentInteractionController?
     
+    var fileURLs: [URL: String] = [:]
+    var fileDownloadStatus: [URL: Bool] = [:]
+    
     let storage = Storage.storage()
     let firestore = Firestore.firestore()
     let userID = UserSession.shared.currentUserID
     var studentTableView: UITableView!
     var studentInfos: [Student] = []
     var selectedStudentIDs: Set<String> = []
-    var shareButton: UIButton!
     var sendButton: UIButton!
     
     var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "student"
     
     override func viewDidLoad() {
-            super.viewDidLoad()
-            
-            setupCollectionView()
-            
-            if userRole == "teacher" {
-                setupStudentTableView()
-                setupSendButton()
-                setupLongPressGesture()
-                setupMenuAndShareButton()
-                uploadAllFiles()
-            }
-            
-            fetchUserFiles()
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        
+        setupCollectionView()
+        
+        if userRole == "teacher" {
+            setupStudentTableView()
+            setupSendButton()
+            setupLongPressGesture()
+            setupMenu()
+            uploadAllFiles()
         }
+        
+        fetchUserFiles()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
     
     private func setupSendButton() {
-            sendButton = UIButton(type: .system)
-            sendButton.setTitle("發送文件", for: .normal)
-            sendButton.backgroundColor = .systemBlue
-            sendButton.setTitleColor(.white, for: .normal)
-            sendButton.layer.cornerRadius = 8
-            sendButton.translatesAutoresizingMaskIntoConstraints = false
-            sendButton.addTarget(self, action: #selector(sendFilesToSelectedStudents), for: .touchUpInside)
-            
-            view.addSubview(sendButton)
-            
-            // 設置按鈕的 AutoLayout
-            NSLayoutConstraint.activate([
-                sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-                sendButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                sendButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-                sendButton.heightAnchor.constraint(equalToConstant: 50)
-            ])
-        }
+        sendButton = UIButton(type: .system)
+        sendButton.isHidden = true
+        sendButton.setTitle("發送文件", for: .normal)
+        sendButton.backgroundColor = .systemBlue
+        sendButton.setTitleColor(.white, for: .normal)
+        sendButton.layer.cornerRadius = 8
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        sendButton.addTarget(self, action: #selector(sendFilesToSelectedStudents), for: .touchUpInside)
+        
+        view.addSubview(sendButton)
+        
+        NSLayoutConstraint.activate([
+            sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            sendButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            sendButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            sendButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
     
-    private func setupMenuAndShareButton() {
-            let menuButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
-            navigationItem.rightBarButtonItem = menuButton
-            
-            let menu = UIMenu(title: "", children: [
-                UIAction(title: "上傳檔案", image: UIImage(systemName: "doc.badge.plus")) { [weak self] _ in
-                    self?.uploadFiles()
-                },
-                UIAction(title: "選取多個文件分享", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
-                    self?.selectMultipleFilesForSharing()
-                }
-            ])
-            
-            menuButton.menu = menu
-            menuButton.primaryAction = nil
-            
-            shareButton = UIButton(type: .system)
-            shareButton.setTitle("分享", for: .normal)
-            shareButton.backgroundColor = .systemBlue
-            shareButton.tintColor = .white
-            shareButton.layer.cornerRadius = 10
-            shareButton.isHidden = true
-            shareButton.addTarget(self, action: #selector(shareSelectedFiles), for: .touchUpInside)
-            
-            view.addSubview(shareButton)
-            shareButton.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                shareButton.heightAnchor.constraint(equalToConstant: 50),
-                shareButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
-                shareButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
-                shareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
-            ])
-        }
+    private func setupMenu() {
+        let menuButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
+        navigationItem.rightBarButtonItem = menuButton
+        
+        let menu = UIMenu(title: "", children: [
+            UIAction(title: "上傳檔案", image: UIImage(systemName: "doc.badge.plus")) { [weak self] _ in
+                self?.uploadFiles()
+            },
+            UIAction(title: "選取多個文件分享", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+                self?.selectMultipleFilesForSharing()
+            }
+        ])
+        
+        menuButton.menu = menu
+        menuButton.primaryAction = nil
+    }
     
     private func setupStudentTableView() {
-            studentTableView = UITableView()
-            studentTableView.delegate = self
-            studentTableView.dataSource = self
-            studentTableView.register(StudentTableViewCell.self, forCellReuseIdentifier: "StudentCell")
-            studentTableView.translatesAutoresizingMaskIntoConstraints = false
-            
-            view.addSubview(studentTableView)
-            
-            // 設置學生資訊 TableView 的 AutoLayout
-            NSLayoutConstraint.activate([
-                studentTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                studentTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                studentTableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 200),
-                studentTableView.heightAnchor.constraint(equalToConstant: 300)  // 設定 TableView 的高度
-            ])
-        }
-
-    @objc func selectMultipleFilesForSharing() {
-        collectionView.allowsMultipleSelection = true
-        shareButton.isHidden = false
-    }
-    
-    @objc func shareSelectedFiles() {
-        if selectedFiles.isEmpty {
-            print("沒有選擇任何文件")
-            return
-        }
+        studentTableView = UITableView()
+        studentTableView.delegate = self
+        studentTableView.dataSource = self
+        studentTableView.register(StudentTableViewCell.self, forCellReuseIdentifier: "StudentCell")
+        studentTableView.translatesAutoresizingMaskIntoConstraints = false
+        studentTableView.isHidden = true
+        
+        view.addSubview(studentTableView)
+        
+        NSLayoutConstraint.activate([
+            studentTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            studentTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            studentTableView.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
+            studentTableView.heightAnchor.constraint(equalToConstant: 300)
+        ])
         
         fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
-                    for (studentID, _) in notes {
-                        self?.fetchUser(from: "students", userID: studentID, as: Student.self)
-                    }
-                }
-        
-        print("分享文件：\(selectedFiles)")
-        
-        collectionView.allowsMultipleSelection = true
-        shareButton.isHidden = true
-        collectionView.reloadData()
+            for (studentID, _) in notes {
+                self?.fetchUser(from: "students", userID: studentID, as: Student.self)
+            }
+        }
     }
+    
+    @objc func selectMultipleFilesForSharing() {
+        collectionView.allowsMultipleSelection = true
+        sendButton.isHidden = false
+        studentTableView.isHidden = false
+    }
+    //    @objc func shareSelectedFiles() {
+    //        if selectedFiles.isEmpty {
+    //            print("沒有選擇任何文件")
+    //            return
+    //        }
+    //
+    //        fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
+    //                    for (studentID, _) in notes {
+    //                        self?.fetchUser(from: "students", userID: studentID, as: Student.self)
+    //                    }
+    //                }
+    //
+    //        print("分享文件：\(selectedFiles)")
+    //
+    //        collectionView.allowsMultipleSelection = true
+    //        shareButton.isHidden = true
+    //        collectionView.reloadData()
+    //    }
     
     func fetchStudentsNotes(completion: @escaping ([String: String]) -> Void) {
         firestore.collection("teachers").document(userID ?? "").getDocument { (snapshot, error) in
-                if let error = error {
-                    print("Error fetching studentsNotes: \(error.localizedDescription)")
-                    completion([:])
-                    return
-                }
-                
-                guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
-                    print("No studentsNotes found for teacher \(teacherID)")
-                    completion([:])
-                    return
-                }
-                
-                completion(studentsNotes)
+            if let error = error {
+                print("Error fetching studentsNotes: \(error.localizedDescription)")
+                completion([:])
+                return
             }
+            
+            guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
+                print("No studentsNotes found for teacher \(self.userID)")
+                completion([:])
+                return
+            }
+            
+            completion(studentsNotes)
+        }
     }
-
+    
     func fetchStudentsNotes(forTeacherID teacherID: String, completion: @escaping ([String: String]) -> Void) {
-            firestore.collection("teachers").document(teacherID).getDocument { (snapshot, error) in
-                if let error = error {
-                    print("Error fetching studentsNotes: \(error.localizedDescription)")
-                    completion([:])
-                    return
+        firestore.collection("teachers").document(teacherID).getDocument { (snapshot, error) in
+            if let error = error {
+                print("Error fetching studentsNotes: \(error.localizedDescription)")
+                completion([:])
+                return
+            }
+            
+            guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
+                print("No studentsNotes found for teacher \(teacherID)")
+                completion([:])
+                return
+            }
+            
+            completion(studentsNotes)
+        }
+    }
+    
+    func fetchUser<T: UserProtocol & Decodable>(from collection: String, userID: String, as type: T.Type) {
+        UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: type) { [weak self] result in
+            switch result {
+            case .success(let user):
+                if let student = user as? Student {
+                    self?.studentInfos.append(student)
                 }
-                
-                guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
-                    print("No studentsNotes found for teacher \(teacherID)")
-                    completion([:])
-                    return
+                DispatchQueue.main.async {
+                    self?.studentTableView.reloadData()
                 }
-                
-                completion(studentsNotes)
+            case .failure(let error):
+                print("Error fetching user: \(error.localizedDescription)")
             }
         }
-
-        func fetchUser<T: UserProtocol & Decodable>(from collection: String, userID: String, as type: T.Type) {
-            UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: type) { [weak self] result in
-                switch result {
-                case .success(let user):
-                    if let student = user as? Student {
-                        self?.studentInfos.append(student)
-                    }
-                    DispatchQueue.main.async {
-                        self?.studentTableView.reloadData()
-                    }
-                case .failure(let error):
-                    print("Error fetching user: \(error.localizedDescription)")
-                }
-            }
-        }
+    }
     
     @objc func sendFilesToSelectedStudents() {
         guard !selectedFiles.isEmpty, !selectedStudentIDs.isEmpty else {
@@ -200,7 +201,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         for studentID in selectedStudentIDs {
             for file in selectedFiles {
                 print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
-
+                
                 let fileName = file.lastPathComponent
                 
                 firestore.collection("files")
@@ -228,88 +229,151 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                     }
             }
         }
+        
+        // 清空選擇列表
+        selectedFiles.removeAll()
+        selectedStudentIDs.removeAll()
+        
+        // 隱藏 TableView 和分享按鈕
+        studentTableView.isHidden = true
+        sendButton.isHidden = true
+        
+        collectionView.allowsMultipleSelection = false
+        collectionView.reloadData()
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item < files.count {
             let selectedFileURL = files[indexPath.item]
-            selectedFiles.append(selectedFileURL)
-            print("選擇文件：\(selectedFileURL.lastPathComponent)")
             
-            // 更新 Cell 的視覺效果
-            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-                cell.setSelected(true)
+            if collectionView.allowsMultipleSelection {
+                selectedFiles.append(selectedFileURL)
+                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                    cell.setSelected(true)
+                }
+                print("選擇文件：\(selectedFileURL.lastPathComponent)")
+            } else {
+                previewFile(at: selectedFileURL)
             }
+            
+            // 更新發送按鈕的狀態
+            updateSendButtonState()
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if indexPath.item < files.count {
             let deselectedFileURL = files[indexPath.item]
-            if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
-                selectedFiles.remove(at: index)
-                print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+            
+            if collectionView.allowsMultipleSelection {
+                if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
+                    selectedFiles.remove(at: index)
+                    print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+                }
+                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                    cell.setSelected(false)
+                }
             }
             
-            // 更新 Cell 的視覺效果
-            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-                cell.setSelected(false)
-            }
+            // 更新發送按鈕的狀態
+            updateSendButtonState()
+        }
+    }
+    
+    func updateSendButtonState() {
+        sendButton.isEnabled = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
+    }
+    
+    private func previewFile(at url: URL) {
+        // 檢查文件是否存在於本地
+        if FileManager.default.fileExists(atPath: url.path) {
+            documentInteractionController = UIDocumentInteractionController(url: url)
+            documentInteractionController?.delegate = self
+            documentInteractionController?.presentPreview(animated: true)
+        } else {
+            print("File does not exist at path: \(url.path)")
         }
     }
     
     func fetchUserFiles() {
-           guard let currentUserID = UserSession.shared.currentUserID else {
-               print("Error: Current user ID is nil.")
-               return
-           }
-           
-           if userRole == "teacher" {
-               // 教师：获取所有文件
-               firestore.collection("files")
-                   .whereField("ownerID", isEqualTo: currentUserID)
-                   .getDocuments { [weak self] snapshot, error in
-                       if let error = error {
-                           print("Error fetching user files: \(error)")
-                           return
-                       }
-                       
-                       self?.handleFetchedFiles(snapshot)
-                   }
-           } else {
-               // 学生：只获取有权限的文件
-               firestore.collection("files")
-                   .whereField("authorizedStudents", arrayContains: currentUserID)
-                   .getDocuments { [weak self] snapshot, error in
-                       if let error = error {
-                           print("Error fetching files for student: \(error)")
-                           return
-                       }
-                       
-                       self?.handleFetchedFiles(snapshot)
-                   }
-           }
-       }
-    
-    private func handleFetchedFiles(_ snapshot: QuerySnapshot?) {
-            guard let documents = snapshot?.documents else {
-                print("No files found.")
-                return
-            }
-            
-            self.files.removeAll()
-            
-            for document in documents {
-                guard let urlString = document.data()["downloadURL"] as? String,
-                      let fileName = document.data()["fileName"] as? String,
-                      let url = URL(string: urlString) else {
-                    continue
-                }
-                
-                self.downloadFile(from: url, withName: fileName)
+        guard let currentUserID = UserSession.shared.currentUserID else {
+            print("Error: Current user ID is nil.")
+            return
+        }
+        
+        let cachedFiles = getCachedFiles()
+        if !cachedFiles.isEmpty {
+            self.files = cachedFiles
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
             }
         }
-
+        
+        let collectionPath = userRole == "teacher" ? "files" : "files"
+        let queryField = userRole == "teacher" ? "ownerID" : "authorizedStudents"
+        let queryValue = userRole == "teacher" ? currentUserID : currentUserID
+        
+        firestore.collection(collectionPath)
+            .whereField(queryField, isEqualTo: queryValue)
+            .getDocuments { [weak self] snapshot, error in
+                if let error = error {
+                    print("Error fetching user files: \(error)")
+                    return
+                }
+                
+                self?.handleFetchedFiles(snapshot)
+            }
+    }
+    
+    func getCachedFiles() -> [URL] {
+        let fileManager = FileManager.default
+        let cacheDirectory = getCacheDirectory()
+        
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
+            return fileURLs
+        } catch {
+            print("Error fetching cached files: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    private func handleFetchedFiles(_ snapshot: QuerySnapshot?) {
+        guard let documents = snapshot?.documents else {
+            print("No files found.")
+            return
+        }
+        
+        self.files.removeAll()
+        self.fileDownloadStatus.removeAll()
+        
+        for document in documents {
+            guard let urlString = document.data()["downloadURL"] as? String,
+                  let fileName = document.data()["fileName"] as? String,
+                  let remoteURL = URL(string: urlString) else {
+                continue
+            }
+            
+            // 檢查本地緩存
+            if let cachedURL = isFileCached(fileName: fileName) {
+                // 文件已緩存，直接使用本地文件
+                self.files.append(cachedURL)
+                self.fileDownloadStatus[cachedURL] = false
+            } else {
+                // 文件未緩存，需要下載
+                self.files.append(remoteURL)
+                self.fileDownloadStatus[remoteURL] = true
+                
+                // 在此時刷新 collectionView，顯示活動指示器
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+                
+                self.downloadFile(from: remoteURL, withName: fileName)
+            }
+        }
+    }
+    
     func downloadFile(from url: URL, withName fileName: String) {
         let task = URLSession.shared.downloadTask(with: url) { [weak self] (tempLocalUrl, response, error) in
             if let error = error {
@@ -322,19 +386,24 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 return
             }
             
-            let fileManager = FileManager.default
-            let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let localUrl = documentsDirectory.appendingPathComponent(fileName)
+            let cacheDirectory = self?.getCacheDirectory()
+            let localUrl = cacheDirectory?.appendingPathComponent(fileName)
             
             do {
-                if fileManager.fileExists(atPath: localUrl.path) {
-                    try fileManager.removeItem(at: localUrl)
-                }
-                try fileManager.moveItem(at: tempLocalUrl, to: localUrl)
-                
-                DispatchQueue.main.async {
-                    self?.files.append(localUrl)
-                    self?.collectionView.reloadData()
+                if let localUrl = localUrl {
+                    if FileManager.default.fileExists(atPath: localUrl.path) {
+                        try FileManager.default.removeItem(at: localUrl)
+                    }
+                    try FileManager.default.moveItem(at: tempLocalUrl, to: localUrl)
+                    
+                    DispatchQueue.main.async {
+                        // 更新 files 列表以指向本地緩存文件
+                        if let index = self?.files.firstIndex(of: url) {
+                            self?.files[index] = localUrl
+                        }
+                        self?.fileDownloadStatus[localUrl] = false
+                        self?.collectionView.reloadData()
+                    }
                 }
             } catch {
                 print("Error moving file: \(error.localizedDescription)")
@@ -364,7 +433,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.allowsMultipleSelection = true
+        collectionView.allowsMultipleSelection = false
         collectionView.register(FileCell.self, forCellWithReuseIdentifier: "fileCell")
         collectionView.backgroundColor = .white // 設置背景色
         view.addSubview(collectionView)
@@ -375,7 +444,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
             collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -300)
         ])
     }
     
@@ -452,37 +521,11 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
         if indexPath.item < files.count {
             let fileURL = files[indexPath.item]
-            cell.configure(with: fileURL)
+            let isDownloading = fileDownloadStatus[fileURL] ?? false
+            cell.configure(with: fileURL, isDownloading: isDownloading)
         }
         return cell
     }
-    
-    //    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    //        if indexPath.item < files.count {
-    //            let selectedFile = files[indexPath.item]
-    //            selectedFiles.append(selectedFile)
-    //            print("File selected: \(selectedFile.lastPathComponent)")
-    //
-    //            // 開始上傳文件到 Firebase
-    //            uploadFileToFirebase(selectedFile) { [weak self] result in
-    //                switch result {
-    //                case .success(let downloadURL):
-    //                    self?.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: selectedFile.lastPathComponent)
-    //                case .failure(let error):
-    //                    print("File upload failed: \(error.localizedDescription)")
-    //                }
-    //            }
-    //        } else {
-    //            print("Error: Selected index out of bounds.")
-    //        }
-    //    }
-    
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        if indexPath.item < files.count {
-//            let selectedFileURL = files[indexPath.item]
-//            previewFile(at: selectedFileURL)
-//        }
-//    }
     
     func setupLongPressGesture() {
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
@@ -518,15 +561,12 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func updateFileName(at indexPath: IndexPath, newName: String) {
-        // 獲取原始文件URL
         var fileURL = files[indexPath.item]
         
-        // 更新本地URL（僅用於顯示，並未更改實際文件）
         let newFileURL = fileURL.deletingLastPathComponent().appendingPathComponent(newName)
         
         files[indexPath.item] = newFileURL
         
-        // 更新 Firebase 上的文件名稱
         updateFileMetadataInFirestore(for: fileURL, newFileName: newName)
         
         // 重新載入CollectionView
@@ -557,10 +597,28 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
-    func previewFile(at url: URL) {
-        documentInteractionController = UIDocumentInteractionController(url: url)
-        documentInteractionController?.delegate = self
-        documentInteractionController?.presentPreview(animated: true)
+    // MARK: - Cache
+    func getCacheDirectory() -> URL {
+        let fileManager = FileManager.default
+        let cacheDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("FileCache")
+        
+        if !fileManager.fileExists(atPath: cacheDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Error creating cache directory: \(error.localizedDescription)")
+            }
+        }
+        
+        return cacheDirectory
+    }
+    
+    func isFileCached(fileName: String) -> URL? {
+        let filePath = getCacheDirectory().appendingPathComponent(fileName)
+        if FileManager.default.fileExists(atPath: filePath.path) {
+            return filePath
+        }
+        return nil
     }
     
     // MARK: - UIDocumentInteractionControllerDelegate
@@ -633,17 +691,14 @@ extension FilesVC: UIDocumentPickerDelegate {
             return
         }
         
-        let selectedURL = urls[0] // 這裡假設一次只選取一個文件
+        let selectedURL = urls[0] 
         let fileName = selectedURL.lastPathComponent
         
-        // 檢查文件名稱是否已經存在
         checkIfFileExists(fileName: fileName) { [weak self] exists in
             if exists {
                 print("Error: A file with the same name already exists.")
-                // 可以彈出警告通知使用者文件名稱重複
-                self?.showAlert(message: "A file with the same name already exists. Please rename the file and try again.")
+                self?.showAlert(message: "已有同名文件，請重新選擇")
             } else {
-                // 不重複，允許上傳
                 self?.files.append(selectedURL)
                 self?.collectionView.reloadData()
                 self?.uploadFileToFirebase(selectedURL) { result in
@@ -674,7 +729,7 @@ extension FilesVC: UIDocumentPickerDelegate {
                 }
             }
     }
-
+    
     func showAlert(message: String) {
         let alert = UIAlertController(title: "已有同名文件", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))

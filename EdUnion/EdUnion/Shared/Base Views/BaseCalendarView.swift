@@ -207,7 +207,6 @@ struct BaseCalendarView: View {
                 
                 Spacer()
                 
-                // 活動列表部分
                 if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
                     List {
                         ForEach(activities) { appointment in
@@ -224,27 +223,32 @@ struct BaseCalendarView: View {
                                                     }
                                                 }
                                             }
-                                            .font(.subheadline)
-                                            .foregroundColor(.white)
+                                            .font(.headline)
+                                            .foregroundColor(Color(UIColor.myDarkGray))
                                         
-                                        Spacer()
+                                        
                                         
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
                                             .foregroundColor(.black)
+                                        
+                                        Spacer()
                                     }
                                 }
                                 Spacer()
                                 
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.white)
+                                Image(systemName: "arrow.right")
+                                    .foregroundColor(Color(UIColor.myDarkGray))
                             }
-                            .padding()
-                            .background(Color(uiColor: .systemBackground))
+                            .padding(.vertical, 20) 
+                            .padding(.horizontal, 10)
+                            .background(Color(UIColor.white))
                             .cornerRadius(10)
                             .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                             .padding(.vertical, 5)
                             .listRowSeparator(.hidden)
+                            .listRowBackground(Color(UIColor.myGray))
+                            .frame(height: 80)
                             .onTapGesture {
                                 selectedAppointment = appointment
                                 isShowingCard = true
