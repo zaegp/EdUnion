@@ -260,7 +260,6 @@ struct BaseCalendarView: View {
             }
             .background(Color.myGray)
             
-            // 彈出卡片視圖
             if isShowingCard, let appointment = selectedAppointment {
                 VStack {
                     Spacer()
@@ -284,7 +283,7 @@ struct BaseCalendarView: View {
                                     .foregroundColor(.white)
                                     .padding()
                                     .frame(maxWidth: .infinity)
-                                    .background(Color.red)
+                                    .background(Color.mainOrange)
                                     .cornerRadius(10)
                             }
                         } else if userRole == "teacher" {
@@ -297,7 +296,7 @@ struct BaseCalendarView: View {
                                     .foregroundColor(.white)
                                     .padding()
                                     .frame(maxWidth: .infinity)
-                                    .background(Color.blue)
+                                    .background(Color.mainOrange)
                                     .cornerRadius(10)
                             }
                         }

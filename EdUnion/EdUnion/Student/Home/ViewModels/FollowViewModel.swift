@@ -36,19 +36,17 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
                     self.filteredItems = teachers
                 }
                 
-                // 確保在主執行緒更新 UI
                 DispatchQueue.main.async {
-                    self.onDataUpdate?() // 通知 UI 更新
+                    self.onDataUpdate?()
                 }
                 
             case .failure(let error):
                 print("Failed to fetch teachers: \(error)")
                 
-                // 處理錯誤的情況，確保 items 和 filteredItems 都被清空
                 DispatchQueue.main.async {
                     self.items = []
                     self.filteredItems = []
-                    self.onDataUpdate?() // 通知 UI 更新
+                    self.onDataUpdate?()
                 }
             }
         }
@@ -59,7 +57,6 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
             filteredItems = items
         } else {
             filteredItems = items.filter { teacher in
-                // 安全處理 resume 陣列，防止越界崩潰
                 return teacher.fullName.lowercased().contains(query.lowercased()) ||
                 teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
             }

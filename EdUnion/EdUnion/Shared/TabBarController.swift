@@ -33,7 +33,7 @@ class TabBarController: UITabBarController {
     private func setupTabBar() {
         tabBar.isHidden = true
 
-        let height: CGFloat = 80
+        let height: CGFloat = 60
         customTabBarView = UIView(frame: CGRect(x: 20, y: view.frame.height - height - 20, width: view.frame.width - 40, height: height))
         customTabBarView.backgroundColor = .white
         customTabBarView.layer.cornerRadius = height / 2
@@ -61,6 +61,9 @@ class TabBarController: UITabBarController {
     }
 
     @objc private func tabBarButtonTapped(_ sender: UIButton) {
+        let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+        feedbackGenerator.impactOccurred()
+        
         updateSelectedTab(index: sender.tag)
         selectedIndex = sender.tag
     }
@@ -78,7 +81,7 @@ class TabBarController: UITabBarController {
                                                                  width: circleSize,
                                                                  height: circleSize))
                     circleLayer.path = circlePath.cgPath
-                    circleLayer.fillColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00).cgColor
+                    circleLayer.fillColor = UIColor.myGray.cgColor
                     
                     if let sublayers = button.layer.sublayers {
                         for layer in sublayers {
@@ -140,7 +143,7 @@ class TabBarController: UITabBarController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        let height: CGFloat = 80
+        let height: CGFloat = 60
         customTabBarView.frame = CGRect(x: 20, y: view.frame.height - height - 20, width: view.frame.width - 40, height: height)
     }
 }

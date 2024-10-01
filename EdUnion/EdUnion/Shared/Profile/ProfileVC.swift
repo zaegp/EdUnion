@@ -68,7 +68,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
         userImageView.addGestureRecognizer(tapGesture)
         
-        nameLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        nameLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         headerView.addSubview(userImageView)
@@ -130,7 +130,6 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                 ("分析", "chart.bar", { [weak self] in self?.navigateToChartView() }),
                 ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
                 ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                ("待確認的預約", "bell", { [weak self] in self?.navigateToConfirmAppointments() }),
                 ("所有學生列表", "person.3", { [weak self] in self?.navigateToAllStudents() }),
                 ("教材", "folder", { [weak self] in self?.navigateToFiles() })
             ]
@@ -235,6 +234,10 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     // MARK: - UITableViewDelegate & DataSource Methods
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return menuItems.count

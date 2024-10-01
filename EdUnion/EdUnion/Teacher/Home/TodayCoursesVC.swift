@@ -19,7 +19,7 @@ class TodayCoursesVC: UIViewController {
     let tableView = UITableView()
     private var viewModel = TodayCoursesViewModel()
     
-    private let progressBarHostingController = UIHostingController(rootView: ProgressContentView())
+    private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
     let titleLabel = UILabel()
     let bellButton = UIButton()
     var expandedIndexPath: IndexPath?
@@ -107,7 +107,7 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
-//                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
+                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
             }
         }
         viewModel.fetchTodayAppointments()

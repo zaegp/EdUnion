@@ -55,6 +55,14 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+    }
+    
     private func setupSendButton() {
         sendButton = UIButton(type: .system)
         sendButton.isHidden = true

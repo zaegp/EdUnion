@@ -214,7 +214,7 @@ class TeacherDetailVC: UIViewController {
                 }
             }
         } else {
-            UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacher!.userID, listName: "followList") { error in
+            UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacher!.id, listName: "followList") { error in
                 if let error = error {
                     print("更新 followList 失敗: \(error)")
                 } else {

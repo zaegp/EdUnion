@@ -28,7 +28,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "可選時段"
-        view.backgroundColor = .white
+        view.backgroundColor = .myGray
         tabBarController?.tabBar.isHidden = true
         
         setupNavigationBar()
@@ -37,6 +37,23 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         
         bindViewModel()
         viewModel.loadTimeSlots()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
     }
     
     func setupNavigationBar() {
@@ -145,10 +162,8 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func pushToCalendarVC() {
         let calendarView = ColorPickerCalendarView()
         let hostingController = UIHostingController(rootView: calendarView)
-        //        navigationController?.pushViewController(hostingController, animated: true)
-        hostingController.modalPresentationStyle = .pageSheet  // 或者 .pageSheet, .formSheet 等等
-        hostingController.modalTransitionStyle = .coverVertical  // 可以改成其他如 .flipHorizontal, .crossDissolve
-        
+        hostingController.modalPresentationStyle = .pageSheet
+        hostingController.modalTransitionStyle = .coverVertical
         present(hostingController, animated: true, completion: nil)
     }
 }
