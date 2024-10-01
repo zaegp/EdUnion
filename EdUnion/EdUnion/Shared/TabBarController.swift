@@ -58,7 +58,6 @@ class TabBarController: UITabBarController {
             tabBarButtons.append(button)
         }
         
-        // 設置第一個按鈕為橘色
         updateSelectedTab(index: 0)
     }
 
