@@ -16,13 +16,19 @@ struct ChatViewControllerWrapper: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> ChatVC {
         let chatVC = ChatVC()
-        chatVC.teacher?.id = teacherID
-        chatVC.student?.id = studentID
+        
+        var student = Student()
+        student.id = studentID
+        chatVC.student = student
+
+        var teacher = Teacher()
+        teacher.id = teacherID
+        chatVC.teacher = teacher
+
         return chatVC
     }
     
     func updateUIViewController(_ uiViewController: ChatVC, context: Context) {
-        // 更新視圖控制器的狀態
     }
 }
 
@@ -46,12 +52,12 @@ struct CalendarDayView: View {
                 
                 Text(day.formatted(.dateTime.day()))
                     .fontWeight(.bold)
-                    .foregroundColor(isSelected ? .black : .white)
-                    .strikethrough(isPastDate, color: .white)
+                    .foregroundColor(isSelected ? .primary : Color(UIColor.systemBackground))
+                    .strikethrough(isPastDate, color: Color(UIColor.systemBackground))
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
                         Circle()
-                            .fill(isSelected ? Color(hex: "#fca311") : Color.clear)
+                            .fill(isSelected ? Color.mainOrange : Color.clear)
                     )
                 
                 ZStack {
@@ -77,7 +83,6 @@ struct CalendarDayView: View {
 }
 
 struct BaseCalendarView: View {
-    
     @Binding var externalDateColors: [Date: Color]?
     @State private var internalDateColors: [Date: Color] = [:]
     @ObservedObject var viewModel: BaseCalendarViewModel
@@ -86,7 +91,7 @@ struct BaseCalendarView: View {
     @State private var selectedAppointment: Appointment?
     @State private var appointmentListener: ListenerRegistration?
     let userID = UserSession.shared.currentUserID
-    let userRole = UserDefaults.standard.string(forKey: "userRole") ?? ""
+    let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     @State private var isShowingCard = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -107,7 +112,6 @@ struct BaseCalendarView: View {
     @State private var selectedDay: Date? = nil
     
     @State private var appointments: [Appointment] = []
-    /*@State private var activitiesByDate: [Date: [Appointment]] = [:]*/
     
     var onDayTap: ((Date) -> Void)? = nil
     var onDayLongPress: ((Date) -> Void)? = nil
@@ -118,8 +122,6 @@ struct BaseCalendarView: View {
     @State private var days: [Date?] = []
     @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
-    //    @State private var leftIsActive = false
-    //    @State private var rightIsActive = false
     
     var body: some View {
         let colors = dateColors
@@ -129,16 +131,16 @@ struct BaseCalendarView: View {
                     HStack {
                         Button(action: { previousPeriod() }) {
                             Image(systemName: "chevron.left")
-                                .foregroundColor(Color.white)
+                                .foregroundColor(Color(UIColor.systemBackground))
                         }
                         Spacer()
                         Text(formattedMonthAndYear(currentDate))
                             .font(.headline)
-                            .foregroundColor(Color.white)
+                            .foregroundColor(Color(UIColor.systemBackground))
                         Spacer()
                         Button(action: { nextPeriod() }) {
                             Image(systemName: "chevron.right")
-                                .foregroundColor(Color.white)
+                                .foregroundColor(Color(UIColor.systemBackground))
                         }
                     }
                     .padding()
@@ -148,7 +150,7 @@ struct BaseCalendarView: View {
                             Text(day)
                                 .fontWeight(.regular)
                                 .frame(maxWidth: .infinity)
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(Color.secondary)
                         }
                     }
                     
@@ -200,9 +202,9 @@ struct BaseCalendarView: View {
                     }
                 }
                 .padding()
-                .background(Color(hex: "#252525"))
+                .background(Color.myDarkGray)
                 .cornerRadius(30)
-                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+//                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
                 .padding()
                 
                 Spacer()
@@ -226,8 +228,6 @@ struct BaseCalendarView: View {
                                             .font(.headline)
                                             .foregroundColor(Color(UIColor.myDarkGray))
                                         
-                                        
-                                        
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
                                             .foregroundColor(.black)
@@ -242,12 +242,12 @@ struct BaseCalendarView: View {
                             }
                             .padding(.vertical, 20) 
                             .padding(.horizontal, 10)
-                            .background(Color(UIColor.white))
+                            .background(.myCell)
                             .cornerRadius(10)
                             .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                             .padding(.vertical, 5)
                             .listRowSeparator(.hidden)
-                            .listRowBackground(Color(UIColor.myGray))
+                            .listRowBackground(Color.myBackground)
                             .frame(height: 80)
                             .onTapGesture {
                                 selectedAppointment = appointment
@@ -258,7 +258,7 @@ struct BaseCalendarView: View {
                     .listStyle(PlainListStyle())
                 }
             }
-            .background(Color.myGray)
+            .background(Color.myBackground)
             
             if isShowingCard, let appointment = selectedAppointment {
                 VStack {
@@ -457,12 +457,6 @@ struct BaseCalendarView: View {
     }()
 }
 
-
-
-
 //#Preview {
 //    BaseCalendarView()
 //}
-
-
-

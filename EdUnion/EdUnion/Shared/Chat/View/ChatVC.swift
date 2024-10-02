@@ -20,6 +20,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var teacher: Teacher?
     var student: Student?
     let userID = UserSession.shared.currentUserID
+    var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     
     private let imageView = UIImageView()
     private let messageInputBar = UIView()
@@ -44,7 +45,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupRecordingSession()
         setupKeyboardNotifications()
         
-        if teacher == nil {
+        if userRole == "teacher" {
             viewModel = ChatViewModel(chatRoomID: (userID ?? "") + "_" + (student?.id ?? ""))
         } else {
             viewModel = ChatViewModel(chatRoomID: (teacher?.id ?? "") + "_" + (userID ?? ""))

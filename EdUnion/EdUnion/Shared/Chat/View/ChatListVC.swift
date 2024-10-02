@@ -11,19 +11,78 @@ import FirebaseAuth
 
 class ChatListVC: UIViewController {
     
-    private let tableView = UITableView()
-    private let searchBar = UISearchBar()
-    private let cancelButton = UIButton(type: .system)
-    private var searchBarWidthConstraint: NSLayoutConstraint?
+    var theTeacher: Teacher?
+    var theStudent: Student?
     
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
     private var participantID: String?
     private var participants: [String: Any] = [:]
+    
+    private let searchBar = UISearchBar()
+    private let cancelButton = UIButton(type: .system)
+    private let tableView = UITableView()
+    private var searchBarWidthConstraint: NSLayoutConstraint?
+    
     private var chatRoomListener: ListenerRegistration?
     
-    var theTeacher: Teacher?
-    var theStudent: Student?
+    private let noChatRoomsView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        let imageView = UIImageView(image: UIImage(systemName: "bubble.left.and.bubble.right.fill"))
+        imageView.tintColor = .label
+        
+        let label = UILabel()
+        label.text = "暫無聊天訊息，開始新的聊天吧！"
+        label.textColor = .label
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(imageView)
+        view.addSubview(label)
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+            
+            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 10),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        return view
+    }()
+    
+    private let noSearchResultsView: UIView = {
+        let view = UIView()
+        
+        let imageView = UIImageView(image: UIImage(systemName: "magnifyingglass"))
+        imageView.tintColor = .label
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let label = UILabel()
+        label.text = "找不到相關聊天記錄。"
+        label.textColor = .label
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(imageView)
+        view.addSubview(label)
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+            
+            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 10),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        return view
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,63 +94,71 @@ class ChatListVC: UIViewController {
         }
         
         setupUI()
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        observeChatRooms()
         
-        tabBarController?.tabBar.isHidden = false
+        observeChatRooms()
+        tabBarController?.tabBar.isHidden = true
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
         chatRoomListener?.remove()
     }
     
     private func setupUI() {
-        tableView.separatorStyle = .none
-        
         searchBar.delegate = self
         searchBar.placeholder = "搜尋"
-        searchBar.tintColor = .white
+        searchBar.tintColor = .mySearchBarTint
         searchBar.sizeToFit()
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-
         searchBar.backgroundImage = UIImage()
-        searchBar.barTintColor = UIColor.blue
-
+        
         if let searchTextField = searchBar.searchTextField as? UITextField {
-            searchTextField.backgroundColor = UIColor.myDarkGray
-            searchTextField.layer.cornerRadius = 20
+            searchTextField.backgroundColor = UIColor.mySearchBar
+            searchTextField.layer.cornerRadius = 10
             searchTextField.clipsToBounds = true
             
-            searchTextField.textColor = UIColor.white
+            searchTextField.textColor = UIColor.mySearchBarTint
             searchTextField.tintColor = UIColor.mainOrange
             
-            let placeholderText = "搜尋"
-            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.myGray]
+            let placeholderText = "搜尋聊天室"
+            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.mySearchBarTint]
             searchTextField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: attributes)
             
             if let leftIconView = searchTextField.leftView as? UIImageView {
                 leftIconView.image = leftIconView.image?.withRenderingMode(.alwaysTemplate)
-                leftIconView.tintColor = UIColor.myGray 
+                leftIconView.tintColor = UIColor.mySearchBarTint
             }
         }
         
         cancelButton.setTitle("取消", for: .normal)
-        cancelButton.tintColor = .myGray
+        cancelButton.tintColor = .mySearchBarTint
         cancelButton.isHidden = true
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
         
         let searchContainer = UIView()
-        searchContainer.translatesAutoresizingMaskIntoConstraints = false
         searchContainer.addSubview(searchBar)
         searchContainer.addSubview(cancelButton)
         
         navigationItem.titleView = searchContainer
+        self.view.addSubview(tableView)
+        view.addSubview(noChatRoomsView)
+        view.addSubview(noSearchResultsView)
+        
+        tableView.separatorStyle = .none
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(ChatListCell.self, forCellReuseIdentifier: "ChatListCell")
+        tableView.frame = self.view.bounds
+        tableView.backgroundColor = .myBackground
+        tableView.tableFooterView = UIView()
+        
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        searchContainer.translatesAutoresizingMaskIntoConstraints = false
         
         searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)
         
@@ -105,16 +172,14 @@ class ChatListVC: UIViewController {
             
             cancelButton.leadingAnchor.constraint(equalTo: searchBar.trailingAnchor),
             cancelButton.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
-            cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor)
+            cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor),
+            
+            noChatRoomsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noChatRoomsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            noSearchResultsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noSearchResultsView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(ChatListCell.self, forCellReuseIdentifier: "ChatListCell")
-        tableView.frame = self.view.bounds
-        tableView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
-        tableView.tableFooterView = UIView()
-        self.view.addSubview(tableView)
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -150,12 +215,15 @@ class ChatListVC: UIViewController {
     }
     
     private func observeChatRooms() {
+        noChatRoomsView.isHidden = true
+        noSearchResultsView.isHidden = true
+        
         guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
-                print("Error: Unable to get user role from UserDefaults.")
-                return
-            }
-            
-            let isTeacher = (userRole == "teacher")
+            print("Error: Unable to get user role from UserDefaults.")
+            return
+        }
+        
+        let isTeacher = (userRole == "teacher")
         
         UserFirebaseService.shared.fetchChatRooms(for: participantID ?? "", isTeacher: isTeacher) { [weak self] (chatRooms, error) in
             if let error = error {
@@ -209,6 +277,11 @@ class ChatListVC: UIViewController {
             self?.filteredChatRooms = chatRooms
             
             DispatchQueue.main.async {
+                if chatRooms.isEmpty {
+                    self?.noChatRoomsView.isHidden = false
+                } else {
+                    self?.noChatRoomsView.isHidden = true
+                }
                 self?.tableView.reloadData()
             }
         }
@@ -222,22 +295,30 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let isInitialEmpty = chatRooms.isEmpty
+        let isSearchEmpty = filteredChatRooms.isEmpty
+        
+        if !isInitialEmpty && isSearchEmpty {
+            noSearchResultsView.isHidden = false
+        } else {
+            noSearchResultsView.isHidden = true
+        }
+        
         return filteredChatRooms.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
-        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        cell.backgroundColor = .myBackground
         let chatRoom = filteredChatRooms[indexPath.row]
         
-        let participantId = chatRoom.participants.filter { $0 != participantID }.first ?? "未知用戶"
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
         let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "student"
         
         if userRole == "teacher" {
-            UserFirebaseService.shared.fetchUser(from: "students", by: participantId, as: Student.self) { result in
+            UserFirebaseService.shared.fetchUser(from: "students", by: chatRoom.participants[1], as: Student.self) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let student):
@@ -249,7 +330,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
                 }
             }
         } else {
-            UserFirebaseService.shared.fetchUser(from: "teachers", by: participantId, as: Teacher.self) { result in
+            UserFirebaseService.shared.fetchUser(from: "teachers", by: chatRoom.participants[0], as: Teacher.self) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let teacher):
@@ -300,5 +381,12 @@ extension ChatListVC: UISearchBarDelegate {
             }
         }
         tableView.reloadData()
+    }
+}
+
+extension ChatListVC: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchBar.resignFirstResponder()
+        cancelButtonTapped()
     }
 }

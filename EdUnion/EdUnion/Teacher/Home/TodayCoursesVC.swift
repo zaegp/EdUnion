@@ -21,6 +21,7 @@ class TodayCoursesVC: UIViewController {
     
     private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
     let titleLabel = UILabel()
+    let noCoursesLabel = UILabel()
     let stackView = UIStackView()
     var expandedIndexPath: IndexPath?
     let userID = UserSession.shared.currentUserID
@@ -36,18 +37,24 @@ class TodayCoursesVC: UIViewController {
     
     private func createTableHeader() -> UIView {
         let headerView = UIView()
-        headerView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        headerView.backgroundColor = .myGray
         
         return headerView
     }
     
     private func configureUI() {
-        view.backgroundColor = .myGray
+        view.backgroundColor = .white
         
         titleLabel.text = "Today's Courses"
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
+        
+        noCoursesLabel.text = "今日無課程"
+        noCoursesLabel.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+        noCoursesLabel.textAlignment = .center
+        noCoursesLabel.isHidden = true // 預設隱藏
+        view.addSubview(noCoursesLabel)
         
         addChild(progressBarHostingController)
         view.addSubview(progressBarHostingController.view)
@@ -55,7 +62,7 @@ class TodayCoursesVC: UIViewController {
         
         tableView.layer.cornerRadius = 20
         tableView.layer.masksToBounds = true
-        tableView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        tableView.backgroundColor = .myGray
         tableView.separatorStyle = .none
         tableView.register(TodayCoursesCell.self, forCellReuseIdentifier: "Cell")
         tableView.delegate = self
@@ -83,12 +90,16 @@ class TodayCoursesVC: UIViewController {
     
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        noCoursesLabel.translatesAutoresizingMaskIntoConstraints = false
         progressBarHostingController.view.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            
+            noCoursesLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noCoursesLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 100),
             
             progressBarHostingController.view.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 50),
             progressBarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -105,14 +116,22 @@ class TodayCoursesVC: UIViewController {
     private func setupViewModel() {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
+                if self?.viewModel.appointments.isEmpty == true {
+                    // 無課程，顯示無課程標籤並隱藏進度條
+                    self?.progressBarHostingController.view.isHidden = true
+                    self?.noCoursesLabel.isHidden = false
+                } else {
+                    // 有課程，顯示進度條並隱藏無課程標籤
+                    self?.progressBarHostingController.view.isHidden = false
+                    self?.noCoursesLabel.isHidden = true
+                    self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
+                }
                 self?.tableView.reloadData()
-                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
             }
         }
         viewModel.fetchTodayAppointments()
     }
 }
-
 // MARK: - UITableViewDataSource
 extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     

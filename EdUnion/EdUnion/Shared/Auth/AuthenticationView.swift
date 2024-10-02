@@ -78,13 +78,14 @@ struct AuthenticationView: View {
                                             var userData: [String: Any] = [
                                                 "fullName": (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? ""),
                                                 "email": appleIDCredential.email ?? "",
-                                                "userID": appleIDCredential.user
+                                                "userID": appleIDCredential.user,
+                                                "photoURL": "",
+                                                "status": "normal"
                                             ]
                                             
                                             if userRole == "student" {
                                                 userData["followList"] = [String]()
                                                 userData["usedList"] = [String]()
-                                                userData["photoURL"] = String()
                                             }
                                             
                                             userRef.setData(userData) { error in

@@ -90,7 +90,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         view.addSubview(profileImageView)
         view.addSubview(stackView)
         
-        // Set constraints
         NSLayoutConstraint.activate([
             profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -202,7 +201,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         ]
         
         if let profileImageURL = profileImageURL {
-            dataToSave["profileImageURL"] = profileImageURL
+            dataToSave["photoURL"] = profileImageURL
         }
         
         teacherRef.updateData(dataToSave) { error in

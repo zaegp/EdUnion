@@ -294,20 +294,22 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             }
         }
         
-        let collectionPath = userRole == "teacher" ? "files" : "files"
+        let collectionPath = "files"
         let queryField = userRole == "teacher" ? "ownerID" : "authorizedStudents"
-        let queryValue = userRole == "teacher" ? currentUserID : currentUserID
         
-        firestore.collection(collectionPath)
-            .whereField(queryField, isEqualTo: queryValue)
-            .getDocuments { [weak self] snapshot, error in
-                if let error = error {
-                    print("Error fetching user files: \(error)")
-                    return
-                }
-                
-                self?.handleFetchedFiles(snapshot)
+        // 使用 arrayContains 運算符來查找陣列中包含 currentUserID 的文件
+        let query = userRole == "teacher" ?
+                    firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
+                    firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
+        
+        query.getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("Error fetching user files: \(error)")
+                return
             }
+            
+            self?.handleFetchedFiles(snapshot)
+        }
     }
     
     func getCachedFiles() -> [URL] {
