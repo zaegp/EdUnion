@@ -22,6 +22,7 @@
 		517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */; };
 		517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD72CACC3BA002A2513 /* Kingfisher */; };
 		517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */; };
+		517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -128,6 +129,7 @@
 		513BEC182CA89059000E0DE9 /* LessonChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonChartView.swift; sourceTree = "<group>"; };
 		513BEC1F2CA90361000E0DE9 /* BarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarChartView.swift; sourceTree = "<group>"; };
 		513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesCell.swift; sourceTree = "<group>"; };
+		517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -242,6 +244,14 @@
 			path = Intro;
 			sourceTree = "<group>";
 		};
+		517E9DDC2CAE8196002A2513 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */,
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
 		51993B092CA50AB80022C79F /* Auth */ = {
 			isa = PBXGroup;
 			children = (
@@ -254,6 +264,7 @@
 		519C8EC02C9399FA007DFCBA /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				517E9DDC2CAE8196002A2513 /* CustomViews */,
 				513BEC082CA54ABB000E0DE9 /* Intro */,
 				51993B092CA50AB80022C79F /* Auth */,
 				51D25C882C9B320E0083EECF /* Base Views */,
@@ -784,6 +795,7 @@
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
 				51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */,
+				517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */,
 				513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */,
 				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */,

@@ -28,7 +28,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "可選時段"
-        view.backgroundColor = .myGray
+        view.backgroundColor = .myBackground
         tabBarController?.tabBar.isHidden = true
         
         setupNavigationBar()
@@ -58,7 +58,9 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     func setupNavigationBar() {
         let iconImage = UIImage(systemName: "calendar")
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: iconImage, style: .plain, target: self, action: #selector(pushToCalendarVC))
+        navigationItem.rightBarButtonItem?.tintColor = .mainOrange
     }
     
     func setupTableView() {
@@ -71,6 +73,8 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.rowHeight = 60
         tableView.layer.cornerRadius = 10
         tableView.clipsToBounds = true
+        tableView.separatorStyle = .none
+        tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
         
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -127,7 +131,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         modalVC.onTimeSlotEdited = { [weak self] editedTimeSlot in
             self?.viewModel.updateTimeSlot(at: index, with: editedTimeSlot)
         }
-        modalVC.modalPresentationStyle = .fullScreen
+        modalVC.modalPresentationStyle = .formSheet
         present(modalVC, animated: true, completion: nil)
     }
     
@@ -142,12 +146,24 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "AvailableTimeSlotsCell", for: indexPath) as! AvailableTimeSlotsCell
+        cell.backgroundColor = .clear
+        cell.selectionStyle = .none
+        
         let timeSlot = viewModel.timeSlots[indexPath.row]
         cell.configure(with: timeSlot)
         return cell
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle,     forRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+            cell.contentView.layer.masksToBounds = true
+            cell.contentView.layer.cornerRadius = 12
+            
+            // 調整 cell 的邊距
+            let cellMargins = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+            cell.frame = cell.frame.inset(by: cellMargins)
+        }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             viewModel.deleteTimeSlot(at: indexPath.row)
         }

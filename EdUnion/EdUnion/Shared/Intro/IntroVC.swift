@@ -13,100 +13,144 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     let userID = UserSession.shared.currentUserID
     
     let profileImageView = UIImageView()
-    let uploadImageButton = UIButton(type: .system)
     
     let educationLabel = UILabel()
-    let educationTextField = UITextField()
+    let educationTextField = PaddedTextField()
     
     let experienceLabel = UILabel()
-    let experienceTextField = UITextField()
+    let experienceTextField = PaddedTextField()
     
     let introLabel = UILabel()
     let introTextView = UITextView()
     
     let subjectsLabel = UILabel()
-    let subjectsTextField = UITextField()
+    let subjectsTextField = PaddedTextField()
     
     let hourlyRateLabel = UILabel()
-    let hourlyRateTextField = UITextField()
+    let hourlyRateTextField = PaddedTextField()
     
     let saveButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
         setupUI()
         setupKeyboardDismissRecognizer()
+        
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(uploadImageButtonTapped))
+        profileImageView.isUserInteractionEnabled = true
+        profileImageView.addGestureRecognizer(tapGesture)
     }
     
     func setupUI() {
-        // Configure profile image view
-        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.image = UIImage(systemName: "person.crop.circle.badge.plus")
+        profileImageView.tintColor = .myBlack
+        profileImageView.contentMode = .scaleAspectFit
         profileImageView.layer.cornerRadius = 50
         profileImageView.clipsToBounds = true
-        profileImageView.layer.borderWidth = 1
-        profileImageView.layer.borderColor = UIColor.gray.cgColor
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        educationLabel.text = "- 學歷 -"
+        experienceLabel.text = "- 教學經驗 -"
+        introLabel.text = "- 自我介紹 -"
+        subjectsLabel.text = "- 教學科目 -"
+        hourlyRateLabel.text = "- 時薪 -"
         
-        uploadImageButton.setTitle("上傳照片", for: .normal)
-        uploadImageButton.addTarget(self, action: #selector(uploadImageButtonTapped), for: .touchUpInside)
-        uploadImageButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        educationLabel.text = "學歷"
-        experienceLabel.text = "教學經驗"
-        introLabel.text = "自我介紹"
-        subjectsLabel.text = "教學科目"
-        hourlyRateLabel.text = "時薪"
-        
-        for textField in [educationTextField, experienceTextField, subjectsTextField, hourlyRateTextField] {
-            textField.borderStyle = .roundedRect
-            textField.translatesAutoresizingMaskIntoConstraints = false
+        for label in [educationLabel, experienceLabel, introLabel, subjectsLabel, hourlyRateLabel] {
+            label.textAlignment = .center
+            label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            label.adjustsFontSizeToFitWidth = true // 調整字體大小以適應寬度
+            label.minimumScaleFactor = 0.5 // 最小縮放比例
         }
         
-        introTextView.layer.borderColor = UIColor.gray.cgColor
-        introTextView.layer.borderWidth = 1.0
-        introTextView.layer.cornerRadius = 8.0
-        introTextView.font = UIFont.systemFont(ofSize: 16)
-        introTextView.translatesAutoresizingMaskIntoConstraints = false
-        introTextView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        for textField in [educationTextField, experienceTextField, subjectsTextField, hourlyRateTextField] {
+            textField.borderStyle = .none
+            textField.layer.cornerRadius = 10
+            textField.layer.borderWidth = 1
+            textField.layer.borderColor = UIColor.mainTint.cgColor
+            textField.clipsToBounds = true
+            textField.backgroundColor = .systemBackground
+            textField.textAlignment = .left
+            textField.horizontalPadding = 10
+            textField.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            textField.tintColor = .mainOrange
+        }
         
-        saveButton.setTitle("送出", for: .normal)
+        introTextView.layer.cornerRadius = 10
+        introTextView.font = UIFont.systemFont(ofSize: 16)
+        introTextView.isScrollEnabled = true
+        introTextView.contentInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        introTextView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        introTextView.tintColor = .mainOrange
+        
+        saveButton.setTitle("保存", for: .normal)
+        saveButton.backgroundColor = .mainOrange
+        saveButton.tintColor = .white
+        saveButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        saveButton.layer.cornerRadius = 30
+        saveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         saveButton.addTarget(self, action: #selector(saveChanges), for: .touchUpInside)
-        saveButton.translatesAutoresizingMaskIntoConstraints = false
         
         let stackView = UIStackView(arrangedSubviews: [
-            uploadImageButton,
             createStackView(with: educationLabel, and: educationTextField),
             createStackView(with: experienceLabel, and: experienceTextField),
-            createStackView(with: introLabel, and: introTextView),
             createStackView(with: subjectsLabel, and: subjectsTextField),
             createStackView(with: hourlyRateLabel, and: hourlyRateTextField),
+            createStackView(with: introLabel, and: introTextView),
             saveButton
         ])
         stackView.axis = .vertical
         stackView.spacing = 20
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
-        view.addSubview(profileImageView)
-        view.addSubview(stackView)
+        let scrollView = UIScrollView()
+        scrollView.backgroundColor = .clear
+           scrollView.translatesAutoresizingMaskIntoConstraints = false
+           view.addSubview(scrollView)
+           
+           // Container View to hold profileImageView and stackView
+           let containerView = UIView()
+           containerView.translatesAutoresizingMaskIntoConstraints = false
+           scrollView.addSubview(containerView)
+           
+           containerView.addSubview(profileImageView)
+           containerView.addSubview(stackView)
         
         NSLayoutConstraint.activate([
-            profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            profileImageView.heightAnchor.constraint(equalToConstant: 100),
-            profileImageView.widthAnchor.constraint(equalToConstant: 100),
-            
-            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
+                // Scroll View
+                scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                
+                // Container View
+                containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+                containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+                containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+                containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+                containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+                
+                // Profile Image View
+                profileImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+                profileImageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+                profileImageView.heightAnchor.constraint(equalToConstant: 100),
+                profileImageView.widthAnchor.constraint(equalToConstant: 100),
+                
+                // Stack View
+                stackView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
+                stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+                stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+                stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20)
+            ])
     }
     
     private func createStackView(with label: UILabel, and inputView: UIView) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: [label, inputView])
         stackView.axis = .vertical
-        stackView.spacing = 5
+        stackView.spacing = 10
         return stackView
     }
     
@@ -133,6 +177,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
     
     @objc func saveChanges() {
+        navigateToMainApp()
+        
         guard let userID = userID else {
             print("Error: User not logged in.")
             return
@@ -193,6 +239,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                 completion(.success(urlString))
             }
         }
+        
+        profileImageView.contentMode = .scaleAspectFill
     }
     
     private func saveResumeData(teacherRef: DocumentReference, resumeData: [String], profileImageURL: String?) {
@@ -217,7 +265,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                             print("Error creating data: \(error.localizedDescription)")
                         } else {
                             print("Data successfully created and saved.")
-                            self.navigateToMainApp()
+//                            self.navigateToMainApp()
                         }
                     }
                 } else {
@@ -225,7 +273,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                 }
             } else {
                 print("Data successfully updated.")
-                self.navigateToMainApp()
+//                self.navigateToMainApp()
             }
         }
     }

@@ -30,7 +30,7 @@ class ChatListCell: UITableViewCell {
         profileImageView.layer.cornerRadius = 30
         profileImageView.clipsToBounds = true
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        profileImageView.tintColor = .label
+        profileImageView.tintColor = .myBlack
         profileImageView.contentMode = .scaleAspectFill
         
         nameLabel.font = UIFont.boldSystemFont(ofSize: 16)

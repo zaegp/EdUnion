@@ -16,14 +16,35 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     var existingTimeSlots: [AvailableTimeSlot] = []
     var onTimeSlotEdited: ((AvailableTimeSlot) -> Void)?
     
+    let saveButton = UIButton(type: .system)
+    let cancelButton = UIButton(type: .system)
+    let addTimeSlotButton = UIButton(type: .system)
+    
     private let startTimePicker = UIPickerView()
     private let endTimePicker = UIPickerView()
-    private var selectedColor: UIColor = .clear
+    private var selectedColor: UIColor = .white
     
     private var selectedTimeRanges: [String] = []
     
     private let selectedSlotLabel = UILabel()
     private let colorPreview = UIView()
+    private let colorPreviewLabel: UILabel = {
+        let label = UILabel()
+        label.text = "請點擊選擇顏色"
+        label.textAlignment = .center
+        label.textColor = .myGray
+        label.font = UIFont.systemFont(ofSize: 16)
+        return label
+    }()
+    private let emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "尚未添加時間段"
+        label.textAlignment = .center
+        label.textColor = .myGray
+        label.font = UIFont.systemFont(ofSize: 18)
+        label.isHidden = true
+        return label
+    }()
     private let timeSlotsTableView = UITableView()
 
     private let colorStackView = UIStackView()
@@ -45,7 +66,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .myBackground
         
         setupTimePickers()
         setupColorPicker()
@@ -108,12 +129,21 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     func setupColorPicker() {
         colorPreview.layer.cornerRadius = 8
         colorPreview.layer.borderWidth = 1
-        colorPreview.layer.borderColor = UIColor(resource: .myGray).cgColor
+        colorPreview.layer.borderColor = UIColor.myGray.cgColor
         colorPreview.backgroundColor = selectedColor
-        colorPreview.largeContentTitle = "請選擇顏色"
+        colorPreview.isUserInteractionEnabled = true
+        
+        // 添加 colorPreviewLabel 到 colorPreview 中
+        colorPreview.addSubview(colorPreviewLabel)
+        
+        // 設置 colorPreviewLabel 的約束，使其在 colorPreview 的中間
+        colorPreviewLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            colorPreviewLabel.centerXAnchor.constraint(equalTo: colorPreview.centerXAnchor),
+            colorPreviewLabel.centerYAnchor.constraint(equalTo: colorPreview.centerYAnchor)
+        ])
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectColorTapped))
-        colorPreview.isUserInteractionEnabled = true
         colorPreview.addGestureRecognizer(tapGesture)
     }
     
@@ -123,6 +153,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         colorPicker.selectedColor = selectedColor
         present(colorPicker, animated: true, completion: nil)
     }
+
     
     func setupSelectedSlotDisplay() {
         selectedSlotLabel.font = UIFont.systemFont(ofSize: 16)
@@ -147,83 +178,117 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         timeSlotsTableView.layer.shadowRadius = 4
         timeSlotsTableView.layer.shadowPath = UIBezierPath(roundedRect: timeSlotsTableView.bounds, cornerRadius: timeSlotsTableView.layer.cornerRadius).cgPath
         
+        timeSlotsTableView.backgroundView = emptyStateLabel
+        
         timeSlotsTableView.heightAnchor.constraint(equalToConstant: 150).isActive = true
     }
     
+    func updateEmptyState() {
+        if selectedTimeRanges.isEmpty {
+            emptyStateLabel.isHidden = false
+        } else {
+            emptyStateLabel.isHidden = true
+        }
+    }
+    
     func setupButtons() {
-        let addTimeSlotButton = UIButton(type: .system)
         addTimeSlotButton.setTitle("新增時間段", for: .normal)
         addTimeSlotButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         addTimeSlotButton.setTitleColor(.mainTint, for: .normal)
-        addTimeSlotButton.backgroundColor = .myGray
+        addTimeSlotButton.backgroundColor = .myBlack
         addTimeSlotButton.layer.cornerRadius = 8
         addTimeSlotButton.addTarget(self, action: #selector(addTimeSlotTapped), for: .touchUpInside)
         
-        let saveButton = UIButton(type: .system)
         saveButton.setTitle("儲存", for: .normal)
         saveButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         saveButton.setTitleColor(.mainTint, for: .normal)
-        saveButton.backgroundColor = .myGray
+        saveButton.backgroundColor = .mainOrange
         saveButton.layer.cornerRadius = 8
         saveButton.addTarget(self, action: #selector(saveAllTimeSlots), for: .touchUpInside)
         
-        let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("取消", for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         cancelButton.setTitleColor(.mainTint, for: .normal)
-        cancelButton.backgroundColor = .myGray
+        cancelButton.backgroundColor = .myBlack
         cancelButton.layer.cornerRadius = 8
         cancelButton.addTarget(self, action: #selector(cancelSelection), for: .touchUpInside)
-        
-        buttonStackView.axis = .vertical
-        buttonStackView.spacing = 16
-        buttonStackView.distribution = .fillEqually
-        buttonStackView.addArrangedSubview(addTimeSlotButton)
-        buttonStackView.addArrangedSubview(saveButton)
-        buttonStackView.addArrangedSubview(cancelButton)
     }
     
     func setupConstraints() {
-        view.addSubview(timePickersStackView)
-        view.addSubview(selectedSlotLabel)
-        view.addSubview(timeSlotsTableView)
-        view.addSubview(buttonStackView)
-        view.addSubview(colorPreview)
+
+        let timeSeparatorLabel = UILabel()
+        timeSeparatorLabel.text = "～"
+        timeSeparatorLabel.textAlignment = .center
+        timeSeparatorLabel.font = UIFont.systemFont(ofSize: 16)
         
-        timePickersStackView.translatesAutoresizingMaskIntoConstraints = false
-        selectedSlotLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeSlotsTableView.translatesAutoresizingMaskIntoConstraints = false
-        buttonStackView.translatesAutoresizingMaskIntoConstraints = false
+        let startTimeStack = UIStackView(arrangedSubviews: [startTimePicker])
+        startTimeStack.axis = .vertical
+        startTimeStack.spacing = 5
+        
+        let endTimeStack = UIStackView(arrangedSubviews: [endTimePicker])
+        endTimeStack.axis = .vertical
+        endTimeStack.spacing = 5
+        
+        let timePickersVerticalStack = UIStackView(arrangedSubviews: [startTimeStack, timeSeparatorLabel, endTimeStack])
+        timePickersVerticalStack.axis = .vertical
+        timePickersVerticalStack.spacing = 10
+
+        // 將時間選擇器和新增按鈕水平排列
+        let timeSelectionStackView = UIStackView(arrangedSubviews: [timePickersVerticalStack, addTimeSlotButton])
+        timeSelectionStackView.axis = .horizontal
+        timeSelectionStackView.spacing = 10
+        timeSelectionStackView.distribution = .fill
+        timeSelectionStackView.alignment = .center
+
+        // 中間區域：時間段列表
+        let timeSlotsLabel = UILabel()
+        timeSlotsLabel.text = "已選擇的時間段"
+        timeSlotsLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        timeSlotsLabel.textAlignment = .left
+
+        let timeSlotsContainer = UIStackView(arrangedSubviews: [timeSlotsLabel, timeSlotsTableView])
+        timeSlotsContainer.axis = .vertical
+        timeSlotsContainer.spacing = 10
+
+        let buttonsStackView = UIStackView(arrangedSubviews: [saveButton, cancelButton])
+        buttonsStackView.axis = .horizontal
+        buttonsStackView.spacing = 16
+        buttonsStackView.distribution = .fillEqually
+
+        // 整體佈局
+        let mainStackView = UIStackView(arrangedSubviews: [colorPreview, timeSelectionStackView, timeSlotsContainer, buttonsStackView])
+            mainStackView.axis = .vertical
+            mainStackView.spacing = 20
+        
+            mainStackView.translatesAutoresizingMaskIntoConstraints = false
+        addTimeSlotButton.translatesAutoresizingMaskIntoConstraints = false
+        saveButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
         colorPreview.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            selectedSlotLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            selectedSlotLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            selectedSlotLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            selectedSlotLabel.heightAnchor.constraint(equalToConstant: 30),
-            
-            timeSlotsTableView.topAnchor.constraint(equalTo: selectedSlotLabel.bottomAnchor, constant: 10),
-            timeSlotsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            timeSlotsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            timeSlotsTableView.heightAnchor.constraint(equalToConstant: 150),
-            
-            timePickersStackView.topAnchor.constraint(equalTo: timeSlotsTableView.bottomAnchor, constant: 20),
-            timePickersStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            timePickersStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            timePickersStackView.heightAnchor.constraint(equalToConstant: 200),
-            
-            colorPreview.topAnchor.constraint(equalTo: timePickersStackView.bottomAnchor, constant: 20),
-            colorPreview.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            colorPreview.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            colorPreview.heightAnchor.constraint(equalToConstant: 50),
-            
-            buttonStackView.topAnchor.constraint(equalTo: colorPreview.bottomAnchor, constant: 20),
-            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            buttonStackView.heightAnchor.constraint(equalToConstant: 180),
-            buttonStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
-        ])
-    }
+
+            view.addSubview(mainStackView)
+
+            // 設置約束
+            NSLayoutConstraint.activate([
+//                mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+                mainStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+//                mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+
+                addTimeSlotButton.heightAnchor.constraint(equalToConstant: 40),
+                saveButton.heightAnchor.constraint(equalToConstant: 40),
+                cancelButton.heightAnchor.constraint(equalToConstant: 40),
+
+                colorPreview.heightAnchor.constraint(equalToConstant: 80),
+                // 時間選擇器的大小
+                startTimePicker.heightAnchor.constraint(equalToConstant: 100),
+                endTimePicker.heightAnchor.constraint(equalToConstant: 100),
+                startTimePicker.widthAnchor.constraint(equalToConstant: 200),
+                // 時間段列表高度
+                timeSlotsTableView.heightAnchor.constraint(equalToConstant: 150)
+            ])
+        }
     
     @objc func addTimeSlotTapped() {
         let startTimeString = String(format: "%02d:%@", selectedStartHour, selectedStartMinute)
@@ -242,6 +307,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         
         selectedTimeRanges.append(timeRange)
         timeSlotsTableView.reloadData()
+        updateEmptyState()
     }
     
     @objc func saveAllTimeSlots() {
@@ -301,11 +367,14 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
         selectedColor = viewController.selectedColor
         colorPreview.backgroundColor = selectedColor
+        
+        colorPreviewLabel.isHidden = true
     }
     
     // MARK: - TableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        selectedTimeRanges.count
+        updateEmptyState()
+        return selectedTimeRanges.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -321,6 +390,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
             selectedTimeRanges.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
+        updateEmptyState()
     }
 }
 

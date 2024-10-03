@@ -100,6 +100,9 @@ class ChatListVC: UIViewController {
         super.viewWillAppear(animated)
         
         observeChatRooms()
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
+
         tabBarController?.tabBar.isHidden = true
     }
     

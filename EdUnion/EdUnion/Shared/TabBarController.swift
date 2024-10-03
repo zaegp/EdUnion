@@ -74,7 +74,7 @@ class TabBarController: UITabBarController {
             if i == index {
                 UIView.animate(withDuration: 0.3, animations: {
                     button.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
-                    button.tintColor = UIColor(red: 0.92, green: 0.37, blue: 0.16, alpha: 1.00)
+                    button.tintColor = .mainOrange
                 })
             } else {
                 UIView.animate(withDuration: 0.3, animations: {

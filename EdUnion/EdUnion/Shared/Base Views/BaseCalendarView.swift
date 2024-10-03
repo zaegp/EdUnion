@@ -240,7 +240,7 @@ struct BaseCalendarView: View {
                                 }
                                 Spacer()
                                 
-                                Image(systemName: "arrow.right")
+                                Image(systemName: "arrow.forward")
                                     .foregroundColor(.primary)
                             }
                             .padding(.vertical, 5)
