@@ -117,9 +117,12 @@ class ChatListVC: UIViewController {
         searchBar.backgroundImage = UIImage()
         
         if let searchTextField = searchBar.searchTextField as? UITextField {
-            searchTextField.backgroundColor = UIColor.mySearchBar
+            searchTextField.backgroundColor = .clear
             searchTextField.layer.cornerRadius = 10
             searchTextField.clipsToBounds = true
+            
+            searchTextField.layer.borderWidth = 1.0
+            searchTextField.layer.borderColor = UIColor.myBorder.cgColor
             
             searchTextField.textColor = UIColor.mySearchBarTint
             searchTextField.tintColor = UIColor.mainOrange

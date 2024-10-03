@@ -108,5 +108,3 @@ extension BaseCollectionVC: UICollectionViewDelegate {
         collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
-
-

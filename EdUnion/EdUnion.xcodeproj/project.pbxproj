@@ -70,7 +70,6 @@
 		51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C992C9E4F370083EECF /* DetailView.swift */; };
 		51D25C9E2C9E60C00083EECF /* FollowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */; };
 		51D25CA02C9E90B30083EECF /* FollowVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9F2C9E90B30083EECF /* FollowVC.swift */; };
-		51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */; };
 		51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */; };
 		51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC22C9F3BA10083EECF /* NavigationController.swift */; };
 		51D25CC92CA060100083EECF /* FrequentlyUsedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC82CA060100083EECF /* FrequentlyUsedVC.swift */; };
@@ -180,12 +179,6 @@
 		51D25C9F2C9E90B30083EECF /* FollowVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowVC.swift; sourceTree = "<group>"; };
 		51D25CA72C9F27310083EECF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		51D25CA92C9F27310083EECF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidgetBundle.swift; sourceTree = "<group>"; };
-		51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidget.swift; sourceTree = "<group>"; };
-		51D25CB02C9F27310083EECF /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
-		51D25CB22C9F27320083EECF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		51D25CB42C9F27320083EECF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseWidgetView.swift; sourceTree = "<group>"; };
 		51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Ext.swift"; sourceTree = "<group>"; };
 		51D25CC22C9F3BA10083EECF /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		51D25CC82CA060100083EECF /* FrequentlyUsedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequentlyUsedVC.swift; sourceTree = "<group>"; };
@@ -523,26 +516,12 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		51D25CAB2C9F27310083EECF /* TodayCoursesWidget */ = {
-			isa = PBXGroup;
-			children = (
-				51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */,
-				51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */,
-				51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */,
-				51D25CB02C9F27310083EECF /* AppIntent.swift */,
-				51D25CB22C9F27320083EECF /* Assets.xcassets */,
-				51D25CB42C9F27320083EECF /* Info.plist */,
-			);
-			path = TodayCoursesWidget;
-			sourceTree = "<group>";
-		};
 		51ED0ACA2C916721006322B7 = {
 			isa = PBXGroup;
 			children = (
 				51ED0AD52C916721006322B7 /* EdUnion */,
 				51ED0AEC2C916722006322B7 /* EdUnionTests */,
 				51ED0AF62C916722006322B7 /* EdUnionUITests */,
-				51D25CAB2C9F27310083EECF /* TodayCoursesWidget */,
 				51D25CA62C9F27310083EECF /* Frameworks */,
 				51ED0AD42C916721006322B7 /* Products */,
 			);
@@ -773,7 +752,6 @@
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
 				513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */,
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
-				51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */,
 				513BEC0A2CA54ACC000E0DE9 /* IntroVC.swift in Sources */,
 				51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,

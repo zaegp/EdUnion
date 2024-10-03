@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseAuth
 
 protocol UserProtocol {
     var id: String { get set }
@@ -21,6 +22,8 @@ class UserFirebaseService {
     
     let db = Firestore.firestore()
     let storage = Storage.storage()
+    
+    let userID = UserSession.shared.currentUserID ?? ""
     
     // MARK: - 通用查詢方法
     func fetchData<T: Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
@@ -561,6 +564,28 @@ class UserFirebaseService {
             }
         }
     }
+    
+    // MARK: - 封鎖檢舉
+    func blockUser(blockID: String, isTeacher: Bool, completion: @escaping (Error?) -> Void) {
+        let collectionName = isTeacher ? "teachers" : "students"
+        
+        let userRef = db.collection(collectionName).document(userID)
+        
+        userRef.updateData([
+            "blockList": FieldValue.arrayUnion([blockID])
+        ]) { error in
+            completion(error)
+        }
+    }
+    
+    func removeStudentFromTeacherNotes(teacherID: String, studentID: String, completion: @escaping (Error?) -> Void) {
+            let teacherRef = Firestore.firestore().collection("teachers").document(teacherID)
+            teacherRef.updateData([
+                "studentsNotes.\(studentID)": FieldValue.delete()
+            ]) { error in
+                completion(error)
+            }
+        }
     //    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
     //        let studentRef = db.collection("students").document(id)
     //        studentRef.getDocument { document, error in

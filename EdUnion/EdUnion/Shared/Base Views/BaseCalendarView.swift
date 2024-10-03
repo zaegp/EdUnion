@@ -51,9 +51,9 @@ struct CalendarDayView: View {
                 let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
                 
                 Text(day.formatted(.dateTime.day()))
-                    .fontWeight(.bold)
-                    .foregroundColor(isSelected ? .primary : Color(UIColor.systemBackground))
-                    .strikethrough(isPastDate, color: Color(UIColor.systemBackground))
+                    .fontWeight(.medium)
+                    .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color.mainTint)
+                    .strikethrough(isPastDate, color: Color.mainTint)
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
                         Circle()
@@ -131,16 +131,16 @@ struct BaseCalendarView: View {
                     HStack {
                         Button(action: { previousPeriod() }) {
                             Image(systemName: "chevron.left")
-                                .foregroundColor(Color(UIColor.systemBackground))
+                                .foregroundColor(Color.mainTint)
                         }
                         Spacer()
                         Text(formattedMonthAndYear(currentDate))
                             .font(.headline)
-                            .foregroundColor(Color(UIColor.systemBackground))
+                            .foregroundColor(Color.mainTint)
                         Spacer()
                         Button(action: { nextPeriod() }) {
                             Image(systemName: "chevron.right")
-                                .foregroundColor(Color(UIColor.systemBackground))
+                                .foregroundColor(Color.mainTint)
                         }
                     }
                     .padding()
@@ -150,7 +150,7 @@ struct BaseCalendarView: View {
                             Text(day)
                                 .fontWeight(.regular)
                                 .frame(maxWidth: .infinity)
-                                .foregroundColor(Color.secondary)
+                                .foregroundColor(Color.myGray)
                         }
                     }
                     
@@ -166,7 +166,6 @@ struct BaseCalendarView: View {
                                     color: dateColors[day] ?? .clear
                                 )
                                 .onTapGesture {
-                                    print("點擊了日期：\(day)")
                                     toggleSingleSelection(for: day)
                                     onDayTap?(day)
                                 }
@@ -204,6 +203,10 @@ struct BaseCalendarView: View {
                 .padding()
                 .background(Color.myDarkGray)
                 .cornerRadius(30)
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 30)
+//                        .stroke(Color.myBorder, lineWidth: 2)
+//                )
 //                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
                 .padding()
                 
@@ -230,7 +233,7 @@ struct BaseCalendarView: View {
                                         
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
-                                            .foregroundColor(.black)
+                                            .foregroundColor(.primary)
                                         
                                         Spacer()
                                     }
@@ -238,17 +241,21 @@ struct BaseCalendarView: View {
                                 Spacer()
                                 
                                 Image(systemName: "arrow.right")
-                                    .foregroundColor(Color(UIColor.myDarkGray))
+                                    .foregroundColor(.primary)
                             }
-                            .padding(.vertical, 20) 
+                            .padding(.vertical, 5)
                             .padding(.horizontal, 10)
-                            .background(.myCell)
-                            .cornerRadius(10)
-                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                            .background(.clear)
+                            .cornerRadius(20)
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 20)
+//                                    .stroke(Color.myBorder, lineWidth: 1)
+//                            )
+//                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                             .padding(.vertical, 5)
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.myBackground)
-                            .frame(height: 80)
+                            .frame(height: 40)
                             .onTapGesture {
                                 selectedAppointment = appointment
                                 isShowingCard = true
@@ -302,7 +309,7 @@ struct BaseCalendarView: View {
                         }
                     }
                     .padding()
-                    .background(Color.white)
+                    .background(Color.myBackground)
                     .cornerRadius(15)
                     .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
                     .padding()

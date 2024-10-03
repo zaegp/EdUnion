@@ -8,6 +8,7 @@
 import UIKit
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -131,12 +132,51 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                 ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
                 ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
                 ("所有學生列表", "person.3", { [weak self] in self?.navigateToAllStudents() }),
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                ("刪除帳號", "trash", deleteAccountAction)
             ]
         } else {
             menuItems = [
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                ("刪除帳號", "trash", deleteAccountAction)
             ]
+        }
+    }
+    
+    private func deleteAccountAction() {
+        // 顯示確認刪除帳號的警告
+        let alertController = UIAlertController(title: "刪除帳號", message: "確定要刪除您的帳號嗎？這個操作無法恢復。", preferredStyle: .alert)
+        
+        let deleteAction = UIAlertAction(title: "刪除", style: .destructive) { _ in
+            // 呼叫 Firebase 更新 status 為 "Deleting"
+            self.updateUserStatusToDeleting()
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+
+    private func updateUserStatusToDeleting() {
+        guard let userID = userID, !userID.isEmpty else {
+            print("Error: 無法取得使用者 ID")
+            return
+        }
+        
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        
+        let userRef = Firestore.firestore().collection(collection).document(userID)
+        
+        userRef.updateData(["status": "Deleting"]) { error in
+            if let error = error {
+                print("更新使用者狀態失敗: \(error.localizedDescription)")
+            } else {
+                print("使用者狀態已更新為 'Deleting'")
+                self.logoutButtonTapped()
+            }
         }
     }
     

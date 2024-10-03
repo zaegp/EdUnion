@@ -103,6 +103,54 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         let cell = tableView.dequeueReusableCell(withIdentifier: "studentCell", for: indexPath)
         let student = students[indexPath.row]
         cell.textLabel?.text = student.fullName
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        cell.addGestureRecognizer(longPressGesture)
+        
         return cell
+    }
+    
+    @objc private func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            guard let indexPath = tableView.indexPathForRow(at: gestureRecognizer.location(in: tableView)) else { return }
+            let student = students[indexPath.row]
+            showBlockConfirmation(for: student, at: indexPath)
+        }
+    }
+    
+    private func showBlockConfirmation(for student: Student, at indexPath: IndexPath) {
+        let alertController = UIAlertController(title: "封鎖或檢舉", message: "你確定要封鎖並檢舉這位學生嗎？", preferredStyle: .alert)
+        
+        let confirmAction = UIAlertAction(title: "確認", style: .destructive) { _ in
+            guard let userID = self.userID else {
+                print("錯誤: 無法取得當前使用者 ID")
+                return
+            }
+            
+            UserFirebaseService.shared.blockUser(blockID: student.id, isTeacher: false) { error in
+                if let error = error {
+                    print("封鎖用戶失敗: \(error.localizedDescription)")
+                    return
+                }
+                
+                UserFirebaseService.shared.removeStudentFromTeacherNotes(teacherID: userID, studentID: student.id) { error in
+                    if let error = error {
+                        print("從 Firebase 中刪除學生失敗: \(error.localizedDescription)")
+                    } else {
+                        print("成功從 Firebase 中刪除學生 \(student.id)")
+                        
+                        self.students.remove(at: indexPath.row)
+                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    }
+                }
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
 }

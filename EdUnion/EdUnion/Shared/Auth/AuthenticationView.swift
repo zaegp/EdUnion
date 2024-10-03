@@ -80,7 +80,8 @@ struct AuthenticationView: View {
                                                 "email": appleIDCredential.email ?? "",
                                                 "userID": appleIDCredential.user,
                                                 "photoURL": "",
-                                                "status": "normal"
+                                                "status": "normal",
+                                                "blockList":[]
                                             ]
                                             
                                             if userRole == "student" {

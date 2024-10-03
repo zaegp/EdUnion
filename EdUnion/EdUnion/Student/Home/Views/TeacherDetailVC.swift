@@ -12,6 +12,7 @@ class TeacherDetailVC: UIViewController {
     var teacher: Teacher?
     var isFavorite: Bool = false
     var favoriteButton: UIBarButtonItem!
+    var ellipsisButton: UIBarButtonItem!
     private let imageView = UIImageView()
     private let nameLabel = UILabel()
     private let totalCoursesLabel = UILabel()
@@ -29,7 +30,10 @@ class TeacherDetailVC: UIViewController {
         view.backgroundColor = .white
         favoriteButton = UIBarButtonItem(image: UIImage(systemName: isFavorite ? "suit.heart.fill" : "suit.heart"), style: .plain, target: self, action: #selector(favoriteButtonTapped))
         favoriteButton.tintColor = .mainOrange
-        navigationItem.rightBarButtonItem = favoriteButton
+        ellipsisButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: self, action: #selector(ellipsisButtonTapped))
+        ellipsisButton.tintColor = .mainOrange
+        
+        navigationItem.rightBarButtonItems = [favoriteButton, ellipsisButton]
         
         setupUI()
         checkIfTeacherIsFavorited()
@@ -42,6 +46,35 @@ class TeacherDetailVC: UIViewController {
         
         tabBarController?.tabBar.isHidden = false
     }
+    
+    @objc private func ellipsisButtonTapped() {
+            // 彈出 Alert 進行封鎖確認
+            let alertController = UIAlertController(title: "封鎖", message: "您確定要封鎖這位老師嗎？", preferredStyle: .alert)
+            
+            let confirmAction = UIAlertAction(title: "確認", style: .destructive) { _ in
+                // 呼叫封鎖用戶的方法
+                self.blockUser()
+            }
+            
+            let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+            
+            alertController.addAction(confirmAction)
+            alertController.addAction(cancelAction)
+            
+            present(alertController, animated: true, completion: nil)
+        }
+        
+        private func blockUser() {
+            guard let teacherID = teacher?.id else { return }
+            UserFirebaseService.shared.blockUser(blockID: teacherID, isTeacher: false) { error in
+                if let error = error {
+                    print("封鎖老師失敗: \(error.localizedDescription)")
+                } else {
+                    print("成功封鎖老師")
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
     
     private func checkIfTeacherIsFavorited() {
         

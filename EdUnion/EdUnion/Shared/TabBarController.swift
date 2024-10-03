@@ -34,7 +34,7 @@ class TabBarController: UITabBarController {
 
         let height: CGFloat = 60
         customTabBarView = UIView(frame: CGRect(x: 20, y: view.frame.height - height - 20, width: view.frame.width - 40, height: height))
-        customTabBarView.backgroundColor = .white
+        customTabBarView.backgroundColor = .myDarkGray
         customTabBarView.layer.cornerRadius = height / 2
         customTabBarView.layer.shadowColor = UIColor.black.cgColor
         customTabBarView.layer.shadowOpacity = 0.2
