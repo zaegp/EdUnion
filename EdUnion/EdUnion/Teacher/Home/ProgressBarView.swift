@@ -12,7 +12,7 @@ struct ProgressBarView: View {
     var range: ClosedRange<Double> = 0...1
     var lineWidth: CGFloat = 20
     var separatorWidth: CGFloat = 2
-    var separatorColor: Color = .white
+    var separatorColor: Color = .myBackground
     var segments: Int = 100
     
     private var progressPercentage: String {
@@ -49,7 +49,7 @@ struct ProgressBarView: View {
             }
             
             Text(progressPercentage)
-                .font(.system(size: 24, weight: .bold))
+                .font(.system(size: 30, weight: .bold))
                 .foregroundColor(.black)
                 .frame(width: 200, height: 200)
                 .animation(.easeInOut(duration: 0.8), value: value)

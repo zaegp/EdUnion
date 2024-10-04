@@ -63,7 +63,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             headerView.backgroundColor = .myBackground
             
             userImageView = UIImageView()
-            userImageView.tintColor = .myBlack
+            userImageView.tintColor = .myMessageCell
             userImageView.contentMode = .scaleAspectFill
             userImageView.layer.cornerRadius = 40
             userImageView.clipsToBounds = true

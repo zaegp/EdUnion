@@ -15,9 +15,8 @@ protocol ChatTableViewCellDelegate: AnyObject {
 
 class ChatTableViewCell: UITableViewCell {
     
-    let userID = UserSession.shared.currentUserID
-    
     private var isImageLoaded = false
+    let userID = UserSession.shared.currentUserID
     
     private let bubbleBackgroundView: UIView = {
         let view = UIView()
@@ -46,7 +45,7 @@ class ChatTableViewCell: UITableViewCell {
     
     private let audioButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("播放", for: .normal)
+        button.setTitle("播放音訊", for: .normal)
         button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.isHidden = true
@@ -69,7 +68,7 @@ class ChatTableViewCell: UITableViewCell {
         label.font = UIFont.preferredFont(forTextStyle: .caption2)
         label.adjustsFontForContentSizeCategory = true
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.textColor = .gray
+        label.textColor = .myGray
         return label
     }()
     
@@ -144,16 +143,17 @@ class ChatTableViewCell: UITableViewCell {
     private func setupConstraints() {
         bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
         bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
-
+        
         bubbleTrailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
         bubbleLeadingConstraintGreater = bubbleBackgroundView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 100)
-
+        
         bubbleLeadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
         bubbleTrailingConstraintLess = bubbleBackgroundView.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -100)
         
         bubbleWidthConstraint = bubbleBackgroundView.widthAnchor.constraint(equalToConstant: 200)
         bubbleHeightConstraint = bubbleBackgroundView.heightAnchor.constraint(equalToConstant: 40)
-
+        
+        
         NSLayoutConstraint.activate([
             bubbleTopConstraint,
             bubbleBottomConstraint
@@ -170,10 +170,10 @@ class ChatTableViewCell: UITableViewCell {
         ])
         
         NSLayoutConstraint.activate([
-            audioButton.topAnchor.constraint(equalTo: bubbleBackgroundView.topAnchor, constant: 8),
+            audioButton.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 8),
             audioButton.leadingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: 8),
             audioButton.trailingAnchor.constraint(equalTo: bubbleBackgroundView.trailingAnchor, constant: -8),
-            audioButton.heightAnchor.constraint(equalToConstant: 20)
+            audioButton.heightAnchor.constraint(equalToConstant: 30)
         ])
         
         NSLayoutConstraint.activate([
@@ -223,7 +223,7 @@ class ChatTableViewCell: UITableViewCell {
     
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
-    
+        
         self.isSentByCurrentUser = (message.senderID == userID)
         resetContent()
         
@@ -231,7 +231,7 @@ class ChatTableViewCell: UITableViewCell {
             timestampLabel.text = formatDate(message.timestamp.dateValue())
             timestampLabel.isHidden = false
         }
-
+        
         switch message.type {
         case 0:
             bubbleBackgroundView.isHidden = false
@@ -240,7 +240,7 @@ class ChatTableViewCell: UITableViewCell {
             setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
             messageLabel.text = message.content
             messageLabel.isHidden = false
-
+            
         case 1:
             bubbleBackgroundView.isHidden = true
             messageImageView.isHidden = false
@@ -254,20 +254,20 @@ class ChatTableViewCell: UITableViewCell {
                 activityIndicator.startAnimating()
                 loadImage(from: message.content)
             }
-
+            
         case 2:
             bubbleBackgroundView.isHidden = false
-                messageLabel.isHidden = true
-                messageImageView.isHidden = true
-                audioButton.isHidden = false
-                toggleImageButton.isHidden = true
-                setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+            messageLabel.isHidden = true
+            messageImageView.isHidden = true
+            audioButton.isHidden = false
+            toggleImageButton.isHidden = true
+            setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
             bubbleWidthConstraint.isActive = true
             bubbleHeightConstraint.isActive = true
             bubbleWidthConstraint.constant = 200
             bubbleHeightConstraint.constant = 40
-                       setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
-
+            setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+            
         default:
             bubbleBackgroundView.isHidden = true
             messageImageView.isHidden = true
@@ -298,8 +298,8 @@ class ChatTableViewCell: UITableViewCell {
         bubbleBackgroundView.isHidden = false
         timestampLabel.text = nil
         messageLabel.text = nil
-       
-            messageImageView.image = nil
+        
+        messageImageView.image = nil
         
         audioPlayer = nil
         activityIndicator.stopAnimating()
@@ -315,33 +315,29 @@ class ChatTableViewCell: UITableViewCell {
             bubbleHeightConstraint
         ])
         
-//        NSLayoutConstraint.deactivate([
-//            bubbleLeadingConstraint,
-//            bubbleTrailingConstraint
-//        ])
+        //        NSLayoutConstraint.deactivate([
+        //            bubbleLeadingConstraint,
+        //            bubbleTrailingConstraint
+        //        ])
     }
     
     private func updateBubbleAppearance() {
         guard !bubbleBackgroundView.isHidden else { return }
-        bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .systemOrange : .systemGray5
+        bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .myMessageCell : .myCell
         messageLabel.textColor = isSentByCurrentUser ? .white : .black
-//        timestampLabel.textColor = isSentByCurrentUser ? .white.withAlphaComponent(0.8) : .black.withAlphaComponent(0.6)
     }
     
-    
-
-    // 根據發送者啟用約束
     private func setupBubbleConstraints(isSentByCurrentUser: Bool) {
         if isSentByCurrentUser {
             bubbleTrailingConstraint.isActive = true
             bubbleLeadingConstraintGreater.isActive = true
-
+            
             bubbleLeadingConstraint.isActive = false
             bubbleTrailingConstraintLess.isActive = false
         } else {
             bubbleLeadingConstraint.isActive = true
             bubbleTrailingConstraintLess.isActive = true
-
+            
             bubbleTrailingConstraint.isActive = false
             bubbleLeadingConstraintGreater.isActive = false
         }
@@ -364,29 +360,29 @@ class ChatTableViewCell: UITableViewCell {
         ])
     }
     
-//    private func loadImage(from urlString: String) {
-//        guard let url = URL(string: urlString) else { return }
-//        
-//        let processor = DownsamplingImageProcessor(size: CGSize(width: 200, height: 200))
-//        messageImageView.kf.indicatorType = .activity
-//        messageImageView.kf.setImage(
-//            with: url,
-////            placeholder: UIImage(systemName: "photo"),
-//            options: [
-//                .processor(processor),
-//                .scaleFactor(UIScreen.main.scale),
-//                .transition(.fade(0.3)),
-//                .cacheOriginalImage
-//            ]) { [weak self] result in
-//                switch result {
-//                case .success(_):
-//                    self?.activityIndicator.stopAnimating()
-//                case .failure(let error):
-//                    print("圖片加載失敗: \(error.localizedDescription)")
-//                    self?.activityIndicator.stopAnimating()
-//                }
-//            }
-//    }
+    //    private func loadImage(from urlString: String) {
+    //        guard let url = URL(string: urlString) else { return }
+    //
+    //        let processor = DownsamplingImageProcessor(size: CGSize(width: 200, height: 200))
+    //        messageImageView.kf.indicatorType = .activity
+    //        messageImageView.kf.setImage(
+    //            with: url,
+    ////            placeholder: UIImage(systemName: "photo"),
+    //            options: [
+    //                .processor(processor),
+    //                .scaleFactor(UIScreen.main.scale),
+    //                .transition(.fade(0.3)),
+    //                .cacheOriginalImage
+    //            ]) { [weak self] result in
+    //                switch result {
+    //                case .success(_):
+    //                    self?.activityIndicator.stopAnimating()
+    //                case .failure(let error):
+    //                    print("圖片加載失敗: \(error.localizedDescription)")
+    //                    self?.activityIndicator.stopAnimating()
+    //                }
+    //            }
+    //    }
     
     private func loadImage(from urlString: String) {
         activityIndicator.startAnimating()

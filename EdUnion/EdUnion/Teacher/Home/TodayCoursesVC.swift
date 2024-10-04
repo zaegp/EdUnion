@@ -43,7 +43,8 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func configureUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
+        progressBarHostingController.view.backgroundColor = .myBackground
         
         titleLabel.text = "Today's Courses"
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
@@ -98,13 +99,13 @@ class TodayCoursesVC: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            noCoursesLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            noCoursesLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 100),
-            
             progressBarHostingController.view.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 50),
             progressBarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             progressBarHostingController.view.widthAnchor.constraint(equalToConstant: 150),
             progressBarHostingController.view.heightAnchor.constraint(equalToConstant: 150),
+            
+            noCoursesLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noCoursesLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -300),
             
             tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 50),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -118,12 +119,14 @@ class TodayCoursesVC: UIViewController {
             DispatchQueue.main.async {
                 if self?.viewModel.appointments.isEmpty == true {
                     // 無課程，顯示無課程標籤並隱藏進度條
-                    self?.progressBarHostingController.view.isHidden = true
+//                    self?.progressBarHostingController.view.isHidden = true
                     self?.noCoursesLabel.isHidden = false
+                    self?.tableView.isHidden = true
                 } else {
                     // 有課程，顯示進度條並隱藏無課程標籤
-                    self?.progressBarHostingController.view.isHidden = false
+//                    self?.progressBarHostingController.view.isHidden = false
                     self?.noCoursesLabel.isHidden = true
+                    self?.tableView.isHidden = false
                     self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
                 }
                 self?.tableView.reloadData()

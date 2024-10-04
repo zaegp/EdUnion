@@ -117,7 +117,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 imageView.image = UIImage(systemName: "person.crop.circle.fill")
             }
         }
-        imageView.tintColor = .myBlack
+        imageView.tintColor = .myMessageCell
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
