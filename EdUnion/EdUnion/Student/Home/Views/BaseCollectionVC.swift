@@ -26,11 +26,11 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
         
         setupCollectionView()
         bindViewModel()
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .myBackground
         viewModel.fetchData()
     }
 
@@ -89,9 +89,9 @@ extension BaseCollectionVC: UICollectionViewDataSource {
         cell.configure(with: item)
         cell.contentView.layer.cornerRadius = 30
             cell.contentView.layer.borderWidth = 1.0
-            cell.contentView.layer.borderColor = UIColor.clear.cgColor
+        cell.contentView.layer.borderColor = UIColor.myGray.cgColor
             cell.contentView.layer.masksToBounds = false
-        cell.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        cell.backgroundColor = .clear
         return cell
     }
 }

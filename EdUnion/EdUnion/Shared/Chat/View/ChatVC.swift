@@ -37,8 +37,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
         
+        view.backgroundColor = .myBackground
         setupNavigationBar()
         setupMessageInputBar()
         setupTableView()
@@ -117,7 +117,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 imageView.image = UIImage(systemName: "person.crop.circle.fill")
             }
         }
-        imageView.tintColor = .white
+        imageView.tintColor = .myBlack
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
@@ -139,17 +139,19 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func setupMessageInputBar() {
-        messageInputBar.backgroundColor = .white
+        messageTextView.inputAccessoryView = nil
+        messageInputBar.backgroundColor = .myBackground
         
         messageTextView.font = UIFont.systemFont(ofSize: 16)
         messageTextView.layer.borderWidth = 1.0
-        messageTextView.layer.borderColor = UIColor.lightGray.cgColor
+        messageTextView.layer.borderColor = UIColor.myGray.cgColor
         messageTextView.layer.cornerRadius = 10
         messageTextView.isScrollEnabled = false
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 32)
         
-        sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
+        //        sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
+        sendButton.setImage(UIImage(systemName: "paperplane.fill"), for: .normal)
         sendButton.tintColor = .mainOrange
         sendButton.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
@@ -204,6 +206,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         tableView.register(ChatTableViewCell.self, forCellReuseIdentifier: "ChatCell")
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
+        tableView.backgroundColor = .clear
         
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -324,11 +327,10 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             let keyboardHeight = keyboardFrame.height
             
             UIView.animate(withDuration: 0.3) {
-                self.bottomConstraint.constant = -keyboardHeight
+                self.bottomConstraint.constant = -keyboardHeight + self.view.safeAreaInsets.bottom
                 self.view.layoutIfNeeded()
             }
             
-            tableView.contentInset.bottom = keyboardHeight
             scrollToBottom()
         }
     }
@@ -338,7 +340,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             self.bottomConstraint.constant = 0
             self.view.layoutIfNeeded()
         }
-        tableView.contentInset.bottom = 0
+        
+//        tableView.contentInset.bottom = 0
+//        tableView.scrollIndicatorInsets.bottom = 0
     }
     
     // MARK: - TableView Delegate
@@ -349,6 +353,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
+        cell.backgroundColor = .myBackground
         let message = viewModel.message(at: indexPath.row)
         let previousMessage: Message? = indexPath.row > 0 ? viewModel.message(at: indexPath.row - 1) : nil
         let pendingImage = viewModel.getPendingImage(for: message.ID ?? "nil")

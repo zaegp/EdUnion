@@ -15,6 +15,8 @@ class ChatViewModel {
     let userID = UserSession.shared.currentUserID
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []
+    private var listener: ListenerRegistration?
+
     //    var otherParticipantID: String
     
     var onMessagesUpdated: (() -> Void)?
@@ -160,24 +162,34 @@ class ChatViewModel {
     }
     
     func fetchMessages() {
-        UserFirebaseService.shared.fetchMessages(chatRoomID: chatRoomID, currentUserID: userID ?? "") { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let newMessages):
-                print("Fetched newMessages: \(newMessages)")
-                newMessages.forEach { newMessage in
-                    if !self.messages.contains(where: { $0.ID == newMessage.ID }) {
-                        self.messages.append(newMessage)
+        listener = UserFirebaseService.shared.db.collection("chats").document(chatRoomID).collection("messages")
+            .order(by: "timestamp")
+            .addSnapshotListener { [weak self] (snapshot, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error fetching messages: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("No documents")
+                    return
+                }
+                
+                var newMessages: [Message] = []
+                
+                for document in documents {
+                    if let message = Message(document: document) {
+                        newMessages.append(message)
                     }
                 }
                 
-                self.onMessagesUpdated?()
+                // 更新 messages 陣列
+                self.messages = newMessages
                 
-            case .failure(let error):
-                print("Error fetching messages: \(error.localizedDescription)")
+                // 通知 UI 更新
+                self.onMessagesUpdated?()
             }
-        }
     }
     
 }

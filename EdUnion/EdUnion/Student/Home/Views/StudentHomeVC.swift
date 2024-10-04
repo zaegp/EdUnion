@@ -13,12 +13,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     private let viewControllers: [UIViewController] = [FollowVC(), AllTeacherVC(), FrequentlyUsedVC()]
     private var pageViewControllerTopConstraint: NSLayoutConstraint?
     
-    private let searchBar: UISearchBar = {
-            let searchBar = UISearchBar()
-            searchBar.placeholder = "搜尋"
-            searchBar.alpha = 0
-            return searchBar
-        }()
+    private let searchBarView = SearchBarView()
         
         private let searchIcon: UIImageView = {
             let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
@@ -67,9 +62,9 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
         
-        searchBar.delegate = self
+        searchBarView.delegate = self
 
         selectedIndex = 1
 
@@ -95,69 +90,51 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     }
         
     private func setupSearchIcon() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(searchIconTapped))
-        searchIcon.addGestureRecognizer(tapGesture)
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(searchIconTapped))
+            searchIcon.addGestureRecognizer(tapGesture)
 
-        view.addSubview(searchIcon)
-        view.addSubview(searchBar)
+            view.addSubview(searchIcon)
+            view.addSubview(searchBarView)
 
-        searchBar.setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
-        searchBar.backgroundImage = UIImage()
-        searchBar.backgroundColor = .white
-        searchBar.layer.borderWidth = 0
-        searchBar.layer.borderColor = UIColor.clear.cgColor
+            searchBarView.alpha = 0
 
-        searchBar.alpha = 0
+            searchIcon.translatesAutoresizingMaskIntoConstraints = false
+            searchBarView.translatesAutoresizingMaskIntoConstraints = false
 
+            NSLayoutConstraint.activate([
+                searchIcon.centerYAnchor.constraint(equalTo: labelsStackView.centerYAnchor),
+                searchIcon.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-        searchIcon.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            searchIcon.centerYAnchor.constraint(equalTo: labelsStackView.centerYAnchor),
-            searchIcon.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
-            searchBar.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 8),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: 50)
-        ])
-    }
+                searchBarView.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 8),
+                searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                searchBarView.heightAnchor.constraint(equalToConstant: 50)
+            ])
+        }
 
     @objc private func searchIconTapped() {
-        UIView.animate(withDuration: 0.3, animations: {
-            self.searchBar.alpha = self.searchBar.alpha == 0 ? 1 : 0
+            UIView.animate(withDuration: 0.3, animations: {
+                self.searchBarView.alpha = self.searchBarView.alpha == 0 ? 1 : 0
+                
+                if self.searchBarView.alpha == 1 {
+                    self.pageViewControllerTopConstraint?.constant = 60
+                } else {
+                    self.pageViewControllerTopConstraint?.constant = 10
+                }
+
+                self.view.layoutIfNeeded()
+            }, completion: { _ in
+                if self.searchBarView.alpha == 1 {
+                    self.searchBarView.focusSearchBar()
+                } else {
+                    self.searchBarView.hideKeyboardAndCancel()
+                }
+            })
             
-            if self.searchBar.alpha == 1 {
-                self.pageViewControllerTopConstraint?.constant = 60
-            } else {
-                self.pageViewControllerTopConstraint?.constant = 10
-            }
+            self.updateUnderlinePosition(to: self.selectedIndex!)
+        }
 
-            self.view.layoutIfNeeded()
-        }, completion: { _ in
-            if self.searchBar.alpha == 1 {
-                self.searchBar.becomeFirstResponder()
-            } else {
-                self.searchBar.resignFirstResponder()
-            }
-        })
-        
-        self.updateUnderlinePosition(to: self.selectedIndex!)
-    }
-
-    private func updatePageViewControllerConstraints(isSearchBarVisible: Bool) {
-        pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        pageViewController.view.removeConstraints(pageViewController.view.constraints)
-
-        NSLayoutConstraint.activate([
-            pageViewController.view.topAnchor.constraint(equalTo: isSearchBarVisible ? searchBar.bottomAnchor : underlineView.bottomAnchor, constant: 10),
-            pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetX = scrollView.contentOffset.x
         let width = scrollView.frame.width
@@ -305,4 +282,20 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
             currentVC.viewModel.search(query: searchText)
         }
     }
+}
+
+extension StudentHomeVC: SearchBarViewDelegate {
+    func searchBarView(_ searchBarView: SearchBarView, didChangeText text: String) {
+            if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
+                currentVC.viewModel.search(query: text)
+            } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
+                currentVC.viewModel.search(query: text)
+            } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
+                currentVC.viewModel.search(query: text)
+            }
+        }
+        
+        func searchBarViewDidCancel(_ searchBarView: SearchBarView) {
+           searchIconTapped()
+        }
 }

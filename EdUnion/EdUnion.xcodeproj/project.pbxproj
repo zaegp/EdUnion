@@ -23,6 +23,7 @@
 		517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD72CACC3BA002A2513 /* Kingfisher */; };
 		517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */; };
 		517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */; };
+		517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDF2CAEE440002A2513 /* SearchBarView.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -130,6 +131,7 @@
 		513BEC1F2CA90361000E0DE9 /* BarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarChartView.swift; sourceTree = "<group>"; };
 		513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesCell.swift; sourceTree = "<group>"; };
 		517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
+		517E9DDF2CAEE440002A2513 /* SearchBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBarView.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 			isa = PBXGroup;
 			children = (
 				517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */,
+				517E9DDF2CAEE440002A2513 /* SearchBarView.swift */,
 			);
 			path = CustomViews;
 			sourceTree = "<group>";
@@ -789,6 +792,7 @@
 				51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */,
 				51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
+				517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
 				51D25CA02C9E90B30083EECF /* FollowVC.swift in Sources */,

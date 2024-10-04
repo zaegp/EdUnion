@@ -18,12 +18,10 @@ class ChatListVC: UIViewController {
     private var filteredChatRooms: [ChatRoom] = []
     private var participantID: String?
     private var participants: [String: Any] = [:]
-    
-    private let searchBar = UISearchBar()
-    private let cancelButton = UIButton(type: .system)
+   
     private let tableView = UITableView()
-    private var searchBarWidthConstraint: NSLayoutConstraint?
-    
+    private let searchBarView = SearchBarView()
+
     private var chatRoomListener: ListenerRegistration?
     
     private let noChatRoomsView: UIView = {
@@ -31,7 +29,7 @@ class ChatListVC: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let imageView = UIImageView(image: UIImage(systemName: "bubble.left.and.bubble.right.fill"))
-        imageView.tintColor = .label
+        imageView.tintColor = .myBlack
         
         let label = UILabel()
         label.text = "暫無聊天訊息，開始新的聊天吧！"
@@ -113,43 +111,8 @@ class ChatListVC: UIViewController {
     }
     
     private func setupUI() {
-        searchBar.delegate = self
-        searchBar.placeholder = "搜尋"
-        searchBar.tintColor = .mySearchBarTint
-        searchBar.sizeToFit()
-        searchBar.backgroundImage = UIImage()
-        
-        if let searchTextField = searchBar.searchTextField as? UITextField {
-            searchTextField.backgroundColor = .clear
-            searchTextField.layer.cornerRadius = 10
-            searchTextField.clipsToBounds = true
-            
-            searchTextField.layer.borderWidth = 1.0
-            searchTextField.layer.borderColor = UIColor.myBorder.cgColor
-            
-            searchTextField.textColor = UIColor.mySearchBarTint
-            searchTextField.tintColor = UIColor.mainOrange
-            
-            let placeholderText = "搜尋聊天室"
-            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.mySearchBarTint]
-            searchTextField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: attributes)
-            
-            if let leftIconView = searchTextField.leftView as? UIImageView {
-                leftIconView.image = leftIconView.image?.withRenderingMode(.alwaysTemplate)
-                leftIconView.tintColor = UIColor.mySearchBarTint
-            }
-        }
-        
-        cancelButton.setTitle("取消", for: .normal)
-        cancelButton.tintColor = .mySearchBarTint
-        cancelButton.isHidden = true
-        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        
-        let searchContainer = UIView()
-        searchContainer.addSubview(searchBar)
-        searchContainer.addSubview(cancelButton)
-        
-        navigationItem.titleView = searchContainer
+        searchBarView.delegate = self
+        navigationItem.titleView = searchBarView
         self.view.addSubview(tableView)
         view.addSubview(noChatRoomsView)
         view.addSubview(noSearchResultsView)
@@ -162,23 +125,11 @@ class ChatListVC: UIViewController {
         tableView.backgroundColor = .myBackground
         tableView.tableFooterView = UIView()
         
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        searchContainer.translatesAutoresizingMaskIntoConstraints = false
-        
-        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: searchContainer.widthAnchor)
+        searchBarView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            searchContainer.widthAnchor.constraint(equalToConstant: view.frame.width),
-            searchContainer.heightAnchor.constraint(equalToConstant: 44),
-            
-            searchBar.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor),
-            searchBar.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor),
-            searchBarWidthConstraint!,
-            
-            cancelButton.leadingAnchor.constraint(equalTo: searchBar.trailingAnchor),
-            cancelButton.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
-            cancelButton.centerYAnchor.constraint(equalTo: searchContainer.centerYAnchor),
+            searchBarView.widthAnchor.constraint(equalToConstant: view.frame.width),
+            searchBarView.heightAnchor.constraint(equalToConstant: 44),
             
             noChatRoomsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             noChatRoomsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -186,34 +137,6 @@ class ChatListVC: UIViewController {
             noSearchResultsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             noSearchResultsView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-    }
-    
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        cancelButton.isHidden = false
-        
-        searchBarWidthConstraint?.isActive = false
-        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor, multiplier: 0.85)
-        searchBarWidthConstraint?.isActive = true
-        
-        UIView.animate(withDuration: 0.3) {
-            self.navigationItem.titleView?.layoutIfNeeded()
-        }
-    }
-    
-    @objc private func cancelButtonTapped() {
-        searchBar.text = ""
-        searchBar.resignFirstResponder()
-        
-        searchBarWidthConstraint?.isActive = false
-        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalTo: navigationItem.titleView!.widthAnchor)
-        searchBarWidthConstraint?.isActive = true
-        
-        UIView.animate(withDuration: 0.3) {
-            self.cancelButton.isHidden = true
-            self.navigationItem.titleView?.layoutIfNeeded()
-        }
-        
-        tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -374,25 +297,29 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension ChatListVC: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchText.isEmpty {
+extension ChatListVC: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchBarView.hideKeyboardAndCancel()
+    }
+}
+
+extension ChatListVC: SearchBarViewDelegate {
+    func searchBarView(_ searchBarView: SearchBarView, didChangeText text: String) {
+        if text.isEmpty {
             filteredChatRooms = chatRooms
         } else {
             filteredChatRooms = chatRooms.filter { chatRoom in
                 if let participantName = participants[chatRoom.id] as? String {
-                    return participantName.lowercased().contains(searchText.lowercased())
+                    return participantName.lowercased().contains(text.lowercased())
                 }
                 return false
             }
         }
         tableView.reloadData()
     }
-}
-
-extension ChatListVC: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        searchBar.resignFirstResponder()
-        cancelButtonTapped()
+    
+    func searchBarViewDidCancel(_ searchBarView: SearchBarView) {
+        filteredChatRooms = chatRooms
+        tableView.reloadData()
     }
 }
