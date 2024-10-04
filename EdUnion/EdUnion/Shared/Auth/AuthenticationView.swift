@@ -87,6 +87,8 @@ struct AuthenticationView: View {
                                             if userRole == "student" {
                                                 userData["followList"] = [String]()
                                                 userData["usedList"] = [String]()
+                                            } else {
+                                                userData["totalCourses"] = Int()
                                             }
                                             
                                             userRef.setData(userData) { error in

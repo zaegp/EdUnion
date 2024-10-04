@@ -30,6 +30,16 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     let hourlyRateTextField = PaddedTextField()
     
     let saveButton = UIButton(type: .system)
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +62,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         profileImageView.layer.cornerRadius = 50
         profileImageView.clipsToBounds = true
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         educationLabel.text = "- 學歷 -"
         experienceLabel.text = "- 教學經驗 -"
         introLabel.text = "- 自我介紹 -"
@@ -177,35 +187,100 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
     
     @objc func saveChanges() {
-        navigateToMainApp()
-        
-        guard let userID = userID else {
-            print("Error: User not logged in.")
-            return
-        }
-        
-        let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(userID)
-        
-        let resumeData = [
-            educationTextField.text ?? "",
-            experienceTextField.text ?? "",
-            introTextView.text ?? "",
-            subjectsTextField.text ?? "",
-            hourlyRateTextField.text ?? ""
-        ]
-        
-        if let profileImage = profileImageView.image {
-            uploadProfileImage(profileImage) { [weak self] result in
-                switch result {
-                case .success(let urlString):
-                    self?.saveResumeData(teacherRef: teacherRef, resumeData: resumeData, profileImageURL: urlString)
-                case .failure(let error):
-                    print("Error uploading profile image: \(error.localizedDescription)")
+            guard let userID = userID else {
+                print("Error: User not logged in.")
+                return
+            }
+            
+            // 開始加載動畫
+            startSaveButtonAnimation()
+            
+            let db = Firestore.firestore()
+            let teacherRef = db.collection("teachers").document(userID)
+            
+            let resumeData = [
+                educationTextField.text ?? "",
+                experienceTextField.text ?? "",
+                introTextView.text ?? "",
+                subjectsTextField.text ?? "",
+                hourlyRateTextField.text ?? ""
+            ]
+            
+        if profileImageView.image == UIImage(systemName: "person.crop.circle.badge.plus") {
+                // 沒有上傳圖片，直接保存資料
+                saveResumeData(teacherRef: teacherRef, resumeData: resumeData, profileImageURL: "") {
+                    self.stopSaveButtonAnimation()
+                    self.navigateToMainApp()
+                }
+            } else if let profileImage = profileImageView.image {
+                uploadProfileImage(profileImage) { [weak self] result in
+                    switch result {
+                    case .success(let urlString):
+                        self?.saveResumeData(teacherRef: teacherRef, resumeData: resumeData, profileImageURL: urlString) {
+                            self?.stopSaveButtonAnimation()
+                            self?.navigateToMainApp()
+                        }
+                    case .failure(let error):
+                        self?.stopSaveButtonAnimation()
+                        print("Error uploading profile image: \(error.localizedDescription)")
+                    }
+                }
+            } else {
+                // 如果沒有圖片，直接保存資料
+                saveResumeData(teacherRef: teacherRef, resumeData: resumeData, profileImageURL: "") {
+                    self.stopSaveButtonAnimation()
+                    self.navigateToMainApp()
                 }
             }
-        } else {
-            saveResumeData(teacherRef: teacherRef, resumeData: resumeData, profileImageURL: nil)
+        }
+        
+        private func startSaveButtonAnimation() {
+//            saveButton.setTitle("保存中", for: .normal)
+            saveButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+            saveButton.semanticContentAttribute = .forceRightToLeft
+            saveButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+
+            saveButton.imageView?.addSymbolEffect(.variableColor.iterative.nonReversing)
+            
+        }
+        
+        private func stopSaveButtonAnimation() {
+            saveButton.imageView?.removeSymbolEffect(ofType: .variableColor)
+            saveButton.setTitle("保存", for: .normal) // 恢復按鈕的標題
+        }
+
+    private func saveResumeData(teacherRef: DocumentReference, resumeData: [String], profileImageURL: String?, completion: @escaping () -> Void) {
+        var dataToSave: [String: Any] = [
+            "resume": resumeData
+        ]
+        
+        if let profileImageURL = profileImageURL {
+            dataToSave["photoURL"] = profileImageURL
+        }
+        
+        teacherRef.updateData(dataToSave) { error in
+            if let error = error {
+                if (error as NSError).code == FirestoreErrorCode.notFound.rawValue {
+                    teacherRef.setData([
+                        "resume": resumeData,
+                        "photoURL": profileImageURL ?? "",
+                        "totalCourseHours": 0,
+                        "timeSlots": []
+                    ]) { error in
+                        if let error = error {
+                            print("Error creating data: \(error.localizedDescription)")
+                        } else {
+                            print("Data successfully created and saved.")
+                            completion()
+                        }
+                    }
+                } else {
+                    print("Error updating data: \(error.localizedDescription)")
+                }
+            } else {
+                print("Data successfully updated.")
+                completion()
+            }
         }
     }
     
@@ -241,41 +316,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         }
         
         profileImageView.contentMode = .scaleAspectFill
-    }
-    
-    private func saveResumeData(teacherRef: DocumentReference, resumeData: [String], profileImageURL: String?) {
-        var dataToSave: [String: Any] = [
-            "resume": resumeData
-        ]
-        
-        if let profileImageURL = profileImageURL {
-            dataToSave["photoURL"] = profileImageURL
-        }
-        
-        teacherRef.updateData(dataToSave) { error in
-            if let error = error {
-                if (error as NSError).code == FirestoreErrorCode.notFound.rawValue {
-                    teacherRef.setData([
-                        "resume": resumeData,
-                        "profileImageURL": profileImageURL ?? "",
-                        "totalCourseHours": 0,
-                        "timeSlots": []
-                    ]) { error in
-                        if let error = error {
-                            print("Error creating data: \(error.localizedDescription)")
-                        } else {
-                            print("Data successfully created and saved.")
-//                            self.navigateToMainApp()
-                        }
-                    }
-                } else {
-                    print("Error updating data: \(error.localizedDescription)")
-                }
-            } else {
-                print("Data successfully updated.")
-//                self.navigateToMainApp()
-            }
-        }
     }
     
     private func navigateToMainApp() {

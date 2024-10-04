@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -254,12 +255,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     // MARK: - Image Picker Methods
     
     @objc private func didTapProfileImage() {
-        let actionSheet = UIAlertController(title: "更換大頭貼照", message: nil, preferredStyle: .actionSheet)
-        actionSheet.addAction(UIAlertAction(title: "從圖庫選擇", style: .default) { [weak self] _ in
-            self?.presentImagePicker(sourceType: .photoLibrary)
-        })
-        actionSheet.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        present(actionSheet, animated: true)
+        presentImagePicker(sourceType: .photoLibrary)
     }
     
     private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
@@ -313,9 +309,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                 titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
             ])
 
-        
         cell.accessoryType = .disclosureIndicator
-        cell.accessoryType
         cell.imageView?.tintColor = .myBlack
         cell.selectionStyle = .none
         return cell
@@ -330,10 +324,66 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
+        
         if let editedImage = info[.editedImage] as? UIImage {
             userImageView.image = editedImage
+            uploadProfileImage(editedImage)
         } else if let originalImage = info[.originalImage] as? UIImage {
             userImageView.image = originalImage
+            uploadProfileImage(originalImage)
+        }
+    }
+    
+    private func uploadProfileImage(_ image: UIImage) {
+        guard let userID = userID else {
+            print("Error: User not logged in.")
+            return
+        }
+        
+        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("Error converting image to data.")
+            return
+        }
+        
+        storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
+            if let error = error {
+                print("Error uploading image: \(error.localizedDescription)")
+                return
+            }
+            
+            storageRef.downloadURL { url, error in
+                if let error = error {
+                    print("Error getting download URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let downloadURL = url else {
+                    print("Error: Download URL is nil.")
+                    return
+                }
+                
+                self?.saveImageURLToFirestore(downloadURL.absoluteString)
+            }
+        }
+    }
+
+    private func saveImageURLToFirestore(_ urlString: String) {
+        guard let userID = userID else {
+            print("Error: User not logged in.")
+            return
+        }
+        
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        let userRef = Firestore.firestore().collection(collection).document(userID)
+        
+        userRef.updateData(["photoURL": urlString]) { error in
+            if let error = error {
+                print("Error saving image URL to Firestore: \(error.localizedDescription)")
+            } else {
+                print("Image URL successfully saved to Firestore.")
+            }
         }
     }
     
