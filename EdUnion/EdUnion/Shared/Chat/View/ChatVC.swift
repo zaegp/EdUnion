@@ -12,7 +12,7 @@ import FirebaseFirestore
 import IQKeyboardManagerSwift
 import Kingfisher
 
-class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
+class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate, UIGestureRecognizerDelegate {
     
     private var viewModel: ChatViewModel!
     private let tableView = UITableView()
@@ -150,7 +150,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 32)
         
-        //        sendButton.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
         sendButton.setImage(UIImage(systemName: "paperplane.fill"), for: .normal)
         sendButton.tintColor = .mainOrange
         sendButton.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
@@ -217,6 +216,16 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             tableView.bottomAnchor.constraint(equalTo: messageInputBar.topAnchor)
         ])
     }
+    
+
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        if let view = touch.view, view.isDescendant(of: sendButton) {
+            return false
+        }
+        return true
+    }
+    
     
     private func setupRecordingSession() {
         recordingSession = AVAudioSession.sharedInstance()

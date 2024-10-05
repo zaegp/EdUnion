@@ -214,7 +214,7 @@ struct BaseCalendarView: View {
                 
                 if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
                     List {
-                        ForEach(activities) { appointment in
+                        ForEach(viewModel.sortedActivities) { appointment in
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
@@ -263,6 +263,15 @@ struct BaseCalendarView: View {
                         }
                     }
                     .listStyle(PlainListStyle())
+                    .onAppear {
+                        viewModel.loadAndSortActivities(for: activities)
+                    }
+                    .onChange(of: selectedDay) { newDay in
+                        let newActivities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
+                        if let newActivities = newActivities {
+                            viewModel.loadAndSortActivities(for: newActivities)
+                        }
+                    }
                 }
             }
             .background(Color.myBackground)

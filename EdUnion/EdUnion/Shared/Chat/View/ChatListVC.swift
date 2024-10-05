@@ -17,8 +17,7 @@ class ChatListVC: UIViewController {
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
     private var participantID: String?
-    private var participants: [String: Any] = [:]
-   
+    private var participants: [String: UserProtocol] = [:]
     private let tableView = UITableView()
     private let searchBarView = SearchBarView()
 
@@ -146,66 +145,59 @@ class ChatListVC: UIViewController {
     private func observeChatRooms() {
         noChatRoomsView.isHidden = true
         noSearchResultsView.isHidden = true
-        
+
         guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
             print("Error: Unable to get user role from UserDefaults.")
             return
         }
-        
+
         let isTeacher = (userRole == "teacher")
-        
+
         UserFirebaseService.shared.fetchChatRooms(for: participantID ?? "", isTeacher: isTeacher) { [weak self] (chatRooms, error) in
             if let error = error {
                 print("Error fetching chat rooms: \(error.localizedDescription)")
                 return
             }
-            
+
             guard let chatRooms = chatRooms else {
                 print("No chat rooms found.")
                 return
             }
-            
+
             self?.chatRooms = chatRooms
-            
+            self?.filteredChatRooms = chatRooms
+
+            let dispatchGroup = DispatchGroup()
+
             for chatRoom in chatRooms {
+                dispatchGroup.enter()
                 let participantId = chatRoom.participants.filter { $0 != self?.participantID }.first ?? "未知用戶"
-                
-                if let userRole = UserDefaults.standard.string(forKey: "userRole") {
-                    if userRole == "student" {
-                        UserFirebaseService.shared.fetchName(from: "students", by: participantId) { [weak self] result in
-                            switch result {
-                            case .success(let studentName):
-                                self?.participants[chatRoom.id] = studentName
-                            case .failure:
-                                self?.participants[chatRoom.id] = "Unknown Student"
-                            }
-                            DispatchQueue.main.async {
-                                self?.tableView.reloadData()
-                            }
+
+                if isTeacher {
+                    UserFirebaseService.shared.fetchUser(from: "students", by: participantId, as: Student.self) { [weak self] result in
+                        switch result {
+                        case .success(let student):
+                            self?.participants[chatRoom.id] = student
+                        case .failure:
+                            let unknownStudent = Student.self
+                            self?.participants[chatRoom.id] = Student.self as? any UserProtocol
                         }
-                    } else if userRole == "teacher" {
-                        UserFirebaseService.shared.fetchName(from: "teachers", by: participantId) { [weak self] result in
-                            switch result {
-                            case .success(let teacherName):
-                                self?.participants[chatRoom.id] = teacherName
-                            case .failure:
-                                self?.participants[chatRoom.id] = "Unknown Teacher"
-                            }
-                            DispatchQueue.main.async {
-                                self?.tableView.reloadData()
-                            }
-                        }
-                    } else {
-                        print("Error: Unknown user role.")
+                        dispatchGroup.leave()
                     }
                 } else {
-                    print("Error: Unable to get user role from UserDefaults.")
+                    UserFirebaseService.shared.fetchUser(from: "teachers", by: participantId, as: Teacher.self) { [weak self] result in
+                        switch result {
+                        case .success(let teacher):
+                            self?.participants[chatRoom.id] = teacher
+                        case .failure:
+                            self?.participants[chatRoom.id] = Teacher.self as? any UserProtocol
+                        }
+                        dispatchGroup.leave()
+                    }
                 }
             }
-            
-            self?.filteredChatRooms = chatRooms
-            
-            DispatchQueue.main.async {
+
+            dispatchGroup.notify(queue: .main) {
                 if chatRooms.isEmpty {
                     self?.noChatRoomsView.isHidden = false
                 } else {
@@ -244,32 +236,12 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         let lastMessage = chatRoom.lastMessage ?? "沒有消息"
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
-        let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "student"
-        
-        if userRole == "teacher" {
-            UserFirebaseService.shared.fetchUser(from: "students", by: chatRoom.participants[1], as: Student.self) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let student):
-                        self.participants[chatRoom.id] = student
-                        cell.configure(name: student.fullName, lastMessage: lastMessage, time: lastMessageTime, image: student.photoURL ?? "")
-                    case .failure:
-                        cell.configure(name: "Unknown Student", lastMessage: lastMessage, time: lastMessageTime, image: "")
-                    }
-                }
-            }
+        if let participant = participants[chatRoom.id] {
+            // participant 是 UserProtocol 类型
+            let photoURLString = participant.photoURL ?? ""
+            cell.configure(name: participant.fullName, lastMessage: lastMessage, time: lastMessageTime, image: photoURLString)
         } else {
-            UserFirebaseService.shared.fetchUser(from: "teachers", by: chatRoom.participants[0], as: Teacher.self) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let teacher):
-                        self.participants[chatRoom.id] = teacher
-                        cell.configure(name: teacher.fullName, lastMessage: lastMessage, time: lastMessageTime, image: teacher.photoURL ?? "")
-                    case .failure:
-                        cell.configure(name: "Unknown Teacher", lastMessage: lastMessage, time: lastMessageTime, image: "")
-                    }
-                }
-            }
+            cell.configure(name: "未知用户", lastMessage: lastMessage, time: lastMessageTime, image: "")
         }
         
         return cell
