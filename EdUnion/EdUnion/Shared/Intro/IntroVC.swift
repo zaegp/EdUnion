@@ -30,16 +30,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     let hourlyRateTextField = PaddedTextField()
     
     let saveButton = UIButton(type: .system)
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        
-        tabBarController?.tabBar.isHidden = true
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(true, animated: true)
-        }
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

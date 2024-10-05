@@ -14,105 +14,105 @@ import FirebaseStorage
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     private let tableView = UITableView()
-        private var userImageView: UIImageView!
-        private let nameLabel = UILabel()
-        private let userID = UserSession.shared.currentUserID
-        private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
+    private var userImageView: UIImageView!
+    private let nameLabel = UILabel()
+    private let userID = UserSession.shared.currentUserID
+    private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
+    
+    private var menuItems: [(title: String, icon: String, action: () -> Void)] = []
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
-        private var menuItems: [(title: String, icon: String, action: () -> Void)] = []
-
-        override func viewDidLoad() {
-            super.viewDidLoad()
+        view.backgroundColor = .myBackground
+        setupTableView()
+        setupTableHeaderView()
+        setupMenuItems()
+        updateUserInfo()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tabBarController?.tabBar.isHidden = true
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
+    }
+    
+    // MARK: - Setup Methods
+    
+    private func setupTableView() {
+        view.addSubview(tableView)
+        
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .myBackground
+        
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -80)
+        ])
+    }
+    
+    private func setupTableHeaderView() {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 130))
+        headerView.backgroundColor = .myBackground
+        
+        userImageView = UIImageView()
+        userImageView.tintColor = .myMessageCell
+        userImageView.contentMode = .scaleAspectFill
+        userImageView.layer.cornerRadius = 40
+        userImageView.clipsToBounds = true
+        userImageView.isUserInteractionEnabled = true
+        userImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
+        userImageView.addGestureRecognizer(tapGesture)
+        
+        nameLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        headerView.addSubview(userImageView)
+        headerView.addSubview(nameLabel)
+        
+        NSLayoutConstraint.activate([
+            userImageView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            userImageView.topAnchor.constraint(equalTo: headerView.topAnchor),
+            userImageView.widthAnchor.constraint(equalToConstant: 80),
+            userImageView.heightAnchor.constraint(equalToConstant: 80),
             
-            view.backgroundColor = .myBackground
-            setupTableView()
-            setupTableHeaderView()
-            setupMenuItems()
-            updateUserInfo()
+            nameLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            nameLabel.topAnchor.constraint(equalTo: userImageView.bottomAnchor, constant: 10)
+        ])
+        
+        tableView.tableHeaderView = headerView
+    }
+    
+    private func setupMenuItems() {
+        if userRole == "teacher" {
+            menuItems = [
+                //                    ("分析", "arrow.right.to.line", { [weak self] in self?.navigateToChartView() }),
+                ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
+                ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
+                ("所有學生列表", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                ("登出", "door.right.hand.open", logoutButtonTapped),
+                ("刪除帳號", "trash", deleteAccountAction)
+            ]
+        } else {
+            menuItems = [
+                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                ("刪除帳號", "trash", deleteAccountAction),
+                ("登出帳號", "door.right.hand.open", logoutButtonTapped) // 添加登出
+            ]
         }
-        
-        override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-
-            tabBarController?.tabBar.isHidden = true
-            navigationController?.navigationBar.barTintColor = .myBackground
-            navigationController?.navigationBar.shadowImage = UIImage()
-        }
-        
-        // MARK: - Setup Methods
-        
-        private func setupTableView() {
-            view.addSubview(tableView)
-            
-            tableView.delegate = self
-            tableView.dataSource = self
-            tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-            tableView.separatorStyle = .none
-            tableView.backgroundColor = .myBackground
-            
-            tableView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                tableView.topAnchor.constraint(equalTo: view.topAnchor),
-                tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-                tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -80)
-            ])
-        }
-        
-        private func setupTableHeaderView() {
-            let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 130))
-            headerView.backgroundColor = .myBackground
-            
-            userImageView = UIImageView()
-            userImageView.tintColor = .myMessageCell
-            userImageView.contentMode = .scaleAspectFill
-            userImageView.layer.cornerRadius = 40
-            userImageView.clipsToBounds = true
-            userImageView.isUserInteractionEnabled = true
-            userImageView.translatesAutoresizingMaskIntoConstraints = false
-            
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
-            userImageView.addGestureRecognizer(tapGesture)
-            
-            nameLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-            nameLabel.translatesAutoresizingMaskIntoConstraints = false
-            
-            headerView.addSubview(userImageView)
-            headerView.addSubview(nameLabel)
-            
-            NSLayoutConstraint.activate([
-                userImageView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-                userImageView.topAnchor.constraint(equalTo: headerView.topAnchor),
-                userImageView.widthAnchor.constraint(equalToConstant: 80),
-                userImageView.heightAnchor.constraint(equalToConstant: 80),
-                
-                nameLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-                nameLabel.topAnchor.constraint(equalTo: userImageView.bottomAnchor, constant: 10)
-            ])
-            
-            tableView.tableHeaderView = headerView
-        }
-        
-        private func setupMenuItems() {
-            if userRole == "teacher" {
-                menuItems = [
-//                    ("分析", "arrow.right.to.line", { [weak self] in self?.navigateToChartView() }),
-                    ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
-                    ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                    ("所有學生列表", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
-                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                    ("登出", "door.right.hand.open", logoutButtonTapped),
-                    ("刪除帳號", "trash", deleteAccountAction)
-                ]
-            } else {
-                menuItems = [
-                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                    ("刪除帳號", "trash", deleteAccountAction),
-                    ("登出帳號", "door.right.hand.open", logoutButtonTapped) // 添加登出
-                ]
-            }
-        }
-        
+    }
+    
     @objc private func logoutButtonTapped() {
         let alertController = UIAlertController(title: "登出", message: "確定要登出嗎？", preferredStyle: .alert)
         
@@ -126,7 +126,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         
         present(alertController, animated: true, completion: nil)
     }
-
+    
     private func performLogout() {
         do {
             try Auth.auth().signOut()
@@ -159,7 +159,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         
         present(alertController, animated: true, completion: nil)
     }
-
+    
     private func updateUserStatusToDeleting() {
         guard let userID = userID, !userID.isEmpty else {
             print("Error: 無法取得使用者 ID")
@@ -290,25 +290,25 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
-            let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
-            iconImageView.tintColor = .myBlack
-            iconImageView.contentMode = .scaleAspectFit
-            iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
+        iconImageView.tintColor = .myBlack
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
         
         cell.contentView.addSubview(iconImageView)
-            cell.contentView.addSubview(titleLabel)
-
-            NSLayoutConstraint.activate([
-                iconImageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
-                iconImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
-                iconImageView.widthAnchor.constraint(equalToConstant: 40),
-                iconImageView.heightAnchor.constraint(equalToConstant: 40),
-
-                titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 30),
-                titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
-                titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
-            ])
-
+        cell.contentView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+            iconImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 40),
+            iconImageView.heightAnchor.constraint(equalToConstant: 40),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 30),
+            titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
+        ])
+        
         cell.accessoryType = .disclosureIndicator
         cell.imageView?.tintColor = .myBlack
         cell.selectionStyle = .none
@@ -368,7 +368,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
             }
         }
     }
-
+    
     private func saveImageURLToFirestore(_ urlString: String) {
         guard let userID = userID else {
             print("Error: User not logged in.")
