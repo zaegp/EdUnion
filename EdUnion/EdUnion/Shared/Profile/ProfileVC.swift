@@ -35,6 +35,10 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         super.viewWillAppear(animated)
         
         tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+        
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
     }
@@ -99,7 +103,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                 //                    ("分析", "arrow.right.to.line", { [weak self] in self?.navigateToChartView() }),
                 ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
                 ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                ("所有學生列表", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
                 ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
                 ("登出", "door.right.hand.open", logoutButtonTapped),
                 ("刪除帳號", "trash", deleteAccountAction)

@@ -40,18 +40,9 @@ class ResumeVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setupTabBarVisibility(hidden: true)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        setupTabBarVisibility(hidden: false)
-    }
-    
-    private func setupTabBarVisibility(hidden: Bool) {
-        tabBarController?.tabBar.isHidden = hidden
+        
         if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(hidden, animated: true)
+            tabBarController.setCustomTabBarHidden(true, animated: true)
         }
     }
     

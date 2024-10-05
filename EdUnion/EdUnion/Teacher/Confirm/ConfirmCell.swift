@@ -11,7 +11,7 @@ class ConfirmCell: UITableViewCell {
     
     let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        view.backgroundColor = .myCell
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

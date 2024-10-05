@@ -176,7 +176,6 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         
         let student = students[indexPath.row]
         
-        // 設置菜單動作的回調
         cell.onBlockAction = { [weak self] in
             self?.showBlockConfirmation(for: student, at: indexPath)
         }

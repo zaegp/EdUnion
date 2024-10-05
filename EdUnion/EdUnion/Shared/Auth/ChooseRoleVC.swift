@@ -22,8 +22,8 @@ class ChooseRoleVC: UIViewController {
     private let studentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("學生", for: .normal)
-        button.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
-        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .mainOrange
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(didTapStudent), for: .touchUpInside)
@@ -34,8 +34,8 @@ class ChooseRoleVC: UIViewController {
     private let tutorButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("家教", for: .normal)
-        button.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
-        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .mainOrange
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(didTapTeacher), for: .touchUpInside)
@@ -45,18 +45,19 @@ class ChooseRoleVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupBackground()
+        view.backgroundColor = .myBackground
+//        setupBackground()
         setupUI()
     }
     
-    private func setupBackground() {
-        let backgroundView = UIHostingController(rootView: GradientBackgroundView())
-        addChild(backgroundView)
-        backgroundView.view.frame = view.bounds
-        backgroundView.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(backgroundView.view)
-        backgroundView.didMove(toParent: self)
-    }
+//    private func setupBackground() {
+//        let backgroundView = UIHostingController(rootView: GradientBackgroundView())
+//        addChild(backgroundView)
+//        backgroundView.view.frame = view.bounds
+//        backgroundView.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+//        view.addSubview(backgroundView.view)
+//        backgroundView.didMove(toParent: self)
+//    }
     
     private func setupUI() {
         // Stack View for Buttons
@@ -105,17 +106,17 @@ class ChooseRoleVC: UIViewController {
     }
 }
 
-struct GradientBackgroundView: View {
-    var body: some View {
-        LinearGradient(gradient: Gradient(colors: [Color(hex: "#eeeeee"), Color(hex: "#ff6347"), Color(hex: "#252525")]),
-                       startPoint: .top,
-                       endPoint: .bottom)
-        .edgesIgnoringSafeArea(.all)
-    }
-}
-
-struct ContentsView_Previews: PreviewProvider {
-    static var previews: some View {
-        RadialGradientView()
-    }
-}
+//struct GradientBackgroundView: View {
+//    var body: some View {
+//        LinearGradient(gradient: Gradient(colors: [Color(hex: "#E63C3A"), Color(hex: "#D6D4CE")]),
+//                       startPoint: .top,
+//                       endPoint: .bottom)
+//        .edgesIgnoringSafeArea(.all)
+//    }
+//}
+//
+//struct ContentsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        GradientBackgroundView()
+//    }
+//}
