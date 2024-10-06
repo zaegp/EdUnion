@@ -39,13 +39,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(false, animated: true)
-        }
-    }
+   
     
     // MARK: - TableView
     func setupTableView() {

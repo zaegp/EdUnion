@@ -80,7 +80,12 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
     }
     
     override func viewDidLayoutSubviews() {

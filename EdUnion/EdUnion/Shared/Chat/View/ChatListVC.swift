@@ -83,6 +83,7 @@ class ChatListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .myBackground
         
         if let currentUserID = Auth.auth().currentUser?.uid {
             participantID = currentUserID
@@ -120,7 +121,7 @@ class ChatListVC: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ChatListCell.self, forCellReuseIdentifier: "ChatListCell")
-        tableView.frame = self.view.bounds
+        tableView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height - 80)
         tableView.backgroundColor = .myBackground
         tableView.tableFooterView = UIView()
         

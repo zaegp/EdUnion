@@ -34,6 +34,7 @@ class TodayCoursesVC: UIViewController {
         setupConstraints()
         setupViewModel()
     }
+
     
     private func createTableHeader() -> UIView {
         let headerView = UIView()

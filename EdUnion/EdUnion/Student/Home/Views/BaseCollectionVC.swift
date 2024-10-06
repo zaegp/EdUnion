@@ -30,8 +30,14 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         
         setupCollectionView()
         bindViewModel()
-        collectionView.backgroundColor = .myBackground
         viewModel.fetchData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        collectionView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - 80)
+
     }
 
     private func bindViewModel() {
@@ -41,6 +47,7 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
     }
 
     private func setupCollectionView() {
+        
         let layout = UICollectionViewFlowLayout()
         
         let padding: CGFloat = 16
@@ -56,8 +63,8 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         
         layout.sectionInset = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
         
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
+        collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - 80), collectionViewLayout: layout)
+        collectionView.backgroundColor = .myBackground
         collectionView.delegate = self
         collectionView.dataSource = self
 

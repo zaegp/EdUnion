@@ -46,6 +46,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
         
         fetchUserFiles()
+        updateStudentTableViewEmptyState()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -120,9 +121,36 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
+    func setEmptyMessage(_ message: String) {
+            let messageLabel = UILabel()
+            messageLabel.text = message
+            messageLabel.textColor = .myGray
+            messageLabel.numberOfLines = 0
+            messageLabel.textAlignment = .center
+            messageLabel.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+            messageLabel.sizeToFit()
+            
+            studentTableView.backgroundView = messageLabel
+            studentTableView.separatorStyle = .none
+        }
+        
+        func restoreTableView() {
+            studentTableView.backgroundView = nil
+            studentTableView.separatorStyle = .singleLine
+        }
+    
+    func updateStudentTableViewEmptyState() {
+            if studentInfos.isEmpty {
+                setEmptyMessage("還沒有學生可以分享，快去上課吧！")
+            } else {
+                restoreTableView()
+            }
+        }
+    
     @objc func selectMultipleFilesForSharing() {
         collectionView.allowsMultipleSelection = true
         sendButton.isHidden = false
+       updateSendButtonState()
         studentTableView.isHidden = false
     }
     
@@ -171,6 +199,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 }
                 DispatchQueue.main.async {
                     self?.studentTableView.reloadData()
+                    self?.updateStudentTableViewEmptyState()
                 }
             case .failure(let error):
                 print("Error fetching user: \(error.localizedDescription)")

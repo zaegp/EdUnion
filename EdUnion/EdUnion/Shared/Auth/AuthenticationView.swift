@@ -155,6 +155,7 @@ struct AuthenticationView: View {
                             if document?.exists == true {
                                 navigateToMainApp()
                             } else {
+//                                appleIDCredentialForProfileSetup = appleIDCredential
                                 saveUserData(userRef: userRef, appleIDCredential: appleIDCredential)
                             }
                         }
@@ -188,6 +189,8 @@ struct AuthenticationView: View {
                 userData["usedList"] = [String]()
             } else {
                 userData["totalCourses"] = Int()
+                userData["timeSlots"] = [String]()
+                        userData["selectedTimeSlots"] = [String: String]()
             }
             
             userRef.setData(userData) { error in

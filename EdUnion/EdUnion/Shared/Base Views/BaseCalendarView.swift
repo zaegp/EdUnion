@@ -123,6 +123,8 @@ struct BaseCalendarView: View {
     @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
     
+    @State private var isWeekView: Bool = false
+    
     var body: some View {
         let colors = dateColors
         ZStack {
@@ -177,23 +179,46 @@ struct BaseCalendarView: View {
                             }
                         }
                     }
+                    .frame(height: isWeekView ? 80 : nil)
+                    .animation(.easeInOut(duration: 0.3), value: isWeekView)
                     .gesture(
                         DragGesture()
                             .onEnded { value in
                                 let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
                                 feedbackGenerator.prepare()
                                 
-                                if value.translation.width < 0 {
-                                    nextPeriod()
-                                    feedbackGenerator.impactOccurred()
-                                } else if value.translation.width > 0 {
-                                    previousPeriod()
-                                    feedbackGenerator.impactOccurred()
+                                if abs(value.translation.width) > abs(value.translation.height) {
+                                    if value.translation.width < 0 {
+                                        nextPeriod()
+                                        feedbackGenerator.impactOccurred()
+                                    } else if value.translation.width > 0 {
+                                        previousPeriod()
+                                        feedbackGenerator.impactOccurred()
+                                    }
+                                } else {
+                                    withAnimation {
+                                        if value.translation.height < 0 {
+                                            // 向上滑動，切換到週視圖
+                                            if !isWeekView {
+                                                isWeekView = true
+                                                generateDays()
+                                                feedbackGenerator.impactOccurred()
+                                            }
+                                        } else if value.translation.height > 0 {
+                                            // 向下滑動，切換到月視圖
+                                            if isWeekView {
+                                                isWeekView = false
+                                                generateDays()
+                                                feedbackGenerator.impactOccurred()
+                                            }
+                                        }
+                                    }
                                 }
                             }
                     )
                     .onAppear {
                         setupView()
+                        generateDays()
                         if !isDataLoaded {
                             fetchAppointments()
                             isDataLoaded = true
@@ -203,11 +228,6 @@ struct BaseCalendarView: View {
                 .padding()
                 .background(Color.myDarkGray)
                 .cornerRadius(30)
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 30)
-//                        .stroke(Color.myBorder, lineWidth: 2)
-//                )
-//                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
                 .padding()
                 
                 Spacer()
@@ -272,6 +292,7 @@ struct BaseCalendarView: View {
                             viewModel.loadAndSortActivities(for: newActivities)
                         }
                     }
+                    .padding(.bottom, 80)
                 }
             }
             .background(Color.myBackground)
@@ -336,6 +357,48 @@ struct BaseCalendarView: View {
         }
     }
     
+    func generateDays() {
+        days.removeAll()
+        
+        let calendar = Calendar.current
+        var referenceDate: Date
+        
+        if isWeekView {
+            // 使用 selectedDay 或 currentDate 作為參考日期
+            referenceDate = selectedDay ?? currentDate
+            
+            // 找到該週的第一天（通常是週日或週一，取決於日曆設定）
+            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate))!
+            
+            for i in 0..<7 {
+                if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
+                    days.append(date)
+                }
+            }
+        } else {
+            // 生成整個月的日期
+            referenceDate = currentDate
+            let range = calendar.range(of: .day, in: .month, for: referenceDate)!
+            let numDays = range.count
+            
+            // 找到這個月的第一天
+            let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate))!
+            let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
+            
+            // 計算需要填充的前導空白
+            let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
+            
+            // 填充前導空白
+            days = Array(repeating: nil, count: leadingEmptyDays)
+            
+            for day in 1...numDays {
+                if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
+                    days.append(date)
+                }
+            }
+        }
+    }
+    
     func cancelAppointment(appointmentID: String) {
         AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceling) { result in
             switch result {
@@ -356,8 +419,18 @@ struct BaseCalendarView: View {
         return formatter.string(from: date)
     }
     
-    private func toggleSingleSelection(for day: Date) {
-        selectedDay = (selectedDay == day) ? nil : day
+    func toggleSingleSelection(for day: Date) {
+        if selectedDay == day {
+            selectedDay = nil // 取消選擇
+        } else {
+            selectedDay = day
+        }
+        
+        if isWeekView {
+            withAnimation {
+                generateDays()
+            }
+        }
     }
     
     private func setupView() {
@@ -390,20 +463,54 @@ struct BaseCalendarView: View {
         return days
     }
     
-    private func previousPeriod() {
-        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
-        setupView()
+//    private func previousPeriod() {
+//        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
+//        setupView()
+//    }
+//    
+//    private func nextPeriod() {
+//        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
+//        setupView()
+//    }
+    
+    func previousPeriod() {
+        withAnimation {
+            if isWeekView {
+                currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
+            } else {
+                currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
+            }
+            generateDays()
+        }
+    }
+
+    func nextPeriod() {
+        withAnimation {
+            if isWeekView {
+                currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
+            } else {
+                currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
+            }
+            generateDays()
+        }
     }
     
-    private func nextPeriod() {
-        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
-        setupView()
-    }
-    
-    private func formattedMonthAndYear(_ date: Date) -> String {
+    func formattedMonthAndYear(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: date)
+        if isWeekView {
+            // 週視圖顯示當週的日期範圍
+            let calendar = Calendar.current
+            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+            let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
+            formatter.dateFormat = "MMM d"
+            let startString = formatter.string(from: startOfWeek)
+            let endString = formatter.string(from: endOfWeek)
+            return "\(startString) - \(endString)"
+        } else {
+            // 月視圖顯示月份和年份
+            formatter.dateFormat = "yyyy MMM"
+            return formatter.string(from: date)
+        }
     }
     
     private func fetchAppointments() {
