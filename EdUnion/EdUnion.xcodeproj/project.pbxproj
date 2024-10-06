@@ -25,6 +25,7 @@
 		517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDF2CAEE440002A2513 /* SearchBarView.swift */; };
 		517E9DE42CB0D91F002A2513 /* StudentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE32CB0D91F002A2513 /* StudentCell.swift */; };
 		517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE52CB0E004002A2513 /* NotePopupView.swift */; };
+		517E9DE82CB2C54D002A2513 /* UserProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -134,6 +135,7 @@
 		517E9DDF2CAEE440002A2513 /* SearchBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBarView.swift; sourceTree = "<group>"; };
 		517E9DE32CB0D91F002A2513 /* StudentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentCell.swift; sourceTree = "<group>"; };
 		517E9DE52CB0E004002A2513 /* NotePopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePopupView.swift; sourceTree = "<group>"; };
+		517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileVC.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -244,6 +246,7 @@
 			isa = PBXGroup;
 			children = (
 				513BEC092CA54ACC000E0DE9 /* IntroVC.swift */,
+				517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */,
 			);
 			path = Intro;
 			sourceTree = "<group>";
@@ -786,6 +789,7 @@
 				51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */,
 				51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */,
 				519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */,
+				517E9DE82CB2C54D002A2513 /* UserProfileVC.swift in Sources */,
 				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
 				51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */,
 				519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */,

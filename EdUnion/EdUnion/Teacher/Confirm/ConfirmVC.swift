@@ -33,13 +33,18 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
         
-        tabBarController?.tabBar.isHidden = true
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(true, animated: true)
         }
     }
     
-   
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+    }
     
     // MARK: - TableView
     func setupTableView() {

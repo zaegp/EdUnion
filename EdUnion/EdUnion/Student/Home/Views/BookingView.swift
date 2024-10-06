@@ -38,14 +38,13 @@ struct BookingView: View {
     var body: some View {
         VStack {
             if availableDates.isEmpty {
-                // 空状态：没有可用日期
                 VStack {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
-                    Text("暂无可预订的日期")
+                    Text("暫無可預約的日期")
                         .font(.headline)
                         .foregroundColor(.gray)
                 }
@@ -67,13 +66,13 @@ struct BookingView: View {
                                 VStack {
                                     Text(formattedDate(date))
                                         .font(.headline)
-                                        .foregroundColor(selectedDate == date ? .white : .primary)
+                                        .foregroundColor(.white)
                                     Text(formattedWeekday(date))
                                         .font(.subheadline)
-                                        .foregroundColor(selectedDate == date ? .white : .secondary)
+                                        .foregroundColor(.white)
                                 }
                                 .padding()
-                                .background(selectedDate == date ? Color.accentColor : Color.gray.opacity(0.2))
+                                .background(selectedDate == date ? Color.mainOrange : Color.myMessageCell)
                                 .cornerRadius(10)
                             }
                         }
@@ -85,14 +84,13 @@ struct BookingView: View {
                     let slotsForDate = timeSlots.filter { $0.colorHex == colorHex }
                     
                     if slotsForDate.isEmpty {
-                        // 空状态：该日期没有可用时间段
                         VStack {
                             Image(systemName: "clock.arrow.circlepath")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 100, height: 100)
                                 .foregroundColor(.gray)
-                            Text("该日期暂无可用的时间段")
+                            Text("該日期暫無可用的時間段")
                                 .font(.headline)
                                 .foregroundColor(.gray)
                         }
@@ -119,7 +117,7 @@ struct BookingView: View {
                         }
                     }
                 } else {
-                    Text("请选择日期")
+                    Text("請選擇日期")
                         .font(.headline)
                         .padding()
                     Spacer()
@@ -129,20 +127,21 @@ struct BookingView: View {
             Spacer()
             
             Button(action: submitBooking) {
-                Text("提交预订")
+                Text("確定預約")
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color.accentColor : Color.gray)
+                    .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color.mainOrange : Color.gray)
                     .cornerRadius(10)
                     .padding([.horizontal, .bottom])
             }
             .disabled(selectedDate == nil || selectedTimes.isEmpty)
         }
         .frame(maxHeight: .infinity)
+        .background(Color.myBackground)
         .alert(isPresented: $showingAlert) {
-            Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("确定")))
+            Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("確定")))
         }
     }
     
@@ -182,17 +181,17 @@ struct BookingView: View {
     
     func buttonBackgroundColor(for timeSlot: String) -> Color {
         if isBooked(timeSlot: timeSlot) {
-            return Color.gray.opacity(0.2)
+            return Color.gray
         } else if isSelected(timeSlot: timeSlot) {
-            return Color.green
+            return Color.mainOrange
         } else {
-            return Color.blue
+            return Color.myMessageCell
         }
     }
     
     func buttonForegroundColor(for timeSlot: String) -> Color {
         if isBooked(timeSlot: timeSlot) {
-            return Color.gray
+            return Color.white
         } else {
             return Color.white
         }
@@ -227,16 +226,44 @@ struct BookingView: View {
     }
     
     func toggleSelection(of timeSlot: String) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        
+        // 將時間轉換為 Date 類型
+        guard let selectedTime = dateFormatter.date(from: timeSlot) else { return }
+        
+        // 檢查是否為取消選取的情況
         if let index = selectedTimes.firstIndex(of: timeSlot) {
+            // 如果是取消選取，直接移除選擇
             selectedTimes.remove(at: index)
-        } else {
-            selectedTimes.append(timeSlot)
+            return
         }
+        
+        // 檢查添加新的時間段是否連續
+        var allSelectedTimes = selectedTimes + [timeSlot]
+        allSelectedTimes.sort()
+        
+        for i in 0..<(allSelectedTimes.count - 1) {
+            guard let firstTime = dateFormatter.date(from: allSelectedTimes[i]),
+                  let secondTime = dateFormatter.date(from: allSelectedTimes[i + 1]) else {
+                return
+            }
+            
+            // 如果兩個時間之間的間隔不是 30 分鐘，則顯示警告訊息並返回
+            if Calendar.current.dateComponents([.minute], from: firstTime, to: secondTime).minute != 30 {
+                alertMessage = "只能選擇連續的時間段。"
+                showingAlert = true
+                return
+            }
+        }
+        
+        // 如果是新增選取，通過連續性檢查後才添加
+        selectedTimes.append(timeSlot)
     }
     
     func submitBooking() {
         guard let date = selectedDate, !selectedTimes.isEmpty else {
-            alertMessage = "请选择日期和至少一个时间段。"
+            alertMessage = "請選擇日期和至少一個時間段。"
             showingAlert = true
             return
         }
@@ -256,10 +283,10 @@ struct BookingView: View {
         
         bookingRef.setData(bookingData) { error in
             if let error = error {
-                alertMessage = "预订失败：\(error.localizedDescription)"
+                alertMessage = "預定失敗：\(error.localizedDescription)"
                 showingAlert = true
             } else {
-                alertMessage = "预订成功！"
+                alertMessage = "預定成功！"
                 showingAlert = true
                 selectedDate = nil
                 selectedTimes = []

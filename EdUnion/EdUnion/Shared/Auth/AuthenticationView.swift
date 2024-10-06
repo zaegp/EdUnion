@@ -88,7 +88,6 @@ struct AuthenticationView: View {
         }
     }
     
-    
     private func navigateToMainApp() {
         if let userRole = UserDefaults.standard.string(forKey: "userRole") {
             let mainVC = TabBarController(userRole: userRole)
@@ -199,11 +198,12 @@ struct AuthenticationView: View {
                 } else {
                     print("User data successfully saved to Firestore")
                     
-                    if userRole == "teacher" {
-                        navigateToIntroVC()
-                    } else {
-                        navigateToMainApp()
-                    }
+                    navigateToIntroVC()
+//                    if userRole == "teacher" {
+//                        navigateToIntroVC()
+//                    } else {
+//                        navigateToMainApp()
+//                    }
                 }
             }
         }

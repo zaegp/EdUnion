@@ -35,10 +35,9 @@ class TodayCoursesVC: UIViewController {
         setupViewModel()
     }
 
-    
     private func createTableHeader() -> UIView {
         let headerView = UIView()
-        headerView.backgroundColor = .myGray
+        headerView.backgroundColor = .myCell
         
         return headerView
     }
@@ -64,7 +63,7 @@ class TodayCoursesVC: UIViewController {
         
         tableView.layer.cornerRadius = 20
         tableView.layer.masksToBounds = true
-        tableView.backgroundColor = .myGray
+        tableView.backgroundColor = .myCell
         tableView.separatorStyle = .none
         tableView.register(TodayCoursesCell.self, forCellReuseIdentifier: "Cell")
         tableView.delegate = self
@@ -149,22 +148,30 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
+        cell.backgroundColor = .myCell
         configureCell(cell, at: indexPath)
+        
         return cell
     }
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
-        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
         let appointment = viewModel.appointments[indexPath.row]
         
+        // 先獲取學生名字
         viewModel.fetchStudentName(for: appointment) { [weak self] studentName in
             DispatchQueue.main.async {
+                // 獲取備註
+                self?.viewModel.fetchStudentNote(teacherID: appointment.teacherID, studentID: appointment.studentID)
+                
+                // 配置 cell
                 cell.configureCell(
                     name: studentName,
                     times: appointment.times,
-                    note: self?.viewModel.studentNote ?? "",
+                    note: self?.viewModel.studentNote ?? "無備註",
                     isExpanded: self?.expandedIndexPath == indexPath
                 )
+                
+                // 更新按鈕狀態
                 self?.updateCellButtonState(cell, appointment: appointment)
             }
         }
