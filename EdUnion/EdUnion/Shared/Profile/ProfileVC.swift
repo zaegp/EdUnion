@@ -10,6 +10,8 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
+import SafariServices
+
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -53,6 +55,8 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.separatorStyle = .none
         tableView.backgroundColor = .myBackground
+        
+        tableView.showsVerticalScrollIndicator = false
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -98,24 +102,32 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     private func setupMenuItems() {
-        if userRole == "teacher" {
-            menuItems = [
-                //                    ("分析", "arrow.right.to.line", { [weak self] in self?.navigateToChartView() }),
-                ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
-                ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                ("登出", "door.right.hand.open", logoutButtonTapped),
-                ("刪除帳號", "trash", deleteAccountAction)
-            ]
-        } else {
-            menuItems = [
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                ("刪除帳號", "trash", deleteAccountAction),
-                ("登出帳號", "door.right.hand.open", logoutButtonTapped) // 添加登出
-            ]
-        }
-    }
+           if userRole == "teacher" {
+               menuItems = [
+                   ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
+                   ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
+                   ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                   ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("登出", "door.right.hand.open", logoutButtonTapped),
+                   ("刪除帳號", "trash", deleteAccountAction)
+               ]
+           } else {
+               menuItems = [
+                   ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("登出帳號", "door.right.hand.open", logoutButtonTapped),
+                   ("刪除帳號", "trash", deleteAccountAction)
+               ]
+           }
+       }
+       
+       // MARK: - Open Privacy Policy Method
+       private func openPrivacyPolicy() {
+           guard let url = URL(string: "https://www.privacypolicies.com/live/8f20be33-d0b5-4f8b-a724-4c02a815b87a") else { return }
+           let safariVC = SFSafariViewController(url: url)
+           present(safariVC, animated: true, completion: nil)
+       }
     
     @objc private func logoutButtonTapped() {
         let alertController = UIAlertController(title: "登出", message: "確定要登出嗎？", preferredStyle: .alert)

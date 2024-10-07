@@ -137,6 +137,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
             return UITableViewCell()
         }
         cell.backgroundColor = .myBackground
+        cell.selectionStyle = .none
         
         let student = students[indexPath.row]
         
@@ -200,7 +201,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     }
     
     private func showBlockConfirmation(for student: Student, at indexPath: IndexPath) {
-        let alertController = UIAlertController(title: "封鎖或檢舉", message: "你確定要封鎖並檢舉這位學生嗎？", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "封鎖並檢舉", message: "你確定要封鎖並檢舉這位學生嗎？", preferredStyle: .alert)
         
         let confirmAction = UIAlertAction(title: "確認", style: .destructive) { _ in
             guard let userID = self.userID else {
