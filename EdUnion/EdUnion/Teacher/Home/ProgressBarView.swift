@@ -50,7 +50,7 @@ struct ProgressBarView: View {
             
             Text(progressPercentage)
                 .font(.system(size: 30, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(Color(UIColor.label))
                 .frame(width: 200, height: 200)
                 .animation(.easeInOut(duration: 0.8), value: value)
         }

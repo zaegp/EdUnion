@@ -86,15 +86,16 @@ struct AuthenticationView: View {
                     }
                 )
                 .background(.clear)
-                .signInWithAppleButtonStyle(.black)
+                .signInWithAppleButtonStyle(.whiteOutline)
                 .frame(width: 280, height: 45)
                 .compositingGroup()
-                .shadow(radius: 5)
                 .padding(.bottom, 50)
             }
         }
+        .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showSwitchRoleView) {
             SwitchRoleViewControllerRepresentable()
+                .background(Color.myBackground.edgesIgnoringSafeArea(.all))
         }
     }
     

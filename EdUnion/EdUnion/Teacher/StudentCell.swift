@@ -8,12 +8,10 @@
 import UIKit
 
 class StudentCell: UITableViewCell {
-    
     let studentImageView = UIImageView()
     let nameLabel = UILabel()
     let blockButton = UIButton(type: .system)
     
-    // 用於菜單動作的回調閉包
     var onBlockAction: (() -> Void)?
     var onAddNoteAction: (() -> Void)?
     
@@ -38,11 +36,11 @@ class StudentCell: UITableViewCell {
         studentImageView.translatesAutoresizingMaskIntoConstraints = false
         
         nameLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        nameLabel.textColor = .black
+        nameLabel.textColor = .label
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         blockButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        blockButton.tintColor = .black
+        blockButton.tintColor = .label
         blockButton.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(studentImageView)

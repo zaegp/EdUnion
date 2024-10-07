@@ -194,8 +194,8 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
     func setupButtons() {
         addTimeSlotButton.setTitle("新增時間段", for: .normal)
         addTimeSlotButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        addTimeSlotButton.setTitleColor(.mainTint, for: .normal)
-        addTimeSlotButton.backgroundColor = .myBlack
+        addTimeSlotButton.setTitleColor(.systemBackground, for: .normal)
+        addTimeSlotButton.backgroundColor = .label
         addTimeSlotButton.layer.cornerRadius = 8
         addTimeSlotButton.addTarget(self, action: #selector(addTimeSlotTapped), for: .touchUpInside)
         
@@ -208,8 +208,8 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         
         cancelButton.setTitle("取消", for: .normal)
         cancelButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        cancelButton.setTitleColor(.mainTint, for: .normal)
-        cancelButton.backgroundColor = .myBlack
+        cancelButton.setTitleColor(.systemBackground, for: .normal)
+        cancelButton.backgroundColor = .label
         cancelButton.layer.cornerRadius = 8
         cancelButton.addTarget(self, action: #selector(cancelSelection), for: .touchUpInside)
     }

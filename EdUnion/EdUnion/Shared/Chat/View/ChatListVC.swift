@@ -113,6 +113,7 @@ class ChatListVC: UIViewController {
     private func setupUI() {
         searchBarView.delegate = self
         navigationItem.titleView = searchBarView
+        searchBarView.layer.borderWidth = 0
         self.view.addSubview(tableView)
         view.addSubview(noChatRoomsView)
         view.addSubview(noSearchResultsView)

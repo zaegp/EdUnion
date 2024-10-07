@@ -79,7 +79,7 @@ class TodayCoursesVC: UIViewController {
             target: self,
             action: #selector(pushToConfirmVC)
         )
-        iconButton.tintColor = .black
+        iconButton.tintColor = .label
         navigationItem.rightBarButtonItem = iconButton
     }
     

@@ -198,7 +198,6 @@ struct BaseCalendarView: View {
                                 } else {
                                     withAnimation {
                                         if value.translation.height < 0 {
-                                            // 向上滑動，切換到週視圖
                                             if !isWeekView {
                                                 isWeekView = true
                                                 generateDays()
@@ -300,12 +299,13 @@ struct BaseCalendarView: View {
             if isShowingCard, let appointment = selectedAppointment {
                 VStack {
                     Spacer()
-                    VStack(spacing: 20) {
+                    VStack(spacing: 24) {
                         Text(appointment.date)
                             .font(.headline)
                         
                         Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
                             .font(.title)
+                            .fontWeight(.semibold)
                         
                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                             .font(.subheadline)
@@ -345,7 +345,9 @@ struct BaseCalendarView: View {
                     .padding()
                     Spacer()
                 }
-                .background(Color.black.opacity(0.5))
+                .background(
+                    Color.primary.opacity(0.2)
+                )
                 .edgesIgnoringSafeArea(.all)
                 .onTapGesture {
                     isShowingCard = false
@@ -474,25 +476,24 @@ struct BaseCalendarView: View {
 //    }
     
     func previousPeriod() {
-        withAnimation {
+       
             if isWeekView {
                 currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
             } else {
                 currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
             }
             generateDays()
-        }
+        
     }
 
     func nextPeriod() {
-        withAnimation {
             if isWeekView {
                 currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
             } else {
                 currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
             }
             generateDays()
-        }
+        
     }
     
     func formattedMonthAndYear(_ date: Date) -> String {
@@ -562,13 +563,14 @@ struct BaseCalendarView: View {
             let hasPending = appointments.contains { $0.status.lowercased() == "pending" }
             let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
             
-            if hasPending {
-                internalDateColors[date] = .red
-            } else if hasConfirmed {
-                internalDateColors[date] = .green
-            } else {
-                internalDateColors[date] = .clear
-            }
+            internalDateColors[date] = .mainOrange
+//            if hasPending {
+//                internalDateColors[date] = .red
+//            } else if hasConfirmed {
+//                internalDateColors[date] = .green
+//            } else {
+//                internalDateColors[date] = .clear
+//            }
         }
     }
     

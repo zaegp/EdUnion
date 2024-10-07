@@ -293,7 +293,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         titleLabel.textColor = .myBlack
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+        let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
         iconImageView.tintColor = .myBlack
         iconImageView.contentMode = .scaleAspectFit

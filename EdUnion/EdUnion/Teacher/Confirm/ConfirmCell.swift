@@ -36,6 +36,7 @@ class ConfirmCell: UITableViewCell {
     
     let titleLabel: UILabel = {
         let label = UILabel()
+        label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

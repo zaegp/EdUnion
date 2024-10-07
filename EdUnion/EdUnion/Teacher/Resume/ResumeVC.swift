@@ -47,12 +47,7 @@ class ResumeVC: UIViewController {
     }
     
     func setupUI() {
-        let titleLabel = UILabel()
-        titleLabel.text = "履歷"
-        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        titleLabel.textColor = .black
-        navigationItem.titleView = titleLabel
-        
+
         configureLabels()
         configureTextFields()
         configureTextView()
@@ -92,11 +87,12 @@ class ResumeVC: UIViewController {
         
         for textField in textFields {
             textField.borderStyle = .none
+            textField.textColor = .black
             textField.layer.cornerRadius = 10
-            textField.layer.borderWidth = 1
-            textField.layer.borderColor = UIColor.mainTint.cgColor
+//            textField.layer.borderWidth = 1
+//            textField.layer.borderColor = UIColor.mainTint.cgColor
             textField.clipsToBounds = true
-            textField.backgroundColor = .systemBackground
+            textField.backgroundColor = .myGray
             textField.textAlignment = .left
             textField.horizontalPadding = 10
             textField.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -105,6 +101,7 @@ class ResumeVC: UIViewController {
     
     private func configureTextView() {
         textView3.layer.cornerRadius = 20
+        textView3.backgroundColor = .myGray
         textView3.font = UIFont.systemFont(ofSize: 16)
         textView3.isScrollEnabled = true
         textView3.contentInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)

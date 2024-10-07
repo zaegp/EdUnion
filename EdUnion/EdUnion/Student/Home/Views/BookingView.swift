@@ -66,10 +66,10 @@ struct BookingView: View {
                                 VStack {
                                     Text(formattedDate(date))
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Color(UIColor.systemBackground))
                                     Text(formattedWeekday(date))
                                         .font(.subheadline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Color(UIColor.systemBackground))
                                 }
                                 .padding()
                                 .background(selectedDate == date ? Color.mainOrange : Color.myMessageCell)
@@ -192,8 +192,10 @@ struct BookingView: View {
     func buttonForegroundColor(for timeSlot: String) -> Color {
         if isBooked(timeSlot: timeSlot) {
             return Color.white
-        } else {
+        } else if isSelected(timeSlot: timeSlot) {
             return Color.white
+        } else {
+            return Color(UIColor.systemBackground)
         }
     }
     

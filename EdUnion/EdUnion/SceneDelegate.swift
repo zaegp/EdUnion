@@ -25,7 +25,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     let tabBarController = TabBarController(userRole: role)
                     window?.rootViewController = tabBarController
                 } else {
-                    
                     window?.rootViewController = ChooseRoleVC()
                 }
             } else {

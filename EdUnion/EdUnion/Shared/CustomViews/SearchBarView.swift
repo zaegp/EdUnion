@@ -43,7 +43,7 @@ class SearchBarView: UIView, UISearchBarDelegate {
             searchTextField.layer.cornerRadius = 10
             searchTextField.clipsToBounds = true
             searchTextField.layer.borderWidth = 1.0
-            searchTextField.layer.borderColor = UIColor.myBorder.cgColor
+            searchTextField.layer.borderColor = UIColor.myGray.cgColor
             searchTextField.textColor = UIColor.mySearchBarTint
             searchTextField.tintColor = UIColor.mainOrange
             

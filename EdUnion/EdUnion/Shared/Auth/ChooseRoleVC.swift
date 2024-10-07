@@ -22,10 +22,9 @@ class ChooseRoleVC: UIViewController {
     private let studentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("學生", for: .normal)
-        button.setTitleColor(.label, for: .normal)
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.myGray.cgColor
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.label, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(didTapStudent), for: .touchUpInside)
@@ -38,7 +37,7 @@ class ChooseRoleVC: UIViewController {
         button.layer.borderWidth = 1
         button.setTitleColor(.label, for: .normal)
         button.layer.borderColor = UIColor.myGray.cgColor
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.label, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(didTapTeacher), for: .touchUpInside)
@@ -100,12 +99,9 @@ class ChooseRoleVC: UIViewController {
     private func navigateToAuthApp() {
         let authView = AuthenticationView()
         let hostingController = UIHostingController(rootView: authView)
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController = hostingController
-            window.makeKeyAndVisible()
-        }
+        hostingController.modalPresentationStyle = .fullScreen 
+
+        present(hostingController, animated: true, completion: nil)
     }
 }
 

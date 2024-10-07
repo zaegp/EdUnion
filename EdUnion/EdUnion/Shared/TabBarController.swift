@@ -40,13 +40,21 @@ class TabBarController: UITabBarController {
         customTabBarView.layer.shadowOpacity = 0.2
         customTabBarView.layer.shadowOffset = CGSize(width: 0, height: 5)
         customTabBarView.layer.shadowRadius = 10
+
+        // 添加選中背景視圖
+        let selectedHeight: CGFloat = height - 10 // 比 customTabBarView 小一點
         
+        let buttonWidth = customTabBarView.frame.width / CGFloat(4)
+        let selectedWidth: CGFloat = buttonWidth - 20 // 比按鈕寬度小 20 點
+        let selectedBackgroundView = UIView(frame: CGRect(x: (buttonWidth - selectedWidth) / 2, y: (height - selectedHeight) / 2, width: selectedWidth, height: selectedHeight))
+        selectedBackgroundView.backgroundColor = .myBackground // 設定選中背景顏色
+        selectedBackgroundView.layer.cornerRadius = selectedHeight / 2
+        customTabBarView.addSubview(selectedBackgroundView)
+
         view.addSubview(customTabBarView)
 
         let tabBarButtonImages = ["house", "calendar", "message", "person"]
         let numberOfButtons = tabBarButtonImages.count
-        let buttonWidth = customTabBarView.frame.width / CGFloat(numberOfButtons)
-
         for (index, imageName) in tabBarButtonImages.enumerated() {
             let button = UIButton(type: .custom)
             button.frame = CGRect(x: CGFloat(index) * buttonWidth, y: 0, width: buttonWidth, height: customTabBarView.frame.height)
@@ -57,30 +65,43 @@ class TabBarController: UITabBarController {
             customTabBarView.addSubview(button)
             tabBarButtons.append(button)
         }
-        
-        updateSelectedTab(index: 0)
+
+        updateSelectedTab(index: 0, selectedBackgroundView: selectedBackgroundView)
     }
 
     @objc private func tabBarButtonTapped(_ sender: UIButton) {
         let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
         feedbackGenerator.impactOccurred()
-        
-        updateSelectedTab(index: sender.tag)
+
+        if let selectedBackgroundView = customTabBarView.subviews.first(where: { $0.backgroundColor == .myBackground }) {
+            updateSelectedTab(index: sender.tag, selectedBackgroundView: selectedBackgroundView)
+        }
         selectedIndex = sender.tag
     }
 
-    private func updateSelectedTab(index: Int) {
+    private func updateSelectedTab(index: Int, selectedBackgroundView: UIView) {
+        let buttonWidth = customTabBarView.frame.width / CGFloat(tabBarButtons.count)
+        let selectedWidth: CGFloat = buttonWidth - 20 // 與之前設置的寬度相同
+
+        // 計算選中背景視圖的新 x 位置，使其在按鈕中心
+        let newX = CGFloat(index) * buttonWidth + (buttonWidth - selectedWidth) / 2
+
+        // 更新選中背景視圖的位置
+        UIView.animate(withDuration: 0.3) {
+            selectedBackgroundView.frame.origin.x = newX
+        }
+
         for (i, button) in tabBarButtons.enumerated() {
             if i == index {
-                UIView.animate(withDuration: 0.3, animations: {
+                UIView.animate(withDuration: 0.3) {
                     button.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
-                    button.tintColor = .mainOrange
-                })
+                    button.tintColor = .black // 改變選中的按鈕顏色
+                }
             } else {
-                UIView.animate(withDuration: 0.3, animations: {
+                UIView.animate(withDuration: 0.3) {
                     button.transform = CGAffineTransform.identity
-                    button.tintColor = .gray 
-                })
+                    button.tintColor = .gray
+                }
             }
         }
     }
