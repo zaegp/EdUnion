@@ -43,10 +43,10 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             setupLongPressGesture()
             setupMenu()
             uploadAllFiles()
+            updateStudentTableViewEmptyState()
         }
         
         fetchUserFiles()
-        updateStudentTableViewEmptyState()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -298,7 +298,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
 
     func endSendAnimation() {
-        // 在這裡可以重置按鈕狀態，或者執行其他結束動畫的邏輯
         print("文件傳送完成")
     }
     
@@ -312,11 +311,10 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                     cell.setSelected(true)
                 }
                 print("選擇文件：\(selectedFileURL.lastPathComponent)")
+                updateSendButtonState()
             } else {
                 previewFile(at: selectedFileURL)
             }
-            
-            updateSendButtonState()
         }
     }
     

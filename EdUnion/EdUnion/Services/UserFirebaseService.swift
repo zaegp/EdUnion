@@ -16,8 +16,6 @@ protocol UserProtocol {
     var photoURL: String? { get }
 }
 
-
-
 class UserFirebaseService {
     static let shared = UserFirebaseService()
     private init() {}
@@ -277,6 +275,21 @@ class UserFirebaseService {
         
         return listener  // 返回監聽器，稍後可以根據需要移除監聽
     }
+    
+    func fetchBlocklist(completion: @escaping (Result<[String], Error>) -> Void) {
+
+            let userRef = db.collection("students").document(userID)
+            userRef.getDocument { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let snapshot = snapshot, snapshot.exists {
+                    let blocklist = snapshot.data()?["blockList"] as? [String] ?? []
+                    completion(.success(blocklist))
+                } else {
+                    completion(.success([]))
+                }
+            }
+        }
     
     // MARK: - 老師：存可選時段
     func updateTimeSlot(_ timeSlot: AvailableTimeSlot, for teacherID: String, operation: FieldValue, completion: @escaping (Result<Void, Error>) -> Void) {

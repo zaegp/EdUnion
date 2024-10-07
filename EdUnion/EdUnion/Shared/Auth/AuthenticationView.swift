@@ -33,16 +33,29 @@ struct AuthenticationView: View {
                     Text("EdUnion")
                         .font(.system(size: 36))
                         .bold()
-                        .padding(.bottom, 50)
+                        .padding(.bottom, 30)
                 }
                 
                 Spacer()
                 
                 VStack {
-                    Text("當前身份是: \(userRole)")
-                        .font(.system(size: 16))
-                        .foregroundColor(.myBlack)
-                        .padding(.bottom, 20)
+                    VStack {
+                        Text("  當前身份  ")
+                            .font(.system(size: 20))
+                            .foregroundColor(.myBlack)
+                            .padding(.bottom, 10)
+                        
+                        Text("  \(userRoleText())  ")
+                            .font(.system(size: 20))
+                            .bold()
+                            .foregroundColor(.myBlack)
+                    }
+                    .padding()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.myGray, lineWidth: 1)
+                    )
+                    .padding(.bottom, 30)
                     
                     Button(action: {
                         showSwitchRoleView = true
@@ -56,8 +69,8 @@ struct AuthenticationView: View {
                                 .font(.system(size: 16))
                         }
                     }
-//                    .padding(.top, 20)
                 }
+                .padding(.bottom, 80)
                 
                 Spacer()
                 
@@ -77,13 +90,10 @@ struct AuthenticationView: View {
                 .frame(width: 280, height: 45)
                 .compositingGroup()
                 .shadow(radius: 5)
-                
-                Spacer().frame(height: 50)
+                .padding(.bottom, 50)
             }
-            
-            
         }
-        .sheet(isPresented: $showSwitchRoleView) {
+        .fullScreenCover(isPresented: $showSwitchRoleView) {
             SwitchRoleViewControllerRepresentable()
         }
     }
@@ -172,6 +182,16 @@ struct AuthenticationView: View {
                 print("failure", error)
             }
         }
+    
+    private func userRoleText() -> String {
+        if userRole == "student" {
+            return "學生"
+        } else if userRole == "teacher" {
+            return "老師"
+        } else {
+            return "未知身份"
+        }
+    }
     
     private func saveUserData(userRef: DocumentReference, appleIDCredential: ASAuthorizationAppleIDCredential) {
             var userData: [String: Any] = [

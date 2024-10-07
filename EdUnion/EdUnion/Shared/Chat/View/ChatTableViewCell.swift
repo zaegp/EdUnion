@@ -323,8 +323,8 @@ class ChatTableViewCell: UITableViewCell {
     
     private func updateBubbleAppearance() {
         guard !bubbleBackgroundView.isHidden else { return }
-        bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .myMessageCell : .myCell
-        messageLabel.textColor = isSentByCurrentUser ? .white : .black
+        bubbleBackgroundView.backgroundColor = isSentByCurrentUser ? .myMessageCell : .myGray
+        messageLabel.textColor = isSentByCurrentUser ? .systemBackground : .black
     }
     
     private func setupBubbleConstraints(isSentByCurrentUser: Bool) {

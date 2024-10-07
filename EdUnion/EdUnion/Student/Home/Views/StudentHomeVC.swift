@@ -33,7 +33,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         let discoverLabel = UILabel()
         discoverLabel.text = "發現"
         discoverLabel.textAlignment = .center
-        discoverLabel.textColor = .black
+        discoverLabel.textColor = .myBlack
         discoverLabel.font = .systemFont(ofSize: 18, weight: .bold)
         discoverLabel.isUserInteractionEnabled = true
         
@@ -139,7 +139,6 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
             self.updateUnderlinePosition(to: self.selectedIndex!)
         }
 
-    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetX = scrollView.contentOffset.x
         let width = scrollView.frame.width
@@ -244,7 +243,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
 
         for (i, label) in labelsStackView.arrangedSubviews.enumerated() {
             if let label = label as? UILabel {
-                label.textColor = (i == index) ? .black : .gray
+                label.textColor = (i == index) ? .myBlack : .gray
             }
         }
     }

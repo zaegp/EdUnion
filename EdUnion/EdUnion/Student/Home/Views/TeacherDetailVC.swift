@@ -134,11 +134,11 @@ class TeacherDetailVC: UIViewController {
             if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
                 imageView.kf.setImage(
                     with: url,
-                    placeholder: UIImage(systemName: "person.crop.circle")?
+                    placeholder: UIImage(systemName: "person.crop.circle.fill")?
                         .withTintColor(.backButton, renderingMode: .alwaysOriginal)
                 )
             } else {
-                imageView.image = UIImage(systemName: "person.crop.circle")
+                imageView.image = UIImage(systemName: "person.crop.circle.fill")
                 imageView.tintColor = .backButton
             }
             imageView.contentMode = .scaleAspectFill

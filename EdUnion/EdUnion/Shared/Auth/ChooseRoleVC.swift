@@ -14,7 +14,7 @@ class ChooseRoleVC: UIViewController {
         let label = UILabel()
         label.text = "你的身份是...?"
         label.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        label.textColor = .black
+        label.textColor = .label
         label.textAlignment = .center
         return label
     }()
@@ -22,7 +22,9 @@ class ChooseRoleVC: UIViewController {
     private let studentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("學生", for: .normal)
-        button.backgroundColor = .mainOrange
+        button.setTitleColor(.label, for: .normal)
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.myGray.cgColor
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5
@@ -30,11 +32,12 @@ class ChooseRoleVC: UIViewController {
         return button
     }()
     
-    // Tutor Button
     private let tutorButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("家教", for: .normal)
-        button.backgroundColor = .mainOrange
+        button.layer.borderWidth = 1
+        button.setTitleColor(.label, for: .normal)
+        button.layer.borderColor = UIColor.myGray.cgColor
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.layer.cornerRadius = 5

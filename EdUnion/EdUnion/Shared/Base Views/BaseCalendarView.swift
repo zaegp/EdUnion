@@ -52,8 +52,8 @@ struct CalendarDayView: View {
                 
                 Text(day.formatted(.dateTime.day()))
                     .fontWeight(.medium)
-                    .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color.mainTint)
-                    .strikethrough(isPastDate, color: Color.mainTint)
+                    .foregroundColor(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                    .strikethrough(isPastDate, color: Color(UIColor.systemBackground))
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
                         Circle()
@@ -133,16 +133,16 @@ struct BaseCalendarView: View {
                     HStack {
                         Button(action: { previousPeriod() }) {
                             Image(systemName: "chevron.left")
-                                .foregroundColor(Color.mainTint)
+                                .foregroundColor(Color(UIColor.systemBackground))
                         }
                         Spacer()
                         Text(formattedMonthAndYear(currentDate))
                             .font(.headline)
-                            .foregroundColor(Color.mainTint)
+                            .foregroundColor(Color(UIColor.systemBackground))
                         Spacer()
                         Button(action: { nextPeriod() }) {
                             Image(systemName: "chevron.right")
-                                .foregroundColor(Color.mainTint)
+                                .foregroundColor(Color(UIColor.systemBackground))
                         }
                     }
                     .padding()

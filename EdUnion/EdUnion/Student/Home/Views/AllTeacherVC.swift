@@ -15,11 +15,15 @@ class AllTeacherVC: BaseCollectionVC {
         setupViewModel()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchData()
+    }
+    
     private func setupViewModel() {
         viewModel.onDataUpdate = { [weak self] in
             self?.collectionView.reloadData()
         }
         viewModel.fetchData()
     }
-    
 }

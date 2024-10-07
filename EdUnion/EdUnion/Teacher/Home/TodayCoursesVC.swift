@@ -54,7 +54,6 @@ class TodayCoursesVC: UIViewController {
         noCoursesLabel.text = "今日無課程"
         noCoursesLabel.font = UIFont.systemFont(ofSize: 24, weight: .medium)
         noCoursesLabel.textAlignment = .center
-        noCoursesLabel.isHidden = true // 預設隱藏
         view.addSubview(noCoursesLabel)
         
         addChild(progressBarHostingController)
@@ -118,15 +117,11 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 if self?.viewModel.appointments.isEmpty == true {
-                    // 無課程，顯示無課程標籤並隱藏進度條
-//                    self?.progressBarHostingController.view.isHidden = true
-                    self?.noCoursesLabel.isHidden = false
-                    self?.tableView.isHidden = true
+                    // 課程為空時，顯示 noCoursesLabel 作為 tableView 的背景
+                    self?.tableView.backgroundView = self?.noCoursesLabel
                 } else {
-                    // 有課程，顯示進度條並隱藏無課程標籤
-//                    self?.progressBarHostingController.view.isHidden = false
-                    self?.noCoursesLabel.isHidden = true
-                    self?.tableView.isHidden = false
+                    // 有課程時，移除背景標籤
+                    self?.tableView.backgroundView = nil
                     self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
                 }
                 self?.tableView.reloadData()
@@ -167,7 +162,7 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
                 cell.configureCell(
                     name: studentName,
                     times: appointment.times,
-                    note: self?.viewModel.studentNote ?? "無備註",
+                    note: self?.viewModel.studentNote ?? "",
                     isExpanded: self?.expandedIndexPath == indexPath
                 )
                 
