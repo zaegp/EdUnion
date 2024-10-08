@@ -19,6 +19,20 @@ struct Teacher: UserProtocol, Codable {
     var studentsNotes: [String: String]?
     var email: String?
     
+    init() {
+            id = ""
+            userID = ""
+            resume = []
+            fullName = ""
+            photoURL = nil
+            selectedTimeSlots = nil
+            timeSlots = nil
+            totalCourses = 0
+            studentsNotes = nil
+            email = nil
+        }
+
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         

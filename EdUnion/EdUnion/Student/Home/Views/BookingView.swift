@@ -18,7 +18,7 @@ struct BookingView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var bookedSlots: [String] = []
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.currentUserID ?? ""
     
     var availableDates: [String] {
         let dateFormatter = DateFormatter()
@@ -37,104 +37,166 @@ struct BookingView: View {
     
     var body: some View {
         VStack {
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHGrid(rows: [GridItem(.flexible())], spacing: 15) {
-                    ForEach(availableDates, id: \.self) { date in
-                        Button(action: {
-                            selectedDate = date
-                            selectedTimes = []
-                            
-                            getBookedSlots(for: selectedDate ?? "") { slots in
-                                bookedSlots = slots
-                                _ = generateTimeSlots(from: timeSlots.flatMap { $0.timeRanges }, bookedSlots: bookedSlots)
-                            }
-                        }) {
-                            Text(date)
-                                .padding()
-                                .background(selectedDate == date ? .mainOrange : Color.gray.opacity(0.2))
-                                .foregroundColor(selectedDate == date ? .white : .black)
-                                .cornerRadius(10)
-                        }
-                    }
+            if availableDates.isEmpty {
+                VStack {
+                    Image(systemName: "calendar.badge.exclamationmark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
+                        .foregroundColor(.gray)
+                    Text("暫無可預約的日期")
+                        .font(.headline)
+                        .foregroundColor(.gray)
                 }
                 .padding()
-            }
-            
-            if let selectedDate = selectedDate, let colorHex = selectedTimeSlots[selectedDate] {
-                let slotsForDate = timeSlots.filter { $0.colorHex == colorHex }
-                
-                if slotsForDate.isEmpty {
-                    Text("無可用時間段")
-                        .padding()
-                } else {
-                    ScrollView(.vertical, showsIndicators: false) {
-                        LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
-                            // 確保 `bookedSlots` 在調用時已經包含最新的已預約時間段
-                            ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }, id: \.self) { timeSlot in
-                                Button(action: {
-                                    toggleSelection(of: timeSlot)
-                                }) {
-                                    Text(timeSlot)
-                                        .frame(height: 50)
-                                        .frame(maxWidth: .infinity)
-                                        .background(
-                                            isSelected(timeSlot: timeSlot) ? Color.mainOrange : Color.myGray
-                                        )
-                                        .foregroundColor(
-                                            isSelected(timeSlot: timeSlot) ? .white : .black
-                                        )
-                                        .cornerRadius(10)
+                Spacer()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(availableDates, id: \.self) { date in
+                            Button(action: {
+                                selectedDate = date
+                                selectedTimes = []
+                                
+                                getBookedSlots(for: selectedDate ?? "") { slots in
+                                    bookedSlots = slots
+                                    _ = generateTimeSlots(from: timeSlots.flatMap { $0.timeRanges }, bookedSlots: bookedSlots)
                                 }
+                            }) {
+                                VStack {
+                                    Text(formattedDate(date))
+                                        .font(.headline)
+                                        .foregroundColor(Color(UIColor.systemBackground))
+                                    Text(formattedWeekday(date))
+                                        .font(.subheadline)
+                                        .foregroundColor(Color(UIColor.systemBackground))
+                                }
+                                .padding()
+                                .background(selectedDate == date ? Color.mainOrange : Color.myMessageCell)
+                                .cornerRadius(10)
                             }
                         }
-                        .padding()
                     }
-                }
-            } else {
-                Text("請選擇日期")
                     .padding()
+                }
+                
+                if let selectedDate = selectedDate, let colorHex = selectedTimeSlots[selectedDate] {
+                    let slotsForDate = timeSlots.filter { $0.colorHex == colorHex }
+                    
+                    if slotsForDate.isEmpty {
+                        VStack {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.gray)
+                            Text("該日期暫無可用的時間段")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        Spacer()
+                    } else {
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
+                                ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }, id: \.self) { timeSlot in
+                                    Button(action: {
+                                        toggleSelection(of: timeSlot)
+                                    }) {
+                                        Text(timeSlot)
+                                            .frame(height: 50)
+                                            .frame(maxWidth: .infinity)
+                                            .background(buttonBackgroundColor(for: timeSlot))
+                                            .foregroundColor(buttonForegroundColor(for: timeSlot))
+                                            .cornerRadius(10)
+                                    }
+                                    .disabled(isBooked(timeSlot: timeSlot))
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                } else {
+                    Text("請選擇日期")
+                        .font(.headline)
+                        .padding()
+                    Spacer()
+                }
             }
             
             Spacer()
             
             Button(action: submitBooking) {
-                Text("提交預約")
+                Text("確定預約")
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color(UIColor(resource: .mainOrange)) : Color.gray)
+                    .background((selectedDate != nil && !selectedTimes.isEmpty) ? Color.mainOrange : Color.gray)
                     .cornerRadius(10)
                     .padding([.horizontal, .bottom])
             }
             .disabled(selectedDate == nil || selectedTimes.isEmpty)
         }
         .frame(maxHeight: .infinity)
+        .background(Color.myBackground)
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("確定")))
         }
     }
     
-    func getBookedSlots(for date: String, completion: @escaping ([String]) -> Void) {
-        AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { result in
-            switch result {
-            case .success(let appointments):
-                let filteredAppointments = appointments.filter { appointment in
-                    appointment.date == date
-                }
-                
-                let bookedSlots = filteredAppointments.flatMap { $0.times }
-                completion(bookedSlots)
-                
-            case .failure(let error):
-                print("Error fetching appointments: \(error)")
-                completion([])
-            }
+    // 辅助方法
+    
+    func formattedDate(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MM月dd日"
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
         }
+        return dateString
+    }
+    
+    func formattedWeekday(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        let outputFormatter = DateFormatter()
+        outputFormatter.locale = Locale(identifier: "zh_CN")
+        outputFormatter.dateFormat = "EEEE"
+        if let date = inputFormatter.date(from: dateString) {
+            let weekday = outputFormatter.string(from: date)
+            return weekday
+        }
+        return ""
     }
     
     func isSelected(timeSlot: String) -> Bool {
         return selectedTimes.contains(timeSlot)
+    }
+    
+    func isBooked(timeSlot: String) -> Bool {
+        return bookedSlots.contains(timeSlot)
+    }
+    
+    func buttonBackgroundColor(for timeSlot: String) -> Color {
+        if isBooked(timeSlot: timeSlot) {
+            return Color.gray
+        } else if isSelected(timeSlot: timeSlot) {
+            return Color.mainOrange
+        } else {
+            return Color.myMessageCell
+        }
+    }
+    
+    func buttonForegroundColor(for timeSlot: String) -> Color {
+        if isBooked(timeSlot: timeSlot) {
+            return Color.white
+        } else if isSelected(timeSlot: timeSlot) {
+            return Color.white
+        } else {
+            return Color(UIColor.systemBackground)
+        }
     }
     
     func generateTimeSlots(from timeRanges: [String], bookedSlots: [String]) -> [String] {
@@ -152,9 +214,7 @@ struct BookingView: View {
                 
                 while currentTime < endTime {
                     let timeString = dateFormatter.string(from: currentTime)
-                    if !bookedSlots.contains(timeString) {
-                        timeSlots.append(timeString)
-                    }
+                    timeSlots.append(timeString)
                     
                     if let newTime = Calendar.current.date(byAdding: .minute, value: 30, to: currentTime) {
                         currentTime = newTime
@@ -168,42 +228,39 @@ struct BookingView: View {
     }
     
     func toggleSelection(of timeSlot: String) {
-        if let index = selectedTimes.firstIndex(of: timeSlot) {
-            selectedTimes.remove(at: index)
-        } else {
-            if selectedTimes.isEmpty {
-                selectedTimes.append(timeSlot)
-            } else {
-                let sortedTimes = selectedTimes.sorted()
-                if let firstTime = sortedTimes.first,
-                   let lastTime = sortedTimes.last,
-                   let timePlus30 = addMinutes(to: timeSlot, minutes: 30),
-                   let timeMinus30 = subtractMinutes(from: timeSlot, minutes: 30) {
-                    
-                    if timePlus30 == firstTime || timeMinus30 == lastTime {
-                        selectedTimes.append(timeSlot)
-                    } else {
-                        alertMessage = "請選擇連續的時間段（間隔30分鐘）。"
-                        showingAlert = true
-                    }
-                }
-            }
-        }
-    }
-    
-    func addMinutes(to time: String, minutes: Int) -> String? {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         
-        if let date = dateFormatter.date(from: time),
-           let newTime = Calendar.current.date(byAdding: .minute, value: minutes, to: date) {
-            return dateFormatter.string(from: newTime)
+        // 將時間轉換為 Date 類型
+        guard let selectedTime = dateFormatter.date(from: timeSlot) else { return }
+        
+        // 檢查是否為取消選取的情況
+        if let index = selectedTimes.firstIndex(of: timeSlot) {
+            // 如果是取消選取，直接移除選擇
+            selectedTimes.remove(at: index)
+            return
         }
-        return nil
-    }
-    
-    func subtractMinutes(from time: String, minutes: Int) -> String? {
-        return addMinutes(to: time, minutes: -minutes)
+        
+        // 檢查添加新的時間段是否連續
+        var allSelectedTimes = selectedTimes + [timeSlot]
+        allSelectedTimes.sort()
+        
+        for i in 0..<(allSelectedTimes.count - 1) {
+            guard let firstTime = dateFormatter.date(from: allSelectedTimes[i]),
+                  let secondTime = dateFormatter.date(from: allSelectedTimes[i + 1]) else {
+                return
+            }
+            
+            // 如果兩個時間之間的間隔不是 30 分鐘，則顯示警告訊息並返回
+            if Calendar.current.dateComponents([.minute], from: firstTime, to: secondTime).minute != 30 {
+                alertMessage = "只能選擇連續的時間段。"
+                showingAlert = true
+                return
+            }
+        }
+        
+        // 如果是新增選取，通過連續性檢查後才添加
+        selectedTimes.append(timeSlot)
     }
     
     func submitBooking() {
@@ -228,26 +285,43 @@ struct BookingView: View {
         
         bookingRef.setData(bookingData) { error in
             if let error = error {
-                alertMessage = "預約失敗：\(error.localizedDescription)"
+                alertMessage = "預定失敗：\(error.localizedDescription)"
                 showingAlert = true
             } else {
-                alertMessage = "預約成功！"
+                alertMessage = "預定成功！"
                 showingAlert = true
                 selectedDate = nil
                 selectedTimes = []
             }
         }
         
-        UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacherID, listName: "usedList") { error in
+        UserFirebaseService.shared.updateStudentList(studentID: userID, teacherID: teacherID, listName: "usedList") { error in
             if let error = error {
-                print("更新 usedList 失敗: \(error)")
+                print("更新 usedList 失败: \(error)")
             } else {
                 print("成功更新 usedList")
             }
         }
     }
+    
+    func getBookedSlots(for date: String, completion: @escaping ([String]) -> Void) {
+        AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { result in
+            switch result {
+            case .success(let appointments):
+                let filteredAppointments = appointments.filter { appointment in
+                    appointment.date == date
+                }
+                
+                let bookedSlots = filteredAppointments.flatMap { $0.times }
+                completion(bookedSlots)
+                
+            case .failure(let error):
+                print("Error fetching appointments: \(error)")
+                completion([])
+            }
+        }
+    }
 }
-
 //#Preview {
 //    BookingView(selectedTimeSlots: ["2024-09-11": "#FF624F", "2024-09-13": "#FF624F", "2024-09-12": "#000000", "2024-10-10": "#FF624F"], timeSlots: [EdUnion.TimeSlot(colorHex: "#FF624F", timeRanges: ["08:00 - 11:00", "14:00 - 18:00"]), EdUnion.TimeSlot(colorHex: "#000000", timeRanges: ["06:00 - 21:00"])])
 //}

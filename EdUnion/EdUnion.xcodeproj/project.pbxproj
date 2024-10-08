@@ -11,17 +11,21 @@
 		513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */; };
 		513BEC102CA6820A000E0DE9 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0F2CA6820A000E0DE9 /* UserSession.swift */; };
 		513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC112CA8507C000E0DE9 /* ChatListCell.swift */; };
-		513BEC142CA88C5D000E0DE9 /* FileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC132CA88C5D000E0DE9 /* FileVC.swift */; };
 		513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC182CA89059000E0DE9 /* LessonChartView.swift */; };
 		513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC1F2CA90361000E0DE9 /* BarChartView.swift */; };
 		513BEC242CAAC7B7000E0DE9 /* FilesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */; };
-		517E9DB82CACADB4002A2513 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DB72CACADB4002A2513 /* SwiftUIIntrospect */; };
-		517E9DBB2CACADBF002A2513 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DBA2CACADBF002A2513 /* Kingfisher */; };
-		517E9DBE2CACADCB002A2513 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DBD2CACADCB002A2513 /* IQKeyboardManagerSwift */; };
-		517E9DC12CACAE03002A2513 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DC02CACAE03002A2513 /* FirebaseAnalytics */; };
-		517E9DC32CACAE03002A2513 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DC22CACAE03002A2513 /* FirebaseAuth */; };
-		517E9DC52CACAE03002A2513 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DC42CACAE03002A2513 /* FirebaseFirestore */; };
-		517E9DC72CACAE03002A2513 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DC62CACAE03002A2513 /* FirebaseStorage */; };
+		517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCB2CACC3A8002A2513 /* FirebaseAnalytics */; };
+		517E9DCE2CACC3A8002A2513 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCD2CACC3A8002A2513 /* FirebaseAuth */; };
+		517E9DD02CACC3A8002A2513 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCF2CACC3A8002A2513 /* FirebaseFirestore */; };
+		517E9DD22CACC3A8002A2513 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD12CACC3A8002A2513 /* FirebaseStorage */; };
+		517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */; };
+		517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD72CACC3BA002A2513 /* Kingfisher */; };
+		517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */; };
+		517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */; };
+		517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDF2CAEE440002A2513 /* SearchBarView.swift */; };
+		517E9DE42CB0D91F002A2513 /* StudentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE32CB0D91F002A2513 /* StudentCell.swift */; };
+		517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE52CB0E004002A2513 /* NotePopupView.swift */; };
+		517E9DE82CB2C54D002A2513 /* UserProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -70,7 +74,6 @@
 		51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C992C9E4F370083EECF /* DetailView.swift */; };
 		51D25C9E2C9E60C00083EECF /* FollowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */; };
 		51D25CA02C9E90B30083EECF /* FollowVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C9F2C9E90B30083EECF /* FollowVC.swift */; };
-		51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */; };
 		51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */; };
 		51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC22C9F3BA10083EECF /* NavigationController.swift */; };
 		51D25CC92CA060100083EECF /* FrequentlyUsedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25CC82CA060100083EECF /* FrequentlyUsedVC.swift */; };
@@ -125,10 +128,14 @@
 		513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesVC.swift; sourceTree = "<group>"; };
 		513BEC0F2CA6820A000E0DE9 /* UserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSession.swift; sourceTree = "<group>"; };
 		513BEC112CA8507C000E0DE9 /* ChatListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListCell.swift; sourceTree = "<group>"; };
-		513BEC132CA88C5D000E0DE9 /* FileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVC.swift; sourceTree = "<group>"; };
 		513BEC182CA89059000E0DE9 /* LessonChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonChartView.swift; sourceTree = "<group>"; };
 		513BEC1F2CA90361000E0DE9 /* BarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarChartView.swift; sourceTree = "<group>"; };
 		513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesCell.swift; sourceTree = "<group>"; };
+		517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
+		517E9DDF2CAEE440002A2513 /* SearchBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBarView.swift; sourceTree = "<group>"; };
+		517E9DE32CB0D91F002A2513 /* StudentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentCell.swift; sourceTree = "<group>"; };
+		517E9DE52CB0E004002A2513 /* NotePopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePopupView.swift; sourceTree = "<group>"; };
+		517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileVC.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -180,12 +187,6 @@
 		51D25C9F2C9E90B30083EECF /* FollowVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowVC.swift; sourceTree = "<group>"; };
 		51D25CA72C9F27310083EECF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		51D25CA92C9F27310083EECF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidgetBundle.swift; sourceTree = "<group>"; };
-		51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesWidget.swift; sourceTree = "<group>"; };
-		51D25CB02C9F27310083EECF /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
-		51D25CB22C9F27320083EECF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		51D25CB42C9F27320083EECF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseWidgetView.swift; sourceTree = "<group>"; };
 		51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Ext.swift"; sourceTree = "<group>"; };
 		51D25CC22C9F3BA10083EECF /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		51D25CC82CA060100083EECF /* FrequentlyUsedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequentlyUsedVC.swift; sourceTree = "<group>"; };
@@ -214,13 +215,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				517E9DBB2CACADBF002A2513 /* Kingfisher in Frameworks */,
-				517E9DC32CACAE03002A2513 /* FirebaseAuth in Frameworks */,
-				517E9DB82CACADB4002A2513 /* SwiftUIIntrospect in Frameworks */,
-				517E9DC12CACAE03002A2513 /* FirebaseAnalytics in Frameworks */,
-				517E9DC72CACAE03002A2513 /* FirebaseStorage in Frameworks */,
-				517E9DBE2CACADCB002A2513 /* IQKeyboardManagerSwift in Frameworks */,
-				517E9DC52CACAE03002A2513 /* FirebaseFirestore in Frameworks */,
+				517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */,
+				517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */,
+				517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */,
+				517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */,
+				517E9DD22CACC3A8002A2513 /* FirebaseStorage in Frameworks */,
+				517E9DCE2CACC3A8002A2513 /* FirebaseAuth in Frameworks */,
+				517E9DD02CACC3A8002A2513 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,8 +246,18 @@
 			isa = PBXGroup;
 			children = (
 				513BEC092CA54ACC000E0DE9 /* IntroVC.swift */,
+				517E9DE72CB2C54D002A2513 /* UserProfileVC.swift */,
 			);
 			path = Intro;
+			sourceTree = "<group>";
+		};
+		517E9DDC2CAE8196002A2513 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */,
+				517E9DDF2CAEE440002A2513 /* SearchBarView.swift */,
+			);
+			path = CustomViews;
 			sourceTree = "<group>";
 		};
 		51993B092CA50AB80022C79F /* Auth */ = {
@@ -261,6 +272,7 @@
 		519C8EC02C9399FA007DFCBA /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				517E9DDC2CAE8196002A2513 /* CustomViews */,
 				513BEC082CA54ABB000E0DE9 /* Intro */,
 				51993B092CA50AB80022C79F /* Auth */,
 				51D25C882C9B320E0083EECF /* Base Views */,
@@ -337,11 +349,12 @@
 				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 				519E14972CA1884200E344CE /* AllStudentVC.swift */,
+				517E9DE52CB0E004002A2513 /* NotePopupView.swift */,
+				517E9DE32CB0D91F002A2513 /* StudentCell.swift */,
 				513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */,
 				513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */,
 				513BEC182CA89059000E0DE9 /* LessonChartView.swift */,
 				513BEC1F2CA90361000E0DE9 /* BarChartView.swift */,
-				513BEC132CA88C5D000E0DE9 /* FileVC.swift */,
 			);
 			path = Teacher;
 			sourceTree = "<group>";
@@ -523,26 +536,12 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		51D25CAB2C9F27310083EECF /* TodayCoursesWidget */ = {
-			isa = PBXGroup;
-			children = (
-				51D25CAC2C9F27310083EECF /* TodayCoursesWidgetBundle.swift */,
-				51D25CBC2C9F284D0083EECF /* CourseWidgetView.swift */,
-				51D25CAE2C9F27310083EECF /* TodayCoursesWidget.swift */,
-				51D25CB02C9F27310083EECF /* AppIntent.swift */,
-				51D25CB22C9F27320083EECF /* Assets.xcassets */,
-				51D25CB42C9F27320083EECF /* Info.plist */,
-			);
-			path = TodayCoursesWidget;
-			sourceTree = "<group>";
-		};
 		51ED0ACA2C916721006322B7 = {
 			isa = PBXGroup;
 			children = (
 				51ED0AD52C916721006322B7 /* EdUnion */,
 				51ED0AEC2C916722006322B7 /* EdUnionTests */,
 				51ED0AF62C916722006322B7 /* EdUnionUITests */,
-				51D25CAB2C9F27310083EECF /* TodayCoursesWidget */,
 				51D25CA62C9F27310083EECF /* Frameworks */,
 				51ED0AD42C916721006322B7 /* Products */,
 			);
@@ -616,13 +615,13 @@
 			);
 			name = EdUnion;
 			packageProductDependencies = (
-				517E9DB72CACADB4002A2513 /* SwiftUIIntrospect */,
-				517E9DBA2CACADBF002A2513 /* Kingfisher */,
-				517E9DBD2CACADCB002A2513 /* IQKeyboardManagerSwift */,
-				517E9DC02CACAE03002A2513 /* FirebaseAnalytics */,
-				517E9DC22CACAE03002A2513 /* FirebaseAuth */,
-				517E9DC42CACAE03002A2513 /* FirebaseFirestore */,
-				517E9DC62CACAE03002A2513 /* FirebaseStorage */,
+				517E9DCB2CACC3A8002A2513 /* FirebaseAnalytics */,
+				517E9DCD2CACC3A8002A2513 /* FirebaseAuth */,
+				517E9DCF2CACC3A8002A2513 /* FirebaseFirestore */,
+				517E9DD12CACC3A8002A2513 /* FirebaseStorage */,
+				517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */,
+				517E9DD72CACC3BA002A2513 /* Kingfisher */,
+				517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -697,10 +696,10 @@
 			);
 			mainGroup = 51ED0ACA2C916721006322B7;
 			packageReferences = (
-				517E9DB62CACADB4002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
-				517E9DB92CACADBF002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				517E9DBC2CACADCB002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
-				517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				517E9DD32CACC3B1002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -767,13 +766,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				513BEC142CA88C5D000E0DE9 /* FileVC.swift in Sources */,
 				519C8F142C996295007DFCBA /* ChatListVC.swift in Sources */,
 				51D25CC92CA060100083EECF /* FrequentlyUsedVC.swift in Sources */,
 				519C8F032C969D3B007DFCBA /* BookingVC.swift in Sources */,
 				513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */,
 				519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */,
-				51D25CBD2C9F284D0083EECF /* CourseWidgetView.swift in Sources */,
 				513BEC0A2CA54ACC000E0DE9 /* IntroVC.swift in Sources */,
 				51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
@@ -788,9 +785,11 @@
 				51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */,
 				519C8EE42C954D82007DFCBA /* AvailableTimeSlot.swift in Sources */,
 				519C8EF92C95C701007DFCBA /* TeacherCell.swift in Sources */,
+				517E9DE42CB0D91F002A2513 /* StudentCell.swift in Sources */,
 				51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */,
 				51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */,
 				519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */,
+				517E9DE82CB2C54D002A2513 /* UserProfileVC.swift in Sources */,
 				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
 				51D25C942C9D4C2D0083EECF /* TimeService.swift in Sources */,
 				519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */,
@@ -800,12 +799,14 @@
 				51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */,
 				51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
+				517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
 				51D25CA02C9E90B30083EECF /* FollowVC.swift in Sources */,
 				51ED0AD72C916721006322B7 /* AppDelegate.swift in Sources */,
 				51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */,
 				51D25C9A2C9E4F380083EECF /* DetailView.swift in Sources */,
+				517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */,
 				513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */,
 				519C8F162C9964FE007DFCBA /* ChatRoom.swift in Sources */,
 				51B619DD2CA06C1A00EAC4B8 /* BaseCollectionVC.swift in Sources */,
@@ -834,6 +835,7 @@
 				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* AllTeacherViewModel.swift in Sources */,
 				513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */,
+				517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1034,9 +1036,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -1066,9 +1072,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -1085,9 +1095,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EdUnion.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EdUnion";
 			};
 			name = Debug;
@@ -1105,9 +1119,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EdUnion.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EdUnion";
 			};
 			name = Release;
@@ -1123,9 +1141,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = EdUnion;
 			};
 			name = Debug;
@@ -1141,9 +1163,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnionUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = EdUnion;
 			};
 			name = Release;
@@ -1190,31 +1216,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		517E9DB62CACADB4002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.0;
-			};
-		};
-		517E9DB92CACADBF002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.0.3;
-			};
-		};
-		517E9DBC2CACADCB002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.1.1;
-			};
-		};
-		517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
@@ -1222,43 +1224,67 @@
 				minimumVersion = 11.3.0;
 			};
 		};
+		517E9DD32CACC3B1002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.1.1;
+			};
+		};
+		517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.3;
+			};
+		};
+		517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		517E9DB72CACADB4002A2513 /* SwiftUIIntrospect */ = {
+		517E9DCB2CACC3A8002A2513 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 517E9DB62CACADB4002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
-			productName = SwiftUIIntrospect;
-		};
-		517E9DBA2CACADBF002A2513 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 517E9DB92CACADBF002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
-		517E9DBD2CACADCB002A2513 /* IQKeyboardManagerSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 517E9DBC2CACADCB002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
-			productName = IQKeyboardManagerSwift;
-		};
-		517E9DC02CACAE03002A2513 /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
 		};
-		517E9DC22CACAE03002A2513 /* FirebaseAuth */ = {
+		517E9DCD2CACC3A8002A2513 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
 		};
-		517E9DC42CACAE03002A2513 /* FirebaseFirestore */ = {
+		517E9DCF2CACC3A8002A2513 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
 		};
-		517E9DC62CACAE03002A2513 /* FirebaseStorage */ = {
+		517E9DD12CACC3A8002A2513 /* FirebaseStorage */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 517E9DBF2CACADDF002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DD32CACC3B1002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
+		};
+		517E9DD72CACC3BA002A2513 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

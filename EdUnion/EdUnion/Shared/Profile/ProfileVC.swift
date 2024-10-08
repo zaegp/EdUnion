@@ -8,6 +8,10 @@
 import UIKit
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
+import FirebaseStorage
+import SafariServices
+
 
 class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -18,22 +22,27 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     
     private var menuItems: [(title: String, icon: String, action: () -> Void)] = []
-    private let logoutButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
         setupTableView()
         setupTableHeaderView()
-        setupLogoutButton()
         setupMenuItems()
         updateUserInfo()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tabBarController?.tabBar.isHidden = false
+        
+        tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+        
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     // MARK: - Setup Methods
@@ -44,21 +53,26 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .myBackground
+        
+        tableView.showsVerticalScrollIndicator = false
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            tableView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -80)
         ])
     }
     
     private func setupTableHeaderView() {
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 150))
-        headerView.backgroundColor = .white
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 130))
+        headerView.backgroundColor = .myBackground
         
         userImageView = UIImageView()
+        userImageView.tintColor = .myMessageCell
         userImageView.contentMode = .scaleAspectFill
         userImageView.layer.cornerRadius = 40
         userImageView.clipsToBounds = true
@@ -76,7 +90,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         
         NSLayoutConstraint.activate([
             userImageView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-            userImageView.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 20),
+            userImageView.topAnchor.constraint(equalTo: headerView.topAnchor),
             userImageView.widthAnchor.constraint(equalToConstant: 80),
             userImageView.heightAnchor.constraint(equalToConstant: 80),
             
@@ -87,31 +101,54 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         tableView.tableHeaderView = headerView
     }
     
-    private func setupLogoutButton() {
-            logoutButton.setTitle("登出", for: .normal)
-            logoutButton.setTitleColor(.white, for: .normal)
-            logoutButton.backgroundColor = .systemRed
-            logoutButton.layer.cornerRadius = 10
-            logoutButton.translatesAutoresizingMaskIntoConstraints = false
-            logoutButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
-            
-            view.addSubview(logoutButton)
-            
-            NSLayoutConstraint.activate([
-                logoutButton.heightAnchor.constraint(equalToConstant: 50),
-                logoutButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20),
-                logoutButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20),
-                logoutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
-            ])
-        }
+    private func setupMenuItems() {
+           if userRole == "teacher" {
+               menuItems = [
+                   ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
+                   ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
+                   ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                   ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("登出", "door.right.hand.open", logoutButtonTapped),
+                   ("刪除帳號", "trash", deleteAccountAction)
+               ]
+           } else {
+               menuItems = [
+                   ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("登出帳號", "door.right.hand.open", logoutButtonTapped),
+                   ("刪除帳號", "trash", deleteAccountAction)
+               ]
+           }
+       }
+       
+       // MARK: - Open Privacy Policy Method
+       private func openPrivacyPolicy() {
+           guard let url = URL(string: "https://www.privacypolicies.com/live/8f20be33-d0b5-4f8b-a724-4c02a815b87a") else { return }
+           let safariVC = SFSafariViewController(url: url)
+           present(safariVC, animated: true, completion: nil)
+       }
     
     @objc private func logoutButtonTapped() {
+        let alertController = UIAlertController(title: "登出", message: "確定要登出嗎？", preferredStyle: .alert)
+        
+        let confirmAction = UIAlertAction(title: "確認", style: .destructive) { _ in
+            self.performLogout()
+        }
+        alertController.addAction(confirmAction)
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    private func performLogout() {
         do {
             try Auth.auth().signOut()
             print("Successfully signed out")
             
             let loginView = AuthenticationView()
-            
             let hostingController = UIHostingController(rootView: loginView)
             
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -124,19 +161,38 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         }
     }
     
-    private func setupMenuItems() {
-        if userRole == "teacher" {
-            menuItems = [
-                ("分析", "chart.bar", { [weak self] in self?.navigateToChartView() }),
-                ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
-                ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                ("所有學生列表", "person.3", { [weak self] in self?.navigateToAllStudents() }),
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
-            ]
-        } else {
-            menuItems = [
-                ("教材", "folder", { [weak self] in self?.navigateToFiles() })
-            ]
+    private func deleteAccountAction() {
+        let alertController = UIAlertController(title: "刪除帳號", message: "確定要刪除您的帳號嗎？這個操作無法恢復。", preferredStyle: .alert)
+        
+        let deleteAction = UIAlertAction(title: "刪除", style: .destructive) { _ in
+            self.updateUserStatusToDeleting()
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    private func updateUserStatusToDeleting() {
+        guard let userID = userID, !userID.isEmpty else {
+            print("Error: 無法取得使用者 ID")
+            return
+        }
+        
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        
+        let userRef = Firestore.firestore().collection(collection).document(userID)
+        
+        userRef.updateData(["status": "Deleting"]) { error in
+            if let error = error {
+                print("更新使用者狀態失敗: \(error.localizedDescription)")
+            } else {
+                print("使用者狀態已更新為 'Deleting'")
+                self.logoutButtonTapped()
+            }
         }
     }
     
@@ -205,9 +261,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     private func updateUI(with imageUrlString: String?, name: String) {
         if let url = URL(string: imageUrlString ?? "") {
-            self.userImageView.kf.setImage(with: url, placeholder: UIImage(systemName: "person.crop.circle"))
+            self.userImageView.kf.setImage(with: url, placeholder: UIImage(systemName: "person.crop.circle.fill"))
         } else {
-            self.userImageView.image = UIImage(systemName: "person.crop.circle")
+            self.userImageView.image = UIImage(systemName: "person.crop.circle.fill")
         }
         self.nameLabel.text = name
     }
@@ -215,12 +271,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     // MARK: - Image Picker Methods
     
     @objc private func didTapProfileImage() {
-        let actionSheet = UIAlertController(title: "更換大頭貼照", message: nil, preferredStyle: .actionSheet)
-        actionSheet.addAction(UIAlertAction(title: "從圖庫選擇", style: .default) { [weak self] _ in
-            self?.presentImagePicker(sourceType: .photoLibrary)
-        })
-        actionSheet.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        present(actionSheet, animated: true)
+        presentImagePicker(sourceType: .photoLibrary)
     }
     
     private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
@@ -245,11 +296,37 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.backgroundColor = .myBackground
         let menuItem = menuItems[indexPath.row]
-        cell.textLabel?.text = menuItem.title
-        cell.imageView?.image = UIImage(systemName: menuItem.icon)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = menuItem.title
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        titleLabel.textColor = .myBlack
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+        let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
+        iconImageView.tintColor = .myBlack
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.contentView.addSubview(iconImageView)
+        cell.contentView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+            iconImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 40),
+            iconImageView.heightAnchor.constraint(equalToConstant: 40),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 30),
+            titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
+        ])
+        
         cell.accessoryType = .disclosureIndicator
-        cell.imageView?.tintColor = UIColor.mainOrange
+        cell.imageView?.tintColor = .myBlack
         cell.selectionStyle = .none
         return cell
     }
@@ -263,10 +340,66 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
+        
         if let editedImage = info[.editedImage] as? UIImage {
             userImageView.image = editedImage
+            uploadProfileImage(editedImage)
         } else if let originalImage = info[.originalImage] as? UIImage {
             userImageView.image = originalImage
+            uploadProfileImage(originalImage)
+        }
+    }
+    
+    private func uploadProfileImage(_ image: UIImage) {
+        guard let userID = userID else {
+            print("Error: User not logged in.")
+            return
+        }
+        
+        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("Error converting image to data.")
+            return
+        }
+        
+        storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
+            if let error = error {
+                print("Error uploading image: \(error.localizedDescription)")
+                return
+            }
+            
+            storageRef.downloadURL { url, error in
+                if let error = error {
+                    print("Error getting download URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let downloadURL = url else {
+                    print("Error: Download URL is nil.")
+                    return
+                }
+                
+                self?.saveImageURLToFirestore(downloadURL.absoluteString)
+            }
+        }
+    }
+    
+    private func saveImageURLToFirestore(_ urlString: String) {
+        guard let userID = userID else {
+            print("Error: User not logged in.")
+            return
+        }
+        
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        let userRef = Firestore.firestore().collection(collection).document(userID)
+        
+        userRef.updateData(["photoURL": urlString]) { error in
+            if let error = error {
+                print("Error saving image URL to Firestore: \(error.localizedDescription)")
+            } else {
+                print("Image URL successfully saved to Firestore.")
+            }
         }
     }
     
