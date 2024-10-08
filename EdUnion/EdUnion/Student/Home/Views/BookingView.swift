@@ -57,7 +57,7 @@ struct BookingView: View {
                             Button(action: {
                                 selectedDate = date
                                 selectedTimes = []
-                                
+                                bookedSlots.removeAll()  // 清除之前的預定時段
                                 getBookedSlots(for: selectedDate ?? "") { slots in
                                     bookedSlots = slots
                                     _ = generateTimeSlots(from: timeSlots.flatMap { $0.timeRanges }, bookedSlots: bookedSlots)
@@ -109,6 +109,7 @@ struct BookingView: View {
                                             .background(buttonBackgroundColor(for: timeSlot))
                                             .foregroundColor(buttonForegroundColor(for: timeSlot))
                                             .cornerRadius(10)
+                                            .animation(isBooked(timeSlot: timeSlot) ? .easeInOut : nil)  // 只對已被預約的時間段應用動畫
                                     }
                                     .disabled(isBooked(timeSlot: timeSlot))
                                 }

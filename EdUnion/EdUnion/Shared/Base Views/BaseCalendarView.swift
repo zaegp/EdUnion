@@ -20,11 +20,11 @@ struct ChatViewControllerWrapper: UIViewControllerRepresentable {
         var student = Student()
         student.id = studentID
         chatVC.student = student
-
+        
         var teacher = Teacher()
         teacher.id = teacherID
         chatVC.teacher = teacher
-
+        
         return chatVC
     }
     
@@ -237,18 +237,25 @@ struct BaseCalendarView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        Text(viewModel.participantNames[appointment.studentID] ?? "")
-                                            .onAppear {
-                                                if viewModel.participantNames[appointment.studentID] == nil {
-                                                    if userRole == "teacher" {
+                                        if userRole == "teacher" {
+                                            Text(viewModel.participantNames[appointment.studentID] ?? "")
+                                                .onAppear {
+                                                    if viewModel.participantNames[appointment.studentID] == nil {
                                                         viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
-                                                    } else {
+                                                    }
+                                                }
+                                                .font(.headline)
+                                                .foregroundColor(Color(UIColor.myDarkGray))
+                                        } else {
+                                            Text(viewModel.participantNames[appointment.teacherID] ?? "")
+                                                .onAppear {
+                                                    if viewModel.participantNames[appointment.studentID] == nil {
                                                         viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
                                                     }
                                                 }
-                                            }
-                                            .font(.headline)
-                                            .foregroundColor(Color(UIColor.myDarkGray))
+                                                .font(.headline)
+                                                .foregroundColor(Color(UIColor.myDarkGray))
+                                        }
                                         
                                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                                             .font(.body)
@@ -266,11 +273,11 @@ struct BaseCalendarView: View {
                             .padding(.horizontal, 10)
                             .background(.clear)
                             .cornerRadius(20)
-//                            .overlay(
-//                                RoundedRectangle(cornerRadius: 20)
-//                                    .stroke(Color.myBorder, lineWidth: 1)
-//                            )
-//                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                            //                            .overlay(
+                            //                                RoundedRectangle(cornerRadius: 20)
+                            //                                    .stroke(Color.myBorder, lineWidth: 1)
+                            //                            )
+                            //                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                             .padding(.vertical, 5)
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.myBackground)
@@ -302,11 +309,15 @@ struct BaseCalendarView: View {
                     VStack(spacing: 24) {
                         Text(appointment.date)
                             .font(.headline)
-                        
-                        Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
-                            .font(.title)
-                            .fontWeight(.semibold)
-                        
+                        if userRole == "student" {
+                            Text(viewModel.participantNames[appointment.teacherID] ?? "Unknown")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                        } else {
+                            Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                        }
                         Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                             .font(.subheadline)
                         
@@ -465,34 +476,34 @@ struct BaseCalendarView: View {
         return days
     }
     
-//    private func previousPeriod() {
-//        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
-//        setupView()
-//    }
-//    
-//    private func nextPeriod() {
-//        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
-//        setupView()
-//    }
+    //    private func previousPeriod() {
+    //        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
+    //        setupView()
+    //    }
+    //
+    //    private func nextPeriod() {
+    //        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
+    //        setupView()
+    //    }
     
     func previousPeriod() {
-       
-            if isWeekView {
-                currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
-            } else {
-                currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
-            }
-            generateDays()
+        
+        if isWeekView {
+            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
+        } else {
+            currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
+        }
+        generateDays()
         
     }
-
+    
     func nextPeriod() {
-            if isWeekView {
-                currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
-            } else {
-                currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
-            }
-            generateDays()
+        if isWeekView {
+            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
+        } else {
+            currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
+        }
+        generateDays()
         
     }
     
@@ -564,13 +575,13 @@ struct BaseCalendarView: View {
             let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
             
             internalDateColors[date] = .mainOrange
-//            if hasPending {
-//                internalDateColors[date] = .red
-//            } else if hasConfirmed {
-//                internalDateColors[date] = .green
-//            } else {
-//                internalDateColors[date] = .clear
-//            }
+            //            if hasPending {
+            //                internalDateColors[date] = .red
+            //            } else if hasConfirmed {
+            //                internalDateColors[date] = .green
+            //            } else {
+            //                internalDateColors[date] = .clear
+            //            }
         }
     }
     

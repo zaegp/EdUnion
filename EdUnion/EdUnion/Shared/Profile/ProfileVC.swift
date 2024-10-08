@@ -36,6 +36,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        updateUserInfo()
         tabBarController?.tabBar.isHidden = true
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(false, animated: true)

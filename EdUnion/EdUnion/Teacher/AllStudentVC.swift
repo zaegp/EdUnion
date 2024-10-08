@@ -19,6 +19,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .myBackground
         navigationItem.title = "學生名單"
         
         setupTableView()
@@ -61,17 +62,17 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     }
     
     private func setupEmptyStateLabel() {
-        emptyStateLabel.text = "No students available."
-        emptyStateLabel.textColor = .myGray
+        emptyStateLabel.text = "還沒有學生，快去上課吧！"
+        emptyStateLabel.textColor = .gray
         emptyStateLabel.textAlignment = .center
         emptyStateLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        emptyStateLabel.isHidden = true // 初始時隱藏
+        emptyStateLabel.isHidden = true
         view.addSubview(emptyStateLabel)
         
         emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80) // 上移 80 點
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80) 
         ])
     }
     
@@ -116,7 +117,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     
     private func updateUI() {
         tableView.reloadData()
-        updateEmptyState() // 更新空狀態標籤的顯示
+        updateEmptyState()
     }
     
     private func updateEmptyState() {

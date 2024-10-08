@@ -221,11 +221,36 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             for studentID in self.selectedStudentIDs {
                 for file in self.selectedFiles {
                     print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
-                    // 添加文件傳送的 Firebase 邏輯...
+                    
+                    let fileName = file.lastPathComponent
+                    
+                    self.firestore.collection("files")
+                        .whereField("fileName", isEqualTo: fileName)
+                        .getDocuments { (snapshot, error) in
+                            if let error = error {
+                                print("Error finding file in Firestore: \(error.localizedDescription)")
+                                return
+                            }
+                            
+                            guard let document = snapshot?.documents.first else {
+                                print("File not found in Firestore.")
+                                return
+                            }
+                            
+                            document.reference.updateData([
+                                "authorizedStudents": FieldValue.arrayUnion([studentID])
+                            ]) { error in
+                                if let error = error {
+                                    print("Error adding student to authorized list: \(error)")
+                                } else {
+                                    print("Student \(studentID) added to authorized list for file \(fileName) successfully.")
+                                }
+                            }
+                        }
                 }
             }
             
-            // 清空選擇
+           
             self.selectedFiles.removeAll()
             self.selectedStudentIDs.removeAll()
             self.studentTableView.isHidden = true
@@ -369,17 +394,19 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         let collectionPath = "files"
         let queryField = userRole == "teacher" ? "ownerID" : "authorizedStudents"
         
-        // 使用 arrayContains 運算符來查找陣列中包含 currentUserID 的文件
+        // 即時監聽文件變動
         let query = userRole == "teacher" ?
-                    firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
-                    firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
+            firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
+            firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
         
-        query.getDocuments { [weak self] snapshot, error in
+        // 使用 Firestore 即時監聽文件變動
+        query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error)")
                 return
             }
             
+            // 處理即時變動的文件
             self?.handleFetchedFiles(snapshot)
         }
     }
@@ -430,6 +457,10 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 
                 self.downloadFile(from: remoteURL, withName: fileName)
             }
+        }
+        
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
         }
     }
     

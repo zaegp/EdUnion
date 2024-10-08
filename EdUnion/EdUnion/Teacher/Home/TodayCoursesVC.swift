@@ -43,6 +43,7 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func configureUI() {
+        noCoursesLabel.isHidden = true
         view.backgroundColor = .myBackground
         progressBarHostingController.view.backgroundColor = .myBackground
         
@@ -118,6 +119,7 @@ class TodayCoursesVC: UIViewController {
             DispatchQueue.main.async {
                 if self?.viewModel.appointments.isEmpty == true {
                     // 課程為空時，顯示 noCoursesLabel 作為 tableView 的背景
+                    self?.noCoursesLabel.isHidden = false
                     self?.tableView.backgroundView = self?.noCoursesLabel
                 } else {
                     // 有課程時，移除背景標籤

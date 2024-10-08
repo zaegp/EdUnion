@@ -331,8 +331,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     userRef.setData([
                         "resume": resumeData,
                         "photoURL": profileImageURL ?? "",
-                        "totalCourseHours": 0,
-                        "timeSlots": [],
+//                        "totalCourseHours": 0,
+//                        "timeSlots": [],
                         "fullName": name // 覆蓋 fullName 欄位
                     ]) { error in
                         if let error = error {

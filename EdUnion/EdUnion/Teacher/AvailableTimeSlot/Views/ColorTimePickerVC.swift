@@ -32,7 +32,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         let label = UILabel()
         label.text = "請點擊選擇顏色"
         label.textAlignment = .center
-        label.textColor = .myGray
+        label.textColor = .gray
         label.font = UIFont.systemFont(ofSize: 16)
         return label
     }()

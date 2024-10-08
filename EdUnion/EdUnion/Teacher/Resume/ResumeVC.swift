@@ -10,6 +10,9 @@ import FirebaseFirestore
 
 class ResumeVC: UIViewController {
     
+    let nameLabel = UILabel()
+    let nameTextField = PaddedTextField()
+    
     let label1 = UILabel()
     let textField1 = PaddedTextField()
     
@@ -47,28 +50,57 @@ class ResumeVC: UIViewController {
     }
     
     func setupUI() {
-
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsVerticalScrollIndicator = false
+        view.addSubview(scrollView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        configureNameSection()
         configureLabels()
         configureTextFields()
         configureTextView()
         configureSaveButton()
         
         let stackViews = createStackViews()
-        let mainStackView = UIStackView(arrangedSubviews: stackViews + [saveButton])
+        
+        let nameStackView = createStackView(with: nameLabel, textField: nameTextField)
+        
+        let mainStackView = UIStackView(arrangedSubviews: [nameStackView] + stackViews + [saveButton])
         mainStackView.axis = .vertical
         mainStackView.spacing = 20
-        
-        view.addSubview(mainStackView)
-        
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        scrollView.addSubview(mainStackView)
+        
         NSLayoutConstraint.activate([
-            mainStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            mainStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            mainStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            mainStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+            mainStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20),
+            mainStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
         ])
+    }
+    
+    private func configureNameSection() {
+        nameLabel.text = "- 姓名 -"
+        nameLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        nameLabel.textAlignment = .center
+        
+        nameTextField.borderStyle = .none
+        nameTextField.textColor = .black
+        nameTextField.layer.cornerRadius = 10
+        nameTextField.clipsToBounds = true
+        nameTextField.backgroundColor = .myGray
+        nameTextField.textAlignment = .left
+        nameTextField.horizontalPadding = 10
+        nameTextField.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
     
     private func configureLabels() {
@@ -89,8 +121,8 @@ class ResumeVC: UIViewController {
             textField.borderStyle = .none
             textField.textColor = .black
             textField.layer.cornerRadius = 10
-//            textField.layer.borderWidth = 1
-//            textField.layer.borderColor = UIColor.mainTint.cgColor
+            //            textField.layer.borderWidth = 1
+            //            textField.layer.borderColor = UIColor.mainTint.cgColor
             textField.clipsToBounds = true
             textField.backgroundColor = .myGray
             textField.textAlignment = .left
@@ -119,13 +151,13 @@ class ResumeVC: UIViewController {
     }
     
     private func createStackViews() -> [UIStackView] {
-        let stackView1 = createStackView(with: label1, textField: textField1)
-        let stackView2 = createStackView(with: label2, textField: textField2)
-        let stackView3 = createStackView(with: label4, textView: textView3)
-        let stackView4 = createStackView(with: label3, textField: textField4)
-        let stackView5 = createStackView(with: label5, textField: textField5)
+        let stackView1 = createStackView(with: label1, textField: textField1) // 學歷
+        let stackView2 = createStackView(with: label2, textField: textField2) // 家教經驗
+        let stackView3 = createStackView(with: label3, textField: textField4) // 自我介紹
+        let stackView4 = createStackView(with: label4, textView: textView3) // 時薪
+        let stackView5 = createStackView(with: label5, textField: textField5) // 教學科目
         
-        return [stackView1, stackView2, stackView4, stackView5, stackView3]
+        return [stackView1, stackView2, stackView5, stackView3, stackView4]
     }
     
     private func createStackView(with label: UILabel, textField: UITextField) -> UIStackView {
@@ -160,6 +192,10 @@ class ResumeVC: UIViewController {
                     self?.textField4.text = resume[3]
                     self?.textField5.text = resume[4]
                 }
+                
+                if let name = document.data()?["fullName"] as? String {
+                    self?.nameTextField.text = name
+                }
             }
         }
     }
@@ -176,9 +212,12 @@ class ResumeVC: UIViewController {
             textField5.text ?? ""
         ]
         
-        teacherRef.updateData([
+        let updatedData: [String: Any] = [
+            "fullName": nameTextField.text ?? "",
             "resume": updatedResume
-        ]) { error in
+        ]
+        
+        teacherRef.updateData(updatedData) { error in
             if let error = error {
                 print("更新數據失敗: \(error)")
             } else {
