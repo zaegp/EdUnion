@@ -30,7 +30,9 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        tabBarController?.tabBar.isHidden = true
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
+        
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(true, animated: true)
         }
@@ -50,6 +52,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.separatorStyle = .none
+        tableView.backgroundColor = .myBackground
         tableView.register(ConfirmCell.self, forCellReuseIdentifier: "ConfirmCell")
         view.addSubview(tableView)
     }
@@ -64,6 +67,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
+        cell.backgroundColor = .myBackground
         let appointment = viewModel.appointments[indexPath.row]
         var isStudentExisting = false
         

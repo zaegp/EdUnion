@@ -21,6 +21,7 @@ class TodayCoursesVC: UIViewController {
     
     private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
     let titleLabel = UILabel()
+    let noCoursesLabel = UILabel()
     let stackView = UIStackView()
     var expandedIndexPath: IndexPath?
     let userID = UserSession.shared.currentUserID
@@ -33,21 +34,27 @@ class TodayCoursesVC: UIViewController {
         setupConstraints()
         setupViewModel()
     }
-    
+
     private func createTableHeader() -> UIView {
         let headerView = UIView()
-        headerView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        headerView.backgroundColor = .myCell
         
         return headerView
     }
     
     private func configureUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
+        progressBarHostingController.view.backgroundColor = .myBackground
         
         titleLabel.text = "Today's Courses"
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
+        
+        noCoursesLabel.text = "今日無課程"
+        noCoursesLabel.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+        noCoursesLabel.textAlignment = .center
+        view.addSubview(noCoursesLabel)
         
         addChild(progressBarHostingController)
         view.addSubview(progressBarHostingController.view)
@@ -55,7 +62,7 @@ class TodayCoursesVC: UIViewController {
         
         tableView.layer.cornerRadius = 20
         tableView.layer.masksToBounds = true
-        tableView.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
+        tableView.backgroundColor = .myCell
         tableView.separatorStyle = .none
         tableView.register(TodayCoursesCell.self, forCellReuseIdentifier: "Cell")
         tableView.delegate = self
@@ -72,7 +79,7 @@ class TodayCoursesVC: UIViewController {
             target: self,
             action: #selector(pushToConfirmVC)
         )
-        iconButton.tintColor = .black
+        iconButton.tintColor = .label
         navigationItem.rightBarButtonItem = iconButton
     }
     
@@ -83,6 +90,7 @@ class TodayCoursesVC: UIViewController {
     
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        noCoursesLabel.translatesAutoresizingMaskIntoConstraints = false
         progressBarHostingController.view.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -95,6 +103,9 @@ class TodayCoursesVC: UIViewController {
             progressBarHostingController.view.widthAnchor.constraint(equalToConstant: 150),
             progressBarHostingController.view.heightAnchor.constraint(equalToConstant: 150),
             
+            noCoursesLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noCoursesLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -300),
+            
             tableView.topAnchor.constraint(equalTo: progressBarHostingController.view.bottomAnchor, constant: 50),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -105,14 +116,20 @@ class TodayCoursesVC: UIViewController {
     private func setupViewModel() {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
+                if self?.viewModel.appointments.isEmpty == true {
+                    // 課程為空時，顯示 noCoursesLabel 作為 tableView 的背景
+                    self?.tableView.backgroundView = self?.noCoursesLabel
+                } else {
+                    // 有課程時，移除背景標籤
+                    self?.tableView.backgroundView = nil
+                    self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
+                }
                 self?.tableView.reloadData()
-                self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
             }
         }
         viewModel.fetchTodayAppointments()
     }
 }
-
 // MARK: - UITableViewDataSource
 extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
@@ -126,22 +143,30 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
+        cell.backgroundColor = .myCell
         configureCell(cell, at: indexPath)
+        
         return cell
     }
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
-        cell.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1.00)
         let appointment = viewModel.appointments[indexPath.row]
         
+        // 先獲取學生名字
         viewModel.fetchStudentName(for: appointment) { [weak self] studentName in
             DispatchQueue.main.async {
+                // 獲取備註
+                self?.viewModel.fetchStudentNote(teacherID: appointment.teacherID, studentID: appointment.studentID)
+                
+                // 配置 cell
                 cell.configureCell(
                     name: studentName,
                     times: appointment.times,
                     note: self?.viewModel.studentNote ?? "",
                     isExpanded: self?.expandedIndexPath == indexPath
                 )
+                
+                // 更新按鈕狀態
                 self?.updateCellButtonState(cell, appointment: appointment)
             }
         }

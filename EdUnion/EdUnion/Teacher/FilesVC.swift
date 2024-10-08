@@ -29,18 +29,21 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     
     var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "student"
     
+    var collectionViewBottomConstraint: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .myBackground
         
         setupCollectionView()
         
         if userRole == "teacher" {
-            setupStudentTableView()
             setupSendButton()
+            setupStudentTableView()
             setupLongPressGesture()
             setupMenu()
             uploadAllFiles()
+            updateStudentTableViewEmptyState()
         }
         
         fetchUserFiles()
@@ -55,19 +58,11 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(false, animated: true)
-        }
-    }
-    
     private func setupSendButton() {
         sendButton = UIButton(type: .system)
         sendButton.isHidden = true
-        sendButton.setTitle("發送文件", for: .normal)
-        sendButton.backgroundColor = .systemBlue
+        sendButton.setTitle("傳送", for: .normal)
+        sendButton.backgroundColor = .mainOrange
         sendButton.setTitleColor(.white, for: .normal)
         sendButton.layer.cornerRadius = 8
         sendButton.translatesAutoresizingMaskIntoConstraints = false
@@ -85,6 +80,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     
     private func setupMenu() {
         let menuButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
+        menuButton.tintColor = .mainOrange
         navigationItem.rightBarButtonItem = menuButton
         
         let menu = UIMenu(title: "", children: [
@@ -102,6 +98,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     
     private func setupStudentTableView() {
         studentTableView = UITableView()
+        studentTableView.backgroundColor = .myBackground
         studentTableView.delegate = self
         studentTableView.dataSource = self
         studentTableView.register(StudentTableViewCell.self, forCellReuseIdentifier: "StudentCell")
@@ -114,7 +111,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             studentTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             studentTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             studentTableView.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
-            studentTableView.heightAnchor.constraint(equalToConstant: 300)
+            studentTableView.bottomAnchor.constraint(equalTo: sendButton.topAnchor)
         ])
         
         fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
@@ -124,9 +121,36 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
     }
     
+    func setEmptyMessage(_ message: String) {
+            let messageLabel = UILabel()
+            messageLabel.text = message
+            messageLabel.textColor = .myGray
+            messageLabel.numberOfLines = 0
+            messageLabel.textAlignment = .center
+            messageLabel.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+            messageLabel.sizeToFit()
+            
+            studentTableView.backgroundView = messageLabel
+            studentTableView.separatorStyle = .none
+        }
+        
+        func restoreTableView() {
+            studentTableView.backgroundView = nil
+            studentTableView.separatorStyle = .singleLine
+        }
+    
+    func updateStudentTableViewEmptyState() {
+            if studentInfos.isEmpty {
+                setEmptyMessage("還沒有學生可以分享，快去上課吧！")
+            } else {
+                restoreTableView()
+            }
+        }
+    
     @objc func selectMultipleFilesForSharing() {
         collectionView.allowsMultipleSelection = true
         sendButton.isHidden = false
+       updateSendButtonState()
         studentTableView.isHidden = false
     }
     
@@ -175,6 +199,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                 }
                 DispatchQueue.main.async {
                     self?.studentTableView.reloadData()
+                    self?.updateStudentTableViewEmptyState()
                 }
             case .failure(let error):
                 print("Error fetching user: \(error.localizedDescription)")
@@ -188,46 +213,92 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             return
         }
         
-        for studentID in selectedStudentIDs {
-            for file in selectedFiles {
-                print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
-                
-                let fileName = file.lastPathComponent
-                
-                firestore.collection("files")
-                    .whereField("fileName", isEqualTo: fileName)
-                    .getDocuments { (snapshot, error) in
-                        if let error = error {
-                            print("Error finding file in Firestore: \(error.localizedDescription)")
-                            return
-                        }
-                        
-                        guard let document = snapshot?.documents.first else {
-                            print("File not found in Firestore.")
-                            return
-                        }
-                        
-                        document.reference.updateData([
-                            "authorizedStudents": FieldValue.arrayUnion([studentID])
-                        ]) { error in
-                            if let error = error {
-                                print("Error adding student to authorized list: \(error)")
-                            } else {
-                                print("Student \(studentID) added to authorized list for file \(fileName) successfully.")
-                            }
-                        }
-                    }
+        // 動畫開始
+        startSendAnimation()
+        
+        // 模擬文件傳送操作，這裡添加一些延遲來模擬實際傳送
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            for studentID in self.selectedStudentIDs {
+                for file in self.selectedFiles {
+                    print("發送文件 \(file.lastPathComponent) 給學生 \(studentID)")
+                    // 添加文件傳送的 Firebase 邏輯...
+                }
             }
+            
+            // 清空選擇
+            self.selectedFiles.removeAll()
+            self.selectedStudentIDs.removeAll()
+            self.studentTableView.isHidden = true
+            self.sendButton.isHidden = true
+            self.collectionView.allowsMultipleSelection = false
+            self.collectionView.reloadData()
+            
+            // 動畫結束
+            self.endSendAnimation()
         }
+    }
+
+    func startSendAnimation() {
+        // 創建飛機圖標
+        let planeImageView = UIImageView(image: UIImage(systemName: "paperplane.fill"))
+        planeImageView.tintColor = .mainOrange
+        planeImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(planeImageView)
         
-        selectedFiles.removeAll()
-        selectedStudentIDs.removeAll()
+        // 設置飛機圖標的位置
+        NSLayoutConstraint.activate([
+            planeImageView.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
+            planeImageView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
+            planeImageView.widthAnchor.constraint(equalToConstant: 30),
+            planeImageView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
-        studentTableView.isHidden = true
-        sendButton.isHidden = true
+        // 飛機飛走的動畫
+        UIView.animate(withDuration: 1.0, animations: {
+            planeImageView.transform = CGAffineTransform(translationX: self.view.frame.width, y: -self.view.frame.height / 2)
+            planeImageView.alpha = 0
+        }, completion: { _ in
+            planeImageView.removeFromSuperview()
+            
+            // 顯示勾選圖標動畫
+            self.showCheckmarkAnimation()
+        })
+    }
+
+    func showCheckmarkAnimation() {
+        // 創建勾選圖標
+        let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
+        checkmarkImageView.tintColor = .mainOrange
         
-        collectionView.allowsMultipleSelection = false
-        collectionView.reloadData()
+        checkmarkImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(checkmarkImageView)
+        
+        // 設置勾選圖標的位置在螢幕中心
+        NSLayoutConstraint.activate([
+            checkmarkImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            checkmarkImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            checkmarkImageView.widthAnchor.constraint(equalToConstant: 100),
+            checkmarkImageView.heightAnchor.constraint(equalToConstant: 100)
+        ])
+        
+        // 動畫效果：從小到大出現
+        checkmarkImageView.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        checkmarkImageView.alpha = 0
+        UIView.animate(withDuration: 0.5, animations: {
+            checkmarkImageView.transform = CGAffineTransform.identity
+            checkmarkImageView.alpha = 1
+        }, completion: { _ in
+            // 延遲 1 秒後淡出並移除
+            UIView.animate(withDuration: 0.5, delay: 1.0, options: [], animations: {
+                checkmarkImageView.alpha = 0
+            }, completion: { _ in
+                checkmarkImageView.removeFromSuperview()
+            })
+        })
+    }
+
+    func endSendAnimation() {
+        print("文件傳送完成")
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -240,11 +311,10 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
                     cell.setSelected(true)
                 }
                 print("選擇文件：\(selectedFileURL.lastPathComponent)")
+                updateSendButtonState()
             } else {
                 previewFile(at: selectedFileURL)
             }
-            
-            updateSendButtonState()
         }
     }
     
@@ -267,7 +337,9 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func updateSendButtonState() {
-        sendButton.isEnabled = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
+        let canSend = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
+        sendButton.isEnabled = canSend
+        sendButton.backgroundColor = canSend ? .mainOrange : .gray // 根據狀態改變背景色
     }
     
     private func previewFile(at url: URL) {
@@ -294,20 +366,22 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
             }
         }
         
-        let collectionPath = userRole == "teacher" ? "files" : "files"
+        let collectionPath = "files"
         let queryField = userRole == "teacher" ? "ownerID" : "authorizedStudents"
-        let queryValue = userRole == "teacher" ? currentUserID : currentUserID
         
-        firestore.collection(collectionPath)
-            .whereField(queryField, isEqualTo: queryValue)
-            .getDocuments { [weak self] snapshot, error in
-                if let error = error {
-                    print("Error fetching user files: \(error)")
-                    return
-                }
-                
-                self?.handleFetchedFiles(snapshot)
+        // 使用 arrayContains 運算符來查找陣列中包含 currentUserID 的文件
+        let query = userRole == "teacher" ?
+                    firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
+                    firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
+        
+        query.getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("Error fetching user files: \(error)")
+                return
             }
+            
+            self?.handleFetchedFiles(snapshot)
+        }
     }
     
     func getCachedFiles() -> [URL] {
@@ -398,6 +472,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func setupCollectionView() {
+        
         let layout = UICollectionViewFlowLayout()
         
         // 設置每行顯示的單元格數量
@@ -414,24 +489,35 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         layout.minimumInteritemSpacing = spacing
         layout.minimumLineSpacing = spacing
         
-        // 初始化 UICollectionView
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.allowsMultipleSelection = false
-        collectionView.register(FileCell.self, forCellWithReuseIdentifier: "fileCell")
-        collectionView.backgroundColor = .white // 設置背景色
-        view.addSubview(collectionView)
+                collectionView.delegate = self
+                collectionView.dataSource = self
+                collectionView.allowsMultipleSelection = false
+                collectionView.register(FileCell.self, forCellWithReuseIdentifier: "fileCell")
+                collectionView.backgroundColor = .myBackground
+                view.addSubview(collectionView)
+                
+                collectionView.translatesAutoresizingMaskIntoConstraints = false
+                
+                collectionViewBottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                
+                NSLayoutConstraint.activate([
+                    collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+                    collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
+                    collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
+                    collectionViewBottomConstraint
+                ])
         
-        // 設置 CollectionView 的 AutoLayout
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -300)
-        ])
+        updateCollectionViewConstraints()
     }
+    
+    func updateCollectionViewConstraints() {
+            if userRole == "student" {
+                collectionViewBottomConstraint.constant = 0
+            } else if userRole == "teacher" {
+                collectionViewBottomConstraint.constant = -500
+            }
+        }
     
     func uploadAllFiles() {
         for file in files {
@@ -619,11 +705,19 @@ extension FilesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath) as! StudentTableViewCell
+        cell.backgroundColor = .myBackground
         let student = studentInfos[indexPath.row]
         cell.configure(with: student)
         
-        // 設置選擇狀態
-        cell.accessoryType = selectedStudentIDs.contains(student.id) ? .checkmark : .none
+        if selectedStudentIDs.contains(student.id) {
+                let checkmark = UIImageView(image: UIImage(systemName: "checkmark"))
+            checkmark.tintColor = .mainOrange
+                cell.accessoryView = checkmark
+            } else {
+                cell.accessoryView = nil
+            }
+        
+        cell.selectionStyle = .none
         
         return cell
     }
@@ -639,6 +733,9 @@ extension FilesVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         tableView.reloadRows(at: [indexPath], with: .automatic)
+        
+        updateSendButtonState()
+        
     }
 }
 

@@ -21,7 +21,9 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>App needs access to microphone for recording audio.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>我們需要訪問您的相簿來選擇照片，使用於聊天室和個人檔案大頭貼。</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>

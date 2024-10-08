@@ -25,6 +25,26 @@ struct Message: Decodable {
         case isSeen
         case timestamp
     }
+    
+    init?(document: QueryDocumentSnapshot) {
+            let data = document.data()
+
+            // 手動提取和轉換字段
+            guard let type = data["type"] as? Int,
+                  let content = data["content"] as? String,
+                  let senderID = data["senderID"] as? String,
+                  let isSeen = data["isSeen"] as? Bool,
+                  let timestamp = data["timestamp"] as? Timestamp else {
+                return nil
+            }
+
+            self.ID = document.documentID
+            self.type = type
+            self.content = content
+            self.senderID = senderID
+            self.isSeen = isSeen
+            self.timestamp = timestamp
+        }
 }
 
 //struct Message {
