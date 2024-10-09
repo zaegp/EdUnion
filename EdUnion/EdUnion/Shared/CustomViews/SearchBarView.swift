@@ -47,7 +47,7 @@ class SearchBarView: UIView, UISearchBarDelegate {
             searchTextField.textColor = UIColor.mySearchBarTint
             searchTextField.tintColor = UIColor.mainOrange
             
-            let placeholderText = "搜尋聊天室"
+            let placeholderText = "搜尋"
             let attributes = [NSAttributedString.Key.foregroundColor: UIColor.mySearchBarTint]
             searchTextField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: attributes)
             

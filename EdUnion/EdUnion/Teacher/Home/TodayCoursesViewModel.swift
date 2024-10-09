@@ -44,6 +44,7 @@ class TodayCoursesViewModel {
             }
         }
     
+    
     func fetchTodayAppointments() {
         AppointmentFirebaseService.shared.fetchTodayAppointments { [weak self] result in
             switch result {

@@ -49,15 +49,31 @@ struct CalendarDayView: View {
         VStack(spacing: 5) {
             if let day = day {
                 let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
+                let isToday = Calendar.current.isDateInToday(day)
                 
                 Text(day.formatted(.dateTime.day()))
-                    .fontWeight(.medium)
-                    .foregroundColor(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                    .fontWeight(.bold)
+                    .foregroundColor(
+                        isToday && isSelected
+                        ? Color(UIColor.systemBackground)
+                        : isSelected
+                        ? Color(UIColor.label)
+                        : isToday
+                        ? Color.mainOrange
+                        : Color(UIColor.systemBackground)  
+                    )
                     .strikethrough(isPastDate, color: Color(UIColor.systemBackground))
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
-                        Circle()
-                            .fill(isSelected ? Color.mainOrange : Color.clear)
+                        ZStack {
+                            if !isToday {
+                                Circle()
+                                    .fill(isSelected ? Color.myBackground : Color.clear)
+                            } else {
+                                Circle()
+                                    .fill(isSelected ? Color.mainOrange : Color.clear)
+                            }
+                        }
                     )
                 
                 ZStack {
@@ -136,7 +152,7 @@ struct BaseCalendarView: View {
                                 .foregroundColor(Color(UIColor.systemBackground))
                         }
                         Spacer()
-                        Text(formattedMonthAndYear(currentDate))
+                        Text(formattedMonthAndYear(selectedDay ?? currentDate))
                             .font(.headline)
                             .foregroundColor(Color(UIColor.systemBackground))
                         Spacer()
@@ -200,14 +216,14 @@ struct BaseCalendarView: View {
                                         if value.translation.height < 0 {
                                             if !isWeekView {
                                                 isWeekView = true
-                                                generateDays()
+                                                generateDays(for: selectedDay ?? currentDate)
                                                 feedbackGenerator.impactOccurred()
                                             }
                                         } else if value.translation.height > 0 {
                                             // 向下滑動，切換到月視圖
                                             if isWeekView {
                                                 isWeekView = false
-                                                generateDays()
+                                                generateDays(for: selectedDay ?? currentDate)
                                                 feedbackGenerator.impactOccurred()
                                             }
                                         }
@@ -217,7 +233,7 @@ struct BaseCalendarView: View {
                     )
                     .onAppear {
                         setupView()
-                        generateDays()
+                        generateDays(for: selectedDay ?? currentDate)
                         if !isDataLoaded {
                             fetchAppointments()
                             isDataLoaded = true
@@ -370,19 +386,16 @@ struct BaseCalendarView: View {
         }
     }
     
-    func generateDays() {
+    func generateDays(for referenceDate: Date) {
         days.removeAll()
         
         let calendar = Calendar.current
-        var referenceDate: Date
         
         if isWeekView {
-            // 使用 selectedDay 或 currentDate 作為參考日期
-            referenceDate = selectedDay ?? currentDate
-            
             // 找到該週的第一天（通常是週日或週一，取決於日曆設定）
-            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate))!
-            
+            guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
+                return
+            }
             for i in 0..<7 {
                 if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
                     days.append(date)
@@ -390,7 +403,6 @@ struct BaseCalendarView: View {
             }
         } else {
             // 生成整個月的日期
-            referenceDate = currentDate
             let range = calendar.range(of: .day, in: .month, for: referenceDate)!
             let numDays = range.count
             
@@ -441,7 +453,7 @@ struct BaseCalendarView: View {
         
         if isWeekView {
             withAnimation {
-                generateDays()
+                generateDays(for: selectedDay ?? currentDate)
             }
         }
     }
@@ -476,35 +488,68 @@ struct BaseCalendarView: View {
         return days
     }
     
-    //    private func previousPeriod() {
-    //        currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
-    //        setupView()
-    //    }
-    //
-    //    private func nextPeriod() {
-    //        currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
-    //        setupView()
-    //    }
-    
     func previousPeriod() {
-        
         if isWeekView {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate)!
+            if let selectedDay = selectedDay {
+                // 有選擇日期，基於 selectedDay 減去一週
+                if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: selectedDay) {
+                    self.selectedDay = newSelectedDay
+                    generateDays(for: newSelectedDay)
+                }
+            } else {
+                // 沒有選擇日期，基於 currentDate 減去一週
+                if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate) {
+                    self.currentDate = newCurrentDate
+                    generateDays(for: newCurrentDate)
+                }
+            }
         } else {
-            currentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate)!
+            if let selectedDay = selectedDay {
+                // 有選擇日期，基於 selectedDay 減去一個月
+                if let newSelectedDay = Calendar.current.date(byAdding: .month, value: -1, to: selectedDay) {
+                    self.selectedDay = newSelectedDay
+                    generateDays(for: newSelectedDay)
+                }
+            } else {
+                // 沒有選擇日期，基於 currentDate 減去一個月
+                if let newCurrentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate) {
+                    self.currentDate = newCurrentDate
+                    generateDays(for: newCurrentDate)
+                }
+            }
         }
-        generateDays()
-        
     }
-    
+        
     func nextPeriod() {
         if isWeekView {
-            currentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate)!
+            if let selectedDay = selectedDay {
+                // 有選擇日期，基於 selectedDay 增加一週
+                if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: selectedDay) {
+                    self.selectedDay = newSelectedDay
+                    generateDays(for: newSelectedDay)
+                }
+            } else {
+                // 沒有選擇日期，基於 currentDate 增加一週
+                if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate) {
+                    self.currentDate = newCurrentDate
+                    generateDays(for: newCurrentDate)
+                }
+            }
         } else {
-            currentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate)!
+            if let selectedDay = selectedDay {
+                // 有選擇日期，基於 selectedDay 增加一個月
+                if let newSelectedDay = Calendar.current.date(byAdding: .month, value: 1, to: selectedDay) {
+                    self.selectedDay = newSelectedDay
+                    generateDays(for: newSelectedDay)
+                }
+            } else {
+                // 沒有選擇日期，基於 currentDate 增加一個月
+                if let newCurrentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate) {
+                    self.currentDate = newCurrentDate
+                    generateDays(for: newCurrentDate)
+                }
+            }
         }
-        generateDays()
-        
     }
     
     func formattedMonthAndYear(_ date: Date) -> String {
@@ -575,13 +620,6 @@ struct BaseCalendarView: View {
             let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
             
             internalDateColors[date] = .mainOrange
-            //            if hasPending {
-            //                internalDateColors[date] = .red
-            //            } else if hasConfirmed {
-            //                internalDateColors[date] = .green
-            //            } else {
-            //                internalDateColors[date] = .clear
-            //            }
         }
     }
     

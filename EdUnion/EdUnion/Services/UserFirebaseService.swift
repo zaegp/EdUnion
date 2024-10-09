@@ -417,14 +417,11 @@ class UserFirebaseService {
                         return nil
                     }
                     
-                    // 根據是否為老師來篩選 participants 的位置
                     if isTeacher {
-                        // 如果是老師，檢查 participantID 是否在索引 0
                         if chatRoom.participants.indices.contains(0), chatRoom.participants[0] == participantID {
                             return chatRoom
                         }
                     } else {
-                        // 如果是學生，檢查 participantID 是否在索引 1
                         if chatRoom.participants.indices.contains(1), chatRoom.participants[1] == participantID {
                             return chatRoom
                         }

@@ -163,7 +163,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     private func deleteAccountAction() {
-        let alertController = UIAlertController(title: "刪除帳號", message: "確定要刪除您的帳號嗎？這個操作無法恢復。", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "刪除帳號", message: "您在30天內重新登錄此帳號即可保留原本的資料", preferredStyle: .alert)
         
         let deleteAction = UIAlertAction(title: "刪除", style: .destructive) { _ in
             self.updateUserStatusToDeleting()

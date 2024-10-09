@@ -8,7 +8,7 @@
 import UIKit
 
 class TodayCoursesCell: UITableViewCell {
-    
+
     let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -31,7 +31,7 @@ class TodayCoursesCell: UITableViewCell {
     
     let timeLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .myGray
+        label.textColor = .gray
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -103,6 +103,7 @@ class TodayCoursesCell: UITableViewCell {
     
     func configureCell(name: String, times: [String], note: String, isExpanded: Bool) {
         timeLabel.text = ""
+        noteLabel.text = ""
         
         nameLabel.text = name
         timeLabel.text = TimeService.convertCourseTimeToDisplay(from: times)

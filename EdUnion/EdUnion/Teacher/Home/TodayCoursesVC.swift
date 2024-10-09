@@ -154,13 +154,10 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
         let appointment = viewModel.appointments[indexPath.row]
         
-        // 先獲取學生名字
         viewModel.fetchStudentName(for: appointment) { [weak self] studentName in
             DispatchQueue.main.async {
-                // 獲取備註
-                self?.viewModel.fetchStudentNote(teacherID: appointment.teacherID, studentID: appointment.studentID)
+                self?.viewModel.fetchStudentNote(teacherID: self?.userID ?? "", studentID: appointment.studentID)
                 
-                // 配置 cell
                 cell.configureCell(
                     name: studentName,
                     times: appointment.times,
@@ -168,7 +165,6 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
                     isExpanded: self?.expandedIndexPath == indexPath
                 )
                 
-                // 更新按鈕狀態
                 self?.updateCellButtonState(cell, appointment: appointment)
             }
         }
@@ -192,8 +188,10 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         let alert = UIAlertController(title: "完成課程", message: "確定要完成課程嗎?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "確定", style: .default, handler: { [weak self] _ in
-            self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
-            cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            UIView.transition(with: cell.confirmButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
+                cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            }, completion: nil)
         }))
         present(alert, animated: true, completion: nil)
     }
@@ -207,9 +205,9 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         expandedIndexPath = (expandedIndexPath == indexPath) ? nil : indexPath
-        tableView.beginUpdates()
+        
+        // 只更新需要的行，避免整個表格刷新
         tableView.reloadRows(at: indexPathsToReload, with: .fade)
-        tableView.endUpdates()
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {

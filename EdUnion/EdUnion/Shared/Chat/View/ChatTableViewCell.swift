@@ -115,7 +115,7 @@ class ChatTableViewCell: UITableViewCell {
         bubbleBackgroundView.addSubview(toggleImageButton)
         bubbleBackgroundView.addSubview(activityIndicator)
         contentView.addSubview(messageImageView)
-        messageImageView.addSubview(activityIndicator)
+//        messageImageView.addSubview(activityIndicator)
         contentView.addSubview(timestampLabel)
         
         toggleImageButton.addTarget(self, action: #selector(toggleImageButtonTapped), for: .touchUpInside)
@@ -228,6 +228,7 @@ class ChatTableViewCell: UITableViewCell {
                 messageImageView.image = localImage
                 activityIndicator.stopAnimating()
             } else {
+                messageImageView.image = nil
                 activityIndicator.startAnimating()
                 loadImage(from: message.content)
             }
@@ -317,7 +318,6 @@ class ChatTableViewCell: UITableViewCell {
     }
     
     private func loadImage(from urlString: String) {
-        activityIndicator.startAnimating()
         if let url = URL(string: urlString) {
             messageImageView.kf.setImage(with: url) { result in
                 self.activityIndicator.stopAnimating()
