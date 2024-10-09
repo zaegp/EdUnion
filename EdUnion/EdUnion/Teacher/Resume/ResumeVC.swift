@@ -39,6 +39,7 @@ class ResumeVC: UIViewController {
         setupUI()
         fetchResumeData()
         setupKeyboardDismissRecognizer()
+        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {

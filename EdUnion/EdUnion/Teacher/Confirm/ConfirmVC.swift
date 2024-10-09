@@ -25,6 +25,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         
         setupTableView()
         viewModel.loadPendingAppointments()
+        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {

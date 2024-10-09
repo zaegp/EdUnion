@@ -19,3 +19,19 @@ extension UIViewController {
         view.endEditing(true)
     }
 }
+
+// MARK: - 手勢返回前一頁
+extension UIViewController {
+    
+    func enableSwipeToGoBack() {
+        let swipeGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleSwipeGesture(_:)))
+        swipeGesture.edges = .left
+        view.addGestureRecognizer(swipeGesture)
+    }
+    
+    @objc private func handleSwipeGesture(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        if gesture.state == .recognized {
+            navigationController?.popViewController(animated: true)
+        }
+    }
+}

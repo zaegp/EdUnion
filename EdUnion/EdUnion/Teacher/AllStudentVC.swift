@@ -25,6 +25,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         setupTableView()
         setupEmptyStateLabel() // 設置空狀態標籤
         fetchStudents()
+        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -72,7 +73,7 @@ class AllStudentVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80) 
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80)
         ])
     }
     

@@ -47,6 +47,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         }
         
         fetchUserFiles()
+        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {

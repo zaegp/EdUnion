@@ -37,6 +37,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         
         bindViewModel()
         viewModel.loadTimeSlots()
+        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {
