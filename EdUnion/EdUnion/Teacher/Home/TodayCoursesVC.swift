@@ -14,6 +14,58 @@ struct Courses {
     var isCompleted: Bool
 }
 
+class BadgeButton: UIButton {
+    private let badgeLabel = UILabel()
+    
+    var badgeNumber: Int = 0 {
+        didSet {
+            updateBadge()
+        }
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupBadge()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupBadge()
+    }
+    
+    private func setupBadge() {
+        badgeLabel.backgroundColor = .mainOrange
+        badgeLabel.textColor = .white
+        badgeLabel.font = UIFont.systemFont(ofSize: 12)
+        badgeLabel.textAlignment = .center
+        badgeLabel.layer.cornerRadius = 10
+        badgeLabel.clipsToBounds = true
+        badgeLabel.isHidden = true
+        addSubview(badgeLabel)
+        
+        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            badgeLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: -5),
+            badgeLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 5),
+            badgeLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
+            badgeLabel.heightAnchor.constraint(equalToConstant: 20)
+        ])
+    }
+    
+    func setBadge(number: Int) {
+        badgeNumber = number
+    }
+    
+    private func updateBadge() {
+        if badgeNumber > 0 {
+            badgeLabel.text = "\(badgeNumber)"
+            badgeLabel.isHidden = false
+        } else {
+            badgeLabel.isHidden = true
+        }
+    }
+}
+
 class TodayCoursesVC: UIViewController {
     
     let tableView = UITableView()
@@ -26,6 +78,8 @@ class TodayCoursesVC: UIViewController {
     var expandedIndexPath: IndexPath?
     let userID = UserSession.shared.currentUserID
     
+    let bellButton = BadgeButton(type: .system)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,7 +87,34 @@ class TodayCoursesVC: UIViewController {
         setupNavigationBar()
         setupConstraints()
         setupViewModel()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateBellBadge), name: Notification.Name("UpdateBellBadge"), object: nil)
+
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+        
+        viewModel.fetchTodayAppointments()
+        updateBellBadge()
+    }
+    
+    deinit {
+            // 移除通知觀察者
+            NotificationCenter.default.removeObserver(self, name: Notification.Name("UpdateBellBadge"), object: nil)
+        }
+    
+    @objc func updateBellBadge() {
+            viewModel.fetchPendingAppointments { [weak self] in
+                let pendingCount = self?.viewModel.getPendingAppointmentsCount() ?? 0
+                self?.bellButton.setBadge(number: pendingCount)
+                print("Bell badge updated: \(pendingCount)")
+            }
+        }
 
     private func createTableHeader() -> UIView {
         let headerView = UIView()
@@ -74,15 +155,14 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func setupNavigationBar() {
-        let iconButton = UIBarButtonItem(
-            image: UIImage(systemName: "bell"),
-            style: .plain,
-            target: self,
-            action: #selector(pushToConfirmVC)
-        )
-        iconButton.tintColor = .label
-        navigationItem.rightBarButtonItem = iconButton
-    }
+            // 配置 bell 按鈕
+            bellButton.setImage(UIImage(systemName: "bell.badge.fill"), for: .normal)
+            bellButton.tintColor = .label
+            bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
+            
+            let bellBarButtonItem = UIBarButtonItem(customView: bellButton)
+            navigationItem.rightBarButtonItem = bellBarButtonItem
+        }
     
     @objc private func pushToConfirmVC() {
         let confirmVC = ConfirmVC()

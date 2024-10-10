@@ -102,6 +102,9 @@ class ChatListVC: UIViewController {
         navigationController?.navigationBar.shadowImage = UIImage()
 
         tabBarController?.tabBar.isHidden = true
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {

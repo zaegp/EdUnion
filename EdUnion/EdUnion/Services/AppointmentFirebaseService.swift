@@ -11,7 +11,7 @@ import FirebaseFirestore
 class AppointmentFirebaseService {
     static let shared = AppointmentFirebaseService()
     private init() {}
-    
+    let userID = UserSession.shared.currentUserID ?? ""
     let db = Firestore.firestore()
 
     // MARK: - 通用查詢方法
@@ -95,19 +95,71 @@ class AppointmentFirebaseService {
         }
     }
 
-    // MARK: - 今日已確認的預約
+    // MARK: - 今日確認、完成的預約
     func fetchTodayAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
         let todayDate = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let todayDateString = dateFormatter.string(from: todayDate)
+
+        let confirmedQuery = db.collection("appointments")
+            .whereField("date", isEqualTo: todayDateString)
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "confirmed")
         
-        fetchDocuments(db.collection("appointments"), where: "date", isEqualTo: todayDateString, completion: completion)
+        let completedQuery = db.collection("appointments")
+            .whereField("date", isEqualTo: todayDateString)
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "completed")
+        
+        // 並行執行兩次查詢
+        let group = DispatchGroup()
+        
+        var confirmedAppointments: [Appointment] = []
+        var completedAppointments: [Appointment] = []
+        
+        var errorOccurred: Error? = nil
+        
+        // 查詢 confirmed 狀態
+        group.enter()
+        confirmedQuery.getDocuments { (snapshot, error) in
+            if let error = error {
+                errorOccurred = error
+            } else if let documents = snapshot?.documents {
+                confirmedAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+            }
+            group.leave()
+        }
+        
+        // 查詢 completed 狀態
+        group.enter()
+        completedQuery.getDocuments { (snapshot, error) in
+            if let error = error {
+                errorOccurred = error
+            } else if let documents = snapshot?.documents {
+                completedAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+            }
+            group.leave()
+        }
+        
+        // 等待所有查詢完成後，合併結果
+        group.notify(queue: .main) {
+            if let error = errorOccurred {
+                completion(.failure(error))
+            } else {
+                let allAppointments = confirmedAppointments + completedAppointments
+                completion(.success(allAppointments))
+            }
+        }
     }
     
     // MARK: - 更新老師的總課程數
-    func incrementTeacherTotalCourses(teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+    func incrementTeacherTotalCourses(completion: @escaping (Result<Void, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.updateData([
             "totalCourses": FieldValue.increment(Int64(1))
@@ -125,7 +177,6 @@ class AppointmentFirebaseService {
         fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
             switch result {
             case .success(let appointments):
-                // 過濾等待確認狀態
                 let pendingAppointments = appointments.filter { $0.status == "pending" }
                 completion(.success(pendingAppointments))
             case .failure(let error):

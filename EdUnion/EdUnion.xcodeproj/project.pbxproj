@@ -27,6 +27,7 @@
 		517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE52CB0E004002A2513 /* NotePopupView.swift */; };
 		517E9DEB2CB637EE002A2513 /* StudentListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DEA2CB637EE002A2513 /* StudentListViewModel.swift */; };
 		517E9DF22CB71FEE002A2513 /* StudentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF12CB71FEE002A2513 /* StudentTableViewCell.swift */; };
+		517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -138,6 +139,7 @@
 		517E9DE52CB0E004002A2513 /* NotePopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePopupView.swift; sourceTree = "<group>"; };
 		517E9DEA2CB637EE002A2513 /* StudentListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentListViewModel.swift; sourceTree = "<group>"; };
 		517E9DF12CB71FEE002A2513 /* StudentTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentTableViewCell.swift; sourceTree = "<group>"; };
+		517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBarButtonItem+Ext.swift"; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -438,6 +440,7 @@
 				519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */,
 				519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */,
 				51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */,
+				517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -831,6 +834,7 @@
 				513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
+				517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */,
 				51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */,
 				519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */,
 				51ED0ADB2C916721006322B7 /* ViewController.swift in Sources */,

@@ -125,7 +125,8 @@ struct BaseCalendarView: View {
         }
     }
     
-    @State private var selectedDay: Date? = nil
+//    @State private var selectedDay: Date? = nil
+    @State private var selectedDay: Date? = Calendar.current.startOfDay(for: Date())
     
     @State private var appointments: [Appointment] = []
     
@@ -139,7 +140,7 @@ struct BaseCalendarView: View {
     @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
     
-    @State private var isWeekView: Bool = false
+    @State private var isWeekView: Bool = true
     
     var body: some View {
         let colors = dateColors
@@ -179,7 +180,7 @@ struct BaseCalendarView: View {
                                 
                                 CalendarDayView(
                                     day: day,
-                                    isSelected: selectedDay == day,
+                                    isSelected: selectedDay != nil && Calendar.current.isDate(selectedDay!, inSameDayAs: day),
                                     isCurrentMonth: isCurrentMonth,
                                     color: dateColors[day] ?? .clear
                                 )
@@ -422,6 +423,16 @@ struct BaseCalendarView: View {
                 }
             }
         }
+        
+        // 調試打印
+        print("Generated days for \(referenceDate):")
+        for day in days {
+            if let day = day {
+                print(day)
+            } else {
+                print("nil")
+            }
+        }
     }
     
     func cancelAppointment(appointmentID: String) {
@@ -448,8 +459,9 @@ struct BaseCalendarView: View {
         if selectedDay == day {
             selectedDay = nil // 取消選擇
         } else {
-            selectedDay = day
+            selectedDay = day // 選中當前點擊的日期
         }
+        print("Selected Day: \(selectedDay)")
         
         if isWeekView {
             withAnimation {
