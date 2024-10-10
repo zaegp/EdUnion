@@ -51,6 +51,14 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         enableSwipeToGoBack() 
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
+    
     private func setupSendButton() {
         sendButton = UIButton(type: .system)
         sendButton.isHidden = true
