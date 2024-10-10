@@ -131,35 +131,56 @@ class ChatViewModel {
         }
     }
     
-    func sendAudioMessage(_ audioData: Data) {
-        let audioId = UUID().uuidString
-        
-        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
-            guard let self = self else { return }
+//    func sendAudioMessage(_ audioData: Data) {
+//        let audioId = UUID().uuidString
+//        
+//        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
+//            guard let self = self else { return }
+//            
+//            switch result {
+//            case .success(let url):
+//                let messageData: [String: Any] = [
+//                    "senderID": self.userID,
+//                    "type": 2,  // 假設 '2' 代表音訊消息
+//                    "content": url,
+//                    "timestamp": FieldValue.serverTimestamp(),
+//                    "isSeen": false
+//                ]
+//                
+//                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
+//                    if let error = error {
+//                        print("Error sending audio message: \(error.localizedDescription)")
+//                    } else {
+//                        print("Audio message sent successfully")
+//                    }
+//                }
+//                
+//            case .failure(let error):
+//                print("Error uploading audio: \(error.localizedDescription)")
+//            }
+//        }
+//    }
+    
+    func markMessageAsSeen(_ message: Message) {
+            guard let messageID = message.ID else { return }
+            let chatRoomRef = Firestore.firestore().collection("chatRooms").document(chatRoomID)
+            let messageRef = chatRoomRef.collection("messages").document(messageID)
             
-            switch result {
-            case .success(let url):
-                let messageData: [String: Any] = [
-                    "senderID": self.userID,
-                    "type": 2,  // 假設 '2' 代表音訊消息
-                    "content": url,
-                    "timestamp": FieldValue.serverTimestamp(),
-                    "isSeen": false
-                ]
-                
-                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
-                    if let error = error {
-                        print("Error sending audio message: \(error.localizedDescription)")
-                    } else {
-                        print("Audio message sent successfully")
-                    }
+            messageRef.updateData(["isSeen": true]) { error in
+                if let error = error {
+                    print("Failed to update isSeen: \(error)")
+                } else {
+                    print("Message \(messageID) marked as seen.")
                 }
-                
-            case .failure(let error):
-                print("Error uploading audio: \(error.localizedDescription)")
             }
         }
-    }
+    
+    func updateMessageIsSeen(at index: Int) {
+            // Assuming you have a messages array
+            messages[index].isSeen = true
+            // Notify observers if necessary
+            onMessagesUpdated?()
+        }
     
     func fetchMessages() {
         listener = UserFirebaseService.shared.db.collection("chats").document(chatRoomID).collection("messages")

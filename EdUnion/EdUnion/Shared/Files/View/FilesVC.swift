@@ -9,7 +9,7 @@ import UIKit
 import FirebaseStorage
 import FirebaseFirestore
 
-class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UIDocumentInteractionControllerDelegate {
+class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     
     var collectionView: UICollectionView!
     var selectedFiles: [URL] = []
@@ -26,6 +26,7 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     var studentInfos: [Student] = []
     var selectedStudentIDs: Set<String> = []
     var sendButton: UIButton!
+    var currentUploadTask: StorageUploadTask?
     
     var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "student"
     
@@ -48,15 +49,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         
         fetchUserFiles()
         enableSwipeToGoBack() 
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        tabBarController?.tabBar.isHidden = true
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(true, animated: true)
-        }
     }
     
     private func setupSendButton() {
@@ -327,41 +319,6 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         print("文件傳送完成")
     }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.item < files.count {
-            let selectedFileURL = files[indexPath.item]
-            
-            if collectionView.allowsMultipleSelection {
-                selectedFiles.append(selectedFileURL)
-                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-                    cell.setSelected(true)
-                }
-                print("選擇文件：\(selectedFileURL.lastPathComponent)")
-                updateSendButtonState()
-            } else {
-                previewFile(at: selectedFileURL)
-            }
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if indexPath.item < files.count {
-            let deselectedFileURL = files[indexPath.item]
-            
-            if collectionView.allowsMultipleSelection {
-                if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
-                    selectedFiles.remove(at: index)
-                    print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
-                }
-                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-                    cell.setSelected(false)
-                }
-            }
-            
-            updateSendButtonState()
-        }
-    }
-    
     func updateSendButtonState() {
         let canSend = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
         sendButton.isEnabled = canSend
@@ -565,25 +522,80 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     // MARK: - 文件上傳到 Firebase
-    func uploadFileToFirebase(_ fileURL: URL, completion: @escaping (Result<String, Error>) -> Void) {
-        let fileName = fileURL.lastPathComponent
-        let storageRef = storage.reference().child("files/\(fileName)")
+    func generateUniqueFileName(originalName: String) -> String {
+        let uuid = UUID().uuidString
+        return "\(uuid)_\(originalName)"
+    }
+    
+    func uploadFileToFirebase(_ fileURL: URL, retryCount: Int = 3, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let currentUserID = UserSession.shared.currentUserID else {
+            print("Error: Current user ID is nil.")
+            completion(.failure(NSError(domain: "UserSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "Current user ID is nil."])))
+            return
+        }
         
-        let metadata = StorageMetadata()
-        metadata.contentType = "application/octet-stream"
+        let originalFileName = fileURL.lastPathComponent
+        let uniqueFileName = generateUniqueFileName(originalName: originalFileName)
+        let storageRef = Storage.storage().reference().child("files/\(uniqueFileName)")
         
-        storageRef.putFile(from: fileURL, metadata: metadata) { metadata, error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
+        do {
+            let fileData = try Data(contentsOf: fileURL)
+            let metadata = StorageMetadata()
+            metadata.contentType = "application/octet-stream"
+            metadata.customMetadata = ["ownerId": currentUserID]
+            
+            print("Starting upload for file: \(uniqueFileName)")
+            
+            let uploadTask = storageRef.putData(fileData, metadata: metadata) { metadata, error in
+                if let error = error {
+                    if retryCount > 0 {
+                        print("Upload failed, retrying... (\(retryCount) retries left)")
+                        self.uploadFileToFirebase(fileURL, retryCount: retryCount - 1, completion: completion)
+                    } else {
+                        print("Upload failed with error: \(error.localizedDescription)")
+                        completion(.failure(error))
+                    }
+                    return
+                }
+                
+                print("Upload completed, fetching download URL.")
+                
                 storageRef.downloadURL { url, error in
                     if let error = error {
-                        completion(.failure(error))
+                        if retryCount > 0 {
+                            print("Download URL fetch failed, retrying... (\(retryCount) retries left)")
+                            self.uploadFileToFirebase(fileURL, retryCount: retryCount - 1, completion: completion)
+                        } else {
+                            print("Download URL fetch failed with error: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        }
                     } else if let url = url {
+                        print("Upload successful. Download URL: \(url.absoluteString)")
                         completion(.success(url.absoluteString))
                     }
                 }
             }
+            
+            // 監控上傳進度
+            uploadTask.observe(.progress) { snapshot in
+                if let progress = snapshot.progress {
+                    let percentComplete = 100.0 * Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                    print("Upload is \(percentComplete)% complete.")
+                }
+            }
+            
+            uploadTask.observe(.failure) { snapshot in
+                if let error = snapshot.error {
+                    print("Upload failed during progress update: \(error.localizedDescription)")
+                    // 可選：在這裡呼叫 completion(.failure(error)) 或實現其他錯誤處理
+                }
+            }
+            
+            // 保持對 uploadTask 的強引用
+            self.currentUploadTask = uploadTask
+        } catch {
+            print("Error reading file data: \(error.localizedDescription)")
+            completion(.failure(error))
         }
     }
     
@@ -594,6 +606,12 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         present(documentPicker, animated: true, completion: nil)
         
         print("Document picker presented.")
+    }
+
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
     
     func saveFileMetadataToFirestore(downloadURL: String, fileName: String) {
@@ -608,26 +626,11 @@ class FilesVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataS
         
         firestore.collection("files").addDocument(data: fileData) { error in
             if let error = error {
-                print("Error saving file metadata: \(error)")
+                print("Error saving file metadata: \(error.localizedDescription)")
             } else {
                 print("File metadata saved successfully.")
             }
         }
-    }
-    
-    // MARK: - UICollectionView DataSource & Delegate Methods
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return files.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
-        if indexPath.item < files.count {
-            let fileURL = files[indexPath.item]
-            let isDownloading = fileDownloadStatus[fileURL] ?? false
-            cell.configure(with: fileURL, isDownloading: isDownloading)
-        }
-        return cell
     }
     
     func setupLongPressGesture() {
@@ -756,9 +759,7 @@ extension FilesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let student = studentInfos[indexPath.row]
-        
-        // 添加或移除選擇的學生
-        if selectedStudentIDs.contains(student.id) {
+                if selectedStudentIDs.contains(student.id) {
             selectedStudentIDs.remove(student.id)
         } else {
             selectedStudentIDs.insert(student.id)
@@ -771,61 +772,93 @@ extension FilesVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-class StudentTableViewCell: UITableViewCell {
-    let nameLabel = UILabel()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-        contentView.addSubview(nameLabel)
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            nameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
-        ])
+extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return files.count
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
+        if indexPath.item < files.count {
+            let fileURL = files[indexPath.item]
+            let isDownloading = fileDownloadStatus[fileURL] ?? false
+            cell.configure(with: fileURL, isDownloading: isDownloading)
+        }
+        return cell
     }
     
-    func configure(with student: Student) {
-        nameLabel.text = student.fullName
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item < files.count {
+            let selectedFileURL = files[indexPath.item]
+            
+            if collectionView.allowsMultipleSelection {
+                selectedFiles.append(selectedFileURL)
+                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                    cell.setSelected(true)
+                }
+                print("選擇文件：\(selectedFileURL.lastPathComponent)")
+                updateSendButtonState()
+            } else {
+                previewFile(at: selectedFileURL)
+            }
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if indexPath.item < files.count {
+            let deselectedFileURL = files[indexPath.item]
+            
+            if collectionView.allowsMultipleSelection {
+                if let index = selectedFiles.firstIndex(of: deselectedFileURL) {
+                    selectedFiles.remove(at: index)
+                    print("取消選擇文件：\(deselectedFileURL.lastPathComponent)")
+                }
+                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                    cell.setSelected(false)
+                }
+            }
+            
+            updateSendButtonState()
+        }
     }
 }
 
 // MARK: - UIDocumentPickerDelegate
 extension FilesVC: UIDocumentPickerDelegate {
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        print("Document picker did pick documents: \(urls)")
-        
-        if urls.isEmpty {
-            print("Error: No files were selected.")
-            return
-        }
-        
-        let selectedURL = urls[0] 
-        let fileName = selectedURL.lastPathComponent
-        
-        checkIfFileExists(fileName: fileName) { [weak self] exists in
-            if exists {
-                print("Error: A file with the same name already exists.")
-                self?.showAlert(message: "已有同名文件，請重新選擇")
-            } else {
-                self?.files.append(selectedURL)
-                self?.collectionView.reloadData()
-                self?.uploadFileToFirebase(selectedURL) { result in
-                    switch result {
-                    case .success(let downloadURL):
-                        self?.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileName)
-                    case .failure(let error):
-                        print("File upload failed: \(error.localizedDescription)")
+   func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    print("Document picker did pick documents: \(urls)")
+    
+    if urls.isEmpty {
+        print("Error: No files were selected.")
+        showAlert(title: "選擇錯誤", message: "沒有選擇任何文件。")
+        return
+    }
+    
+    let selectedURL = urls[0]
+    let fileName = selectedURL.lastPathComponent
+    
+    checkIfFileExists(fileName: fileName) { [weak self] exists in
+        if exists {
+            print("Error: A file with the same name already exists.")
+            self?.showAlert(title: "文件已存在", message: "已有同名文件，請重新選擇。")
+        } else {
+            self?.files.append(selectedURL)
+            self?.collectionView.reloadData()
+            self?.uploadFileToFirebase(selectedURL) { result in
+                switch result {
+                case .success(let downloadURL):
+                    self?.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileName)
+                    DispatchQueue.main.async {
+                        self?.showAlert(title: "上傳成功", message: "文件已成功上傳。")
                     }
+                case .failure(let error):
+                    print("File upload failed: \(error.localizedDescription)")
+                    self?.showAlert(title: "上傳失敗", message: "文件上傳失敗，請稍後再試。")
                 }
             }
         }
     }
+}
     
     func checkIfFileExists(fileName: String, completion: @escaping (Bool) -> Void) {
         let currentUserID = UserSession.shared.currentUserID ?? "unknown_user"

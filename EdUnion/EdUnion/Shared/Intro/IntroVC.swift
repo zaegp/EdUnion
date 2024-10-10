@@ -84,6 +84,16 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         nameTextField.horizontalPadding = 10
         nameTextField.heightAnchor.constraint(equalToConstant: 50).isActive = true
         nameTextField.tintColor = .mainOrange
+        
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        if textField == nameTextField {
+            let isNameEmpty = nameTextField.text?.isEmpty ?? true
+            saveButton.isEnabled = !isNameEmpty   // 當名字為空時禁用保存按鈕
+        }
     }
 
     private func configureOtherLabelsAndTextFields() {
@@ -131,6 +141,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         saveButton.layer.cornerRadius = 30
         saveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         saveButton.addTarget(self, action: #selector(saveChanges), for: .touchUpInside)
+        
+        saveButton.isEnabled = false
     }
 
     private func setupScrollViewAndContainer() {
@@ -331,9 +343,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     userRef.setData([
                         "resume": resumeData,
                         "photoURL": profileImageURL ?? "",
-//                        "totalCourseHours": 0,
-//                        "timeSlots": [],
-                        "fullName": name // 覆蓋 fullName 欄位
+                        "fullName": name
                     ]) { error in
                         if let error = error {
                             print("Error creating data: \(error.localizedDescription)")
@@ -344,7 +354,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     }
                 } else {
                     print("Error updating data: \(error.localizedDescription)")
-                    completion() // 確保在出錯時也呼叫 completion
+                    completion() 
                 }
             } else {
                 print("Data successfully updated.")

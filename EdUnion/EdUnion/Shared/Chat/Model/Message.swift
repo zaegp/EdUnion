@@ -13,7 +13,7 @@ struct Message: Decodable {
     let type: Int
     var content: String
     let senderID: String
-    let isSeen: Bool
+    var isSeen: Bool
     let timestamp: Timestamp
 
     // Firestore 自動解碼時使用的鍵對應

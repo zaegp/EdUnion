@@ -39,7 +39,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         setupTableView()
         setupKeyboardNotifications()
         updateSendButtonState()
-        enableSwipeToGoBack() 
+        enableSwipeToGoBack()
         
         if userRole == "teacher" {
             viewModel = ChatViewModel(chatRoomID: (userID ?? "") + "_" + (student?.id ?? ""))
@@ -218,17 +218,17 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
 //    @objc private func textFieldDidChange() {
 //        let size = textView.sizeThatFits(CGSize(width: textView.frame.width, height: CGFloat.greatestFiniteMagnitude))
-//            
+//
 //            let maxHeight: CGFloat = 100
 //            let newHeight = min(size.height, maxHeight)
-//            
+//
 //            if newHeight != messageInputBar.frame.height {
 //                UIView.animate(withDuration: 0.2) {
 //                    self.messageInputBar.frame.size.height = newHeight + 16
 //                    self.view.layoutIfNeeded()
 //                }
 //            }
-//            
+//
 //            // 更新 sendButton 狀態
 //            updateSendButtonState()
 //    }

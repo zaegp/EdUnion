@@ -46,6 +46,14 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         navigationController?.navigationBar.shadowImage = UIImage()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(true, animated: true)
+        }
+    }
+    
     // MARK: - Setup Methods
     
     private func setupTableView() {
@@ -221,7 +229,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     private func navigateToAllStudents() {
-        let studentListVC = AllStudentVC()
+        let studentListVC = StudentListVC()
         navigationController?.pushViewController(studentListVC, animated: true)
     }
     
