@@ -88,7 +88,7 @@ class TodayCoursesVC: UIViewController {
         setupConstraints()
         setupViewModel()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(updateBellBadge), name: Notification.Name("UpdateBellBadge"), object: nil)
+        viewModel.listenToPendingAppointments()
 
     }
     
@@ -103,18 +103,11 @@ class TodayCoursesVC: UIViewController {
         updateBellBadge()
     }
     
-    deinit {
-            // 移除通知觀察者
-            NotificationCenter.default.removeObserver(self, name: Notification.Name("UpdateBellBadge"), object: nil)
-        }
-    
     @objc func updateBellBadge() {
-            viewModel.fetchPendingAppointments { [weak self] in
-                let pendingCount = self?.viewModel.getPendingAppointmentsCount() ?? 0
-                self?.bellButton.setBadge(number: pendingCount)
-                print("Bell badge updated: \(pendingCount)")
-            }
-        }
+        let pendingCount = viewModel.getPendingAppointmentsCount()
+        bellButton.setBadge(number: pendingCount)
+        print("Bell badge updated: \(pendingCount)")
+    }
 
     private func createTableHeader() -> UIView {
         let headerView = UIView()
@@ -156,7 +149,7 @@ class TodayCoursesVC: UIViewController {
     
     private func setupNavigationBar() {
             // 配置 bell 按鈕
-            bellButton.setImage(UIImage(systemName: "bell.badge.fill"), for: .normal)
+            bellButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
             bellButton.tintColor = .label
             bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
             
@@ -165,9 +158,10 @@ class TodayCoursesVC: UIViewController {
         }
     
     @objc private func pushToConfirmVC() {
-        let confirmVC = ConfirmVC()
-        navigationController?.pushViewController(confirmVC, animated: true)
-    }
+            let pendingAppointments = viewModel.pendingAppointments
+            let confirmVC = ConfirmVC(appointments: pendingAppointments)
+            navigationController?.pushViewController(confirmVC, animated: true)
+        }
     
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -198,15 +192,17 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 if self?.viewModel.appointments.isEmpty == true {
-                    // 課程為空時，顯示 noCoursesLabel 作為 tableView 的背景
                     self?.noCoursesLabel.isHidden = false
                     self?.tableView.backgroundView = self?.noCoursesLabel
                 } else {
-                    // 有課程時，移除背景標籤
+                    self?.noCoursesLabel.isHidden = true
                     self?.tableView.backgroundView = nil
                     self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
                 }
                 self?.tableView.reloadData()
+                
+                // 直接在這裡更新鐘形徽章
+                self?.updateBellBadge()
             }
         }
         viewModel.fetchTodayAppointments()

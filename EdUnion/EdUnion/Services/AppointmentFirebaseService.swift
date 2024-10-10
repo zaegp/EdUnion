@@ -13,6 +13,7 @@ class AppointmentFirebaseService {
     private init() {}
     let userID = UserSession.shared.currentUserID ?? ""
     let db = Firestore.firestore()
+    private var listener: ListenerRegistration?
 
     // MARK: - 通用查詢方法
     private func fetchDocuments<T: Decodable>(_ collection: CollectionReference, where field: String, isEqualTo value: Any, completion: @escaping (Result<[T], Error>) -> Void) {
@@ -173,18 +174,31 @@ class AppointmentFirebaseService {
     }
 
     // MARK: - 老師：獲取待確認的預約
-    func fetchPendingAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
-            switch result {
-            case .success(let appointments):
-                let pendingAppointments = appointments.filter { $0.status == "pending" }
-                completion(.success(pendingAppointments))
-            case .failure(let error):
-                print("Error fetching pending appointments: \(error.localizedDescription)")
-                completion(.failure(error))
-            }
+    func listenToPendingAppointments(onUpdate: @escaping (Result<[Appointment], Error>) -> Void) {
+//            // 首先移除任何現有的監聽器
+//            listener?.remove()
+            
+            listener = db.collection("appointments")
+                .whereField("teacherID", isEqualTo: userID)
+                .whereField("status", isEqualTo: "pending")
+                .addSnapshotListener { (snapshot, error) in
+                    if let error = error {
+                        onUpdate(.failure(error))
+                        return
+                    }
+                    
+                    guard let documents = snapshot?.documents else {
+                        onUpdate(.success([]))
+                        return
+                    }
+                    
+                    let pendingAppointments = documents.compactMap { document -> Appointment? in
+                        try? document.data(as: Appointment.self)
+                    }
+                    
+                    onUpdate(.success(pendingAppointments))
+                }
         }
-    }
 
     // MARK: - 更新預約狀態
     func updateAppointmentStatus(appointmentID: String, status: AppointmentStatus, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -198,4 +212,8 @@ class AppointmentFirebaseService {
             }
         }
     }
+    
+    func removeListener() {
+            listener?.remove()
+        }
 }

@@ -13,18 +13,27 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var tableView: UITableView!
     var viewModel: ConfirmViewModel!
     
+    init(appointments: [Appointment]) {
+            self.viewModel = ConfirmViewModel(appointments: appointments, userID: UserSession.shared.currentUserID ?? "")
+            super.init(nibName: nil, bundle: nil)
+        }
+    
+    required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel = ConfirmViewModel()
-        viewModel.updateUI = { [weak self] in
-            DispatchQueue.main.async {
-                self?.tableView.reloadData()
-            }
-        }
+//        viewModel = ConfirmViewModel()
+//        viewModel.updateUI = { [weak self] in
+//            DispatchQueue.main.async {
+//                self?.tableView.reloadData()
+//            }
+//        }
         
         setupTableView()
-        viewModel.loadPendingAppointments()
+        setupViewModel()
         enableSwipeToGoBack()
     }
     
@@ -46,6 +55,14 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
             tabBarController.setCustomTabBarHidden(false, animated: true)
         }
     }
+    
+    private func setupViewModel() {
+            viewModel.updateUI = { [weak self] in
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            }
+        }
     
     // MARK: - TableView
     func setupTableView() {

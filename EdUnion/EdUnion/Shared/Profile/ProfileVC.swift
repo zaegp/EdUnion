@@ -223,11 +223,6 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         navigationController?.pushViewController(resumeVC, animated: true)
     }
     
-    private func navigateToConfirmAppointments() {
-        let confirmVC = ConfirmVC()
-        navigationController?.pushViewController(confirmVC, animated: true)
-    }
-    
     private func navigateToAllStudents() {
         let studentListVC = StudentListVC()
         navigationController?.pushViewController(studentListVC, animated: true)
