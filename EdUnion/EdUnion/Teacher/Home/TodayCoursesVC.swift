@@ -14,58 +14,6 @@ struct Courses {
     var isCompleted: Bool
 }
 
-class BadgeButton: UIButton {
-    private let badgeLabel = UILabel()
-    
-    var badgeNumber: Int = 0 {
-        didSet {
-            updateBadge()
-        }
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupBadge()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupBadge()
-    }
-    
-    private func setupBadge() {
-        badgeLabel.backgroundColor = .mainOrange
-        badgeLabel.textColor = .white
-        badgeLabel.font = UIFont.systemFont(ofSize: 12)
-        badgeLabel.textAlignment = .center
-        badgeLabel.layer.cornerRadius = 10
-        badgeLabel.clipsToBounds = true
-        badgeLabel.isHidden = true
-        addSubview(badgeLabel)
-        
-        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            badgeLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: -5),
-            badgeLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 5),
-            badgeLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
-            badgeLabel.heightAnchor.constraint(equalToConstant: 20)
-        ])
-    }
-    
-    func setBadge(number: Int) {
-        badgeNumber = number
-    }
-    
-    private func updateBadge() {
-        if badgeNumber > 0 {
-            badgeLabel.text = "\(badgeNumber)"
-            badgeLabel.isHidden = false
-        } else {
-            badgeLabel.isHidden = true
-        }
-    }
-}
-
 class TodayCoursesVC: UIViewController {
     
     let tableView = UITableView()
@@ -80,6 +28,8 @@ class TodayCoursesVC: UIViewController {
     
     let bellButton = BadgeButton(type: .system)
     
+    private let loadingIndicator = UIActivityIndicatorView(style: .large)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -87,9 +37,8 @@ class TodayCoursesVC: UIViewController {
         setupNavigationBar()
         setupConstraints()
         setupViewModel()
-        
+        tableView.reloadData()
         viewModel.listenToPendingAppointments()
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -99,7 +48,11 @@ class TodayCoursesVC: UIViewController {
             tabBarController.setCustomTabBarHidden(false, animated: true)
         }
         
-        viewModel.fetchTodayAppointments()
+        loadingIndicator.startAnimating()
+                viewModel.fetchTodayAppointments { [weak self] in
+                    // 在數據加載完成後停止加載指示器
+                    self?.loadingIndicator.stopAnimating()
+                }
         updateBellBadge()
     }
     
@@ -205,7 +158,6 @@ class TodayCoursesVC: UIViewController {
                 self?.updateBellBadge()
             }
         }
-        viewModel.fetchTodayAppointments()
     }
 }
 // MARK: - UITableViewDataSource
@@ -228,27 +180,25 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
-        let appointment = viewModel.appointments[indexPath.row]
-        
-        viewModel.fetchStudentName(for: appointment) { [weak self] studentName in
-            DispatchQueue.main.async {
-                self?.viewModel.fetchStudentNote(teacherID: self?.userID ?? "", studentID: appointment.studentID)
-                
-                cell.configureCell(
-                    name: studentName,
-                    times: appointment.times,
-                    note: self?.viewModel.studentNote ?? "",
-                    isExpanded: self?.expandedIndexPath == indexPath
-                )
-                
-                self?.updateCellButtonState(cell, appointment: appointment)
-            }
-        }
+            let appointment = viewModel.appointments[indexPath.row]
+            let studentID = appointment.studentID ?? ""
+            let studentName = viewModel.studentNames[studentID] ?? ""
+            let studentNote = viewModel.studentNotes[studentID] ?? "沒有備註"
+            
+            cell.configureCell(
+                name: studentName,
+                times: appointment.times,
+                note: studentNote,
+                isExpanded: expandedIndexPath == indexPath
+            )
+            
+            updateCellButtonState(cell, appointment: appointment)
         
         cell.confirmCompletion = { [weak self] in
             self?.handleCompletion(for: appointment, cell: cell)
         }
     }
+
     
     private func updateCellButtonState(_ cell: TodayCoursesCell, appointment: Appointment) {
         if appointment.status == "completed" {

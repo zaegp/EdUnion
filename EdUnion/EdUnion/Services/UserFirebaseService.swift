@@ -234,8 +234,8 @@ class UserFirebaseService {
         }
     }
     
-    func fetchStudentNote(teacherID: String, studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+    func fetchStudentNote(studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
@@ -598,27 +598,4 @@ class UserFirebaseService {
                 completion(error)
             }
         }
-    //    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
-    //        let studentRef = db.collection("students").document(id)
-    //        studentRef.getDocument { document, error in
-    //            if let error = error {
-    //                completion(.failure(error))
-    //            } else if let document = document, document.exists {
-    //                let studentName = document.data()?["name"] as? String
-    //                completion(.success(studentName))
-    //            } else {
-    //                completion(.success(nil))
-    //            }
-    //        }
-    //    }
-    
-    
-    // MARK: - 日期格式
-    //    private let dateFormatter: DateFormatter = {
-    //        let formatter = DateFormatter()
-    //        formatter.dateFormat = "yyyy-MM-dd"
-    //        formatter.timeZone = TimeZone.current
-    //        formatter.locale = Locale.current
-    //        return formatter
-    //    }()
 }

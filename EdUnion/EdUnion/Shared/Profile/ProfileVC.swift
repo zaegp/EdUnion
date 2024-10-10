@@ -12,8 +12,7 @@ import FirebaseFirestore
 import FirebaseStorage
 import SafariServices
 
-
-class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ProfileVC: UIViewController, UINavigationControllerDelegate {
     
     private let tableView = UITableView()
     private var userImageView: UIImageView!
@@ -109,14 +108,14 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                    ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
                    ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }),
                    ("登出", "door.right.hand.open", logoutButtonTapped),
                    ("刪除帳號", "trash", deleteAccountAction)
                ]
            } else {
                menuItems = [
                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }),
                    ("登出帳號", "door.right.hand.open", logoutButtonTapped),
                    ("刪除帳號", "trash", deleteAccountAction)
                ]
@@ -263,25 +262,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         }
         self.nameLabel.text = name
     }
-    
-    // MARK: - Image Picker Methods
-    
-    @objc private func didTapProfileImage() {
-        presentImagePicker(sourceType: .photoLibrary)
-    }
-    
-    private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
-        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else { return }
-        
-        let picker = UIImagePickerController()
-        picker.sourceType = sourceType
-        picker.delegate = self
-        picker.allowsEditing = true
-        present(picker, animated: true)
-    }
-    
-    // MARK: - UITableViewDelegate & DataSource Methods
-    
+}
+
+extension ProfileVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
@@ -331,9 +314,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         menuItems[indexPath.row].action()
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
-    // MARK: - UIImagePickerControllerDelegate Methods
-    
+}
+
+extension ProfileVC: UIImagePickerControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         
@@ -401,5 +384,19 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc private func didTapProfileImage() {
+        presentImagePicker(sourceType: .photoLibrary)
+    }
+    
+    private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
+        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else { return }
+        
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
     }
 }

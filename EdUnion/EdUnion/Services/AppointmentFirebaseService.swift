@@ -7,7 +7,6 @@
 
 import FirebaseFirestore
 
-
 class AppointmentFirebaseService {
     static let shared = AppointmentFirebaseService()
     private init() {}
@@ -37,6 +36,7 @@ class AppointmentFirebaseService {
         }
     }
     
+    // MARK: - 預約頁面可選時段
     func fetchAllAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
         fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
             switch result {
@@ -50,6 +50,7 @@ class AppointmentFirebaseService {
             }
         }
     }
+    
     // MARK: - 保存預約
     func saveBooking(data: [String: Any], completion: @escaping (Bool, Error?) -> Void) {
         db.collection("appointments").addDocument(data: data) { error in
@@ -67,23 +68,19 @@ class AppointmentFirebaseService {
     func fetchConfirmedAppointments(forTeacherID teacherID: String? = nil, studentID: String? = nil, completion: @escaping (Result<[Appointment], Error>) -> Void) -> ListenerRegistration? {
         var query: Query = db.collection("appointments").whereField("status", isEqualTo: "confirmed")
 
-        // 如果有提供 teacherID，則加上 teacherID 的篩選條件
         if let teacherID = teacherID {
             query = query.whereField("teacherID", isEqualTo: teacherID)
         }
 
-        // 如果有提供 studentID，則加上 studentID 的篩選條件
         if let studentID = studentID {
             query = query.whereField("studentID", isEqualTo: studentID)
         }
 
-        // 如果沒有提供任何一個 ID，則回傳錯誤
         guard teacherID != nil || studentID != nil else {
             completion(.failure(NSError(domain: "Missing teacherID or studentID", code: 400, userInfo: nil)))
             return nil
         }
 
-        // 添加監聽器並處理結果
         return query.addSnapshotListener { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -113,7 +110,6 @@ class AppointmentFirebaseService {
             .whereField("teacherID", isEqualTo: userID)
             .whereField("status", isEqualTo: "completed")
         
-        // 並行執行兩次查詢
         let group = DispatchGroup()
         
         var confirmedAppointments: [Appointment] = []
@@ -121,7 +117,6 @@ class AppointmentFirebaseService {
         
         var errorOccurred: Error? = nil
         
-        // 查詢 confirmed 狀態
         group.enter()
         confirmedQuery.getDocuments { (snapshot, error) in
             if let error = error {
@@ -134,7 +129,6 @@ class AppointmentFirebaseService {
             group.leave()
         }
         
-        // 查詢 completed 狀態
         group.enter()
         completedQuery.getDocuments { (snapshot, error) in
             if let error = error {
@@ -147,13 +141,15 @@ class AppointmentFirebaseService {
             group.leave()
         }
         
-        // 等待所有查詢完成後，合併結果
         group.notify(queue: .main) {
             if let error = errorOccurred {
                 completion(.failure(error))
             } else {
                 let allAppointments = confirmedAppointments + completedAppointments
-                completion(.success(allAppointments))
+                
+                let sortedAppointments = TimeService.sortCourses(by: allAppointments, ascending: true)
+                
+                completion(.success(sortedAppointments))
             }
         }
     }
@@ -175,30 +171,29 @@ class AppointmentFirebaseService {
 
     // MARK: - 老師：獲取待確認的預約
     func listenToPendingAppointments(onUpdate: @escaping (Result<[Appointment], Error>) -> Void) {
-//            // 首先移除任何現有的監聽器
-//            listener?.remove()
-            
-            listener = db.collection("appointments")
-                .whereField("teacherID", isEqualTo: userID)
-                .whereField("status", isEqualTo: "pending")
-                .addSnapshotListener { (snapshot, error) in
-                    if let error = error {
-                        onUpdate(.failure(error))
-                        return
-                    }
-                    
-                    guard let documents = snapshot?.documents else {
-                        onUpdate(.success([]))
-                        return
-                    }
-                    
-                    let pendingAppointments = documents.compactMap { document -> Appointment? in
-                        try? document.data(as: Appointment.self)
-                    }
-                    
-                    onUpdate(.success(pendingAppointments))
+        //            listener?.remove()
+        
+        listener = db.collection("appointments")
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { (snapshot, error) in
+                if let error = error {
+                    onUpdate(.failure(error))
+                    return
                 }
-        }
+                
+                guard let documents = snapshot?.documents else {
+                    onUpdate(.success([]))
+                    return
+                }
+                
+                let pendingAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+                
+                onUpdate(.success(pendingAppointments))
+            }
+    }
 
     // MARK: - 更新預約狀態
     func updateAppointmentStatus(appointmentID: String, status: AppointmentStatus, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -212,8 +207,4 @@ class AppointmentFirebaseService {
             }
         }
     }
-    
-    func removeListener() {
-            listener?.remove()
-        }
 }

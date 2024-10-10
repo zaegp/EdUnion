@@ -50,6 +50,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
             self?.scrollToBottom()
+            self?.messageTextView.becomeFirstResponder()
         }
         
         messageTextView.delegate = self
@@ -162,7 +163,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         
         photoButton.setImage(UIImage(systemName: "photo"), for: .normal)
-        photoButton.tintColor = .mainOrange
+        photoButton.tintColor = .myMessageCell
         photoButton.addTarget(self, action: #selector(selectPhoto), for: .touchUpInside)
         photoButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -214,24 +215,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         viewModel.sendMessage(messageText)
         messageTextView.text = nil
+        updateSendButtonState()
+        messageTextView.becomeFirstResponder() // 確保鍵盤保持打開
     }
-    
-//    @objc private func textFieldDidChange() {
-//        let size = textView.sizeThatFits(CGSize(width: textView.frame.width, height: CGFloat.greatestFiniteMagnitude))
-//
-//            let maxHeight: CGFloat = 100
-//            let newHeight = min(size.height, maxHeight)
-//
-//            if newHeight != messageInputBar.frame.height {
-//                UIView.animate(withDuration: 0.2) {
-//                    self.messageInputBar.frame.size.height = newHeight + 16
-//                    self.view.layoutIfNeeded()
-//                }
-//            }
-//
-//            // 更新 sendButton 狀態
-//            updateSendButtonState()
-//    }
     
     @objc private func handleKeyboardWillShow(notification: NSNotification) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {

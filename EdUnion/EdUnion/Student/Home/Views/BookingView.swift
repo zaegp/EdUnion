@@ -12,6 +12,20 @@ struct BookingView: View {
     let teacherID: String
     let selectedTimeSlots: [String: String]
     let timeSlots: [AvailableTimeSlot]
+    var availableTimeSlotsForSelectedDate: [String] {
+        guard let selectedDate = selectedDate else { return [] }
+        let allSlots = timeSlots.filter { $0.colorHex == selectedTimeSlots[selectedDate] }
+            .flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }
+        
+        if isToday(selectedDate) {
+            let now = Date()
+            return allSlots.filter { timeSlot in
+                !isTimeSlotInPast(timeSlot, comparedTo: now)
+            }
+        } else {
+            return allSlots
+        }
+    }
     
     @State private var selectedDate: String?
     @State private var selectedTimes: [String] = []
@@ -99,7 +113,7 @@ struct BookingView: View {
                     } else {
                         ScrollView(.vertical, showsIndicators: false) {
                             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
-                                ForEach(slotsForDate.flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }, id: \.self) { timeSlot in
+                                ForEach(availableTimeSlotsForSelectedDate, id: \.self) { timeSlot in
                                     Button(action: {
                                         toggleSelection(of: timeSlot)
                                     }) {
@@ -109,7 +123,7 @@ struct BookingView: View {
                                             .background(buttonBackgroundColor(for: timeSlot))
                                             .foregroundColor(buttonForegroundColor(for: timeSlot))
                                             .cornerRadius(10)
-                                            .animation(isBooked(timeSlot: timeSlot) ? .easeInOut : nil)  // 只對已被預約的時間段應用動畫
+                                            .animation(isBooked(timeSlot: timeSlot) ? .easeInOut : nil)
                                     }
                                     .disabled(isBooked(timeSlot: timeSlot))
                                 }
@@ -235,33 +249,77 @@ struct BookingView: View {
         // 將時間轉換為 Date 類型
         guard let selectedTime = dateFormatter.date(from: timeSlot) else { return }
         
-        // 檢查是否為取消選取的情況
         if let index = selectedTimes.firstIndex(of: timeSlot) {
-            // 如果是取消選取，直接移除選擇
-            selectedTimes.remove(at: index)
-            return
-        }
-        
-        // 檢查添加新的時間段是否連續
-        var allSelectedTimes = selectedTimes + [timeSlot]
-        allSelectedTimes.sort()
-        
-        for i in 0..<(allSelectedTimes.count - 1) {
-            guard let firstTime = dateFormatter.date(from: allSelectedTimes[i]),
-                  let secondTime = dateFormatter.date(from: allSelectedTimes[i + 1]) else {
-                return
-            }
+            // 嘗試取消選取
+            var newSelection = selectedTimes
+            newSelection.remove(at: index)
             
-            // 如果兩個時間之間的間隔不是 30 分鐘，則顯示警告訊息並返回
-            if Calendar.current.dateComponents([.minute], from: firstTime, to: secondTime).minute != 30 {
+            if isSelectionContinuous(newSelection) {
+                // 如果取消後仍然連續，允許取消
+                selectedTimes = newSelection
+            } else {
+                // 否則，顯示警告並阻止取消
                 alertMessage = "只能選擇連續的時間段。"
                 showingAlert = true
-                return
+            }
+        } else {
+            var newSelection = selectedTimes + [timeSlot]
+            newSelection.sort()
+            
+            if isSelectionContinuous(newSelection) {
+                selectedTimes.append(timeSlot)
+            } else {
+                alertMessage = "只能選擇連續的時間段。"
+                showingAlert = true
+            }
+        }
+    }
+    
+    func isSelectionContinuous(_ times: [String]) -> Bool {
+        guard times.count > 1 else { return true }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        
+        let sortedTimes = times.sorted {
+            dateFormatter.date(from: $0)! < dateFormatter.date(from: $1)!
+        }
+        
+        for i in 0..<(sortedTimes.count - 1) {
+            guard let firstTime = dateFormatter.date(from: sortedTimes[i]),
+                  let secondTime = dateFormatter.date(from: sortedTimes[i + 1]) else {
+                return false
+            }
+            
+            let difference = Calendar.current.dateComponents([.minute], from: firstTime, to: secondTime).minute
+            if difference != 30 {
+                return false
             }
         }
         
-        // 如果是新增選取，通過連續性檢查後才添加
-        selectedTimes.append(timeSlot)
+        return true
+    }
+    
+    func isToday(_ dateString: String) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let selectedDate = dateFormatter.date(from: dateString)
+        let calendar = Calendar.current
+        return calendar.isDateInToday(selectedDate ?? Date())
+    }
+
+    func isTimeSlotInPast(_ timeSlot: String, comparedTo currentDate: Date) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        
+        guard let slotTime = dateFormatter.date(from: timeSlot) else { return false }
+        
+        let calendar = Calendar.current
+        let slotDate = calendar.date(bySettingHour: calendar.component(.hour, from: slotTime),
+                                    minute: calendar.component(.minute, from: slotTime),
+                                    second: 0, of: currentDate) ?? currentDate
+        
+        return slotDate < currentDate
     }
     
     func submitBooking() {
@@ -323,6 +381,3 @@ struct BookingView: View {
         }
     }
 }
-//#Preview {
-//    BookingView(selectedTimeSlots: ["2024-09-11": "#FF624F", "2024-09-13": "#FF624F", "2024-09-12": "#000000", "2024-10-10": "#FF624F"], timeSlots: [EdUnion.TimeSlot(colorHex: "#FF624F", timeRanges: ["08:00 - 11:00", "14:00 - 18:00"]), EdUnion.TimeSlot(colorHex: "#000000", timeRanges: ["06:00 - 21:00"])])
-//}

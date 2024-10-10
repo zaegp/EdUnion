@@ -123,262 +123,262 @@ struct BaseCalendarView: View {
     @State private var isWeekView: Bool = true
     
     var body: some View {
-            let colors = dateColors
-            ZStack {
+        let colors = dateColors
+        ZStack {
+            VStack {
                 VStack {
-                    VStack {
-                        HStack {
-                            Button(action: { previousPeriod() }) {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(Color(UIColor.systemBackground))
-                            }
-                            Spacer()
-                            Text(formattedMonthAndYear(selectedDay ?? currentDate))
-                                .font(.headline)
+                    HStack {
+                        Button(action: { previousPeriod() }) {
+                            Image(systemName: "chevron.left")
                                 .foregroundColor(Color(UIColor.systemBackground))
-                            Spacer()
-                            Button(action: { nextPeriod() }) {
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(Color(UIColor.systemBackground))
+                        }
+                        Spacer()
+                        Text(formattedMonthAndYear(selectedDay ?? currentDate))
+                            .font(.headline)
+                            .foregroundColor(Color(UIColor.systemBackground))
+                        Spacer()
+                        Button(action: { nextPeriod() }) {
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(Color(UIColor.systemBackground))
+                        }
+                    }
+                    .padding()
+                    
+                    HStack {
+                        ForEach(daysOfWeek, id: \.self) { day in
+                            Text(day)
+                                .fontWeight(.regular)
+                                .frame(maxWidth: .infinity)
+                                .foregroundColor(Color.myGray)
+                        }
+                    }
+                    
+                    LazyVGrid(columns: columns) {
+                        ForEach(days, id: \.self) { day in
+                            if let day = day {
+                                let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
+                                
+                                CalendarDayView(
+                                    day: day,
+                                    isSelected: selectedDay != nil && Calendar.current.isDate(selectedDay!, inSameDayAs: day),
+                                    isCurrentMonth: isCurrentMonth,
+                                    color: dateColors[day] ?? .clear
+                                )
+                                .onTapGesture {
+                                    toggleSingleSelection(for: day)
+                                    onDayTap?(day)
+                                }
+                                .onLongPressGesture {
+                                    onDayLongPress?(day)
+                                }
+                            } else {
+                                CalendarDayView(day: nil, isSelected: false, isCurrentMonth: false, color: .clear)
                             }
                         }
-                        .padding()
-                        
-                        HStack {
-                            ForEach(daysOfWeek, id: \.self) { day in
-                                Text(day)
-                                    .fontWeight(.regular)
-                                    .frame(maxWidth: .infinity)
-                                    .foregroundColor(Color.myGray)
-                            }
-                        }
-                        
-                        LazyVGrid(columns: columns) {
-                            ForEach(days, id: \.self) { day in
-                                if let day = day {
-                                    let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
-                                    
-                                    CalendarDayView(
-                                        day: day,
-                                        isSelected: selectedDay != nil && Calendar.current.isDate(selectedDay!, inSameDayAs: day),
-                                        isCurrentMonth: isCurrentMonth,
-                                        color: dateColors[day] ?? .clear
-                                    )
-                                    .onTapGesture {
-                                        toggleSingleSelection(for: day)
-                                        onDayTap?(day)
-                                    }
-                                    .onLongPressGesture {
-                                        onDayLongPress?(day)
+                    }
+                    .frame(height: isWeekView ? 80 : nil)
+                    .animation(.easeInOut(duration: 0.3), value: isWeekView)
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+                                feedbackGenerator.prepare()
+                                
+                                if abs(value.translation.width) > abs(value.translation.height) {
+                                    if value.translation.width < 0 {
+                                        nextPeriod()
+                                        feedbackGenerator.impactOccurred()
+                                    } else if value.translation.width > 0 {
+                                        previousPeriod()
+                                        feedbackGenerator.impactOccurred()
                                     }
                                 } else {
-                                    CalendarDayView(day: nil, isSelected: false, isCurrentMonth: false, color: .clear)
-                                }
-                            }
-                        }
-                        .frame(height: isWeekView ? 80 : nil)
-                        .animation(.easeInOut(duration: 0.3), value: isWeekView)
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
-                                    feedbackGenerator.prepare()
-                                    
-                                    if abs(value.translation.width) > abs(value.translation.height) {
-                                        if value.translation.width < 0 {
-                                            nextPeriod()
-                                            feedbackGenerator.impactOccurred()
-                                        } else if value.translation.width > 0 {
-                                            previousPeriod()
-                                            feedbackGenerator.impactOccurred()
-                                        }
-                                    } else {
-                                        withAnimation {
-                                            if value.translation.height < 0 {
-                                                if !isWeekView {
-                                                    isWeekView = true
-                                                    generateDays(for: selectedDay ?? currentDate)
-                                                    feedbackGenerator.impactOccurred()
-                                                }
-                                            } else if value.translation.height > 0 {
-                                                // 向下滑動，切換到月視圖
-                                                if isWeekView {
-                                                    isWeekView = false
-                                                    generateDays(for: selectedDay ?? currentDate)
-                                                    feedbackGenerator.impactOccurred()
-                                                }
+                                    withAnimation {
+                                        if value.translation.height < 0 {
+                                            if !isWeekView {
+                                                isWeekView = true
+                                                generateDays(for: selectedDay ?? currentDate)
+                                                feedbackGenerator.impactOccurred()
+                                            }
+                                        } else if value.translation.height > 0 {
+                                            // 向下滑動，切換到月視圖
+                                            if isWeekView {
+                                                isWeekView = false
+                                                generateDays(for: selectedDay ?? currentDate)
+                                                feedbackGenerator.impactOccurred()
                                             }
                                         }
                                     }
                                 }
-                        )
-                        .onAppear {
-                            setupView()
-                            generateDays(for: selectedDay ?? currentDate)
-                            if !isDataLoaded {
-                                fetchAppointments()
-                                isDataLoaded = true
                             }
+                    )
+                    .onAppear {
+                        setupView()
+                        generateDays(for: selectedDay ?? currentDate)
+                        if !isDataLoaded {
+                            fetchAppointments()
+                            isDataLoaded = true
                         }
-                    }
-                    .padding()
-                    .background(Color.myDarkGray)
-                    .cornerRadius(30)
-                    .padding()
-                    
-                    Spacer()
-                    
-                    if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
-                        List {
-                            ForEach(viewModel.sortedActivities) { appointment in
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            if userRole == "teacher" {
-                                                Text(viewModel.participantNames[appointment.studentID] ?? "")
-                                                    .onAppear {
-                                                        if viewModel.participantNames[appointment.studentID] == nil {
-                                                            viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
-                                                        }
-                                                    }
-                                                    .font(.headline)
-                                                    .foregroundColor(Color(UIColor.myDarkGray))
-                                            } else {
-                                                Text(viewModel.participantNames[appointment.teacherID] ?? "")
-                                                    .onAppear {
-                                                        if viewModel.participantNames[appointment.studentID] == nil {
-                                                            viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
-                                                        }
-                                                    }
-                                                    .font(.headline)
-                                                    .foregroundColor(Color(UIColor.myDarkGray))
-                                            }
-                                            
-                                            Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                                                .font(.body)
-                                                .foregroundColor(.primary)
-                                            
-                                            Spacer()
-                                        }
-                                    }
-                                    Spacer()
-                                    
-                                    Image(systemName: "arrow.forward")
-                                        .foregroundColor(.primary)
-                                }
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 10)
-                                .background(.clear)
-                                .cornerRadius(20)
-                                //                            .overlay(
-                                //                                RoundedRectangle(cornerRadius: 20)
-                                //                                    .stroke(Color.myBorder, lineWidth: 1)
-                                //                            )
-                                //                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-                                .padding(.vertical, 5)
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.myBackground)
-                                .frame(height: 40)
-                                .onTapGesture {
-                                    selectedAppointment = appointment
-                                    isShowingCard = true
-                                }
-                            }
-                        }
-                        .listStyle(PlainListStyle())
-                        .onAppear {
-                            viewModel.loadAndSortActivities(for: activities)
-                        }
-                        .onChange(of: selectedDay) { newDay in
-                            let newActivities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
-                            if let newActivities = newActivities {
-                                viewModel.loadAndSortActivities(for: newActivities)
-                            }
-                        }
-                        .padding(.bottom, 80)
                     }
                 }
-                .background(Color.myBackground)
+                .padding()
+                .background(Color.myDarkGray)
+                .cornerRadius(30)
+                .padding()
                 
-                if isShowingCard, let appointment = selectedAppointment {
-                    VStack {
-                        Spacer()
-                        VStack(spacing: 24) {
-                            Text(appointment.date)
-                                .font(.headline)
-                            if userRole == "student" {
-                                Text(viewModel.participantNames[appointment.teacherID] ?? "Unknown")
-                                    .font(.title)
-                                    .fontWeight(.semibold)
-                            } else {
-                                Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
-                                    .font(.title)
-                                    .fontWeight(.semibold)
+                Spacer()
+                
+                if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
+                    List {
+                        ForEach(viewModel.sortedActivities) { appointment in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        if userRole == "teacher" {
+                                            Text(viewModel.participantNames[appointment.studentID] ?? "")
+                                                .onAppear {
+                                                    if viewModel.participantNames[appointment.studentID] == nil {
+                                                        viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
+                                                    }
+                                                }
+                                                .font(.headline)
+                                                .foregroundColor(Color(UIColor.myDarkGray))
+                                        } else {
+                                            Text(viewModel.participantNames[appointment.teacherID] ?? "")
+                                                .onAppear {
+                                                    if viewModel.participantNames[appointment.studentID] == nil {
+                                                        viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
+                                                    }
+                                                }
+                                                .font(.headline)
+                                                .foregroundColor(Color(UIColor.myDarkGray))
+                                        }
+                                        
+                                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
+                                            .font(.body)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                    }
+                                }
+                                Spacer()
+                                
+                                Image(systemName: "arrow.forward")
+                                    .foregroundColor(.primary)
                             }
-                            Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                                .font(.subheadline)
-                            
-                            if userRole == "student" {
-                                Button(action: {
-                                    let appointmentID = appointment.id ?? ""
-                                    cancelAppointment(appointmentID: appointmentID)
-                                }) {
-                                    Text("取消預約")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.mainOrange)
-                                        .cornerRadius(10)
-                                }
-                            } else if userRole == "teacher" {
-                                Button(action: {
-                                    selectedStudentID = appointment.studentID
-                                    isShowingNotePopup = true
-                                }) {
-                                    Text("顯示備註")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.mainOrange)
-                                        .cornerRadius(10)
-                                }
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(.clear)
+                            .cornerRadius(20)
+                            //                            .overlay(
+                            //                                RoundedRectangle(cornerRadius: 20)
+                            //                                    .stroke(Color.myBorder, lineWidth: 1)
+                            //                            )
+                            //                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                            .padding(.vertical, 5)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.myBackground)
+                            .frame(height: 40)
+                            .onTapGesture {
+                                selectedAppointment = appointment
+                                isShowingCard = true
                             }
                         }
-                        .padding()
-                        .background(Color.myBackground)
-                        .cornerRadius(15)
-                        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                        .padding()
-                        Spacer()
                     }
-                    .background(
-                        Color.primary.opacity(0.2)
-                    )
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        isShowingCard = false
+                    .listStyle(PlainListStyle())
+                    .onAppear {
+                        viewModel.loadAndSortActivities(for: activities)
                     }
+                    .onChange(of: selectedDay) { newDay in
+                        let newActivities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
+                        if let newActivities = newActivities {
+                            viewModel.loadAndSortActivities(for: newActivities)
+                        }
+                    }
+                    .padding(.bottom, 80)
                 }
             }
-            .overlay(
-                               ZStack {
-                                   if isShowingNotePopup {
-                                       NotePopupViewWrapper(
-                                           onSave: { text in
-                                               noteText = text
-                                               isShowingNotePopup = false
-                                           },
-                                           onCancel: {
-                                               isShowingNotePopup = false
-                                           }
-                                       )
-                                       .edgesIgnoringSafeArea(.all)
-                                   }
-                               }
-                           )
+            .background(Color.myBackground)
             
+            if isShowingCard, let appointment = selectedAppointment {
+                VStack {
+                    Spacer()
+                    VStack(spacing: 24) {
+                        Text(appointment.date)
+                            .font(.headline)
+                        if userRole == "student" {
+                            Text(viewModel.participantNames[appointment.teacherID] ?? "Unknown")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                        } else {
+                            Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                        }
+                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
+                            .font(.subheadline)
+                        
+                        if userRole == "student" {
+                            Button(action: {
+                                let appointmentID = appointment.id ?? ""
+                                cancelAppointment(appointmentID: appointmentID)
+                            }) {
+                                Text("取消預約")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.mainOrange)
+                                    .cornerRadius(10)
+                            }
+                        } else if userRole == "teacher" {
+                            Button(action: {
+                                selectedStudentID = appointment.studentID
+                                isShowingNotePopup = true
+                            }) {
+                                Text("顯示備註")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.mainOrange)
+                                    .cornerRadius(10)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.myBackground)
+                    .cornerRadius(15)
+                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .padding()
+                    Spacer()
+                }
+                .background(
+                    Color.primary.opacity(0.2)
+                )
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    isShowingCard = false
+                }
+            }
+        }
+        .overlay(
+            ZStack {
+                if isShowingNotePopup {
+                    NotePopupViewWrapper(
+                        onSave: { text in
+                            noteText = text
+                            isShowingNotePopup = false
+                        },
+                        onCancel: {
+                            isShowingNotePopup = false
+                        }
+                    )
+                    .edgesIgnoringSafeArea(.all)
+                }
+            }
+        )
+        
         
     }
     

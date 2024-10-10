@@ -25,16 +25,10 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        viewModel = ConfirmViewModel()
-//        viewModel.updateUI = { [weak self] in
-//            DispatchQueue.main.async {
-//                self?.tableView.reloadData()
-//            }
-//        }
-        
         setupTableView()
         setupViewModel()
         enableSwipeToGoBack()
+        updateBackgroundView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -46,6 +40,8 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(true, animated: true)
         }
+        
+        updateBackgroundView()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -57,12 +53,21 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     }
     
     private func setupViewModel() {
-            viewModel.updateUI = { [weak self] in
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-                }
+        viewModel.updateUI = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+                self?.updateBackgroundView()
             }
         }
+    }
+    
+    private func updateBackgroundView() {
+        if viewModel.appointments.isEmpty {
+            tableView.backgroundView = createEmptyStateView()
+        } else {
+            tableView.backgroundView = nil
+        }
+    }
     
     // MARK: - TableView
     func setupTableView() {
@@ -173,5 +178,38 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         }
         
         return UISwipeActionsConfiguration(actions: [cancelAction])
+    }
+}
+
+extension ConfirmVC {
+    private func createEmptyStateView() -> UIView {
+        let emptyView = UIView(frame: tableView.bounds)
+        
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "tray")
+        imageView.tintColor = .gray
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let messageLabel = UILabel()
+        messageLabel.text = "目前沒有任何預約"
+        messageLabel.textColor = .gray
+        messageLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        emptyView.addSubview(imageView)
+        emptyView.addSubview(messageLabel)
+        
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor, constant: -20),
+            imageView.widthAnchor.constraint(equalToConstant: 100),
+            imageView.heightAnchor.constraint(equalToConstant: 100),
+            
+            messageLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20),
+            messageLabel.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor)
+        ])
+        
+        return emptyView
     }
 }

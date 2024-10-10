@@ -26,7 +26,3 @@ struct DetailView: View {
         .padding()
     }
 }
-
-//#Preview {
-//    DetailView()
-//}
