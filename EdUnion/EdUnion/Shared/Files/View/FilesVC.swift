@@ -10,7 +10,6 @@ import FirebaseStorage
 import FirebaseFirestore
 
 class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
-    
     var collectionView: UICollectionView!
     var selectedFiles: [FileItem] = []
     var files: [FileItem] = []
@@ -44,11 +43,11 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             setupLongPressGesture()
             setupMenu()
             uploadAllFiles()
-            updateStudentTableViewEmptyState()
         }
         
         fetchUserFiles()
         enableSwipeToGoBack()
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -140,14 +139,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         studentTableView.separatorStyle = .singleLine
     }
     
-    func updateStudentTableViewEmptyState() {
-        if studentInfos.isEmpty {
-            setEmptyMessage("還沒有學生可以分享，快去上課吧！")
-        } else {
-            restoreTableView()
-        }
-    }
-    
     @objc func selectMultipleFilesForSharing() {
         collectionView.allowsMultipleSelection = true
         sendButton.isHidden = false
@@ -200,7 +191,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
                 }
                 DispatchQueue.main.async {
                     self?.studentTableView.reloadData()
-                    self?.updateStudentTableViewEmptyState()
                 }
             case .failure(let error):
                 print("Error fetching user: \(error.localizedDescription)")
@@ -346,6 +336,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
             print("Error: Current user ID is nil.")
+            setCustomEmptyStateView() // 顯示自定義的 empty state
             return
         }
 
@@ -355,7 +346,11 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             self.files = cachedFiles
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
+                self.restoreCollectionView() // 恢復正常背景
             }
+        } else {
+            // 如果沒有緩存文件，顯示加載中或空狀態
+            setCustomEmptyStateView() // 顯示自定義的 empty state
         }
         
         let collectionPath = "files"
@@ -370,11 +365,15 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error.localizedDescription)")
+                self?.setCustomEmptyStateView() // 顯示自定義的 empty state
                 return
             }
             
             guard let snapshot = snapshot else {
-                print("No files found.")
+                print("No snapshot received.")
+                self?.files.removeAll()
+                self?.collectionView.reloadData()
+                self?.setCustomEmptyStateView() // 顯示自定義的 empty state
                 return
             }
             
@@ -406,6 +405,9 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     private func handleFetchedFiles(_ snapshot: QuerySnapshot?) {
         guard let documents = snapshot?.documents else {
             print("No files found.")
+            self.files.removeAll()
+            self.collectionView.reloadData()
+            setCustomEmptyStateView() // 設置自定義的 empty state
             return
         }
         
@@ -443,6 +445,11 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         
         DispatchQueue.main.async {
             self.collectionView.reloadData()
+            if self.files.isEmpty {
+                self.setCustomEmptyStateView() // 顯示自定義的 empty state 視圖
+            } else {
+                self.restoreCollectionView()  // 恢復正常背景
+            }
         }
     }
     
@@ -476,6 +483,13 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
                         }
                         self?.fileDownloadStatus[localUrl] = false
                         self?.collectionView.reloadData()
+                        
+                        // Update empty state
+                        if let self = self, self.files.isEmpty {
+                            
+                        } else {
+                            self?.restoreCollectionView()
+                        }
                     }
                 }
             } catch {
@@ -947,7 +961,6 @@ extension FilesVC: FileCellDelegate {
 
 extension FilesVC: UIDocumentPickerDelegate {
     
-    // 當用戶選擇了文件後調用
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let selectedURL = urls.first else {
             return
@@ -966,12 +979,10 @@ extension FilesVC: UIDocumentPickerDelegate {
                 // 上傳成功後，將元數據保存到 Firestore
                 self.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileName)
                 
-                // 更新 UI 或提示用戶上傳成功
                 DispatchQueue.main.async {
                     self.showAlert(title: "上傳成功", message: "文件已成功上傳。")
                 }
             case .failure(let error):
-                // 處理上傳失敗
                 print("文件上傳失敗: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.showAlert(title: "上傳失敗", message: "無法上傳文件，請稍後再試。")
@@ -980,9 +991,45 @@ extension FilesVC: UIDocumentPickerDelegate {
         }
     }
     
-    // 當用戶取消選擇文件時調用
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         print("用戶取消了文件選擇。")
-        // 您可以在這裡提示用戶或執行其他操作
+    }
+}
+
+// MARK: - Empty State
+extension FilesVC {
+    func setCustomEmptyStateView() {
+        let emptyStateView = UIView(frame: collectionView.bounds)
+        
+        let imageView = UIImageView(image: UIImage(systemName: "doc.text"))
+        imageView.tintColor = .myGray
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        emptyStateView.addSubview(imageView)
+        
+        let messageLabel = UILabel()
+        messageLabel.text = "沒有文件，請點擊右上角上傳文件"
+        messageLabel.textColor = .myGray
+        messageLabel.numberOfLines = 0
+        messageLabel.textAlignment = .center
+        messageLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        emptyStateView.addSubview(messageLabel)
+        
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: emptyStateView.centerYAnchor, constant: -20),
+            imageView.widthAnchor.constraint(equalToConstant: 80),
+            imageView.heightAnchor.constraint(equalToConstant: 80),
+            
+            messageLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16),
+            messageLabel.leadingAnchor.constraint(equalTo: emptyStateView.leadingAnchor, constant: 20),
+            messageLabel.trailingAnchor.constraint(equalTo: emptyStateView.trailingAnchor, constant: -20)
+        ])
+        
+        collectionView.backgroundView = emptyStateView
+    }
+    
+    func restoreCollectionView() {
+        collectionView.backgroundView = nil
     }
 }
