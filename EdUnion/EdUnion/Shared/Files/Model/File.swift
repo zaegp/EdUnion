@@ -7,8 +7,9 @@
 
 import FirebaseCore
 
-struct File {
-    let downloadURL: URL
-    let storagePath: String
+struct FileItem {
+    let localURL: URL?
+    let remoteURL: URL
+    let downloadURL: String
     let fileName: String
 }

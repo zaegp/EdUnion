@@ -80,14 +80,18 @@ class FileCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        contentView.backgroundColor = .clear
+        backgroundColor = .myBackground
+        
         // 配置 fileImageView
+        fileImageView.tintColor = .mainOrange
         fileImageView.contentMode = .scaleAspectFit
         fileImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(fileImageView)
         
         // 配置 fileNameLabel
         fileNameLabel.textAlignment = .center
-        fileNameLabel.numberOfLines = 2
+        fileNameLabel.font = UIFont.systemFont(ofSize: 12) // 減小字體大小
         fileNameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(fileNameLabel)
         
@@ -101,8 +105,8 @@ class FileCell: UICollectionViewCell {
             // fileImageView 放置在 fileNameLabel 上方，水平居中
             fileImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             fileImageView.bottomAnchor.constraint(equalTo: fileNameLabel.topAnchor, constant: -5),
-            fileImageView.widthAnchor.constraint(equalToConstant: 24), // 設定合適的寬度
-            fileImageView.heightAnchor.constraint(equalToConstant: 24), // 設定合適的高度
+            fileImageView.widthAnchor.constraint(equalToConstant: 48), // 增大寬度
+            fileImageView.heightAnchor.constraint(equalToConstant: 48), // 增大高度
             
             // fileNameLabel 保持中心位置
             fileNameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -125,18 +129,32 @@ class FileCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    /// 覆蓋 isSelected 屬性以根據選擇狀態更改圖標
+    override var isSelected: Bool {
+        didSet {
+            if isSelected {
+                // 替換為選擇時的圖標
+                fileImageView.image = UIImage(systemName: "doc.fill")
+            } else {
+                // 恢復為默認圖標
+                fileImageView.image = UIImage(systemName: "doc")
+            }
+        }
+    }
+
     /// 配置 cell 的方法
     /// - Parameters:
     ///   - fileURL: 文件的 URL
     ///   - isDownloading: 文件是否正在下載
-    func configure(with fileURL: URL, isDownloading: Bool) {
-        fileNameLabel.text = fileURL.lastPathComponent
+    func configure(with fileItem: FileItem, isDownloading: Bool) {
+        fileNameLabel.text = fileItem.fileName
         if isDownloading {
             downloadIndicator.startAnimating()
             fileImageView.image = UIImage(systemName: "arrow.down.doc") // 下載中的圖標
         } else {
             downloadIndicator.stopAnimating()
-            fileImageView.image = UIImage(systemName: "doc") // 普通文件圖標
+            // 根據選擇狀態設置圖標
+            fileImageView.image = isSelected ? UIImage(systemName: "doc.fill") : UIImage(systemName: "doc")
         }
     }
 }
