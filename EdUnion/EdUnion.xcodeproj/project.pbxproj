@@ -29,6 +29,7 @@
 		517E9DF22CB71FEE002A2513 /* StudentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF12CB71FEE002A2513 /* StudentTableViewCell.swift */; };
 		517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */; };
 		517E9DF62CB82730002A2513 /* BedgeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF52CB82730002A2513 /* BedgeButton.swift */; };
+		517E9DF92CB8B5AC002A2513 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF82CB8B5AC002A2513 /* File.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -142,6 +143,7 @@
 		517E9DF12CB71FEE002A2513 /* StudentTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentTableViewCell.swift; sourceTree = "<group>"; };
 		517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBarButtonItem+Ext.swift"; sourceTree = "<group>"; };
 		517E9DF52CB82730002A2513 /* BedgeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedgeButton.swift; sourceTree = "<group>"; };
+		517E9DF82CB8B5AC002A2513 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 		517E9DEE2CB63969002A2513 /* Files */ = {
 			isa = PBXGroup;
 			children = (
+				517E9DF72CB8B5A3002A2513 /* Model */,
 				517E9DF02CB63995002A2513 /* View */,
 				517E9DEF2CB6398C002A2513 /* ViewModel */,
 			);
@@ -316,6 +319,14 @@
 				513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		517E9DF72CB8B5A3002A2513 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				517E9DF82CB8B5AC002A2513 /* File.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		51993B092CA50AB80022C79F /* Auth */ = {
@@ -834,6 +845,7 @@
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
+				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
 				513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,

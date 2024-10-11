@@ -17,6 +17,11 @@ class CalendarService {
     private init() {}
 }
 
+struct CalendarDay: Identifiable {
+    let id = UUID()
+    let date: Date?
+}
+
 struct CalendarDayView: View {
     let day: Date?
     let isSelected: Bool
@@ -114,13 +119,13 @@ struct BaseCalendarView: View {
     @State private var currentDate = Date()
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    @State private var days: [Date?] = []
+    @State private var days: [CalendarDay] = []
     @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
     @State private var isShowingNotePopup = false
     @State private var noteText = ""
     
-    @State private var isWeekView: Bool = true
+    @State private var isWeekView: Bool = false
     
     var body: some View {
         let colors = dateColors
@@ -154,8 +159,8 @@ struct BaseCalendarView: View {
                     }
                     
                     LazyVGrid(columns: columns) {
-                        ForEach(days, id: \.self) { day in
-                            if let day = day {
+                        ForEach(days) { calendarDay in
+                            if let day = calendarDay.date {
                                 let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
                                 
                                 CalendarDayView(
@@ -394,27 +399,30 @@ struct BaseCalendarView: View {
             }
             for i in 0..<7 {
                 if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
-                    days.append(date)
+                    days.append(CalendarDay(date: date))
                 }
             }
         } else {
             // 生成整個月的日期
-            let range = calendar.range(of: .day, in: .month, for: referenceDate)!
+            guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return }
             let numDays = range.count
             
             // 找到這個月的第一天
-            let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate))!
+            guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return }
             let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
             
             // 計算需要填充的前導空白
             let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
             
             // 填充前導空白
-            days = Array(repeating: nil, count: leadingEmptyDays)
+            for _ in 0..<leadingEmptyDays {
+                days.append(CalendarDay(date: nil))
+            }
             
+            // 填充當月的日期
             for day in 1...numDays {
                 if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
-                    days.append(date)
+                    days.append(CalendarDay(date: date))
                 }
             }
         }
@@ -422,7 +430,7 @@ struct BaseCalendarView: View {
         // 調試打印
         print("Generated days for \(referenceDate):")
         for day in days {
-            if let day = day {
+            if let day = day.date {
                 print(day)
             } else {
                 print("nil")
@@ -465,7 +473,7 @@ struct BaseCalendarView: View {
     }
     
     private func setupView() {
-        days = generateMonthDays(for: currentDate)
+        generateDays(for: currentDate)
     }
     
     private func generateMonthDays(for date: Date) -> [Date?] {
