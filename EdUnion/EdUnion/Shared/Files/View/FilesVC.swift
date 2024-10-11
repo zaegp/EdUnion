@@ -938,12 +938,6 @@ extension FilesVC: FileCellDelegate {
                             print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                         } else {
                             print("Successfully deleted metadata for file: \(fileItem.fileName)")
-//                            self?.collectionView.performBatchUpdates({
-//                                self?.files.remove(at: indexPath.item)
-//                                self?.collectionView.deleteItems(at: [indexPath])
-//                            }, completion: { finished in
-//                                print("Batch update completed")
-//                            })
                         }
                     }
                 }

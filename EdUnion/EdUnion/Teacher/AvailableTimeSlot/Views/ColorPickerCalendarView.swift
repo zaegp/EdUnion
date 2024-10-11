@@ -6,6 +6,21 @@
 //
 
 import SwiftUI
+import TipKit
+
+struct CalendarTip: Tip {
+    var title: Text {
+        Text("設置可選時段")
+    }
+    
+    var message: Text? {
+        Text("長按日期一次為多個日期設置可選時段")
+    }
+    
+    var image: Image? {
+        Image(systemName: "hand.tap.fill")
+    }
+}
 
 struct ColorPickerCalendarView: View {
     @State private var dateColors: [Date: Color] = [:]
@@ -17,51 +32,73 @@ struct ColorPickerCalendarView: View {
     @State private var timeSlots: [AvailableTimeSlot] = []
     let userID = UserSession.shared.currentUserID
     
+    let calendarTip = CalendarTip()
+    
     var body: some View {
-        BaseCalendarView(
-            externalDateColors: Binding(
-                get: { dateColors },
-                set: { dateColors = $0 ?? [:] }
-            ), viewModel: BaseCalendarViewModel(),
-//            selectedDay: $selectedDay,
-            //            appointments: appointments,
-            //            activitiesByDate: activitiesByDate,
-            onDayTap: { day in
-                self.selectedDay = day
-            },
-            onDayLongPress: { day in
-                selectedDay = day
-                showColorPicker = true
-            }
-        )
-        .sheet(isPresented: Binding<Bool>(
-            get: { selectedDay != nil && showColorPicker },  // 檢查是否有選中的日期
-            set: { showColorPicker = $0 }
-        )) {
-            Group {
-                if let selectedDay = selectedDay {
-                    let existingColor = dateColors[selectedDay]
-                    ColorPickerView(
-                        selectedDate: selectedDay,
-                        existingColor: existingColor,
-                        availableColors: availableColors,
-                        onSelectColor: { color in
-                            dateColors[selectedDay] = color
-                            saveDateColorToFirebase(date: selectedDay, color: color)
-                            selectNextDay(onDayTap: { nextDay in
-                                self.selectedDay = nextDay
-                            })
-                        }
-                    )
+        VStack {
+            Spacer()
+            
+            TipView(calendarTip)
+                .tipBackground(.myCell)
+                .tint(.myBlack)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                
+            BaseCalendarView(
+                externalDateColors: Binding(
+                    get: { dateColors },
+                    set: { dateColors = $0 ?? [:] }
+                ), viewModel: BaseCalendarViewModel(),
+                //            selectedDay: $selectedDay,
+                //            appointments: appointments,
+                //            activitiesByDate: activitiesByDate,
+                onDayTap: { day in
+                    self.selectedDay = day
+                },
+                onDayLongPress: { day in
+                    selectedDay = day
+                    showColorPicker = true
+                    
+                    calendarTip.invalidate(reason: .actionPerformed)
                 }
+            )
+            .sheet(isPresented: Binding<Bool>(
+                get: { selectedDay != nil && showColorPicker },  // 檢查是否有選中的日期
+                set: { showColorPicker = $0 }
+            )) {
+                Group {
+                    if let selectedDay = selectedDay {
+                        let existingColor = dateColors[selectedDay]
+                        ColorPickerView(
+                            selectedDate: selectedDay,
+                            existingColor: existingColor,
+                            availableColors: availableColors,
+                            onSelectColor: { color in
+                                dateColors[selectedDay] = color
+                                saveDateColorToFirebase(date: selectedDay, color: color)
+                                selectNextDay(onDayTap: { nextDay in
+                                    self.selectedDay = nextDay
+                                })
+                            }
+                        )
+                    }
+                }
+                .presentationDetents([.fraction(0.25)])
             }
-            .presentationDetents([.fraction(0.25)])
+            .onAppear {
+                fetchDateColors()
+                fetchTimeSlots()
+                fetchAppointments()
+            }
+            .task {
+                try? Tips.resetDatastore()
+                        try? await Tips.configure()
+                    }
         }
-        .onAppear {
-            fetchDateColors()
-            fetchTimeSlots()
-            fetchAppointments()
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.myBackground)
+        .edgesIgnoringSafeArea(.all)
     }
     
     private func fetchDateColors() {

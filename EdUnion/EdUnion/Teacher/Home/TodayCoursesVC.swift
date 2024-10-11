@@ -39,6 +39,9 @@ class TodayCoursesVC: UIViewController {
         setupViewModel()
         tableView.reloadData()
         viewModel.listenToPendingAppointments()
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+                tableView.addGestureRecognizer(longPressGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,6 +57,34 @@ class TodayCoursesVC: UIViewController {
                     self?.loadingIndicator.stopAnimating()
                 }
         updateBellBadge()
+    }
+    
+    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        // 確保手勢狀態為開始
+        if gestureRecognizer.state == .began {
+            // 獲取觸摸點
+            let touchPoint = gestureRecognizer.location(in: self.tableView)
+            
+            // 獲取 indexPath
+            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
+                // 獲取對應的 Appointment
+                let appointment = viewModel.appointments[indexPath.row]
+
+                
+                
+                // 從 studentNames 中查找對應的學生姓名
+                guard let studentName = viewModel.studentNames[appointment.studentID] else {
+                    print("找不到對應的學生姓名")
+                    return
+                }
+                
+                // 構建 Student 對象或其他需要的數據
+                let student = Student.self
+                
+                // 顯示添加備註的視圖
+                showAddNoteView(for: appointment.studentID)
+            }
+        }
     }
     
     @objc func updateBellBadge() {
@@ -180,25 +211,25 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
-            let appointment = viewModel.appointments[indexPath.row]
-            let studentID = appointment.studentID ?? ""
-            let studentName = viewModel.studentNames[studentID] ?? ""
-            let studentNote = viewModel.studentNotes[studentID] ?? "沒有備註"
-            
-            cell.configureCell(
-                name: studentName,
-                times: appointment.times,
-                note: studentNote,
-                isExpanded: expandedIndexPath == indexPath
-            )
-            
-            updateCellButtonState(cell, appointment: appointment)
+        let appointment = viewModel.appointments[indexPath.row]
+        let studentID = appointment.studentID ?? ""
+        let studentName = viewModel.studentNames[studentID] ?? ""
+        let studentNote = viewModel.studentNotes[studentID] ?? "沒有備註"
+        
+        cell.configureCell(
+            name: studentName,
+            times: appointment.times,
+            note: studentNote,
+            isExpanded: expandedIndexPath == indexPath
+        )
+        
+        updateCellButtonState(cell, appointment: appointment)
         
         cell.confirmCompletion = { [weak self] in
             self?.handleCompletion(for: appointment, cell: cell)
         }
     }
-
+    
     
     private func updateCellButtonState(_ cell: TodayCoursesCell, appointment: Appointment) {
         if appointment.status == "completed" {
@@ -238,5 +269,42 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .delete
+    }
+    
+    private func showAddNoteView(for studentID: String) {
+        let notePopupView = NotePopupView()
+        notePopupView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(notePopupView)
+        
+        NSLayoutConstraint.activate([
+            notePopupView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            notePopupView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            notePopupView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            notePopupView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        
+        // 從 ViewModel 中獲取已有的備註
+        let existingNote = viewModel.studentNotes[studentID] ?? ""
+        notePopupView.setExistingNoteText(existingNote)
+        
+        // 用戶保存備註時，將其保存到 Firebase
+        notePopupView.onSave = { [weak self, weak notePopupView] noteText in
+            self?.viewModel.saveNoteText(noteText, for: studentID, teacherID: self?.userID ?? "") { result in
+                switch result {
+                case .success:
+                    notePopupView?.removeFromSuperview()
+                    // 刷新表格中的這一行
+                    if let indexPath = self?.viewModel.appointments.firstIndex(where: { $0.studentID == studentID }) {
+                        self?.tableView.reloadRows(at: [IndexPath(row: indexPath, section: 0)], with: .automatic)
+                    }
+                case .failure(let error):
+                    print("保存備註失敗: \(error.localizedDescription)")
+                }
+            }
+        }
+        
+        notePopupView.onCancel = {
+            notePopupView.removeFromSuperview()
+        }
     }
 }

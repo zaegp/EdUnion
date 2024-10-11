@@ -157,6 +157,22 @@ class TodayCoursesViewModel: ObservableObject {
         }
     }
     
+    func saveNoteText(_ noteText: String, for studentID: String, teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let noteData = ["note": noteText]
+        
+        db.collection("teachers").document(teacherID).collection("students").document(studentID).setData(noteData, merge: true) { [weak self] error in
+            if let error = error {
+                print("保存備註時發生錯誤: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                // 更新本地 studentNotes 字典
+                self?.studentNotes[studentID] = noteText
+                print("成功保存備註")
+                completion(.success(()))
+            }
+        }
+    }
+    
     // 獲取學生備註，如果已經緩存則不再重新獲取
     func fetchStudentNote(for studentID: String, completion: (() -> Void)? = nil) {
         if studentNotes[studentID] != nil {
