@@ -11,7 +11,7 @@ import FirebaseFirestore
 class ChatViewModel {
     
     private var messages: [Message] = []
-    private let chatRoomID: String
+    let chatRoomID: String
     let userID = UserSession.shared.currentUserID
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []

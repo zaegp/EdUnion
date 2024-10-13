@@ -30,6 +30,8 @@
 		517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */; };
 		517E9DF62CB82730002A2513 /* BedgeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF52CB82730002A2513 /* BedgeButton.swift */; };
 		517E9DF92CB8B5AC002A2513 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF82CB8B5AC002A2513 /* File.swift */; };
+		517E9E022CBAB1C2002A2513 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E012CBAB1C2002A2513 /* FirebaseFunctions */; };
+		517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E042CBB9497002A2513 /* AgoraUIKit */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -226,7 +228,9 @@
 				517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */,
 				517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */,
 				517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */,
+				517E9E022CBAB1C2002A2513 /* FirebaseFunctions in Frameworks */,
 				517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */,
+				517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */,
 				517E9DD22CACC3A8002A2513 /* FirebaseStorage in Frameworks */,
 				517E9DCE2CACC3A8002A2513 /* FirebaseAuth in Frameworks */,
 				517E9DD02CACC3A8002A2513 /* FirebaseFirestore in Frameworks */,
@@ -690,6 +694,8 @@
 				517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */,
 				517E9DD72CACC3BA002A2513 /* Kingfisher */,
 				517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */,
+				517E9E012CBAB1C2002A2513 /* FirebaseFunctions */,
+				517E9E042CBB9497002A2513 /* AgoraUIKit */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -768,6 +774,7 @@
 				517E9DD32CACC3B1002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
+				517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
 			projectDirPath = "";
@@ -1320,6 +1327,14 @@
 				minimumVersion = 1.3.0;
 			};
 		};
+		517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AgoraIO-Community/VideoUIKit-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1357,6 +1372,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
 			productName = SwiftUIIntrospect;
+		};
+		517E9E012CBAB1C2002A2513 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		517E9E042CBB9497002A2513 /* AgoraUIKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */;
+			productName = AgoraUIKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
