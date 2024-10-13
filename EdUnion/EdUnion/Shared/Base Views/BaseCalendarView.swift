@@ -439,16 +439,37 @@ struct BaseCalendarView: View {
     }
     
     func cancelAppointment(appointmentID: String) {
-        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceling) { result in
+        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceled) { result in
             switch result {
             case .success:
                 alertMessage = "已送出取消預約請求"
                 showingAlert = true
                 isShowingCard = false
+                
+                if let selectedDay = selectedDay {
+                    updateAppointmentsForDay(selectedDay)
+                }
+
             case .failure(let error):
                 print("更新預約狀態失敗: \(error.localizedDescription)")
             }
         }
+    }
+
+    func updateAppointmentsForDay(_ day: Date) {
+        let startOfDay = Calendar.current.startOfDay(for: day)
+        
+        if let appointmentsForDay = CalendarService.shared.activitiesByDate[startOfDay] {
+            let hasConfirmedAppointments = appointmentsForDay.contains { $0.status.lowercased() == "confirmed" }
+            
+            if !hasConfirmedAppointments {
+                internalDateColors.removeValue(forKey: startOfDay)
+            }
+        } else {
+            internalDateColors.removeValue(forKey: startOfDay)
+        }
+        
+        generateDays(for: selectedDay ?? currentDate)
     }
     
     func formatTime(_ date: Date) -> String {
@@ -459,9 +480,9 @@ struct BaseCalendarView: View {
     
     func toggleSingleSelection(for day: Date) {
         if selectedDay == day {
-            selectedDay = nil // 取消選擇
+            selectedDay = nil
         } else {
-            selectedDay = day // 選中當前點擊的日期
+            selectedDay = day
         }
         print("Selected Day: \(selectedDay)")
         
@@ -505,13 +526,11 @@ struct BaseCalendarView: View {
     func previousPeriod() {
         if isWeekView {
             if let selectedDay = selectedDay {
-                // 有選擇日期，基於 selectedDay 減去一週
                 if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: selectedDay) {
                     self.selectedDay = newSelectedDay
                     generateDays(for: newSelectedDay)
                 }
             } else {
-                // 沒有選擇日期，基於 currentDate 減去一週
                 if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate) {
                     self.currentDate = newCurrentDate
                     generateDays(for: newCurrentDate)
@@ -519,7 +538,6 @@ struct BaseCalendarView: View {
             }
         } else {
             if let selectedDay = selectedDay {
-                // 有選擇日期，基於 selectedDay 減去一個月
                 if let newSelectedDay = Calendar.current.date(byAdding: .month, value: -1, to: selectedDay) {
                     self.selectedDay = newSelectedDay
                     generateDays(for: newSelectedDay)
@@ -630,10 +648,16 @@ struct BaseCalendarView: View {
         }
         
         for (date, appointments) in CalendarService.shared.activitiesByDate {
-            let hasPending = appointments.contains { $0.status.lowercased() == "pending" }
-            let hasConfirmed = appointments.contains { $0.status.lowercased() == "confirmed" }
+            // 如果日期的所有課程都被取消，則從 internalDateColors 中移除該日期
+            let hasConfirmedAppointments = appointments.contains { $0.status.lowercased() == "confirmed" }
             
-            internalDateColors[date] = .mainOrange
+            if hasConfirmedAppointments {
+                // 日期下有已確認的課程，顯示點點
+                internalDateColors[date] = .mainOrange
+            } else {
+                // 沒有確認的課程，移除該日期的點點
+                internalDateColors.removeValue(forKey: date)
+            }
         }
     }
     
