@@ -11,23 +11,25 @@ import FirebaseFirestore
 
 class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     var collectionView: UICollectionView!
+    var studentTableView: UITableView!
+    var sendButton: UIButton!
+    
     var selectedFiles: [FileItem] = []
     var files: [FileItem] = []
-    var documentInteractionController: UIDocumentInteractionController?
-    
-    var fileURLs: [URL: String] = [:]
-    var fileDownloadStatus: [URL: Bool] = [:]
+    var studentInfos: [Student] = []
+    var selectedStudentIDs: Set<String> = []
     
     let storage = Storage.storage()
     let firestore = Firestore.firestore()
     let userID = UserSession.shared.currentUserID
-    var studentTableView: UITableView!
-    var studentInfos: [Student] = []
-    var selectedStudentIDs: Set<String> = []
-    var sendButton: UIButton!
+    
+    var documentInteractionController: UIDocumentInteractionController?
     var currentUploadTask: StorageUploadTask?
     
-    var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "student"
+    private var userRole: UserRole = UserRole(rawValue: UserDefaults.standard.string(forKey: "userRole") ?? "teacher") ?? .teacher
+
+    var fileURLs: [URL: String] = [:]
+    var fileDownloadStatus: [URL: Bool] = [:]
     
     var collectionViewBottomConstraint: NSLayoutConstraint!
     
@@ -37,7 +39,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         
         setupCollectionView()
         
-        if userRole == "teacher" {
+        if userRole == .teacher {
             setupSendButton()
             setupStudentTableView()
             setupLongPressGesture()
@@ -47,7 +49,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         
         fetchUserFiles()
         enableSwipeToGoBack()
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -146,24 +147,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         studentTableView.isHidden = false
     }
     
-    func fetchStudentsNotes(completion: @escaping ([String: String]) -> Void) {
-        firestore.collection("teachers").document(userID ?? "").getDocument { (snapshot, error) in
-            if let error = error {
-                print("Error fetching studentsNotes: \(error.localizedDescription)")
-                completion([:])
-                return
-            }
-            
-            guard let data = snapshot?.data(), let studentsNotes = data["studentsNotes"] as? [String: String] else {
-                print("No studentsNotes found for teacher \(self.userID)")
-                completion([:])
-                return
-            }
-            
-            completion(studentsNotes)
-        }
-    }
-    
     func fetchStudentsNotes(forTeacherID teacherID: String, completion: @escaping ([String: String]) -> Void) {
         firestore.collection("teachers").document(teacherID).getDocument { (snapshot, error) in
             if let error = error {
@@ -204,13 +187,11 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             return
         }
         
-        // 動畫開始
         startSendAnimation()
         
-        // 模擬文件傳送操作，這裡添加一些延遲來模擬實際傳送
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             for studentID in self.selectedStudentIDs {
-                for fileItem in self.selectedFiles {  // 使用 FileItem 而不是 URL
+                for fileItem in self.selectedFiles {
                     print("發送文件 \(fileItem.fileName) 給學生 \(studentID)")
                     
                     let fileName = fileItem.fileName
@@ -354,10 +335,10 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         }
         
         let collectionPath = "files"
-        let queryField = userRole == "teacher" ? "ownerID" : "authorizedStudents"
+        let queryField = userRole == .teacher ? "ownerID" : "authorizedStudents"
         
         // 即時監聽文件變動
-        let query = userRole == "teacher" ?
+        let query = userRole == .teacher ?
             firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
             firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
         
@@ -540,18 +521,16 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     }
     
     func updateCollectionViewConstraints() {
-        if userRole == "student" {
+        if userRole == .student {
             collectionViewBottomConstraint.constant = 0
-        } else if userRole == "teacher" {
+        } else {
             collectionViewBottomConstraint.constant = -300
         }
     }
     
     func uploadAllFiles() {
         for fileItem in files {
-            // 只上傳有本地 URL 的文件
             guard let localURL = fileItem.localURL else {
-                // 如果沒有本地 URL，可能文件已經上傳過，可以選擇跳過
                 print("File \(fileItem.fileName) 已經上傳，跳過。")
                 continue
             }
@@ -651,12 +630,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         present(documentPicker, animated: true, completion: nil)
         
         print("Document picker presented.")
-    }
-
-    func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
     }
     
     func saveFileMetadataToFirestore(downloadURL: String, fileName: String) {
@@ -876,7 +849,6 @@ extension FilesVC: FileCellDelegate {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let fileItem = files[indexPath.item]
         
-        // 確認刪除操作
         let alert = UIAlertController(title: "刪除文件", message: "確定要刪除文件 \(fileItem.fileName) 嗎？", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "刪除", style: .destructive, handler: { [weak self] _ in
             self?.deleteFile(at: indexPath)
@@ -891,11 +863,11 @@ extension FilesVC: FileCellDelegate {
     }
 
     func editFileName(at indexPath: IndexPath) {
-        let fileItem = files[indexPath.item] // 使用 FileItem 而不是 URL
+        let fileItem = files[indexPath.item]
         let alertController = UIAlertController(title: "編輯文件名稱", message: "請輸入新的文件名稱", preferredStyle: .alert)
         
         alertController.addTextField { textField in
-            textField.text = fileItem.fileName // 使用 FileItem 的 fileName
+            textField.text = fileItem.fileName 
         }
 
         let confirmAction = UIAlertAction(title: "確定", style: .default) { [weak self] _ in
@@ -1007,7 +979,7 @@ extension FilesVC {
         emptyStateView.addSubview(imageView)
         
         let messageLabel = UILabel()
-        messageLabel.text = "沒有文件，請點擊右上角上傳文件"
+        messageLabel.text = userRole == .student ? "還沒有老師分享教材給你喔" : "沒有文件，請點擊右上角上傳文件"
         messageLabel.textColor = .myGray
         messageLabel.numberOfLines = 0
         messageLabel.textAlignment = .center
@@ -1031,5 +1003,14 @@ extension FilesVC {
     
     func restoreCollectionView() {
         collectionView.backgroundView = nil
+    }
+}
+
+// MARK: - Alert Helper
+extension FilesVC {
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }

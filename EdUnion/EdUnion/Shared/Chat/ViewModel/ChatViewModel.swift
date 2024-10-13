@@ -16,10 +16,9 @@ class ChatViewModel {
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []
     private var listener: ListenerRegistration?
+    var onMessagesUpdated: (() -> Void)?
 
     //    var otherParticipantID: String
-    
-    var onMessagesUpdated: (() -> Void)?
     
     init(chatRoomID: String) {
         self.chatRoomID = chatRoomID
@@ -29,6 +28,19 @@ class ChatViewModel {
         defer {
             fetchMessages()
         }
+    }
+    
+    func addVideoCallMessage() {
+        let message = Message(
+            ID: nil,  // 可選，可以使用 nil 或生成唯一標識符
+            type: 2,  // 設置消息類型為視頻通話
+            content: "視訊通話已結束",
+            senderID: UserSession.shared.currentUserID ?? "",
+            isSeen: false,  // 設置為未讀
+            timestamp: Timestamp(date: Date())  // 當前時間戳
+        )
+        messages.append(message)
+        onMessagesUpdated?() // 通知 ChatVC 刷新消息
     }
     
     func numberOfMessages() -> Int {

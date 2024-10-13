@@ -366,7 +366,9 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     private func uploadProfileImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let userID = userID else { return }
 
-        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
+        // 根據 userRole 決定存儲的圖片路徑
+        let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
+        let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("Error converting image to data.")

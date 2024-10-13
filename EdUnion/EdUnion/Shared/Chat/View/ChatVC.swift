@@ -167,6 +167,11 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         videoCallVC.channelName = viewModel.chatRoomID
         
         videoCallVC.modalPresentationStyle = .fullScreen
+        videoCallVC.onCallEnded = { [weak self] in
+                guard let self = self else { return }
+                self.viewModel.addVideoCallMessage() // 通話結束後添加消息
+            }
+        
         present(videoCallVC, animated: true, completion: {
             print("成功呈現 VideoCallVC")
         })
@@ -790,6 +795,7 @@ class VideoCallVC: UIViewController {
     var agoraView: AgoraVideoViewer?
     var channelName: String?
     var token: String?
+    var onCallEnded: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -813,6 +819,14 @@ class VideoCallVC: UIViewController {
             }
         }
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            
+            if isBeingDismissed || isMovingFromParent {
+                onCallEnded?() // 通知 ChatVC 通話結束
+            }
+        }
 
     func setupAgoraVideoViewer(token: String, channelName: String) {
         var agSettings = AgoraSettings()

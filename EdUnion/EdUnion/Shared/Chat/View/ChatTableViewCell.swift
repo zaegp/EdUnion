@@ -233,6 +233,14 @@ class ChatTableViewCell: UITableViewCell {
                 loadImage(from: message.content)
             }
             
+        case 2:  
+                bubbleBackgroundView.isHidden = false
+                messageImageView.isHidden = true
+                toggleImageButton.isHidden = true
+                setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+                messageLabel.text = "視訊通話已結束"
+                messageLabel.isHidden = false
+            
         default:
             bubbleBackgroundView.isHidden = true
             messageImageView.isHidden = true

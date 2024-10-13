@@ -32,6 +32,7 @@
 		517E9DF92CB8B5AC002A2513 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DF82CB8B5AC002A2513 /* File.swift */; };
 		517E9E022CBAB1C2002A2513 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E012CBAB1C2002A2513 /* FirebaseFunctions */; };
 		517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E042CBB9497002A2513 /* AgoraUIKit */; };
+		517E9E072CBBD2EA002A2513 /* UserRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E062CBBD2EA002A2513 /* UserRole.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -146,6 +147,7 @@
 		517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBarButtonItem+Ext.swift"; sourceTree = "<group>"; };
 		517E9DF52CB82730002A2513 /* BedgeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedgeButton.swift; sourceTree = "<group>"; };
 		517E9DF82CB8B5AC002A2513 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		517E9E062CBBD2EA002A2513 /* UserRole.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRole.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 				519C8EC12C939A29007DFCBA /* Chat */,
 				519C8EEE2C95C31B007DFCBA /* TabBarController.swift */,
 				51D25CC22C9F3BA10083EECF /* NavigationController.swift */,
+				517E9E062CBBD2EA002A2513 /* UserRole.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -892,6 +895,7 @@
 				51ED0B092C917A8F006322B7 /* ChatViewModel.swift in Sources */,
 				519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */,
 				51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */,
+				517E9E072CBBD2EA002A2513 /* UserRole.swift in Sources */,
 				51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
 				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,

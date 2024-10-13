@@ -330,39 +330,41 @@ extension ProfileVC: UIImagePickerControllerDelegate {
     }
     
     private func uploadProfileImage(_ image: UIImage) {
-        guard let userID = userID else {
-            print("Error: User not logged in.")
-            return
-        }
-        
-        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
-        
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            print("Error converting image to data.")
-            return
-        }
-        
-        storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
+            guard let userID = userID else {
+                print("Error: User not logged in.")
                 return
             }
             
-            storageRef.downloadURL { url, error in
+            // 根據 userRole 動態設置存儲路徑
+            let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
+            let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
+            
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                print("Error converting image to data.")
+                return
+            }
+            
+            storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
                 if let error = error {
-                    print("Error getting download URL: \(error.localizedDescription)")
+                    print("Error uploading image: \(error.localizedDescription)")
                     return
                 }
                 
-                guard let downloadURL = url else {
-                    print("Error: Download URL is nil.")
-                    return
+                storageRef.downloadURL { url, error in
+                    if let error = error {
+                        print("Error getting download URL: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let downloadURL = url else {
+                        print("Error: Download URL is nil.")
+                        return
+                    }
+                    
+                    self?.saveImageURLToFirestore(downloadURL.absoluteString)
                 }
-                
-                self?.saveImageURLToFirestore(downloadURL.absoluteString)
             }
         }
-    }
     
     private func saveImageURLToFirestore(_ urlString: String) {
         guard let userID = userID else {
