@@ -11,7 +11,6 @@ enum AppointmentStatus: String {
     case pending
     case confirmed
     case completed
-    case canceling
     case canceled
     case rejected
 }

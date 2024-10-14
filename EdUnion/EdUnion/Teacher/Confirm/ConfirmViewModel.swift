@@ -9,7 +9,7 @@ import Foundation
 
 class ConfirmViewModel {
     
-    var appointments: [Appointment] = [] {
+    var appointments: [Appointment] {
         didSet {
             self.updateUI?()
         }
@@ -18,8 +18,9 @@ class ConfirmViewModel {
     var userID: String
     var updateUI: (() -> Void)?
     
-    init() {
-        self.userID = UserSession.shared.currentUserID ?? ""
+    init(appointments: [Appointment], userID: String) {
+        self.appointments = appointments
+        self.userID = userID
     }
     
     func fetchStudentName(for appointment: Appointment, completion: @escaping (String) -> Void) {
@@ -33,23 +34,17 @@ class ConfirmViewModel {
         }
     }
     
-    func loadPendingAppointments() {
-        AppointmentFirebaseService.shared.fetchPendingAppointments(forTeacherID: userID ?? "") { result in
-            switch result {
-            case .success(let fetchedAppointments):
-                self.appointments = fetchedAppointments
-            case .failure(let error):
-                print("加載預約失敗：\(error.localizedDescription)")
-            }
-        }
+    func getPendingAppointmentsCount() -> Int {
+        return appointments.count
     }
     
     func confirmAppointment(appointmentID: String) {
-        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .confirmed) { result in
+        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .confirmed) { [weak self] result in
             switch result {
             case .success:
                 print("預約已確認")
-                self.loadPendingAppointments()
+                self?.appointments.removeAll { $0.id == appointmentID }
+                self?.updateUI?()
             case .failure(let error):
                 print("更新預約狀態失敗: \(error.localizedDescription)")
             }
@@ -57,11 +52,12 @@ class ConfirmViewModel {
     }
 
     func rejectAppointment(appointmentID: String) {
-        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .rejected) { result in
+        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .rejected) { [weak self] result in
             switch result {
             case .success:
                 print("預約已拒絕")
-                self.loadPendingAppointments() 
+                self?.appointments.removeAll { $0.id == appointmentID }
+                self?.updateUI?()
             case .failure(let error):
                 print("更新預約狀態失敗: \(error.localizedDescription)")
             }

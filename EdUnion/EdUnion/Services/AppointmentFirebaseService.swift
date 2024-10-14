@@ -7,12 +7,12 @@
 
 import FirebaseFirestore
 
-
 class AppointmentFirebaseService {
     static let shared = AppointmentFirebaseService()
     private init() {}
-    
+    let userID = UserSession.shared.currentUserID ?? ""
     let db = Firestore.firestore()
+    private var listener: ListenerRegistration?
 
     // MARK: - 通用查詢方法
     private func fetchDocuments<T: Decodable>(_ collection: CollectionReference, where field: String, isEqualTo value: Any, completion: @escaping (Result<[T], Error>) -> Void) {
@@ -36,6 +36,7 @@ class AppointmentFirebaseService {
         }
     }
     
+    // MARK: - 預約頁面可選時段
     func fetchAllAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
         fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
             switch result {
@@ -49,6 +50,7 @@ class AppointmentFirebaseService {
             }
         }
     }
+    
     // MARK: - 保存預約
     func saveBooking(data: [String: Any], completion: @escaping (Bool, Error?) -> Void) {
         db.collection("appointments").addDocument(data: data) { error in
@@ -66,23 +68,19 @@ class AppointmentFirebaseService {
     func fetchConfirmedAppointments(forTeacherID teacherID: String? = nil, studentID: String? = nil, completion: @escaping (Result<[Appointment], Error>) -> Void) -> ListenerRegistration? {
         var query: Query = db.collection("appointments").whereField("status", isEqualTo: "confirmed")
 
-        // 如果有提供 teacherID，則加上 teacherID 的篩選條件
         if let teacherID = teacherID {
             query = query.whereField("teacherID", isEqualTo: teacherID)
         }
 
-        // 如果有提供 studentID，則加上 studentID 的篩選條件
         if let studentID = studentID {
             query = query.whereField("studentID", isEqualTo: studentID)
         }
 
-        // 如果沒有提供任何一個 ID，則回傳錯誤
         guard teacherID != nil || studentID != nil else {
             completion(.failure(NSError(domain: "Missing teacherID or studentID", code: 400, userInfo: nil)))
             return nil
         }
 
-        // 添加監聽器並處理結果
         return query.addSnapshotListener { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -95,19 +93,70 @@ class AppointmentFirebaseService {
         }
     }
 
-    // MARK: - 今日已確認的預約
+    // MARK: - 今日確認、完成的預約
     func fetchTodayAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
         let todayDate = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let todayDateString = dateFormatter.string(from: todayDate)
+
+        let confirmedQuery = db.collection("appointments")
+            .whereField("date", isEqualTo: todayDateString)
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "confirmed")
         
-        fetchDocuments(db.collection("appointments"), where: "date", isEqualTo: todayDateString, completion: completion)
+        let completedQuery = db.collection("appointments")
+            .whereField("date", isEqualTo: todayDateString)
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "completed")
+        
+        let group = DispatchGroup()
+        
+        var confirmedAppointments: [Appointment] = []
+        var completedAppointments: [Appointment] = []
+        
+        var errorOccurred: Error? = nil
+        
+        group.enter()
+        confirmedQuery.getDocuments { (snapshot, error) in
+            if let error = error {
+                errorOccurred = error
+            } else if let documents = snapshot?.documents {
+                confirmedAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+            }
+            group.leave()
+        }
+        
+        group.enter()
+        completedQuery.getDocuments { (snapshot, error) in
+            if let error = error {
+                errorOccurred = error
+            } else if let documents = snapshot?.documents {
+                completedAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+            }
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            if let error = errorOccurred {
+                completion(.failure(error))
+            } else {
+                let allAppointments = confirmedAppointments + completedAppointments
+                
+                let sortedAppointments = TimeService.sortCourses(by: allAppointments, ascending: true)
+                
+                completion(.success(sortedAppointments))
+            }
+        }
     }
     
     // MARK: - 更新老師的總課程數
-    func incrementTeacherTotalCourses(teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+    func incrementTeacherTotalCourses(completion: @escaping (Result<Void, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.updateData([
             "totalCourses": FieldValue.increment(Int64(1))
@@ -121,18 +170,29 @@ class AppointmentFirebaseService {
     }
 
     // MARK: - 老師：獲取待確認的預約
-    func fetchPendingAppointments(forTeacherID teacherID: String, completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        fetchDocuments(db.collection("appointments"), where: "teacherID", isEqualTo: teacherID) { (result: Result<[Appointment], Error>) in
-            switch result {
-            case .success(let appointments):
-                // 過濾等待確認狀態
-                let pendingAppointments = appointments.filter { $0.status == "pending" }
-                completion(.success(pendingAppointments))
-            case .failure(let error):
-                print("Error fetching pending appointments: \(error.localizedDescription)")
-                completion(.failure(error))
+    func listenToPendingAppointments(onUpdate: @escaping (Result<[Appointment], Error>) -> Void) {
+        //            listener?.remove()
+        
+        listener = db.collection("appointments")
+            .whereField("teacherID", isEqualTo: userID)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { (snapshot, error) in
+                if let error = error {
+                    onUpdate(.failure(error))
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    onUpdate(.success([]))
+                    return
+                }
+                
+                let pendingAppointments = documents.compactMap { document -> Appointment? in
+                    try? document.data(as: Appointment.self)
+                }
+                
+                onUpdate(.success(pendingAppointments))
             }
-        }
     }
 
     // MARK: - 更新預約狀態

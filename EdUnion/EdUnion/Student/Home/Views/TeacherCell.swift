@@ -79,7 +79,6 @@ class TeacherCell: UICollectionViewCell {
             stackView.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -16)
         ])
         
-        // 設置圖片大小約束
         NSLayoutConstraint.activate([
             image.widthAnchor.constraint(equalToConstant: 80),
             image.heightAnchor.constraint(equalToConstant: 80)
@@ -87,6 +86,9 @@ class TeacherCell: UICollectionViewCell {
     }
     
     func configure(with teacher: Teacher) {
+        
+        image.image = nil
+
         if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
             image.kf.setImage(with: url, completionHandler: { [weak self] _ in
                 self?.setNeedsLayout()

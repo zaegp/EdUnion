@@ -38,7 +38,7 @@ class ChatTableViewCell: UITableViewCell {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 16 
+        imageView.layer.cornerRadius = 16
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -115,7 +115,7 @@ class ChatTableViewCell: UITableViewCell {
         bubbleBackgroundView.addSubview(toggleImageButton)
         bubbleBackgroundView.addSubview(activityIndicator)
         contentView.addSubview(messageImageView)
-        messageImageView.addSubview(activityIndicator)
+//        messageImageView.addSubview(activityIndicator)
         contentView.addSubview(timestampLabel)
         
         toggleImageButton.addTarget(self, action: #selector(toggleImageButtonTapped), for: .touchUpInside)
@@ -228,9 +228,18 @@ class ChatTableViewCell: UITableViewCell {
                 messageImageView.image = localImage
                 activityIndicator.stopAnimating()
             } else {
+                messageImageView.image = nil
                 activityIndicator.startAnimating()
                 loadImage(from: message.content)
             }
+            
+        case 2:  
+                bubbleBackgroundView.isHidden = false
+                messageImageView.isHidden = true
+                toggleImageButton.isHidden = true
+                setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+                messageLabel.text = "視訊通話已結束"
+                messageLabel.isHidden = false
             
         default:
             bubbleBackgroundView.isHidden = true
@@ -317,7 +326,6 @@ class ChatTableViewCell: UITableViewCell {
     }
     
     private func loadImage(from urlString: String) {
-        activityIndicator.startAnimating()
         if let url = URL(string: urlString) {
             messageImageView.kf.setImage(with: url) { result in
                 self.activityIndicator.stopAnimating()

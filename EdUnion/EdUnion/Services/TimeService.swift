@@ -42,4 +42,22 @@ class TimeService {
         }
         return dateString
     }
+    
+    static func sortCourses(by activities: [Appointment], ascending: Bool = false) -> [Appointment] {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "HH:mm" // 根據實際時間格式調整
+
+            return activities.sorted { (a, b) -> Bool in
+                // 提取開始時間部分
+                guard let timeAFull = a.times.first,
+                      let timeBFull = b.times.first,
+                      let startTimeAString = timeAFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
+                      let startTimeBString = timeBFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
+                      let dateA = dateFormatter.date(from: startTimeAString),
+                      let dateB = dateFormatter.date(from: startTimeBString) else {
+                    return false
+                }
+                return ascending ? dateA > dateB : dateA < dateB
+            }
+        }
 }

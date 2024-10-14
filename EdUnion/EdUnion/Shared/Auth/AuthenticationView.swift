@@ -221,16 +221,17 @@ private func saveUserData(userRef: DocumentReference, appleIDCredential: ASAutho
         "userID": appleIDCredential.user,
         "photoURL": "",
         "status": "normal",
-        "blockList": []
+        "blockList": [],
     ]
     
     if userRole == "student" {
         userData["followList"] = [String]()
         userData["usedList"] = [String]()
     } else {
-        userData["totalCourses"] = Int()
+        userData["totalCourses"] = 0
         userData["timeSlots"] = [String]()
         userData["selectedTimeSlots"] = [String: String]()
+        userData["resume"] = ["", "", "", "", ""]
     }
     
     userRef.setData(userData) { error in

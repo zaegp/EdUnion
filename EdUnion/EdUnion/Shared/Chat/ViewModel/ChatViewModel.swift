@@ -11,15 +11,14 @@ import FirebaseFirestore
 class ChatViewModel {
     
     private var messages: [Message] = []
-    private let chatRoomID: String
+    let chatRoomID: String
     let userID = UserSession.shared.currentUserID
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []
     private var listener: ListenerRegistration?
+    var onMessagesUpdated: (() -> Void)?
 
     //    var otherParticipantID: String
-    
-    var onMessagesUpdated: (() -> Void)?
     
     init(chatRoomID: String) {
         self.chatRoomID = chatRoomID
@@ -72,6 +71,45 @@ class ChatViewModel {
             }
         }
     }
+    
+    func addVideoCallMessage() {
+        let messageId = UUID().uuidString
+            let messageData: [String: Any] = [
+                "ID": messageId,
+                "senderID": userID,
+                "content": "視訊通話已結束",
+                "timestamp": FieldValue.serverTimestamp(),
+                "type": 2, // 表示視訊通話結束類型的消息
+                "isSeen": false
+            ]
+            
+            let chatRef = Firestore.firestore().collection("chats").document(chatRoomID).collection("messages")
+            
+            chatRef.addDocument(data: messageData) { error in
+                if let error = error {
+                    print("Error sending video call end message: \(error.localizedDescription)")
+                } else {
+                    print("Video call end message sent successfully.")
+                }
+            }
+        let chatRoomRef = UserFirebaseService.shared.db.collection("chats").document(chatRoomID)
+        
+        // 更新 messages 集合中的數據
+        chatRoomRef.collection("messages").document(messageId).setData(messageData) { error in
+            if let error = error {
+                print("Error sending message: \(error)")
+            } else {
+                print("Message sent successfully")
+                
+                chatRoomRef.setData([
+                    "id": self.chatRoomID,
+                    "participants": self.participants,
+                    "lastMessage": "視訊通話已結束",
+                    "lastMessageTimestamp": FieldValue.serverTimestamp()
+                ], merge: true)
+            }
+        }
+        }
     
     func sendPhotoMessage(_ image: UIImage) {
         let messageId = UUID().uuidString
@@ -131,35 +169,56 @@ class ChatViewModel {
         }
     }
     
-    func sendAudioMessage(_ audioData: Data) {
-        let audioId = UUID().uuidString
-        
-        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
-            guard let self = self else { return }
+//    func sendAudioMessage(_ audioData: Data) {
+//        let audioId = UUID().uuidString
+//        
+//        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
+//            guard let self = self else { return }
+//            
+//            switch result {
+//            case .success(let url):
+//                let messageData: [String: Any] = [
+//                    "senderID": self.userID,
+//                    "type": 2,  // 假設 '2' 代表音訊消息
+//                    "content": url,
+//                    "timestamp": FieldValue.serverTimestamp(),
+//                    "isSeen": false
+//                ]
+//                
+//                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
+//                    if let error = error {
+//                        print("Error sending audio message: \(error.localizedDescription)")
+//                    } else {
+//                        print("Audio message sent successfully")
+//                    }
+//                }
+//                
+//            case .failure(let error):
+//                print("Error uploading audio: \(error.localizedDescription)")
+//            }
+//        }
+//    }
+    
+    func markMessageAsSeen(_ message: Message) {
+            guard let messageID = message.ID else { return }
+            let chatRoomRef = Firestore.firestore().collection("chatRooms").document(chatRoomID)
+            let messageRef = chatRoomRef.collection("messages").document(messageID)
             
-            switch result {
-            case .success(let url):
-                let messageData: [String: Any] = [
-                    "senderID": self.userID,
-                    "type": 2,  // 假設 '2' 代表音訊消息
-                    "content": url,
-                    "timestamp": FieldValue.serverTimestamp(),
-                    "isSeen": false
-                ]
-                
-                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
-                    if let error = error {
-                        print("Error sending audio message: \(error.localizedDescription)")
-                    } else {
-                        print("Audio message sent successfully")
-                    }
+            messageRef.updateData(["isSeen": true]) { error in
+                if let error = error {
+                    print("Failed to update isSeen: \(error)")
+                } else {
+                    print("Message \(messageID) marked as seen.")
                 }
-                
-            case .failure(let error):
-                print("Error uploading audio: \(error.localizedDescription)")
             }
         }
-    }
+    
+    func updateMessageIsSeen(at index: Int) {
+            // Assuming you have a messages array
+            messages[index].isSeen = true
+            // Notify observers if necessary
+            onMessagesUpdated?()
+        }
     
     func fetchMessages() {
         listener = UserFirebaseService.shared.db.collection("chats").document(chatRoomID).collection("messages")

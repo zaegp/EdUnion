@@ -42,6 +42,8 @@ class TeacherDetailVC: UIViewController {
         super.viewWillAppear(animated)
         
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        navigationController?.navigationBar.barTintColor = .myBackground
+        navigationController?.navigationBar.shadowImage = UIImage()
         
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(true, animated: true)
@@ -136,11 +138,11 @@ class TeacherDetailVC: UIViewController {
             imageView.kf.setImage(
                 with: url,
                 placeholder: UIImage(systemName: "person.crop.circle.fill")?
-                    .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                    .withTintColor(.myTint, renderingMode: .alwaysOriginal)
             )
         } else {
             imageView.image = UIImage(systemName: "person.crop.circle.fill")
-            imageView.tintColor = .backButton
+            imageView.tintColor = .myTint
         }
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 50
@@ -259,7 +261,7 @@ class TeacherDetailVC: UIViewController {
     
     @objc private func favoriteButtonTapped() {
         if isFavorite {
-            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: userID ?? "", teacherID: teacher!.userID) { error in
+            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: userID ?? "", teacherID: teacher!.id) { error in
                 if let error = error {
                     print("從 followList 中移除老師時出錯: \(error.localizedDescription)")
                 } else {

@@ -17,7 +17,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         
         private let searchIcon: UIImageView = {
             let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-            icon.tintColor = .backButton
+            icon.tintColor = .myTint
             icon.isUserInteractionEnabled = true
             return icon
         }()
@@ -86,6 +86,16 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(false, animated: true)
         }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        selectedIndex = 1
+
+        pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: false, completion: nil)
+
+        updateUnderlinePosition(to: selectedIndex!)
     }
     
     override func viewDidLayoutSubviews() {

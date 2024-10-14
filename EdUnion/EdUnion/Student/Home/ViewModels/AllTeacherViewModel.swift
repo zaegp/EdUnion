@@ -14,22 +14,22 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
     var filteredItems: [Teacher] = []
     var onDataUpdate: (() -> Void)?
     private var listener: ListenerRegistration?
-    private var blocklist: [String] = [] // 新增屬性來存儲 blocklist 中的老師 ID
+    private var blocklist: [String] = []
     
     deinit {
         listener?.remove()
     }
     
     func fetchData() {
-        // 先取得學生的 blocklist
         fetchBlocklist { [weak self] blocklist in
             self?.blocklist = blocklist
             print(blocklist)
             UserFirebaseService.shared.fetchTeachersRealTime { [weak self] result in
                 switch result {
                 case .success(let teachers):
-                    // 過濾被封鎖的老師
-                    self?.items = teachers.filter { !blocklist.contains($0.id ?? "") }
+                    self?.items = teachers.filter {
+                        !blocklist.contains($0.id ?? "") && !($0.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                    }
                     self?.filteredItems = self?.items ?? []
                     self?.onDataUpdate?()
                 case .failure(let error):
@@ -39,9 +39,7 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
         }
     }
     
-    // 新增方法來取得 blocklist
     private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
-        // 假設 UserFirebaseService.shared.fetchBlocklist 可以取得學生的 blocklist
         UserFirebaseService.shared.fetchBlocklist { result in
             switch result {
             case .success(let blocklist):

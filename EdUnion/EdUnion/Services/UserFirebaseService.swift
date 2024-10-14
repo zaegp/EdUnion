@@ -234,8 +234,8 @@ class UserFirebaseService {
         }
     }
     
-    func fetchStudentNote(teacherID: String, studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+    func fetchStudentNote(studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
@@ -417,14 +417,11 @@ class UserFirebaseService {
                         return nil
                     }
                     
-                    // 根據是否為老師來篩選 participants 的位置
                     if isTeacher {
-                        // 如果是老師，檢查 participantID 是否在索引 0
                         if chatRoom.participants.indices.contains(0), chatRoom.participants[0] == participantID {
                             return chatRoom
                         }
                     } else {
-                        // 如果是學生，檢查 participantID 是否在索引 1
                         if chatRoom.participants.indices.contains(1), chatRoom.participants[1] == participantID {
                             return chatRoom
                         }
@@ -601,27 +598,4 @@ class UserFirebaseService {
                 completion(error)
             }
         }
-    //    func fetchStudentName(by id: String, completion: @escaping (Result<String?, Error>) -> Void) {
-    //        let studentRef = db.collection("students").document(id)
-    //        studentRef.getDocument { document, error in
-    //            if let error = error {
-    //                completion(.failure(error))
-    //            } else if let document = document, document.exists {
-    //                let studentName = document.data()?["name"] as? String
-    //                completion(.success(studentName))
-    //            } else {
-    //                completion(.success(nil))
-    //            }
-    //        }
-    //    }
-    
-    
-    // MARK: - 日期格式
-    //    private let dateFormatter: DateFormatter = {
-    //        let formatter = DateFormatter()
-    //        formatter.dateFormat = "yyyy-MM-dd"
-    //        formatter.timeZone = TimeZone.current
-    //        formatter.locale = Locale.current
-    //        return formatter
-    //    }()
 }

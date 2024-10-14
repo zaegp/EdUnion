@@ -26,6 +26,10 @@ class TodayCoursesVC: UIViewController {
     var expandedIndexPath: IndexPath?
     let userID = UserSession.shared.currentUserID
     
+    let bellButton = BadgeButton(type: .system)
+    
+    private let loadingIndicator = UIActivityIndicatorView(style: .large)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,6 +37,52 @@ class TodayCoursesVC: UIViewController {
         setupNavigationBar()
         setupConstraints()
         setupViewModel()
+        tableView.reloadData()
+        viewModel.listenToPendingAppointments()
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+                tableView.addGestureRecognizer(longPressGesture)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setCustomTabBarHidden(false, animated: true)
+        }
+        
+        loadingIndicator.startAnimating()
+                viewModel.fetchTodayAppointments { [weak self] in
+                    self?.loadingIndicator.stopAnimating()
+                }
+        updateBellBadge()
+    }
+    
+    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            let touchPoint = gestureRecognizer.location(in: self.tableView)
+            
+            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
+                let appointment = viewModel.appointments[indexPath.row]
+
+                
+                
+                guard let studentName = viewModel.studentNames[appointment.studentID] else {
+                    print("找不到對應的學生姓名")
+                    return
+                }
+                
+                let student = Student.self
+                
+                showAddNoteView(for: appointment.studentID)
+            }
+        }
+    }
+    
+    @objc func updateBellBadge() {
+        let pendingCount = viewModel.getPendingAppointmentsCount()
+        bellButton.setBadge(number: pendingCount)
+        print("Bell badge updated: \(pendingCount)")
     }
 
     private func createTableHeader() -> UIView {
@@ -43,6 +93,7 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func configureUI() {
+        noCoursesLabel.isHidden = true
         view.backgroundColor = .myBackground
         progressBarHostingController.view.backgroundColor = .myBackground
         
@@ -73,18 +124,17 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func setupNavigationBar() {
-        let iconButton = UIBarButtonItem(
-            image: UIImage(systemName: "bell"),
-            style: .plain,
-            target: self,
-            action: #selector(pushToConfirmVC)
-        )
-        iconButton.tintColor = .label
-        navigationItem.rightBarButtonItem = iconButton
+        bellButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
+        bellButton.tintColor = .label
+        bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
+        
+        let bellBarButtonItem = UIBarButtonItem(customView: bellButton)
+        navigationItem.rightBarButtonItem = bellBarButtonItem
     }
     
     @objc private func pushToConfirmVC() {
-        let confirmVC = ConfirmVC()
+        let pendingAppointments = viewModel.pendingAppointments
+        let confirmVC = ConfirmVC(appointments: pendingAppointments)
         navigationController?.pushViewController(confirmVC, animated: true)
     }
     
@@ -117,17 +167,19 @@ class TodayCoursesVC: UIViewController {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
                 if self?.viewModel.appointments.isEmpty == true {
-                    // 課程為空時，顯示 noCoursesLabel 作為 tableView 的背景
+                    self?.noCoursesLabel.isHidden = false
                     self?.tableView.backgroundView = self?.noCoursesLabel
                 } else {
-                    // 有課程時，移除背景標籤
+                    self?.noCoursesLabel.isHidden = true
                     self?.tableView.backgroundView = nil
                     self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
                 }
                 self?.tableView.reloadData()
+                
+                // 直接在這裡更新鐘形徽章
+                self?.updateBellBadge()
             }
         }
-        viewModel.fetchTodayAppointments()
     }
 }
 // MARK: - UITableViewDataSource
@@ -151,30 +203,24 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
         let appointment = viewModel.appointments[indexPath.row]
+        let studentID = appointment.studentID ?? ""
+        let studentName = viewModel.studentNames[studentID] ?? ""
+        let studentNote = viewModel.studentNotes[studentID] ?? "沒有備註"
         
-        // 先獲取學生名字
-        viewModel.fetchStudentName(for: appointment) { [weak self] studentName in
-            DispatchQueue.main.async {
-                // 獲取備註
-                self?.viewModel.fetchStudentNote(teacherID: appointment.teacherID, studentID: appointment.studentID)
-                
-                // 配置 cell
-                cell.configureCell(
-                    name: studentName,
-                    times: appointment.times,
-                    note: self?.viewModel.studentNote ?? "",
-                    isExpanded: self?.expandedIndexPath == indexPath
-                )
-                
-                // 更新按鈕狀態
-                self?.updateCellButtonState(cell, appointment: appointment)
-            }
-        }
+        cell.configureCell(
+            name: studentName,
+            times: appointment.times,
+            note: studentNote,
+            isExpanded: expandedIndexPath == indexPath
+        )
+        
+        updateCellButtonState(cell, appointment: appointment)
         
         cell.confirmCompletion = { [weak self] in
             self?.handleCompletion(for: appointment, cell: cell)
         }
     }
+    
     
     private func updateCellButtonState(_ cell: TodayCoursesCell, appointment: Appointment) {
         if appointment.status == "completed" {
@@ -190,8 +236,10 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         let alert = UIAlertController(title: "完成課程", message: "確定要完成課程嗎?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "確定", style: .default, handler: { [weak self] _ in
-            self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
-            cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            UIView.transition(with: cell.confirmButton, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                self?.viewModel.completeCourse(appointmentID: appointment.id ?? "", teacherID: appointment.teacherID)
+                cell.confirmButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            }, completion: nil)
         }))
         present(alert, animated: true, completion: nil)
     }
@@ -205,12 +253,49 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         expandedIndexPath = (expandedIndexPath == indexPath) ? nil : indexPath
-        tableView.beginUpdates()
+        
+        // 只更新需要的行，避免整個表格刷新
         tableView.reloadRows(at: indexPathsToReload, with: .fade)
-        tableView.endUpdates()
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .delete
+    }
+    
+    private func showAddNoteView(for studentID: String) {
+        let notePopupView = NotePopupView()
+        notePopupView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(notePopupView)
+        
+        NSLayoutConstraint.activate([
+            notePopupView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            notePopupView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            notePopupView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            notePopupView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        
+        // 從 ViewModel 中獲取已有的備註
+        let existingNote = viewModel.studentNotes[studentID] ?? ""
+        notePopupView.setExistingNoteText(existingNote)
+        
+        // 用戶保存備註時，將其保存到 Firebase
+        notePopupView.onSave = { [weak self, weak notePopupView] noteText in
+            self?.viewModel.saveNoteText(noteText, for: studentID, teacherID: self?.userID ?? "") { result in
+                switch result {
+                case .success:
+                    notePopupView?.removeFromSuperview()
+                    // 刷新表格中的這一行
+                    if let indexPath = self?.viewModel.appointments.firstIndex(where: { $0.studentID == studentID }) {
+                        self?.tableView.reloadRows(at: [IndexPath(row: indexPath, section: 0)], with: .automatic)
+                    }
+                case .failure(let error):
+                    print("保存備註失敗: \(error.localizedDescription)")
+                }
+            }
+        }
+        
+        notePopupView.onCancel = {
+            notePopupView.removeFromSuperview()
+        }
     }
 }

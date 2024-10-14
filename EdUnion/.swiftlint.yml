@@ -6,16 +6,17 @@ disabled_rules: # 全局禁用的規則
   - trailing_whitespace # 禁用尾隨空格檢查
   - todo                # 禁用 TODO 檢查
   - comment_spacing     # 禁用註解間距規則
+  - file_length
 
 # 可選：設置具體規則的行為
-line_length:
-  warning: 300  # 行長度超過 300 字元時發出警告
-  error: 400    # 行長度超過 400 字元時報錯
+#line_length:
+#  warning: 300  # 行長度超過 300 字元時發出警告
+#  error: 1100    # 行長度超過 400 字元時報錯
 
-identifier_name:
-  min_length: 1   # 允許變數名稱最短為 1 個字元
-  max_length: 50  # 允許變數名稱最長為 50 個字元
-
+#identifier_name:
+#  min_length: 1   # 允許變數名稱最短為 1 個字元
+#  max_length: 50  # 允許變數名稱最長為 50 個字元
+#
 type_body_length:
   warning: 350
-  error: 600
+  error: 650

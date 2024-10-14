@@ -77,13 +77,22 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         nameTextField.borderStyle = .none
         nameTextField.layer.cornerRadius = 10
         nameTextField.layer.borderWidth = 1
-        nameTextField.layer.borderColor = UIColor.mainTint.cgColor
+        nameTextField.layer.borderColor = UIColor.myGray.cgColor
         nameTextField.clipsToBounds = true
         nameTextField.backgroundColor = .systemBackground
         nameTextField.textAlignment = .left
         nameTextField.horizontalPadding = 10
         nameTextField.heightAnchor.constraint(equalToConstant: 50).isActive = true
         nameTextField.tintColor = .mainOrange
+        
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        if textField == nameTextField {
+            let isNameEmpty = nameTextField.text?.isEmpty ?? true
+            saveButton.isEnabled = !isNameEmpty   // 當名字為空時禁用保存按鈕
+        }
     }
 
     private func configureOtherLabelsAndTextFields() {
@@ -106,7 +115,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             textField.borderStyle = .none
             textField.layer.cornerRadius = 10
             textField.layer.borderWidth = 1
-            textField.layer.borderColor = UIColor.mainTint.cgColor
+            textField.layer.borderColor = UIColor.myGray.cgColor
             textField.clipsToBounds = true
             textField.backgroundColor = .systemBackground
             textField.textAlignment = .left
@@ -131,6 +140,8 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         saveButton.layer.cornerRadius = 30
         saveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         saveButton.addTarget(self, action: #selector(saveChanges), for: .touchUpInside)
+        
+        saveButton.isEnabled = false
     }
 
     private func setupScrollViewAndContainer() {
@@ -331,9 +342,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     userRef.setData([
                         "resume": resumeData,
                         "photoURL": profileImageURL ?? "",
-                        "totalCourseHours": 0,
-                        "timeSlots": [],
-                        "fullName": name // 覆蓋 fullName 欄位
+                        "fullName": name
                     ]) { error in
                         if let error = error {
                             print("Error creating data: \(error.localizedDescription)")
@@ -344,7 +353,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     }
                 } else {
                     print("Error updating data: \(error.localizedDescription)")
-                    completion() // 確保在出錯時也呼叫 completion
+                    completion() 
                 }
             } else {
                 print("Data successfully updated.")
@@ -356,7 +365,9 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     private func uploadProfileImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let userID = userID else { return }
 
-        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
+        // 根據 userRole 決定存儲的圖片路徑
+        let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
+        let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("Error converting image to data.")

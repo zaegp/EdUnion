@@ -12,8 +12,7 @@ import FirebaseFirestore
 import FirebaseStorage
 import SafariServices
 
-
-class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ProfileVC: UIViewController, UINavigationControllerDelegate {
     
     private let tableView = UITableView()
     private var userImageView: UIImageView!
@@ -36,6 +35,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        updateUserInfo()
         tabBarController?.tabBar.isHidden = true
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(false, animated: true)
@@ -106,16 +106,16 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
                menuItems = [
                    ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
                    ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                   ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                   ("學生名單", "person.text.rectangle", { [weak self] in self?.navigateToAllStudents() }),
                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }),
                    ("登出", "door.right.hand.open", logoutButtonTapped),
                    ("刪除帳號", "trash", deleteAccountAction)
                ]
            } else {
                menuItems = [
                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
-                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }), // 新增隱私權政策
+                   ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }),
                    ("登出帳號", "door.right.hand.open", logoutButtonTapped),
                    ("刪除帳號", "trash", deleteAccountAction)
                ]
@@ -162,7 +162,7 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     private func deleteAccountAction() {
-        let alertController = UIAlertController(title: "刪除帳號", message: "確定要刪除您的帳號嗎？這個操作無法恢復。", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "刪除帳號", message: "您在30天內重新登錄此帳號即可保留原本的資料", preferredStyle: .alert)
         
         let deleteAction = UIAlertAction(title: "刪除", style: .destructive) { _ in
             self.updateUserStatusToDeleting()
@@ -214,13 +214,8 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         navigationController?.pushViewController(resumeVC, animated: true)
     }
     
-    private func navigateToConfirmAppointments() {
-        let confirmVC = ConfirmVC()
-        navigationController?.pushViewController(confirmVC, animated: true)
-    }
-    
     private func navigateToAllStudents() {
-        let studentListVC = AllStudentVC()
+        let studentListVC = StudentListVC()
         navigationController?.pushViewController(studentListVC, animated: true)
     }
     
@@ -267,27 +262,11 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         }
         self.nameLabel.text = name
     }
-    
-    // MARK: - Image Picker Methods
-    
-    @objc private func didTapProfileImage() {
-        presentImagePicker(sourceType: .photoLibrary)
-    }
-    
-    private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
-        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else { return }
-        
-        let picker = UIImagePickerController()
-        picker.sourceType = sourceType
-        picker.delegate = self
-        picker.allowsEditing = true
-        present(picker, animated: true)
-    }
-    
-    // MARK: - UITableViewDelegate & DataSource Methods
-    
+}
+
+extension ProfileVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return 70
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -335,9 +314,9 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
         menuItems[indexPath.row].action()
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
-    // MARK: - UIImagePickerControllerDelegate Methods
-    
+}
+
+extension ProfileVC: UIImagePickerControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         
@@ -351,39 +330,41 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     }
     
     private func uploadProfileImage(_ image: UIImage) {
-        guard let userID = userID else {
-            print("Error: User not logged in.")
-            return
-        }
-        
-        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
-        
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            print("Error converting image to data.")
-            return
-        }
-        
-        storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
+            guard let userID = userID else {
+                print("Error: User not logged in.")
                 return
             }
             
-            storageRef.downloadURL { url, error in
+            // 根據 userRole 動態設置存儲路徑
+            let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
+            let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
+            
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                print("Error converting image to data.")
+                return
+            }
+            
+            storageRef.putData(imageData, metadata: nil) { [weak self] metadata, error in
                 if let error = error {
-                    print("Error getting download URL: \(error.localizedDescription)")
+                    print("Error uploading image: \(error.localizedDescription)")
                     return
                 }
                 
-                guard let downloadURL = url else {
-                    print("Error: Download URL is nil.")
-                    return
+                storageRef.downloadURL { url, error in
+                    if let error = error {
+                        print("Error getting download URL: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let downloadURL = url else {
+                        print("Error: Download URL is nil.")
+                        return
+                    }
+                    
+                    self?.saveImageURLToFirestore(downloadURL.absoluteString)
                 }
-                
-                self?.saveImageURLToFirestore(downloadURL.absoluteString)
             }
         }
-    }
     
     private func saveImageURLToFirestore(_ urlString: String) {
         guard let userID = userID else {
@@ -405,5 +386,19 @@ class ProfileVC: UIViewController, UITableViewDelegate, UITableViewDataSource, U
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc private func didTapProfileImage() {
+        presentImagePicker(sourceType: .photoLibrary)
+    }
+    
+    private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
+        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else { return }
+        
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
     }
 }
