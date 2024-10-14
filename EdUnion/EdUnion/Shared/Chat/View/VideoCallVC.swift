@@ -15,26 +15,35 @@ class VideoCallVC: UIViewController {
     var appId: String?
     var onCallEnded: (() -> Void)?
     
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupActivityIndicator()
         
         guard let channelName = self.channelName, !channelName.isEmpty else {
             print("频道名称未设置")
             return
         }
         
+        activityIndicator.startAnimating()
+        
         fetchAgoraToken(channelName: channelName) { [weak self] token, appId in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                if let token = token, let appId = appId {
-                    self.token = token
-                    self.appId = appId
-                    self.setupAgoraVideoViewer(token: token, appId: appId, channelName: channelName)
-                } else {
-                    print("无法获取视频通话 Token 或 App ID")
+                    guard let self = self else { return }
+                    DispatchQueue.main.async {
+                        if let token = token, let appId = appId {
+                            self.token = token
+                            self.appId = appId
+                            self.setupAgoraVideoViewer(token: token, appId: appId, channelName: channelName)
+                            
+                            self.activityIndicator.stopAnimating()
+                        } else {
+                            print("无法获取视频通话 Token 或 App ID")
+                            self.activityIndicator.stopAnimating()
+                        }
+                    }
                 }
-            }
-        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -45,11 +54,23 @@ class VideoCallVC: UIViewController {
         }
     }
     
+    func setupActivityIndicator() {
+            activityIndicator.color = .gray
+            activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(activityIndicator)
+            
+            // 設定活動指示器在螢幕中央
+            NSLayoutConstraint.activate([
+                activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            ])
+        }
+    
     func setupAgoraVideoViewer(token: String, appId: String, channelName: String) {
         var agSettings = AgoraSettings()
         
         agSettings.enabledButtons = [.cameraButton, .micButton, .flipButton]
-        agSettings.buttonPosition = .right
+        agSettings.buttonPosition = .bottom
         AgoraVideoViewer.printLevel = .verbose
         
         let agoraView = AgoraVideoViewer(
@@ -62,13 +83,14 @@ class VideoCallVC: UIViewController {
             delegate: self
         )
         
-        self.view.backgroundColor = .tertiarySystemBackground
+        self.view.backgroundColor = .myBackground
         agoraView.fills(view: self.view)
         self.agoraView = agoraView
         
         agoraView.join(channel: channelName, as: .broadcaster)
         
-        self.showSegmentedView()
+//        self.showSegmentedView()
+        self.agoraView?.style = .floating
     }
     
     func fetchAgoraToken(channelName: String, completion: @escaping (String?, String?) -> Void) {
@@ -142,7 +164,8 @@ class VideoCallVC: UIViewController {
         print(segc)
         let segmentedStyle = [
             AgoraVideoViewer.Style.floating,
-            AgoraVideoViewer.Style.grid
+//            AgoraVideoViewer.Style.grid
+//            AgoraVideoViewer.Style.pinned
         ][segc.selectedSegmentIndex]
         self.agoraView?.style = segmentedStyle
     }
@@ -160,7 +183,7 @@ extension VideoCallVC: AgoraVideoViewerDelegate {
         leaveButton.backgroundColor = .systemRed
         leaveButton.addTarget(self, action: #selector(self.leaveChannel), for: .touchUpInside)
         
-        return [leaveButton] // 返回離開按鈕
+        return [leaveButton]
     }
     
     @objc func leaveChannel(sender: UIButton) {

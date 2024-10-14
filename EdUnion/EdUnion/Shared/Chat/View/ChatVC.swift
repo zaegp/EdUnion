@@ -78,19 +78,15 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 navigationController?.popToViewController(chatListVC, animated: true)
             }
         }
-        
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(false, animated: true)
-        }
     }
     
     private func updateSendButtonState() {
         if let text = messageTextView.text, !text.isEmpty {
             sendButton.isEnabled = true
-            sendButton.tintColor = .mainOrange // 啟用時的顏色
+            sendButton.tintColor = .mainOrange
         } else {
             sendButton.isEnabled = false
-            sendButton.tintColor = .gray // 禁用時的顏色
+            sendButton.tintColor = .gray
         }
     }
     
@@ -107,14 +103,13 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     private func setupNavigationBar() {
         
         let videoCallButton = UIBarButtonItem(
-            image: UIImage(systemName: "video.fill"),
+            image: UIImage(systemName: "video"),
             style: .plain,
             target: self,
             action: #selector(videoCallButtonTapped)
         )
-        videoCallButton.tintColor = .black
+        videoCallButton.tintColor = .mainOrange
         
-        // 將視訊按鈕添加到導航欄右側
         navigationItem.rightBarButtonItem = videoCallButton
         
         if UserDefaults.standard.string(forKey: "userRole") == "teacher" {
@@ -165,9 +160,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         videoCallVC.modalPresentationStyle = .fullScreen
         videoCallVC.onCallEnded = { [weak self] in
-                guard let self = self else { return }
-                self.viewModel.addVideoCallMessage() // 通話結束後添加消息
-            }
+            guard let self = self else { return }
+            self.viewModel.addVideoCallMessage() 
+        }
         
         present(videoCallVC, animated: true, completion: {
             print("成功呈現 VideoCallVC")

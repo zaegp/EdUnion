@@ -222,6 +222,7 @@ struct BaseCalendarView: View {
                         generateDays(for: selectedDay ?? currentDate)
                         if !isDataLoaded {
                             fetchAppointments()
+                            viewModel.fetchStudents(for: userID ?? "")
                             isDataLoaded = true
                         }
                     }
@@ -381,8 +382,16 @@ struct BaseCalendarView: View {
             ZStack {
                 if isShowingNotePopup {
                     NotePopupViewWrapper(
+                        noteText: viewModel.studentsNotes[selectedStudentID] ?? "",
                         onSave: { text in
-                            noteText = text
+                            viewModel.saveNoteText(text, for: selectedStudentID, teacherID: userID ?? "") { result in
+                                switch result {
+                                case .success:
+                                    print("备注已保存")
+                                case .failure(let error):
+                                    print("保存备注失败: \(error.localizedDescription)")
+                                }
+                            }
                             isShowingNotePopup = false
                         },
                         onCancel: {
@@ -393,8 +402,6 @@ struct BaseCalendarView: View {
                 }
             }
         )
-        
-        
     }
     
     func generateDays(for referenceDate: Date) {
@@ -497,9 +504,8 @@ struct BaseCalendarView: View {
         print("Selected Day: \(selectedDay)")
         
         if isWeekView {
-            withAnimation {
-                generateDays(for: selectedDay ?? currentDate)
-            }
+            
+            generateDays(for: selectedDay ?? currentDate)
         }
     }
     
@@ -680,17 +686,19 @@ struct BaseCalendarView: View {
 }
 
 struct NotePopupViewWrapper: UIViewRepresentable {
+    var noteText: String?
     var onSave: (String) -> Void
     var onCancel: () -> Void
-    
+
     func makeUIView(context: Context) -> NotePopupView {
         let notePopupView = NotePopupView()
         notePopupView.onSave = onSave
         notePopupView.onCancel = onCancel
+        notePopupView.setExistingNoteText(noteText ?? "")
         return notePopupView
     }
-    
+
     func updateUIView(_ uiView: NotePopupView, context: Context) {
-        // 更新邏輯
+        // 如果需要更新 UI，可以在这里添加代码
     }
 }

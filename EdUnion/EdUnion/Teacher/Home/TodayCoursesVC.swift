@@ -53,35 +53,27 @@ class TodayCoursesVC: UIViewController {
         
         loadingIndicator.startAnimating()
                 viewModel.fetchTodayAppointments { [weak self] in
-                    // 在數據加載完成後停止加載指示器
                     self?.loadingIndicator.stopAnimating()
                 }
         updateBellBadge()
     }
     
     @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
-        // 確保手勢狀態為開始
         if gestureRecognizer.state == .began {
-            // 獲取觸摸點
             let touchPoint = gestureRecognizer.location(in: self.tableView)
             
-            // 獲取 indexPath
             if let indexPath = tableView.indexPathForRow(at: touchPoint) {
-                // 獲取對應的 Appointment
                 let appointment = viewModel.appointments[indexPath.row]
 
                 
                 
-                // 從 studentNames 中查找對應的學生姓名
                 guard let studentName = viewModel.studentNames[appointment.studentID] else {
                     print("找不到對應的學生姓名")
                     return
                 }
                 
-                // 構建 Student 對象或其他需要的數據
                 let student = Student.self
                 
-                // 顯示添加備註的視圖
                 showAddNoteView(for: appointment.studentID)
             }
         }
@@ -132,20 +124,19 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func setupNavigationBar() {
-            // 配置 bell 按鈕
-            bellButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
-            bellButton.tintColor = .label
-            bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
-            
-            let bellBarButtonItem = UIBarButtonItem(customView: bellButton)
-            navigationItem.rightBarButtonItem = bellBarButtonItem
-        }
+        bellButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
+        bellButton.tintColor = .label
+        bellButton.addTarget(self, action: #selector(pushToConfirmVC), for: .touchUpInside)
+        
+        let bellBarButtonItem = UIBarButtonItem(customView: bellButton)
+        navigationItem.rightBarButtonItem = bellBarButtonItem
+    }
     
     @objc private func pushToConfirmVC() {
-            let pendingAppointments = viewModel.pendingAppointments
-            let confirmVC = ConfirmVC(appointments: pendingAppointments)
-            navigationController?.pushViewController(confirmVC, animated: true)
-        }
+        let pendingAppointments = viewModel.pendingAppointments
+        let confirmVC = ConfirmVC(appointments: pendingAppointments)
+        navigationController?.pushViewController(confirmVC, animated: true)
+    }
     
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false

@@ -32,6 +32,7 @@ class StudentCell: UITableViewCell {
     private func setupViews() {
         studentImageView.contentMode = .scaleAspectFill
         studentImageView.clipsToBounds = true
+        studentImageView.tintColor = .myMessageCell
         studentImageView.layer.cornerRadius = 20
         studentImageView.translatesAutoresizingMaskIntoConstraints = false
         

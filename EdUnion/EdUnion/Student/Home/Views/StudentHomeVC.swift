@@ -17,7 +17,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         
         private let searchIcon: UIImageView = {
             let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-            icon.tintColor = .backButton
+            icon.tintColor = .myTint
             icon.isUserInteractionEnabled = true
             return icon
         }()

@@ -201,7 +201,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         
         saveButton.setTitle("儲存", for: .normal)
         saveButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        saveButton.setTitleColor(.mainTint, for: .normal)
+        saveButton.setTitleColor(.white, for: .normal)
         saveButton.backgroundColor = .mainOrange
         saveButton.layer.cornerRadius = 8
         saveButton.addTarget(self, action: #selector(saveAllTimeSlots), for: .touchUpInside)

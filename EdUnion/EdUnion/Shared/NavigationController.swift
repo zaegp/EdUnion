@@ -22,7 +22,7 @@ class NavigationController: UINavigationController {
         if viewControllers.count > 1 {
             viewController.navigationItem.backButtonDisplayMode = .minimal
             let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(handleBackButton))
-            backButton.tintColor = .backButton
+            backButton.tintColor = .myTint
             viewController.navigationItem.leftBarButtonItem = backButton
         }
     }

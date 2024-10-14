@@ -138,11 +138,11 @@ class TeacherDetailVC: UIViewController {
             imageView.kf.setImage(
                 with: url,
                 placeholder: UIImage(systemName: "person.crop.circle.fill")?
-                    .withTintColor(.backButton, renderingMode: .alwaysOriginal)
+                    .withTintColor(.myTint, renderingMode: .alwaysOriginal)
             )
         } else {
             imageView.image = UIImage(systemName: "person.crop.circle.fill")
-            imageView.tintColor = .backButton
+            imageView.tintColor = .myTint
         }
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 50

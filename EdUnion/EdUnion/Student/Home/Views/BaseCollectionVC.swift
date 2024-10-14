@@ -22,14 +22,14 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
 
     var collectionView: UICollectionView!
     var viewModel: BaseCollectionViewModelProtocol!
-    private var emptyStateLabel: UILabel! // 用於顯示空狀態的標籤
+    private var emptyStateLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .myBackground
         
         setupCollectionView()
-        setupEmptyStateLabel() // 設置空狀態標籤
+        setupEmptyStateLabel()
         bindViewModel()
         viewModel.fetchData()
     }
@@ -45,7 +45,7 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
     private func bindViewModel() {
         viewModel.onDataUpdate = { [weak self] in
             self?.collectionView.reloadData()
-            self?.updateEmptyState() // 更新空狀態
+            self?.updateEmptyState()
         }
     }
 
@@ -78,13 +78,12 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         emptyStateLabel.textColor = .myGray
         emptyStateLabel.textAlignment = .center
         emptyStateLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        emptyStateLabel.isHidden = true // 初始時隱藏
+        emptyStateLabel.isHidden = true
         
         view.addSubview(emptyStateLabel)
     }
     
     private func updateEmptyState() {
-        // 根據數據的狀態來顯示或隱藏空狀態標籤
         emptyStateLabel.isHidden = viewModel.numberOfItems() != 0
         collectionView.isHidden = viewModel.numberOfItems() == 0
     }

@@ -34,6 +34,7 @@
 		517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E042CBB9497002A2513 /* AgoraUIKit */; };
 		517E9E072CBBD2EA002A2513 /* UserRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E062CBBD2EA002A2513 /* UserRole.swift */; };
 		517E9E092CBBE9B2002A2513 /* VideoCallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E082CBBE9B2002A2513 /* VideoCallVC.swift */; };
+		517E9E102CBD1F2E002A2513 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -236,6 +237,7 @@
 				517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */,
 				517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */,
 				517E9DD22CACC3A8002A2513 /* FirebaseStorage in Frameworks */,
+				517E9E102CBD1F2E002A2513 /* FirebaseCrashlytics in Frameworks */,
 				517E9DCE2CACC3A8002A2513 /* FirebaseAuth in Frameworks */,
 				517E9DD02CACC3A8002A2513 /* FirebaseFirestore in Frameworks */,
 			);
@@ -686,6 +688,7 @@
 				51ED0AD12C916721006322B7 /* Resources */,
 				519C8F072C97BDC3007DFCBA /* ShellScript */,
 				51D25CBB2C9F27320083EECF /* Embed Foundation Extensions */,
+				517E9E0C2CBD19F4002A2513 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -702,6 +705,7 @@
 				517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */,
 				517E9E012CBAB1C2002A2513 /* FirebaseFunctions */,
 				517E9E042CBB9497002A2513 /* AgoraUIKit */,
+				517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -822,6 +826,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		517E9E0C2CBD19F4002A2513 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
 		519C8F072C97BDC3007DFCBA /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -1106,6 +1129,7 @@
 				CODE_SIGN_ENTITLEMENTS = EdUnion/EdUnion.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PYY5QH5MCU;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1121,6 +1145,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1157,6 +1182,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1390,6 +1416,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */;
 			productName = AgoraUIKit;
+		};
+		517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

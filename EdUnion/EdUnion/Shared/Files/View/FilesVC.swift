@@ -246,14 +246,14 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 }
             }
             
-            // 清空選擇的文件和學生，並更新 UI
             self.selectedFiles.removeAll()
             self.selectedStudentIDs.removeAll()
+            self.studentTableView.reloadData()
             self.studentTableView.isHidden = true
             self.sendButton.isHidden = true
             self.collectionView.allowsMultipleSelection = false
+            self.collectionView.reloadData()
             
-            // 動畫結束
             self.endSendAnimation()
         }
     }
@@ -918,7 +918,6 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
             let fileItem = files[indexPath.item]
             
             if collectionView.allowsMultipleSelection {
-                // 將 FileItem 添加到選擇的文件列表，而不是只添加 URL
                 selectedFiles.append(fileItem)
                 print("選擇文件：\(fileItem.fileName)")
                 updateSendButtonState()
@@ -947,35 +946,6 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
             }
         }
     }
-    
-//    func showUploadProgress(for fileName: String) {
-//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
-//            let indexPath = IndexPath(item: index, section: 0)
-//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-//                cell.updateProgress(0.0) // 初始進度設置為0
-//            }
-//        }
-//    }
-
-    // 更新進度條
-//    func updateUploadProgress(for fileName: String, progress: Double) {
-//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
-//            let indexPath = IndexPath(item: index, section: 0)
-//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-//                cell.updateProgress(Float(progress / 100.0)) // 進度應該是0.0到1.0之間
-//            }
-//        }
-//    }
-//
-//    // 隱藏上傳進度條
-//    func hideUploadProgress(for fileName: String) {
-//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
-//            let indexPath = IndexPath(item: index, section: 0)
-//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-//                cell.hideProgress()
-//            }
-//        }
-//    }
 }
 
 extension FilesVC: FileCellDelegate {
@@ -1073,15 +1043,16 @@ extension FilesVC: FileCellDelegate {
                                 print("Error deleting local file: \(error.localizedDescription)")
                             }
                             
-                            // 从数组中移除文件并更新 UI
                             DispatchQueue.main.async { [weak self] in
                                 guard let self = self else { return }
-                                // 使用 fileItem 来确保我们删除正确的文件
                                 if let currentIndex = self.files.firstIndex(where: { $0.fileName == fileItem.fileName && $0.remoteURL == fileItem.remoteURL }) {
                                     self.files.remove(at: currentIndex)
                                     self.collectionView.deleteItems(at: [IndexPath(item: currentIndex, section: 0)])
+                                    
+                                    if self.files.isEmpty {
+                                        self.setCustomEmptyStateView()
+                                    }
                                 } else {
-                                    // 如果文件不在数组中，重新加载 CollectionView
                                     self.collectionView.reloadData()
                                 }
                             }

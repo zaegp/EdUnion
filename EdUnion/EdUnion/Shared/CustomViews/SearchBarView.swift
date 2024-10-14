@@ -33,9 +33,7 @@ class SearchBarView: UIView, UISearchBarDelegate {
     
     private func setupUI() {
         searchBar.delegate = self
-        searchBar.placeholder = "搜尋"
-        searchBar.tintColor = .mySearchBarTint
-        searchBar.sizeToFit()
+//        searchBar.sizeToFit()
         searchBar.backgroundImage = UIImage()
         
         if let searchTextField = searchBar.searchTextField as? UITextField {
@@ -44,21 +42,21 @@ class SearchBarView: UIView, UISearchBarDelegate {
             searchTextField.clipsToBounds = true
             searchTextField.layer.borderWidth = 1.0
             searchTextField.layer.borderColor = UIColor.myGray.cgColor
-            searchTextField.textColor = UIColor.mySearchBarTint
+            searchTextField.textColor = UIColor.myTint
             searchTextField.tintColor = UIColor.mainOrange
             
             let placeholderText = "搜尋"
-            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.mySearchBarTint]
+            let attributes = [NSAttributedString.Key.foregroundColor: UIColor.myTint]
             searchTextField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: attributes)
             
             if let leftIconView = searchTextField.leftView as? UIImageView {
                 leftIconView.image = leftIconView.image?.withRenderingMode(.alwaysTemplate)
-                leftIconView.tintColor = UIColor.mySearchBarTint
+                leftIconView.tintColor = UIColor.myTint
             }
         }
         
         cancelButton.setTitle("取消", for: .normal)
-        cancelButton.tintColor = .mySearchBarTint
+        cancelButton.tintColor = .myTint
         cancelButton.isHidden = true
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         

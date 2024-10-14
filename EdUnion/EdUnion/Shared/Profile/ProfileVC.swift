@@ -106,7 +106,7 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
                menuItems = [
                    ("可選時段", "calendar.badge.plus", { [weak self] in self?.navigateToAvailableTimeSlots() }),
                    ("履歷", "list.bullet.clipboard", { [weak self] in self?.navigateToResume() }),
-                   ("學生名單", "person.text.rectangle.fill", { [weak self] in self?.navigateToAllStudents() }),
+                   ("學生名單", "person.text.rectangle", { [weak self] in self?.navigateToAllStudents() }),
                    ("教材", "folder", { [weak self] in self?.navigateToFiles() }),
                    ("隱私權政策", "lock.shield", { [weak self] in self?.openPrivacyPolicy() }),
                    ("登出", "door.right.hand.open", logoutButtonTapped),
@@ -266,7 +266,7 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
 
 extension ProfileVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return 70
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

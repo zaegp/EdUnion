@@ -77,7 +77,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         nameTextField.borderStyle = .none
         nameTextField.layer.cornerRadius = 10
         nameTextField.layer.borderWidth = 1
-        nameTextField.layer.borderColor = UIColor.mainTint.cgColor
+        nameTextField.layer.borderColor = UIColor.myGray.cgColor
         nameTextField.clipsToBounds = true
         nameTextField.backgroundColor = .systemBackground
         nameTextField.textAlignment = .left
@@ -86,7 +86,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         nameTextField.tintColor = .mainOrange
         
         nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-
     }
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
@@ -116,7 +115,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             textField.borderStyle = .none
             textField.layer.cornerRadius = 10
             textField.layer.borderWidth = 1
-            textField.layer.borderColor = UIColor.mainTint.cgColor
+            textField.layer.borderColor = UIColor.myGray.cgColor
             textField.clipsToBounds = true
             textField.backgroundColor = .systemBackground
             textField.textAlignment = .left
