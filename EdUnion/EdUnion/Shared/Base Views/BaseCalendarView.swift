@@ -301,6 +301,16 @@ struct BaseCalendarView: View {
                         }
                     }
                     .padding(.bottom, 80)
+                } else {
+                    VStack {
+                        Spacer()
+                        Text("沒有課程")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding()
+                        Spacer()
+                    }
+                    .padding(.bottom, 80)
                 }
             }
             .background(Color.myBackground)

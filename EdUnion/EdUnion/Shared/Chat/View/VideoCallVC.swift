@@ -9,7 +9,6 @@ import UIKit
 import AgoraUIKit
 
 class VideoCallVC: UIViewController {
-    
     var agoraView: AgoraVideoViewer?
     var channelName: String?
     var token: String?
@@ -19,7 +18,7 @@ class VideoCallVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        guard var channelName = self.channelName, !channelName.isEmpty else {
+        guard let channelName = self.channelName, !channelName.isEmpty else {
             print("频道名称未设置")
             return
         }
@@ -67,7 +66,6 @@ class VideoCallVC: UIViewController {
         agoraView.fills(view: self.view)
         self.agoraView = agoraView
         
-        // 加入频道
         agoraView.join(channel: channelName, as: .broadcaster)
         
         self.showSegmentedView()

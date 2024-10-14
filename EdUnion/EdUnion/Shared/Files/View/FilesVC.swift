@@ -8,11 +8,15 @@
 import UIKit
 import FirebaseStorage
 import FirebaseFirestore
+import QuickLook
 
-class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
+class FilesVC: UIViewController, QLPreviewControllerDataSource {
     var collectionView: UICollectionView!
     var studentTableView: UITableView!
     var sendButton: UIButton!
+    var previewItem: NSURL?
+    var fileDownloadProgress: [URL: Float] = [:]
+    var activityIndicator: UIActivityIndicatorView!
     
     var selectedFiles: [FileItem] = []
     var files: [FileItem] = []
@@ -44,7 +48,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             setupStudentTableView()
             setupLongPressGesture()
             setupMenu()
-            uploadAllFiles()
+            setupActivityIndicator()
         }
         
         fetchUserFiles()
@@ -58,6 +62,26 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             tabBarController.setCustomTabBarHidden(true, animated: true)
         }
     }
+    
+    private func setupActivityIndicator() {
+        activityIndicator = UIActivityIndicatorView(style: .large)
+                activityIndicator.center = self.view.center
+                activityIndicator.hidesWhenStopped = true // 在停止時隱藏
+                self.view.addSubview(activityIndicator)
+    }
+    
+    func showActivityIndicator() {
+            DispatchQueue.main.async {
+                self.activityIndicator.startAnimating()
+            }
+        }
+        
+        // 隱藏活動指示器
+        func hideActivityIndicator() {
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+            }
+        }
     
     private func setupSendButton() {
         sendButton = UIButton(type: .system)
@@ -228,7 +252,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             self.studentTableView.isHidden = true
             self.sendButton.isHidden = true
             self.collectionView.allowsMultipleSelection = false
-            self.collectionView.reloadData()
             
             // 動畫結束
             self.endSendAnimation()
@@ -305,14 +328,25 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
     }
     
     private func previewFile(at url: URL) {
-        if FileManager.default.fileExists(atPath: url.path) {
-            documentInteractionController = UIDocumentInteractionController(url: url)
-            documentInteractionController?.delegate = self
-            documentInteractionController?.presentPreview(animated: true)
-        } else {
-            print("File does not exist at path: \(url.path)")
-        }
-    }
+           if FileManager.default.fileExists(atPath: url.path) {
+               previewItem = url as NSURL
+               let previewController = QLPreviewController()
+               previewController.dataSource = self
+               present(previewController, animated: true, completion: nil)
+           } else {
+               print("File does not exist at path: \(url.path)")
+               showAlert(title: "無法預覽", message: "文件不存在或已被刪除。")
+           }
+       }
+       
+       // QLPreviewControllerDataSource 方法
+       func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+           return previewItem == nil ? 0 : 1
+       }
+       
+       func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+           return previewItem!
+       }
     
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
@@ -320,8 +354,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             setCustomEmptyStateView() // 顯示自定義的 empty state
             return
         }
-
-        // 取得本地緩存的文件
+        
         let cachedFiles = getCachedFiles()
         if !cachedFiles.isEmpty {
             self.files = cachedFiles
@@ -329,27 +362,30 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
                 self.collectionView.reloadData()
                 self.restoreCollectionView() // 恢復正常背景
             }
+            // 如果有緩存的文件，暫時不設置監聽器
+            return
         } else {
-            // 如果沒有緩存文件，顯示加載中或空狀態
-            setCustomEmptyStateView() // 顯示自定義的 empty state
+            setCustomEmptyStateView()
         }
         
+        setupFirestoreListener(for: currentUserID)
+    }
+    
+    func setupFirestoreListener(for currentUserID: String) {
         let collectionPath = "files"
         let queryField = userRole == .teacher ? "ownerID" : "authorizedStudents"
-        
-        // 即時監聽文件變動
+
         let query = userRole == .teacher ?
             firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
             firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
-        
-        // 使用 Firestore 即時監聽文件變動
+
         query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error.localizedDescription)")
                 self?.setCustomEmptyStateView() // 顯示自定義的 empty state
                 return
             }
-            
+
             guard let snapshot = snapshot else {
                 print("No snapshot received.")
                 self?.files.removeAll()
@@ -357,7 +393,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
                 self?.setCustomEmptyStateView() // 顯示自定義的 empty state
                 return
             }
-            
+
             // 處理即時變動的文件
             self?.handleFetchedFiles(snapshot)
         }
@@ -373,7 +409,7 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
 
             for fileURL in fileURLs {
                 let fileName = fileURL.lastPathComponent
-                let fileItem = FileItem(localURL: fileURL, remoteURL: fileURL, downloadURL: "", fileName: fileName)
+                let fileItem = FileItem(localURL: fileURL, remoteURL: fileURL, downloadURL: "", fileName: fileName, storagePath: "files/\(fileName)")
                 cachedFiles.append(fileItem)
             }
             return cachedFiles
@@ -391,39 +427,43 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             setCustomEmptyStateView() // 設置自定義的 empty state
             return
         }
-        
-        self.files.removeAll()
+
+        // 創建一個臨時的文件列表
+        var updatedFiles: [FileItem] = []
         self.fileDownloadStatus.removeAll()
         self.fileURLs.removeAll()
-        
+
         for document in documents {
             guard let urlString = document.data()["downloadURL"] as? String,
                   let fileName = document.data()["fileName"] as? String,
                   let remoteURL = URL(string: urlString) else {
                 continue
             }
-            
+
             // 檢查本地緩存
             if let cachedURL = isFileCached(fileName: fileName) {
-                // 文件已緩存，使用本地文件
-                let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName)
-                self.files.append(fileItem)
-                self.fileDownloadStatus[cachedURL] = false
+                let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
+                let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
+                updatedFiles.append(fileItem)
+                self.fileDownloadStatus[remoteURL] = false
             } else {
-                // 文件未緩存，需要下載
-                let fileItem = FileItem(localURL: nil, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName)
-                self.files.append(fileItem)
+                let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
+                let fileItem = FileItem(localURL: nil, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
+                updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = true
-                
+
                 // 刷新 collectionView 以顯示活動指示器
                 DispatchQueue.main.async {
                     self.collectionView.reloadData()
                 }
-                
+
                 self.downloadFile(from: remoteURL, withName: fileName)
             }
         }
-        
+
+        // 更新 self.files
+        self.files = updatedFiles
+
         DispatchQueue.main.async {
             self.collectionView.reloadData()
             if self.files.isEmpty {
@@ -434,51 +474,51 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         }
     }
     
-    func downloadFile(from url: URL, withName fileName: String) {
-        let task = URLSession.shared.downloadTask(with: url) { [weak self] (tempLocalUrl, response, error) in
-            if let error = error {
-                print("Error downloading file: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let tempLocalUrl = tempLocalUrl else {
-                print("Error: Temporary local URL is nil.")
-                return
-            }
-            
-            let cacheDirectory = self?.getCacheDirectory()
-            let localUrl = cacheDirectory?.appendingPathComponent(fileName)
-            
-            do {
-                if let localUrl = localUrl {
-                    if FileManager.default.fileExists(atPath: localUrl.path) {
-                        try FileManager.default.removeItem(at: localUrl)
-                    }
-                    try FileManager.default.moveItem(at: tempLocalUrl, to: localUrl)
-                    
-                    DispatchQueue.main.async {
-                        // 更新 files 列表以指向本地緩存文件
-                        if let index = self?.files.firstIndex(where: { $0.remoteURL == url }) {
-                            let updatedFileItem = FileItem(localURL: localUrl, remoteURL: url, downloadURL: self?.files[index].downloadURL ?? "", fileName: fileName)
-                            self?.files[index] = updatedFileItem
-                        }
-                        self?.fileDownloadStatus[localUrl] = false
-                        self?.collectionView.reloadData()
-                        
-                        // Update empty state
-                        if let self = self, self.files.isEmpty {
-                            
-                        } else {
-                            self?.restoreCollectionView()
-                        }
-                    }
-                }
-            } catch {
-                print("Error moving file: \(error.localizedDescription)")
-            }
-        }
-        task.resume()
-    }
+//    func downloadFile(from url: URL, withName fileName: String) {
+//        let task = URLSession.shared.downloadTask(with: url) { [weak self] (tempLocalUrl, response, error) in
+//            if let error = error {
+//                print("Error downloading file: \(error.localizedDescription)")
+//                return
+//            }
+//            
+//            guard let tempLocalUrl = tempLocalUrl else {
+//                print("Error: Temporary local URL is nil.")
+//                return
+//            }
+//            
+//            let cacheDirectory = self?.getCacheDirectory()
+//            let localUrl = cacheDirectory?.appendingPathComponent(fileName)
+//            
+//            do {
+//                if let localUrl = localUrl {
+//                    if FileManager.default.fileExists(atPath: localUrl.path) {
+//                        try FileManager.default.removeItem(at: localUrl)
+//                    }
+//                    try FileManager.default.moveItem(at: tempLocalUrl, to: localUrl)
+//                    
+//                    DispatchQueue.main.async {
+//                        // 更新 files 列表以指向本地緩存文件
+//                        if let index = self?.files.firstIndex(where: { $0.remoteURL == url }) {
+//                            let updatedFileItem = FileItem(localURL: localUrl, remoteURL: url, downloadURL: self?.files[index].downloadURL ?? "", fileName: fileName)
+//                            self?.files[index] = updatedFileItem
+//                        }
+//                        self?.fileDownloadStatus[localUrl] = false
+//                        self?.collectionView.reloadData()
+//                        
+//                        // Update empty state
+//                        if let self = self, self.files.isEmpty {
+//                            
+//                        } else {
+//                            self?.restoreCollectionView()
+//                        }
+//                    }
+//                }
+//            } catch {
+//                print("Error moving file: \(error.localizedDescription)")
+//            }
+//        }
+//        task.resume()
+//    }
     
     func setupCollectionView() {
         
@@ -528,22 +568,28 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         }
     }
     
-    func uploadAllFiles() {
-        for fileItem in files {
-            guard let localURL = fileItem.localURL else {
-                print("File \(fileItem.fileName) 已經上傳，跳過。")
-                continue
-            }
-            
-            uploadFileToFirebase(localURL, fileName: fileItem.fileName) { [weak self] result in
-                switch result {
-                case .success(let downloadURL):
-                    self?.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileItem.fileName)
-                case .failure(let error):
-                    print("File upload failed for \(fileItem.fileName): \(error.localizedDescription)")
-                }
-            }
-        }
+//    func uploadAllFiles() {
+//        for fileItem in files {
+//            guard let localURL = fileItem.localURL else {
+//                print("File \(fileItem.fileName) 已經上傳，跳過。")
+//                continue
+//            }
+//            
+//            uploadFileToFirebase(localURL, fileName: fileItem.fileName) { [weak self] result in
+//                switch result {
+//                case .success(let downloadURL):
+//                    self?.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileItem.fileName)
+//                case .failure(let error):
+//                    print("File upload failed for \(fileItem.fileName): \(error.localizedDescription)")
+//                }
+//            }
+//        }
+//    }
+    
+    @objc func uploadFiles() {
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
+        documentPicker.delegate = self
+        present(documentPicker, animated: true, completion: nil)
     }
     
     // MARK: - 文件上傳到 Firebase
@@ -559,22 +605,43 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
             return
         }
         
-        let uniqueFileName = generateUniqueFileName(originalName: fileName)
-        let storageRef = storage.reference().child("files/\(uniqueFileName)")
+        // Step 1: Copy the file to the app's cache directory
+        let cacheDirectory = getCacheDirectory()
+        let cachedFileURL = cacheDirectory.appendingPathComponent(fileName)
+        do {
+            if FileManager.default.fileExists(atPath: cachedFileURL.path) {
+                try FileManager.default.removeItem(at: cachedFileURL)
+            }
+            try FileManager.default.copyItem(at: fileURL, to: cachedFileURL)
+        } catch {
+            print("Error copying file to cache directory: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+        
+        let storagePath = "files/\(fileName)"
+        let storageRef = storage.reference().child(storagePath)
         
         do {
-            let fileData = try Data(contentsOf: fileURL)
+            let fileData = try Data(contentsOf: cachedFileURL)
             let metadata = StorageMetadata()
             metadata.contentType = "application/octet-stream"
             metadata.customMetadata = ["ownerId": currentUserID]
             
-            print("Starting upload for file: \(uniqueFileName)")
+            print("Starting upload for file: \(fileName)")
+            showActivityIndicator()
+            
+            DispatchQueue.main.async {
+                // 显示上传进度指示器
+//                self.showUploadProgress(for: fileName)
+            }
             
             let uploadTask = storageRef.putData(fileData, metadata: metadata) { metadata, error in
+                self.hideActivityIndicator()
                 if let error = error {
                     if retryCount > 0 {
                         print("Upload failed, retrying... (\(retryCount) retries left)")
-                        self.uploadFileToFirebase(fileURL, fileName: fileName, retryCount: retryCount - 1, completion: completion)
+                        self.uploadFileToFirebase(cachedFileURL, fileName: fileName, retryCount: retryCount - 1, completion: completion)
                     } else {
                         print("Upload failed with error: \(error.localizedDescription)")
                         completion(.failure(error))
@@ -588,34 +655,50 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
                     if let error = error {
                         if retryCount > 0 {
                             print("Download URL fetch failed, retrying... (\(retryCount) retries left)")
-                            self.uploadFileToFirebase(fileURL, fileName: fileName, retryCount: retryCount - 1, completion: completion)
+                            self.uploadFileToFirebase(cachedFileURL, fileName: fileName, retryCount: retryCount - 1, completion: completion)
                         } else {
                             print("Download URL fetch failed with error: \(error.localizedDescription)")
                             completion(.failure(error))
                         }
                     } else if let url = url {
                         print("Upload successful. Download URL: \(url.absoluteString)")
+                        
+                        // 保存文件元数据到 Firestore
+                        self.saveFileMetadataToFirestore(downloadURL: url.absoluteString, storagePath: storagePath, fileName: fileName)
+                        
+                        // Step 2: 创建新的 FileItem 并添加到 files 数组
+                        let newFileItem = FileItem(localURL: cachedFileURL, remoteURL: url, downloadURL: url.absoluteString, fileName: fileName, storagePath: storagePath)
+                        DispatchQueue.main.async {
+                            self.files.append(newFileItem)
+                            self.collectionView.reloadData()
+                            // 隐藏上传进度指示器
+//                            self.hideUploadProgress(for: fileName)
+                        }
+                        
                         completion(.success(url.absoluteString))
                     }
                 }
             }
             
-            // 監控上傳進度
+            // 监控上传进度
             uploadTask.observe(.progress) { snapshot in
                 if let progress = snapshot.progress {
                     let percentComplete = 100.0 * Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
-                    print("Upload is \(percentComplete)% complete.")
+                    DispatchQueue.main.async {
+                        // 更新上传进度指示器
+//                        self.updateUploadProgress(for: fileName, progress: percentComplete)
+                    }
                 }
             }
             
             uploadTask.observe(.failure) { snapshot in
+                self.hideActivityIndicator()
                 if let error = snapshot.error {
                     print("Upload failed during progress update: \(error.localizedDescription)")
-                    // 可選：在這裡呼叫 completion(.failure(error)) 或實現其他錯誤處理
+                    // 可选：在这里调用 completion(.failure(error)) 或实现其他错误处理
                 }
             }
             
-            // 保持對 uploadTask 的強引用
             self.currentUploadTask = uploadTask
         } catch {
             print("Error reading file data: \(error.localizedDescription)")
@@ -623,20 +706,21 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         }
     }
     
-    @objc func uploadFiles() {
-        print("Upload button clicked.")
-        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
-        documentPicker.delegate = self
-        present(documentPicker, animated: true, completion: nil)
-        
-        print("Document picker presented.")
-    }
+    //    @objc func uploadFiles() {
+    //        print("Upload button clicked.")
+    //        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
+    //        documentPicker.delegate = self
+    //        present(documentPicker, animated: true, completion: nil)
+    //
+    //        print("Document picker presented.")
+    //    }
     
-    func saveFileMetadataToFirestore(downloadURL: String, fileName: String) {
+    func saveFileMetadataToFirestore(downloadURL: String, storagePath: String, fileName: String) {
         let currentUserID = UserSession.shared.currentUserID ?? "unknown_user"
         let fileData: [String: Any] = [
             "fileName": fileName,
             "downloadURL": downloadURL,
+            "storagePath": storagePath,
             "createdAt": Timestamp(),
             "ownerID": currentUserID,
             "authorizedStudents": []
@@ -742,11 +826,6 @@ class FilesVC: UIViewController, UIDocumentInteractionControllerDelegate {
         }
         return nil
     }
-    
-    // MARK: - UIDocumentInteractionControllerDelegate
-    func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
-        return self
-    }
 }
 
 extension FilesVC: UITableViewDelegate, UITableViewDataSource {
@@ -792,14 +871,45 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
         return files.count
     }
     
+//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
+//        let fileItem = files[indexPath.item]
+//        cell.delegate = self
+//
+//        if let isDownloading = fileDownloadStatus[fileItem.remoteURL] {
+//            cell.configure(with: fileItem, isDownloading: isDownloading, allowsMultipleSelection: collectionView.allowsMultipleSelection)
+//        } else {
+//            cell.configure(with: fileItem, isDownloading: false, allowsMultipleSelection: collectionView.allowsMultipleSelection)
+//        }
+//        
+//        if let progress = fileDownloadProgress[fileItem.remoteURL] {
+//            cell.updateProgress(progress)
+//        } else {
+//            cell.updateProgress(0.0)
+//        }
+//        
+//        return cell
+//    }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
-        if indexPath.item < files.count {
-            let fileItem = files[indexPath.item]
-            let isDownloading = fileDownloadStatus[fileItem.remoteURL] ?? false
-            cell.configure(with: fileItem, isDownloading: isDownloading)
-            cell.delegate = self // 設置委託
+        let fileItem = files[indexPath.item]
+        cell.delegate = self
+
+        var isDownloading = false
+        var progress: Float = 0.0
+
+        if let isFileDownloading = fileDownloadStatus[fileItem.remoteURL] {
+            isDownloading = isFileDownloading
         }
+
+        if let downloadProgress = fileDownloadProgress[fileItem.remoteURL] {
+            progress = downloadProgress
+        }
+
+        cell.configure(with: fileItem, isDownloading: isDownloading, allowsMultipleSelection: collectionView.allowsMultipleSelection)
+        cell.updateProgress(progress)
+
         return cell
     }
     
@@ -813,15 +923,10 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
                 print("選擇文件：\(fileItem.fileName)")
                 updateSendButtonState()
             } else {
-                // 單選模式，預覽文件
-                previewFile(at: fileItem.remoteURL)
-                
-                // 立即取消選中該單元格
-                collectionView.deselectItem(at: indexPath, animated: true)
-                
-                // 獲取單元格並重置圖標
-                if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
-                    cell.fileImageView.image = UIImage(systemName: "doc")
+                if let localURL = fileItem.localURL {
+                    previewFile(at: localURL)
+                } else {
+                    showAlert(title: "無法預覽", message: "文件尚未下載完成。")
                 }
             }
         }
@@ -842,6 +947,35 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
             }
         }
     }
+    
+//    func showUploadProgress(for fileName: String) {
+//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
+//            let indexPath = IndexPath(item: index, section: 0)
+//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+//                cell.updateProgress(0.0) // 初始進度設置為0
+//            }
+//        }
+//    }
+
+    // 更新進度條
+//    func updateUploadProgress(for fileName: String, progress: Double) {
+//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
+//            let indexPath = IndexPath(item: index, section: 0)
+//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+//                cell.updateProgress(Float(progress / 100.0)) // 進度應該是0.0到1.0之間
+//            }
+//        }
+//    }
+//
+//    // 隱藏上傳進度條
+//    func hideUploadProgress(for fileName: String) {
+//        if let index = files.firstIndex(where: { $0.fileName == fileName }) {
+//            let indexPath = IndexPath(item: index, section: 0)
+//            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+//                cell.hideProgress()
+//            }
+//        }
+//    }
 }
 
 extension FilesVC: FileCellDelegate {
@@ -891,12 +1025,18 @@ extension FilesVC: FileCellDelegate {
         }
         
         let fileItem = files[indexPath.item]
-        let downloadURLString = fileItem.downloadURL
+        guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
+            print("Error: storagePath is nil or empty.")
+            showAlert(title: "刪除失敗", message: "無法刪除文件，文件的存储路径无效。")
+            return
+        }
         
-        // 使用 downloadURL 獲取 Storage 參考
-        let storageRef = Storage.storage().reference(forURL: downloadURLString)
+        print("Storage Path: \(storagePath)")
+        print("Local URL: \(String(describing: fileItem.localURL))")
+        print("Remote URL: \(fileItem.remoteURL)")
         
-        // 1. 刪除 Firebase Storage 中的文件
+        let storageRef = storage.reference().child(storagePath)
+        
         storageRef.delete { [weak self] error in
             if let error = error {
                 print("Error deleting file from Storage: \(error.localizedDescription)")
@@ -904,12 +1044,11 @@ extension FilesVC: FileCellDelegate {
                 return
             }
             
-            // 2. 刪除 Firestore 中的文件元數據
             self?.firestore.collection("files")
-                .whereField("downloadURL", isEqualTo: downloadURLString)
+                .whereField("storagePath", isEqualTo: storagePath)
                 .getDocuments { snapshot, error in
                     if let error = error {
-                        print("Error deleting file from Firestore: \(error.localizedDescription)")
+                        print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                         return
                     }
                     
@@ -918,12 +1057,34 @@ extension FilesVC: FileCellDelegate {
                         return
                     }
                     
-                    // 刪除 Firestore 文檔
                     document.reference.delete { error in
                         if let error = error {
                             print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                         } else {
                             print("Successfully deleted metadata for file: \(fileItem.fileName)")
+                            
+                            // 删除本地缓存的文件
+                            do {
+                                if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
+                                    try FileManager.default.removeItem(at: localURL)
+                                    print("Local file deleted successfully.")
+                                }
+                            } catch {
+                                print("Error deleting local file: \(error.localizedDescription)")
+                            }
+                            
+                            // 从数组中移除文件并更新 UI
+                            DispatchQueue.main.async { [weak self] in
+                                guard let self = self else { return }
+                                // 使用 fileItem 来确保我们删除正确的文件
+                                if let currentIndex = self.files.firstIndex(where: { $0.fileName == fileItem.fileName && $0.remoteURL == fileItem.remoteURL }) {
+                                    self.files.remove(at: currentIndex)
+                                    self.collectionView.deleteItems(at: [IndexPath(item: currentIndex, section: 0)])
+                                } else {
+                                    // 如果文件不在数组中，重新加载 CollectionView
+                                    self.collectionView.reloadData()
+                                }
+                            }
                         }
                     }
                 }
@@ -934,30 +1095,27 @@ extension FilesVC: FileCellDelegate {
 extension FilesVC: UIDocumentPickerDelegate {
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let selectedURL = urls.first else {
-            return
-        }
-        
-        // 獲取文件名稱
+        guard let selectedURL = urls.first else { return }
         let fileName = selectedURL.lastPathComponent
         
-        // 這裡處理選擇的文件，例如上傳到 Firebase
-        print("選擇的文件 URL: \(selectedURL)")
-        
-        // 調用上傳方法，傳遞文件的本地 URL 和文件名稱
-        uploadFileToFirebase(selectedURL, fileName: fileName) { result in
-            switch result {
-            case .success(let downloadURL):
-                // 上傳成功後，將元數據保存到 Firestore
-                self.saveFileMetadataToFirestore(downloadURL: downloadURL, fileName: fileName)
-                
+        // 在上傳前檢查是否已存在同名檔案
+        checkIfFileExists(fileName: fileName) { [weak self] exists in
+            if exists {
+                // 如果檔案已存在，提示用戶
                 DispatchQueue.main.async {
-                    self.showAlert(title: "上傳成功", message: "文件已成功上傳。")
+                    self?.showAlert(title: "檔案已存在", message: "已存在同名檔案，請選擇其他檔案或更改檔案名稱。")
                 }
-            case .failure(let error):
-                print("文件上傳失敗: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.showAlert(title: "上傳失敗", message: "無法上傳文件，請稍後再試。")
+            } else {
+                self?.uploadFileToFirebase(selectedURL, fileName: fileName) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let downloadURL):
+                            self?.showAlert(title: "上傳成功", message: "檔案已成功上傳。")
+                        case .failure(let error):
+                            print("檔案上傳失敗: \(error.localizedDescription)")
+                            self?.showAlert(title: "上傳失敗", message: "無法上傳檔案，請稍後再試。")
+                        }
+                    }
                 }
             }
         }
@@ -965,6 +1123,32 @@ extension FilesVC: UIDocumentPickerDelegate {
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         print("用戶取消了文件選擇。")
+    }
+    
+    func checkIfFileExists(fileName: String, completion: @escaping (Bool) -> Void) {
+        guard let currentUserID = UserSession.shared.currentUserID else {
+            completion(false)
+            return
+        }
+        
+        firestore.collection("files")
+            .whereField("fileName", isEqualTo: fileName)
+            .whereField("ownerID", isEqualTo: currentUserID)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error checking if file exists: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                if let documents = snapshot?.documents, !documents.isEmpty {
+                    // 檔案已存在
+                    completion(true)
+                } else {
+                    // 檔案不存在
+                    completion(false)
+                }
+            }
     }
 }
 
@@ -1012,5 +1196,75 @@ extension FilesVC {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
+    }
+}
+
+extension FilesVC: URLSessionDownloadDelegate {
+
+    func downloadFile(from url: URL, withName fileName: String) {
+        let sessionConfig = URLSessionConfiguration.default
+        let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: nil)
+        let task = session.downloadTask(with: url)
+        task.resume()
+    }
+
+    // MARK: - URLSessionDownloadDelegate 方法
+
+    // 下载进度更新
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64,
+                    totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite: Int64) {
+        guard let url = downloadTask.originalRequest?.url else { return }
+
+        let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+        DispatchQueue.main.async {
+            self.updateDownloadProgress(for: url, progress: progress)
+        }
+    }
+
+    // 下载完成
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didFinishDownloadingTo location: URL) {
+        guard let url = downloadTask.originalRequest?.url else { return }
+        let fileName = url.lastPathComponent
+        let cacheDirectory = getCacheDirectory()
+        let localUrl = cacheDirectory.appendingPathComponent(fileName)
+
+        do {
+            if FileManager.default.fileExists(atPath: localUrl.path) {
+                try FileManager.default.removeItem(at: localUrl)
+            }
+            try FileManager.default.moveItem(at: location, to: localUrl)
+
+            DispatchQueue.main.async {
+                if let index = self.files.firstIndex(where: { $0.remoteURL == url }) {
+                    let updatedFileItem = FileItem(localURL: localUrl,
+                                                   remoteURL: url,
+                                                   downloadURL: self.files[index].downloadURL,
+                                                   fileName: self.files[index].fileName)
+                    self.files[index] = updatedFileItem
+                    self.fileDownloadStatus[url] = false
+
+                    // 刪除進度記錄
+                    self.fileDownloadProgress.removeValue(forKey: url)
+
+                    self.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
+                }
+            }
+        } catch {
+            print("移動文件時出錯: \(error.localizedDescription)")
+        }
+    }
+
+    // 更新下载进度
+    func updateDownloadProgress(for url: URL, progress: Double) {
+        if let index = files.firstIndex(where: { $0.remoteURL == url }) {
+            let indexPath = IndexPath(item: index, section: 0)
+
+            if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
+                cell.updateProgress(Float(progress))
+            }
+        }
     }
 }

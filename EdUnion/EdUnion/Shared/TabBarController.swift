@@ -77,6 +77,7 @@ class TabBarController: UITabBarController {
         updateSelectedTab(index: sender.tag, selectedBackgroundView: selectedBackgroundView)
         selectedIndex = sender.tag
     }
+    
     private func updateSelectedTab(index: Int, selectedBackgroundView: UIView) {
         let buttonWidth = customTabBarView.frame.width / CGFloat(tabBarButtons.count)
         let selectedWidth: CGFloat = buttonWidth - 20

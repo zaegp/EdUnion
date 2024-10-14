@@ -88,6 +88,16 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        selectedIndex = 1
+
+        pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: false, completion: nil)
+
+        updateUnderlinePosition(to: selectedIndex!)
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         labelsStackView.layoutIfNeeded()

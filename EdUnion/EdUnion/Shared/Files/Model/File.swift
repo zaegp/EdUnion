@@ -12,4 +12,5 @@ struct FileItem {
     let remoteURL: URL
     let downloadURL: String
     let fileName: String
+    var storagePath: String?
 }
