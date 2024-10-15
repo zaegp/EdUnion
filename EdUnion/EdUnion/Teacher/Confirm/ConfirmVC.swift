@@ -88,29 +88,57 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         return viewModel.appointments.count
     }
     
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
+//        cell.backgroundColor = .myBackground
+//        let appointment = viewModel.appointments[indexPath.row]
+//        var isStudentExisting = false
+//        
+//        viewModel.updateStudentNotes(studentID: appointment.studentID, note: "") { result in
+//            switch result {
+//            case .success(let studentExists):
+//                if studentExists {
+//                    isStudentExisting = true
+//                }
+//            case .failure(let error):
+//                print("Failed to update note: \(error.localizedDescription)")
+//            }
+//        }
+//        
+//        viewModel.fetchStudentName(for: appointment) { studentName in
+//            DispatchQueue.main.async {
+//                cell.configureCell(date: appointment.date, title: studentName, times: appointment.times, isStudentExisting: isStudentExisting)
+//            }
+//        }
+//    
+//        return cell
+//    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
         cell.backgroundColor = .myBackground
         let appointment = viewModel.appointments[indexPath.row]
+        let studentID = appointment.studentID
+        
         var isStudentExisting = false
         
-        viewModel.updateStudentNotes(studentID: appointment.studentID, note: "") { result in
+        viewModel.updateStudentNotes(studentID: studentID, note: "") { [weak self] result in
             switch result {
-            case .success(let studentExists):
-                if studentExists {
-                    isStudentExisting = true
-                }
+            case .success(let studentExisted):
+                isStudentExisting = studentExisted
             case .failure(let error):
                 print("Failed to update note: \(error.localizedDescription)")
             }
-        }
-        
-        viewModel.fetchStudentName(for: appointment) { studentName in
-            DispatchQueue.main.async {
-                cell.configureCell(date: appointment.date, title: studentName, times: appointment.times, isStudentExisting: isStudentExisting)
+            
+            self?.viewModel.fetchStudentName(for: appointment) { studentName in
+                DispatchQueue.main.async {
+                    if let currentCell = tableView.cellForRow(at: indexPath) as? ConfirmCell {
+                        currentCell.configureCell(date: appointment.date, title: studentName, times: appointment.times, isStudentExisting: isStudentExisting)
+                    }
+                }
             }
         }
-    
+        
         return cell
     }
     
@@ -134,7 +162,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let appointment = viewModel.appointments[indexPath.row]
         
-        let confirmAction = UIContextualAction(style: .normal, title: "接受") { action, view, completionHandler in
+        let confirmAction = UIContextualAction(style: .normal, title: "接受") { _, _, completionHandler in
             self.viewModel.confirmAppointment(appointmentID: appointment.id ?? "")
             
             self.viewModel.appointments.remove(at: indexPath.row)
@@ -154,7 +182,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let appointment = viewModel.appointments[indexPath.row]
         
-        let cancelAction = UIContextualAction(style: .destructive, title: "拒絕") { action, view, completionHandler in
+        let cancelAction = UIContextualAction(style: .destructive, title: "拒絕") { _, _, completionHandler in
             let alert = UIAlertController(title: "拒絕預約", message: "確定要拒絕預約嗎", preferredStyle: .alert)
             
             alert.addAction(UIAlertAction(title: "我要拒絕！", style: .destructive, handler: { _ in

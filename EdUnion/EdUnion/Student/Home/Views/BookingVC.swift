@@ -22,6 +22,7 @@ class BookingVC: UIViewController {
             return
         }
         
+        enableSwipeToGoBack()
         setupBookingView(teacherID: teacher?.id ?? "", selectedTimeSlots: selectedTimeSlots, timeSlots: timeSlots)
     }
     

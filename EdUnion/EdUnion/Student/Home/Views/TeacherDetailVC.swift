@@ -34,6 +34,7 @@ class TeacherDetailVC: UIViewController {
         setupScrollView()
         setupUI()
         checkIfTeacherIsFavorited()
+        enableSwipeToGoBack()
     }
     
     override func viewWillAppear(_ animated: Bool) {

@@ -67,6 +67,13 @@ class VideoCallVC: UIViewController {
         
         agSettings.enabledButtons = [.cameraButton, .micButton, .flipButton]
         agSettings.buttonPosition = .bottom
+        agSettings.colors.micFlag = .mainOrange
+        agSettings.colors.micButtonNormal = .myGray
+        agSettings.colors.camButtonNormal = .myGray
+        agSettings.colors.camButtonSelected = .mainOrange
+        agSettings.videoRenderMode = .fit
+        agSettings.colors.micButtonSelected = .mainOrange
+        agSettings.colors.buttonTintColor = .white
         AgoraVideoViewer.printLevel = .verbose
         
         let agoraView = AgoraVideoViewer(
@@ -74,7 +81,7 @@ class VideoCallVC: UIViewController {
                 appId: appId,
                 rtcToken: token
             ),
-            style: .floating,
+//            style: .floating,
             agoraSettings: agSettings,
             delegate: self
         )
@@ -85,8 +92,8 @@ class VideoCallVC: UIViewController {
         
         agoraView.join(channel: channelName, as: .broadcaster)
         
-//        self.showSegmentedView()
-        self.agoraView?.style = .floating
+        self.showSegmentedView()
+//        self.agoraView?.style = .floating
     }
     
     func fetchAgoraToken(channelName: String, completion: @escaping (String?, String?) -> Void) {
@@ -159,11 +166,52 @@ class VideoCallVC: UIViewController {
     @objc func segmentedControlHit(segc: UISegmentedControl) {
         print(segc)
         let segmentedStyle = [
-            AgoraVideoViewer.Style.floating
-//            AgoraVideoViewer.Style.grid
+//            AgoraVideoViewer.Style.floating
+            AgoraVideoViewer.Style.custom(customFunction: customLayout),
+            AgoraVideoViewer.Style.grid,
+//            AgoraVideoViewer.Style.floating
+//            AgoraVideoViewer.Style.pinned,
 //            AgoraVideoViewer.Style.pinned
+            
         ][segc.selectedSegmentIndex]
         self.agoraView?.style = segmentedStyle
+    }
+    
+    func customLayout(viewer: AgoraVideoViewer, views: EnumeratedSequence<[UInt: AgoraSingleVideoView]>, localUid: Int) {
+        let viewWidth = viewer.bounds.width
+        let viewHeight = viewer.bounds.height
+        
+        let smallVideoWidth: CGFloat = viewWidth / 4 // 小視窗寬度
+        let smallVideoHeight: CGFloat = viewHeight / 4 // 小視窗高度
+
+        // 過濾出本地用戶（自己的視訊流）和對方的視訊流
+        var localView: AgoraSingleVideoView?
+        var remoteView: AgoraSingleVideoView?
+
+        for (_, element) in views {
+            if element.key == localUid {
+                localView = element.value // 自己的視訊
+            } else {
+                remoteView = element.value // 對方的視訊
+            }
+        }
+
+        // 配置對方的畫面佔據主要區域
+        if let remoteView = remoteView {
+            remoteView.frame = CGRect(x: 0, y: 0, width: viewWidth, height: viewHeight)
+            remoteView.isHidden = false // 顯示對方的畫面
+        }
+
+        // 配置本地用戶的小視窗，顯示在右下角
+        if let localView = localView {
+            let xOffset = viewWidth - smallVideoWidth - 10 // 靠右邊，留出 10 的間距
+            let yOffset = viewHeight - smallVideoHeight - 10 // 靠下邊，留出 10 的間距
+            localView.frame = CGRect(x: xOffset, y: yOffset, width: smallVideoWidth, height: smallVideoHeight)
+            localView.isHidden = false // 顯示本地的畫面
+        }
+
+        // 強制佈局更新
+        viewer.layoutIfNeeded()
     }
 }
 

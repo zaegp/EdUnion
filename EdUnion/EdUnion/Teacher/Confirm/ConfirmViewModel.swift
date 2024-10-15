@@ -64,13 +64,50 @@ class ConfirmViewModel {
         }
     }
     
+//    func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+//        UserFirebaseService.shared.updateStudentNotes(forTeacher: userID, studentID: studentID, note: note) { result in
+//            switch result {
+//            case .success(let studentExists):
+//                completion(.success(studentExists))
+//            case .failure(let error):
+//                completion(.failure(error))
+//            }
+//        }
+//    }
     func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-        UserFirebaseService.shared.updateStudentNotes(forTeacher: userID, studentID: studentID, note: note) { result in
-            switch result {
-            case .success(let studentExists):
-                completion(.success(studentExists))
-            case .failure(let error):
+        let notesRef = UserFirebaseService.shared.db.collection("studentsNotes").document("notes")
+        
+        notesRef.getDocument { (document, error) in
+            if let error = error {
                 completion(.failure(error))
+                return
+            }
+            
+            if let document = document, document.exists {
+                let data = document.data()
+                if let _ = data?[studentID] {
+                    // 學生 ID 已經存在，不進行更新
+                    completion(.success(true)) // 假設已存在，傳回 true
+                    return
+                } else {
+                    // 學生 ID 不存在，進行更新
+                    notesRef.updateData([studentID: note]) { error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(false)) // 更新成功，傳回 false 表示之前不存在
+                        }
+                    }
+                }
+            } else {
+                // 文檔不存在，創建文檔並添加學生 ID 和 note
+                notesRef.setData([studentID: note]) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(false)) // 更新成功，傳回 false 表示之前不存在
+                    }
+                }
             }
         }
     }

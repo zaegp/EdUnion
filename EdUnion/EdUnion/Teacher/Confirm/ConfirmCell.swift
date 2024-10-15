@@ -20,7 +20,7 @@ class ConfirmCell: UITableViewCell {
     let dateLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 20, weight: .regular)
-        label.textColor = .black
+        label.textColor = .myTint
         label.textAlignment = .center
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -29,14 +29,14 @@ class ConfirmCell: UITableViewCell {
     
     let separatorView: UIView = {
         let view = UIView()
-        view.backgroundColor = .black
+        view.backgroundColor = .myTint
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = .myTint
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -45,7 +45,7 @@ class ConfirmCell: UITableViewCell {
     let timeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        label.textColor = .black
+        label.textColor = .myTint
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

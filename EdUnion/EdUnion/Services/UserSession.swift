@@ -23,7 +23,9 @@ class UserSession {
         return uid
     }
     
-    private init() {}
+    private init() {
+       
+    }
     
     func signOut(completion: @escaping (Error?) -> Void) {
         do {
