@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseStorage
 
 class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
 
     let profileImageView = UIImageView()
 
@@ -254,10 +254,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
 
     @objc func saveChanges() {
-        guard let userID = userID else {
-            print("Error: User not logged in.")
-            return
-        }
 
         // 開始加載動畫
         startSaveButtonAnimation()
@@ -363,9 +359,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
     
     private func uploadProfileImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let userID = userID else { return }
-
-        // 根據 userRole 決定存儲的圖片路徑
         let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
         let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
 

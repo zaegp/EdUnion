@@ -27,22 +27,22 @@ class UserFirebaseService {
     
     // MARK: - 通用查詢方法
     func fetchData<T: Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
-            db.collection(collection).document(id).getDocument { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let data = try? snapshot?.data(as: type) {
-                    completion(.success(data))
-                } else {
-                    completion(.failure(NSError(domain: "No data found in \(collection)", code: 404, userInfo: nil)))
-                }
+        db.collection(collection).document(id).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = try? snapshot?.data(as: type) {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "No data found in \(collection)", code: 404, userInfo: nil)))
             }
         }
+    }
+    
     func fetchUser<T: UserProtocol & Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
         db.collection(collection).document(id).getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
             } else if var data = try? snapshot?.data(as: type) {
-                // 設置文檔 ID
                 data.id = snapshot?.documentID ?? ""
                 completion(.success(data))
             } else {
@@ -50,40 +50,15 @@ class UserFirebaseService {
             }
         }
     }
-        // 調用泛型方法來獲取老師資料
-//        func fetchTeacher(by id: String, completion: @escaping (Result<Teacher, Error>) -> Void) {
-//            fetchData(from: "teachers", by: id, as: Teacher.self, completion: completion)
-//        }
-//        
-//        // 調用泛型方法來獲取學生資料
-//        func fetchStudent(by id: String, completion: @escaping (Result<Student, Error>) -> Void) {
-//            fetchData(from: "students", by: id, as: Student.self, completion: completion)
-//        }
     
-    // 在 UserFirebaseService 中新增方法
-    func fetchFollowedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
-        // 首先根據學生 ID 獲取 followList
+    func fetchTeacherList(forStudentID studentID: String, listKey: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
         db.collection("students").document(studentID).getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
-            } else if let data = snapshot?.data(), let followList = data["followList"] as? [String] {
-                self.fetchTeachers(for: followList, completion: completion)
+            } else if let data = snapshot?.data(), let idList = data[listKey] as? [String] {
+                self.fetchTeachers(for: idList, completion: completion)
             } else {
-                completion(.failure(NSError(domain: "Invalid followList", code: 404, userInfo: nil)))
-            }
-        }
-    }
-    
-    func fetchFrequentlyUsedTeachers(forStudentID studentID: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
-        // 首先根據學生 ID 獲取 followList
-        db.collection("students").document(studentID).getDocument { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let data = snapshot?.data(), let usedList = data["usedList"] as? [String] {
-                // 查詢 followList 中的所有老師
-                self.fetchTeachers(for: usedList, completion: completion)
-            } else {
-                completion(.failure(NSError(domain: "Invalid usedList", code: 404, userInfo: nil)))
+                completion(.failure(NSError(domain: "Invalid \(listKey)", code: 404, userInfo: nil)))
             }
         }
     }
@@ -103,52 +78,22 @@ class UserFirebaseService {
         }
     }
     
-    func removeTeacherFromFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
+    // MARK: - 學生首頁：更新關注和常用老師列表
+    func updateStudentList(studentID: String, teacherID: String, listName: String, add: Bool, completion: @escaping (Error?) -> Void) {
         let studentRef = db.collection("students").document(studentID)
+        let operation: FieldValue = add ? FieldValue.arrayUnion([teacherID]) : FieldValue.arrayRemove([teacherID])
         
         studentRef.updateData([
-            "followList": FieldValue.arrayRemove([teacherID])
+            listName: operation
         ]) { error in
             completion(error)
         }
     }
     
-    func updateStudentList(studentID: String, teacherID: String, listName: String, completion: @escaping (Error?) -> Void) {
-        let studentRef = db.collection("students").document(studentID)
-        
-        studentRef.updateData([
-            listName: FieldValue.arrayUnion([teacherID])
-        ]) { error in
-            if let error = error {
-                print("更新 \(listName) 時出錯: \(error.localizedDescription)")
-                completion(error)
-            } else {
-                print("成功添加老師到 \(listName)")
-                completion(nil)  // 更新成功
-            }
-        }
-    }
-    
-    //    func updateStudentFollowList(studentID: String, teacherID: String, completion: @escaping (Error?) -> Void) {
-    //            let studentRef = db.collection("students").document(studentID)
-    //
-    //            studentRef.updateData([
-    //                "followList": FieldValue.arrayUnion([teacherID])
-    //            ]) { error in
-    //                if let error = error {
-    //                    print("更新 followList 時出錯: \(error.localizedDescription)")
-    //                    completion(error)
-    //                } else {
-    //                    print("成功添加老師到 followList")
-    //                    completion(nil)  // 更新成功
-    //                }
-    //            }
-    //        }
-    
     // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
         var teachers: [Teacher] = []
-        let group = DispatchGroup() 
+        let group = DispatchGroup()
         
         for id in ids {
             group.enter()
@@ -273,72 +218,34 @@ class UserFirebaseService {
             }
         }
         
-        return listener  // 返回監聽器，稍後可以根據需要移除監聽
+        return listener
     }
     
     func fetchBlocklist(completion: @escaping (Result<[String], Error>) -> Void) {
-
-            let userRef = db.collection("students").document(userID)
-            userRef.getDocument { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let snapshot = snapshot, snapshot.exists {
-                    let blocklist = snapshot.data()?["blockList"] as? [String] ?? []
-                    completion(.success(blocklist))
-                } else {
-                    completion(.success([]))
-                }
-            }
-        }
-    
-    // MARK: - 老師：存可選時段
-    func updateTimeSlot(_ timeSlot: AvailableTimeSlot, for teacherID: String, operation: FieldValue, completion: @escaping (Result<Void, Error>) -> Void) {
-        let timeSlotData = timeSlot.toDictionary()
-        let teacherRef = db.collection("teachers").document(teacherID)
         
-        // 先檢查是否有 timeSlots 欄位
-        teacherRef.getDocument { document, error in
-            if let document = document, document.exists {
-                // 如果欄位存在，進行正常操作
-                if let timeSlots = document.data()?["timeSlots"] as? [[String: Any]] {
-                    // 正常更新 timeSlots 欄位
-                    teacherRef.updateData([
-                        "timeSlots": operation == .arrayUnion([timeSlotData]) ? FieldValue.arrayUnion([timeSlotData]) : FieldValue.arrayRemove([timeSlotData])
-                    ]) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(()))
-                        }
-                    }
-                } else {
-                    // 如果 timeSlots 欄位不存在，創建 timeSlots 並執行 arrayUnion 操作
-                    teacherRef.setData([
-                        "timeSlots": FieldValue.arrayUnion([timeSlotData])
-                    ], merge: true) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(()))
-                        }
-                    }
-                }
-            } else if let error = error {
+        let userRef = db.collection("students").document(userID)
+        userRef.getDocument { snapshot, error in
+            if let error = error {
                 completion(.failure(error))
+            } else if let snapshot = snapshot, snapshot.exists {
+                let blocklist = snapshot.data()?["blockList"] as? [String] ?? []
+                completion(.success(blocklist))
+            } else {
+                completion(.success([]))
             }
         }
     }
     
-    // 保存時段（新增）
-    func saveTimeSlot(_ timeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    // MARK: - 老師可選時段：新增刪除編輯可選時段
+    func modifyTimeSlot(_ timeSlot: AvailableTimeSlot, for teacherID: String, add: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         let timeSlotData = timeSlot.toDictionary()
         let teacherRef = db.collection("teachers").document(teacherID)
+        let operation: FieldValue = add ? FieldValue.arrayUnion([timeSlotData]) : FieldValue.arrayRemove([timeSlotData])
         
-        teacherRef.setData([
-            "timeSlots": FieldValue.arrayUnion([timeSlotData])
-        ], merge: true) { error in
+        teacherRef.updateData([
+            "timeSlots": operation
+        ]) { error in
             if let error = error {
-                print("Error adding time slot: \(error)")
                 completion(.failure(error))
             } else {
                 completion(.success(()))
@@ -346,9 +253,15 @@ class UserFirebaseService {
         }
     }
     
-    // 刪除時段
-    func deleteTimeSlot(_ timeSlot: AvailableTimeSlot, for teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        updateTimeSlot(timeSlot, for: teacherID, operation: .arrayRemove([timeSlot.toDictionary()]), completion: completion)
+    func updateTimeSlot(oldTimeSlot: AvailableTimeSlot, newTimeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        modifyTimeSlot(oldTimeSlot, for: teacherID, add: false) { result in
+            switch result {
+            case .success:
+                self.modifyTimeSlot(newTimeSlot, for: teacherID, add: true, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     // MARK: - 老師：取可選時段
@@ -385,16 +298,16 @@ class UserFirebaseService {
     }
     
     // MARK: - 更新時間段（舊換新）
-    func updateTimeSlot(oldTimeSlot: AvailableTimeSlot, newTimeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        deleteTimeSlot(oldTimeSlot, for: teacherID) { result in
-            switch result {
-            case .success:
-                self.saveTimeSlot(newTimeSlot, forTeacher: teacherID, completion: completion)
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
+    //    func updateTimeSlot(oldTimeSlot: AvailableTimeSlot, newTimeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    //        deleteTimeSlot(oldTimeSlot, for: teacherID) { result in
+    //            switch result {
+    //            case .success:
+    //                self.saveTimeSlot(newTimeSlot, forTeacher: teacherID, completion: completion)
+    //            case .failure(let error):
+    //                completion(.failure(error))
+    //            }
+    //        }
+    //    }
     
     // MARK - 聊天室
     func fetchChatRooms(for participantID: String, isTeacher: Bool, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
@@ -482,70 +395,24 @@ class UserFirebaseService {
         }
     }
     
-    // 上傳音檔
-    func uploadAudio(audioData: Data, audioId: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let storageRef = storage.reference().child("chat_audio/\(audioId).m4a")
-        
-        storageRef.putData(audioData, metadata: nil) { _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            storageRef.downloadURL { url, error in
-                if let urlString = url?.absoluteString {
-                    completion(.success(urlString))
-                } else {
-                    completion(.failure(error!))
-                }
-            }
-        }
-    }
-    
-    func fetchMessages(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
+    func fetchMessages(chatRoomID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
         db.collection("chats").document(chatRoomID).collection("messages")
             .order(by: "timestamp", descending: false)
-            .getDocuments { (snapshot, error) in
+            .addSnapshotListener { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
-                    return
-                }
-                
-                let messages: [Message] = snapshot?.documents.compactMap { doc in
-                    return try? doc.data(as: Message.self)
-                } ?? []
-                
-                completion(.success(messages))
-            }
-        
-        addMessageListener(chatRoomID: chatRoomID, currentUserID: currentUserID, completion: completion)
-    }
-    
-    func addMessageListener(chatRoomID: String, currentUserID: String, completion: @escaping (Result<[Message], Error>) -> Void) {
-        db.collection("chats").document(chatRoomID).collection("messages")
-            .order(by: "timestamp", descending: false)
-            .addSnapshotListener { (snapshot, error) in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                let newMessages: [Message] = snapshot?.documentChanges.compactMap { diff in
-                    // 只處理新增或更新的消息
-                    if diff.type == .added || diff.type == .modified {
-                        return try? diff.document.data(as: Message.self)
+                } else if let snapshot = snapshot {
+                    let messages = snapshot.documents.compactMap { doc in
+                        try? doc.data(as: Message.self)
                     }
-                    return nil
-                } ?? []
-                
-                // 傳遞新消息
-                completion(.success(newMessages))
+                    completion(.success(messages))
+                }
             }
     }
     
     // 老師：取今日課程
     func fetchTodayConfirmedAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        let todayDate = Date()
-        let todayDateString = dateFormatter.string(from: todayDate)
+        let todayDateString = dateFormatter.string(from: Date())
         
         db.collection("appointments")
             .whereField("date", isEqualTo: todayDateString)
@@ -557,7 +424,7 @@ class UserFirebaseService {
                 }
                 
                 let appointments = querySnapshot?.documents.compactMap { doc in
-                    return try? doc.data(as: Appointment.self)
+                    try? doc.data(as: Appointment.self)
                 } ?? []
                 completion(.success(appointments))
             }
@@ -578,10 +445,8 @@ class UserFirebaseService {
     }
     
     // MARK: - 封鎖檢舉
-    func blockUser(blockID: String, isTeacher: Bool, completion: @escaping (Error?) -> Void) {
-        let collectionName = isTeacher ? "teachers" : "students"
-        
-        let userRef = db.collection(collectionName).document(userID)
+    func blockUser(blockID: String, userCollection: String, completion: @escaping (Error?) -> Void) {
+        let userRef = db.collection(userCollection).document(userID)
         
         userRef.updateData([
             "blockList": FieldValue.arrayUnion([blockID])
@@ -591,10 +456,63 @@ class UserFirebaseService {
     }
     
     func removeStudentFromTeacherNotes(teacherID: String, studentID: String, completion: @escaping (Error?) -> Void) {
-            let teacherRef = Firestore.firestore().collection("teachers").document(teacherID)
-            teacherRef.updateData([
-                "studentsNotes.\(studentID)": FieldValue.delete()
-            ]) { error in
+        let teacherRef = Firestore.firestore().collection("teachers").document(teacherID)
+        teacherRef.updateData([
+            "studentsNotes.\(studentID)": FieldValue.delete()
+        ]) { error in
+            completion(error)
+        }
+    }
+    
+    // 共通：上傳使用者照片
+    func uploadProfileImage(_ image: UIImage, forUserID userID: String, userRole: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let roleFolder = (userRole == "teacher") ? "teacher_images" : "student_images"
+        let storageRef = Storage.storage().reference().child("\(roleFolder)/\(userID).jpg")
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(.failure(NSError(domain: "ImageConversionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Error converting image to data."])))
+            return
+        }
+        
+        storageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // 成功上傳後，獲取下載 URL
+            storageRef.downloadURL { url, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let downloadURL = url else {
+                    completion(.failure(NSError(domain: "DownloadURLError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Download URL is nil."])))
+                    return
+                }
+                
+                // 將下載 URL 保存到 Firestore
+                let collection = (userRole == "teacher") ? "teachers" : "students"
+                let userRef = Firestore.firestore().collection(collection).document(userID)
+                
+                userRef.updateData(["photoURL": downloadURL.absoluteString]) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(())) // 成功完成
+                    }
+                }
+            }
+        }
+    }
+    
+    // 共通：刪除帳號
+    func updateUserStatusToDeleting(userID: String, userRole: String, completion: @escaping (Error?) -> Void) {
+            let collection = (userRole == "teacher") ? "teachers" : "students"
+            let userRef = Firestore.firestore().collection(collection).document(userID)
+            
+            userRef.updateData(["status": "Deleting"]) { error in
                 completion(error)
             }
         }

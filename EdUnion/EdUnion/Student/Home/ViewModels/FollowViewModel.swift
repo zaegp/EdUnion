@@ -10,7 +10,7 @@ import Foundation
 class FollowViewModel: BaseCollectionViewModelProtocol {
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
-    private var blocklist: [String] = [] // 存儲 blocklist 中的老師 ID
+    private var blocklist: [String] = []
     
     var userID: String? {
         return UserSession.shared.currentUserID
@@ -24,15 +24,12 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
             return
         }
         
-        // 先取得 blocklist
         fetchBlocklist { [weak self] blocklist in
             self?.blocklist = blocklist
             
-            // 然後再獲取關注的老師
-            UserFirebaseService.shared.fetchFollowedTeachers(forStudentID: userID) { result in
+            UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "followList") { result in
                 switch result {
                 case .success(let teachers):
-                    // 過濾 blocklist 中的老師
                     let filteredTeachers = teachers.filter { !blocklist.contains($0.id ?? "") }
                     
                     if filteredTeachers.isEmpty {
@@ -62,7 +59,6 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
         }
     }
     
-    // 新增方法來取得 blocklist
     private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
         UserFirebaseService.shared.fetchBlocklist { result in
             switch result {

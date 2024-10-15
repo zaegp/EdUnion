@@ -8,15 +8,10 @@
 import UIKit
 
 class TeacherDetailVC: UIViewController {
-    
-    var teacher: Teacher?
-    var isFavorite: Bool = false
-    var favoriteButton: UIBarButtonItem!
-    var ellipsisButton: UIBarButtonItem!
-    
+    private var favoriteButton: UIBarButtonItem!
+    private var ellipsisButton: UIBarButtonItem!
     private let scrollView = UIScrollView()
     private let contentStackView = UIStackView()
-    
     private let imageView = UIImageView()
     private let nameLabel = UILabel()
     private let totalCoursesLabel = UILabel()
@@ -26,7 +21,10 @@ class TeacherDetailVC: UIViewController {
     private let introduceLabel = UILabel()
     private let bookButton = UIButton(type: .system)
     private let chatButton = UIButton(type: .system)
-    let userID = UserSession.shared.currentUserID
+    
+    private let studentID = UserSession.shared.unwrappedUserID
+    var teacher: Teacher?
+    private var isFavorite: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,7 +102,7 @@ class TeacherDetailVC: UIViewController {
     
     private func blockUser() {
         guard let teacherID = teacher?.id else { return }
-        UserFirebaseService.shared.blockUser(blockID: teacherID, isTeacher: false) { error in
+        UserFirebaseService.shared.blockUser(blockID: teacherID, userCollection: "students") { error in
             if let error = error {
                 print("封鎖老師失敗: \(error.localizedDescription)")
             } else {
@@ -115,13 +113,12 @@ class TeacherDetailVC: UIViewController {
     }
     
     private func checkIfTeacherIsFavorited() {
-        UserFirebaseService.shared.getStudentFollowList(studentID: userID ?? "") { [weak self] followList, error in
+        UserFirebaseService.shared.getStudentFollowList(studentID: studentID) { [weak self] followList, error in
             if let error = error {
                 print("檢查 followList 時出錯: \(error.localizedDescription)")
             } else if let followList = followList, let teacherID = self?.teacher?.id {
                 self?.isFavorite = followList.contains(teacherID)
                 
-                // 更新收藏按鈕外觀
                 self?.updateFavoriteButtonAppearance()
             }
         }
@@ -255,30 +252,29 @@ class TeacherDetailVC: UIViewController {
     @objc private func chatButtonTapped() {
         let chatVC = ChatVC()
         chatVC.teacher = teacher
-        chatVC.student?.id = userID ?? ""
+        chatVC.student?.id = studentID
         navigationController?.pushViewController(chatVC, animated: true)
     }
     
     @objc private func favoriteButtonTapped() {
-        if isFavorite {
-            UserFirebaseService.shared.removeTeacherFromFollowList(studentID: userID ?? "", teacherID: teacher!.id) { error in
-                if let error = error {
-                    print("從 followList 中移除老師時出錯: \(error.localizedDescription)")
-                } else {
-                    self.isFavorite = false
-                    self.updateFavoriteButtonAppearance()
-                    print("成功從 followList 中移除老師")
-                }
+        toggleFavorite(add: !isFavorite) { error in
+            if let error = error {
+                print("更新 followList 失敗: \(error.localizedDescription)")
+            } else {
+                print(self.isFavorite ? "成功添加到 followList" : "成功從 followList 中移除老師")
             }
-        } else {
-            UserFirebaseService.shared.updateStudentList(studentID: userID ?? "", teacherID: teacher!.id, listName: "followList") { error in
-                if let error = error {
-                    print("更新 followList 失敗: \(error)")
-                } else {
-                    self.isFavorite = true
-                    self.updateFavoriteButtonAppearance()
-                    print("成功更新 followList")
-                }
+        }
+    }
+    
+    private func toggleFavorite(add: Bool, completion: @escaping (Error?) -> Void) {
+        guard let teacherID = teacher?.id else { return }
+        UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacherID, listName: "followList", add: add) { error in
+            if let error = error {
+                completion(error)
+            } else {
+                self.isFavorite = add
+                self.updateFavoriteButtonAppearance()
+                completion(nil)
             }
         }
     }

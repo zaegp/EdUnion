@@ -9,41 +9,38 @@ import UIKit
 import AgoraUIKit
 
 class VideoCallVC: UIViewController {
-    var agoraView: AgoraVideoViewer?
-    var channelName: String?
-    var token: String?
-    var appId: String?
-    var onCallEnded: (() -> Void)?
-    
+    private var agoraView: AgoraVideoViewer?
     private let activityIndicator = UIActivityIndicatorView(style: .large)
+
+    var channelName: String?
     
+    var onCallEnded: (() -> Void)?
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupActivityIndicator()
         
         guard let channelName = self.channelName, !channelName.isEmpty else {
-            print("频道名称未设置")
+            print("無頻道名")
             return
         }
         
         activityIndicator.startAnimating()
         
         fetchAgoraToken(channelName: channelName) { [weak self] token, appId in
-                    guard let self = self else { return }
-                    DispatchQueue.main.async {
-                        if let token = token, let appId = appId {
-                            self.token = token
-                            self.appId = appId
-                            self.setupAgoraVideoViewer(token: token, appId: appId, channelName: channelName)
-                            
-                            self.activityIndicator.stopAnimating()
-                        } else {
-                            print("无法获取视频通话 Token 或 App ID")
-                            self.activityIndicator.stopAnimating()
-                        }
-                    }
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                if let token = token, let appId = appId {
+                    self.setupAgoraVideoViewer(token: token, appId: appId, channelName: channelName)
+                    self.activityIndicator.stopAnimating()
+                } else {
+                    print("無法獲取視頻通話 Token 或 App ID")
+                    self.activityIndicator.stopAnimating()
                 }
+            }
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -59,7 +56,6 @@ class VideoCallVC: UIViewController {
             activityIndicator.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(activityIndicator)
             
-            // 設定活動指示器在螢幕中央
             NSLayoutConstraint.activate([
                 activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
                 activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
@@ -95,11 +91,11 @@ class VideoCallVC: UIViewController {
     
     func fetchAgoraToken(channelName: String, completion: @escaping (String?, String?) -> Void) {
         let parameters: [String: Any] = [
-            "channelName": channelName,
+            "channelName": channelName
         ]
         
         guard let url = URL(string: "https://us-central1-edunion-e5403.cloudfunctions.net/generateAgoraToken") else {
-            print("无效的 URL")
+            print("無效的 URL")
             completion(nil, nil)
             return
         }
@@ -112,14 +108,14 @@ class VideoCallVC: UIViewController {
             let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: [])
             request.httpBody = jsonData
         } catch let error {
-            print("序列化 JSON 时出错: \(error)")
+            print("序列化 JSON 時出錯: \(error)")
             completion(nil, nil)
             return
         }
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("错误: \(error)")
+                print("錯誤: \(error)")
                 completion(nil, nil)
                 return
             }
@@ -131,15 +127,15 @@ class VideoCallVC: UIViewController {
                        let appId = responseJSON["appId"] as? String {
                         completion(token, appId)
                     } else {
-                        print("无法解析 token 或 appId")
+                        print("無法解析 token 或 appId")
                         completion(nil, nil)
                     }
                 } catch let jsonError {
-                    print("解析 JSON 时出错: \(jsonError)")
+                    print("解析 JSON 時出錯: \(jsonError)")
                     completion(nil, nil)
                 }
             } else {
-                print("无法获取 Token，状态码不为200")
+                print("無法獲取 Token，狀態碼不為200")
                 completion(nil, nil)
             }
         }
@@ -163,7 +159,7 @@ class VideoCallVC: UIViewController {
     @objc func segmentedControlHit(segc: UISegmentedControl) {
         print(segc)
         let segmentedStyle = [
-            AgoraVideoViewer.Style.floating,
+            AgoraVideoViewer.Style.floating
 //            AgoraVideoViewer.Style.grid
 //            AgoraVideoViewer.Style.pinned
         ][segc.selectedSegmentIndex]
@@ -187,9 +183,8 @@ extension VideoCallVC: AgoraVideoViewerDelegate {
     }
     
     @objc func leaveChannel(sender: UIButton) {
-        // 調用離開頻道的功能
         print("離開通話")
-        self.agoraView?.leaveChannel() // 離開當前頻道
-        self.dismiss(animated: true, completion: nil) // 返回上一頁
+        self.agoraView?.leaveChannel()
+        self.dismiss(animated: true, completion: nil)
     }
 }

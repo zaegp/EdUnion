@@ -64,7 +64,7 @@ class StudentListViewModel {
     }
     
     func blockStudent(_ student: Student, teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        UserFirebaseService.shared.blockUser(blockID: student.id, isTeacher: false) { error in
+        UserFirebaseService.shared.blockUser(blockID: student.id, userCollection: "teachers") { error in
             if let error = error {
                 completion(.failure(error))
                 return

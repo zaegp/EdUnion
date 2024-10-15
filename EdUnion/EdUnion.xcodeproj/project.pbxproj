@@ -11,8 +11,6 @@
 		513BEC0E2CA5BA0A000E0DE9 /* FilesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */; };
 		513BEC102CA6820A000E0DE9 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC0F2CA6820A000E0DE9 /* UserSession.swift */; };
 		513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC112CA8507C000E0DE9 /* ChatListCell.swift */; };
-		513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC182CA89059000E0DE9 /* LessonChartView.swift */; };
-		513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC1F2CA90361000E0DE9 /* BarChartView.swift */; };
 		513BEC242CAAC7B7000E0DE9 /* FilesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */; };
 		517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCB2CACC3A8002A2513 /* FirebaseAnalytics */; };
 		517E9DCE2CACC3A8002A2513 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCD2CACC3A8002A2513 /* FirebaseAuth */; };
@@ -35,6 +33,7 @@
 		517E9E072CBBD2EA002A2513 /* UserRole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E062CBBD2EA002A2513 /* UserRole.swift */; };
 		517E9E092CBBE9B2002A2513 /* VideoCallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E082CBBE9B2002A2513 /* VideoCallVC.swift */; };
 		517E9E102CBD1F2E002A2513 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */; };
+		517E9E152CBE401A002A2513 /* IntroViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E142CBE401A002A2513 /* IntroViewModel.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -137,8 +136,6 @@
 		513BEC0D2CA5BA0A000E0DE9 /* FilesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesVC.swift; sourceTree = "<group>"; };
 		513BEC0F2CA6820A000E0DE9 /* UserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSession.swift; sourceTree = "<group>"; };
 		513BEC112CA8507C000E0DE9 /* ChatListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListCell.swift; sourceTree = "<group>"; };
-		513BEC182CA89059000E0DE9 /* LessonChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonChartView.swift; sourceTree = "<group>"; };
-		513BEC1F2CA90361000E0DE9 /* BarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarChartView.swift; sourceTree = "<group>"; };
 		513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesCell.swift; sourceTree = "<group>"; };
 		517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
 		517E9DDF2CAEE440002A2513 /* SearchBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBarView.swift; sourceTree = "<group>"; };
@@ -151,6 +148,7 @@
 		517E9DF82CB8B5AC002A2513 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		517E9E062CBBD2EA002A2513 /* UserRole.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRole.swift; sourceTree = "<group>"; };
 		517E9E082CBBE9B2002A2513 /* VideoCallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallVC.swift; sourceTree = "<group>"; };
+		517E9E142CBE401A002A2513 /* IntroViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewModel.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -264,6 +262,7 @@
 			isa = PBXGroup;
 			children = (
 				513BEC092CA54ACC000E0DE9 /* IntroVC.swift */,
+				517E9E142CBE401A002A2513 /* IntroViewModel.swift */,
 			);
 			path = Intro;
 			sourceTree = "<group>";
@@ -432,8 +431,6 @@
 				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 				517E9DE52CB0E004002A2513 /* NotePopupView.swift */,
-				513BEC182CA89059000E0DE9 /* LessonChartView.swift */,
-				513BEC1F2CA90361000E0DE9 /* BarChartView.swift */,
 			);
 			path = Teacher;
 			sourceTree = "<group>";
@@ -882,7 +879,6 @@
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
-				513BEC192CA8905A000E0DE9 /* LessonChartView.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
 				517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */,
@@ -908,6 +904,7 @@
 				51D25C8A2C9B32570083EECF /* BaseCalendarView.swift in Sources */,
 				51D25CC32C9F3BA10083EECF /* NavigationController.swift in Sources */,
 				519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */,
+				517E9E152CBE401A002A2513 /* IntroViewModel.swift in Sources */,
 				517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */,
 				519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */,
 				519C8F1A2C998401007DFCBA /* Date+Ext.swift in Sources */,
@@ -944,7 +941,6 @@
 				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
 				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* AllTeacherViewModel.swift in Sources */,
-				513BEC202CA90361000E0DE9 /* BarChartView.swift in Sources */,
 				517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

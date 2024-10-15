@@ -8,36 +8,27 @@
 import UIKit
 import SwiftUI
 
-class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
-    private let teacherID: String
-    
-    private var viewModel: AvailableTimeSlotsViewModel!
+class AvailableTimeSlotsVC: UIViewController {
     private let tableView = UITableView()
     
-    init(teacherID: String) {
-        self.teacherID = teacherID
-        super.init(nibName: nil, bundle: nil)
-        self.viewModel = AvailableTimeSlotsViewModel()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    private let teacherID = UserSession.shared.unwrappedUserID
+    private var viewModel: AvailableTimeSlotsViewModel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.viewModel = AvailableTimeSlotsViewModel()
+        
         title = "可選時段"
         view.backgroundColor = .myBackground
-        tabBarController?.tabBar.isHidden = true
         
         setupNavigationBar()
+        enableSwipeToGoBack()
         setupTableView()
         setupAddButton()
         
         bindViewModel()
         viewModel.loadTimeSlots()
-        enableSwipeToGoBack() 
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -59,6 +50,7 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(AvailableTimeSlotsCell.self, forCellReuseIdentifier: "AvailableTimeSlotsCell")
+        
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = .clear
@@ -67,9 +59,9 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.clipsToBounds = true
         tableView.separatorStyle = .none
         tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
-        
-        view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -86,9 +78,9 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         addButton.backgroundColor = .mainOrange
         addButton.layer.cornerRadius = 10
         addButton.addTarget(self, action: #selector(showColorTimePickerModal), for: .touchUpInside)
-        
-        view.addSubview(addButton)
         addButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(addButton)
+        
         NSLayoutConstraint.activate([
             addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
@@ -127,7 +119,16 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         present(modalVC, animated: true, completion: nil)
     }
     
-    // MARK: - TableView Delegate
+    @objc func pushToCalendarVC() {
+        let calendarView = ColorPickerCalendarView()
+        let hostingController = UIHostingController(rootView: calendarView)
+        hostingController.modalPresentationStyle = .pageSheet
+        hostingController.modalTransitionStyle = .coverVertical
+        present(hostingController, animated: true, completion: nil)
+    }
+}
+
+extension AvailableTimeSlotsVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         viewModel.timeSlots.count
     }
@@ -150,7 +151,6 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
             cell.contentView.layer.masksToBounds = true
             cell.contentView.layer.cornerRadius = 12
             
-            // 調整 cell 的邊距
             let cellMargins = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
             cell.frame = cell.frame.inset(by: cellMargins)
         }
@@ -165,13 +165,5 @@ class AvailableTimeSlotsVC: UIViewController, UITableViewDelegate, UITableViewDa
         let timeSlot = viewModel.timeSlots[indexPath.row]
         showEditTimeSlotModal(for: timeSlot, at: indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    @objc func pushToCalendarVC() {
-        let calendarView = ColorPickerCalendarView()
-        let hostingController = UIHostingController(rootView: calendarView)
-        hostingController.modalPresentationStyle = .pageSheet
-        hostingController.modalTransitionStyle = .coverVertical
-        present(hostingController, animated: true, completion: nil)
     }
 }

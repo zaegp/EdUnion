@@ -11,21 +11,18 @@ class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
     
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
-    private var blocklist: [String] = [] // 存儲封鎖的老師 ID
+    private var blocklist: [String] = []
     let userID = UserSession.shared.currentUserID
     
     var onDataUpdate: (() -> Void)?
     
     func fetchData() {
-        // 先取得 blocklist
         fetchBlocklist { [weak self] blocklist in
             self?.blocklist = blocklist
             
-            // 然後再獲取常用老師
-            UserFirebaseService.shared.fetchFrequentlyUsedTeachers(forStudentID: self?.userID ?? "") { result in
+            UserFirebaseService.shared.fetchTeacherList(forStudentID: self?.userID ?? "", listKey: "usedList") { result in
                 switch result {
                 case .success(let teachers):
-                    // 過濾 blocklist 中的老師
                     self?.items = teachers.filter { !blocklist.contains($0.id ?? "") }
                     self?.filteredItems = self?.items ?? []
                     self?.onDataUpdate?()
@@ -36,7 +33,6 @@ class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
         }
     }
     
-    // 新增方法來取得 blocklist
     private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
         UserFirebaseService.shared.fetchBlocklist { result in
             switch result {

@@ -7,14 +7,20 @@
 
 import UIKit
 
-class FullScreenImageVC: UIViewController {
+class FullScreenImageVC: UIViewController, UIScrollViewDelegate {
     
     private let imageView: UIImageView
+    private let scrollView: UIScrollView
     
     init(image: UIImage) {
         self.imageView = UIImageView(image: image)
         self.imageView.contentMode = .scaleAspectFit
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.scrollView = UIScrollView()
+        self.scrollView.translatesAutoresizingMaskIntoConstraints = false
+        self.scrollView.minimumZoomScale = 1.0
+        self.scrollView.maximumZoomScale = 3.0
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -26,21 +32,38 @@ class FullScreenImageVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
         
-        view.addSubview(imageView)
+        scrollView.delegate = self
+        
+        scrollView.addSubview(imageView)
+        view.addSubview(scrollView)
         
         NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            imageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor),
+            imageView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            imageView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
         ])
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissSelf))
         view.addGestureRecognizer(tapGesture)
     }
     
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return imageView
+    }
+    
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        let offsetX = max((scrollView.bounds.width - scrollView.contentSize.width) * 0.5, 0)
+        let offsetY = max((scrollView.bounds.height - scrollView.contentSize.height) * 0.5, 0)
+        imageView.center = CGPoint(x: scrollView.contentSize.width * 0.5 + offsetX, y: scrollView.contentSize.height * 0.5 + offsetY)
+    }
+    
     @objc private func dismissSelf() {
         dismiss(animated: true, completion: nil)
     }
 }
-
