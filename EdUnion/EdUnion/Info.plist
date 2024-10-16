@@ -29,5 +29,29 @@
     <string>For the purpose of using the microphone. For example, for a call or live interactive streaming session.</string>
     <key>NSCameraUsageDescription</key>
     <string>For the purpose of using the camera. For example, for a call or live interactive streaming session.</string>
+    <!-- 移除不必要的鍵 -->
+    <!-- <key>NSDocumentDirectoryUsageDescription</key>
+    <string>需要訪問文件目錄以選擇檔案上傳。</string> -->
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    
+    <!-- App Transport Security 設定 -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>firebasestorage.googleapis.com</key>
+            <dict>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                <false/>
+            </dict>
+        </dict>
+    </dict>
 </dict>
 </plist>
