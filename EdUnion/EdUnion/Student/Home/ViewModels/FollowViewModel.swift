@@ -5,51 +5,29 @@
 //  Created by Rowan Su on 2024/9/21.
 //
 
-import Foundation
-
 class FollowViewModel: BaseCollectionViewModelProtocol {
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
     private var blocklist: [String] = []
-    
-    var userID: String? {
-        return UserSession.shared.currentUserID
-    }
-    
     var onDataUpdate: (() -> Void)?
     
     func fetchData() {
-        guard let userID = userID else {
-            print("User ID is nil.")
-            return
-        }
-        
-        fetchBlocklist { [weak self] blocklist in
-            self?.blocklist = blocklist
-            
-            UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "followList") { result in
-                switch result {
-                case .success(let teachers):
-                    let filteredTeachers = teachers.filter { !blocklist.contains($0.id ?? "") }
-                    
-                    if filteredTeachers.isEmpty {
-                        self?.items = []
-                        self?.filteredItems = []
-                        print("No followed teachers found.")
-                    } else {
-                        print("Fetched teachers: \(filteredTeachers)")
+            guard let userID = UserSession.shared.currentUserID else {
+                print("User ID is nil.")
+                return
+            }
+
+            fetchBlocklist { [weak self] blocklist in
+                self?.blocklist = blocklist
+                UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "followList") { result in
+                    switch result {
+                    case .success(let teachers):
+                        let filteredTeachers = teachers.filter { !blocklist.contains($0.id) }
                         self?.items = filteredTeachers
                         self?.filteredItems = filteredTeachers
-                    }
-                    
-                    DispatchQueue.main.async {
                         self?.onDataUpdate?()
-                    }
-                    
-                case .failure(let error):
-                    print("Failed to fetch teachers: \(error)")
-                    
-                    DispatchQueue.main.async {
+                    case .failure(let error):
+                        print("Failed to fetch teachers: \(error)")
                         self?.items = []
                         self?.filteredItems = []
                         self?.onDataUpdate?()
@@ -57,19 +35,6 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
                 }
             }
         }
-    }
-    
-    private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
-        UserFirebaseService.shared.fetchBlocklist { result in
-            switch result {
-            case .success(let blocklist):
-                completion(blocklist)
-            case .failure(let error):
-                print("Error fetching blocklist: \(error)")
-                completion([])
-            }
-        }
-    }
     
     func search(query: String) {
         if query.isEmpty {

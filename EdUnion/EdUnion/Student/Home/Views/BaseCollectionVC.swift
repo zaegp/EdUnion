@@ -7,17 +7,6 @@
 
 import UIKit
 
-protocol BaseCollectionViewModelProtocol {
-    var items: [Teacher] { get set }
-    var onDataUpdate: (() -> Void)? { get set }
-
-    func fetchData()
-    func numberOfItems() -> Int
-    func item(at index: Int) -> Teacher
-    
-    func search(query: String)
-}
-
 class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
 
     var collectionView: UICollectionView!

@@ -34,6 +34,7 @@
 		517E9E092CBBE9B2002A2513 /* VideoCallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E082CBBE9B2002A2513 /* VideoCallVC.swift */; };
 		517E9E102CBD1F2E002A2513 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */; };
 		517E9E152CBE401A002A2513 /* IntroViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E142CBE401A002A2513 /* IntroViewModel.swift */; };
+		517E9E172CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9E162CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift */; };
 		51993B0F2CA512E30022C79F /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B0E2CA512E30022C79F /* AuthenticationView.swift */; };
 		51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51993B102CA52A550022C79F /* ChooseRoleVC.swift */; };
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
@@ -149,6 +150,7 @@
 		517E9E062CBBD2EA002A2513 /* UserRole.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRole.swift; sourceTree = "<group>"; };
 		517E9E082CBBE9B2002A2513 /* VideoCallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallVC.swift; sourceTree = "<group>"; };
 		517E9E142CBE401A002A2513 /* IntroViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewModel.swift; sourceTree = "<group>"; };
+		517E9E162CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionViewModelProtocol.swift; sourceTree = "<group>"; };
 		51993B082CA509BA0022C79F /* EdUnion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EdUnion.entitlements; sourceTree = "<group>"; };
 		51993B0E2CA512E30022C79F /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		51993B102CA52A550022C79F /* ChooseRoleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseRoleVC.swift; sourceTree = "<group>"; };
@@ -551,6 +553,7 @@
 				519C8EF62C95C6D6007DFCBA /* AllTeacherViewModel.swift */,
 				51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */,
 				51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */,
+				517E9E162CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -880,6 +883,7 @@
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
+				517E9E172CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
 				517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */,
 				51D25C852C9AC5F10083EECF /* TodayCoursesViewModel.swift in Sources */,
@@ -1140,7 +1144,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1177,7 +1181,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tzuan.EdUnion;
 				PRODUCT_NAME = "$(TARGET_NAME)";

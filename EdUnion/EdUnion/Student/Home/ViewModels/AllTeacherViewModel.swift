@@ -5,11 +5,9 @@
 //  Created by Rowan Su on 2024/9/14.
 //
 
-import Foundation
 import FirebaseFirestore
 
 class AllTeacherViewModel: BaseCollectionViewModelProtocol {
-    
     var items: [Teacher] = []
     var filteredItems: [Teacher] = []
     var onDataUpdate: (() -> Void)?
@@ -28,7 +26,7 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
                 switch result {
                 case .success(let teachers):
                     self?.items = teachers.filter {
-                        !blocklist.contains($0.id ?? "") && !($0.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                        !blocklist.contains($0.id) && !($0.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                     self?.filteredItems = self?.items ?? []
                     self?.onDataUpdate?()
@@ -39,38 +37,16 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
         }
     }
     
-    private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
-        UserFirebaseService.shared.fetchBlocklist { result in
-            switch result {
-            case .success(let blocklist):
-                completion(blocklist)
-            case .failure(let error):
-                print("Error fetching blocklist: \(error)")
-                completion([])
-            }
-        }
-    }
-    
     func search(query: String) {
-        if query.isEmpty {
-            filteredItems = items
-        } else {
-            filteredItems = items.filter { teacher in
-                teacher.fullName.lowercased().contains(query.lowercased()) ||
-                teacher.resume[0].lowercased().contains(query.lowercased()) ||
-                teacher.resume[1].lowercased().contains(query.lowercased()) ||
-                teacher.resume[2].lowercased().contains(query.lowercased()) ||
-                teacher.resume[3].lowercased().contains(query.lowercased())
-            }
-        }
+        filteredItems = filteredTeachers(by: query)
         onDataUpdate?()
     }
     
     func numberOfItems() -> Int {
-        return filteredItems.count
+        return numberOfItems(in: filteredItems)
     }
     
     func item(at index: Int) -> Teacher {
-        return filteredItems[index]
+        return item(at: index, in: filteredItems)
     }
 }
