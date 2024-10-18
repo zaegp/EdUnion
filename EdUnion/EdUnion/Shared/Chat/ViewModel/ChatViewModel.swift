@@ -55,7 +55,6 @@ class ChatViewModel {
         
         let chatRoomRef = UserFirebaseService.shared.db.collection("chats").document(chatRoomID)
         
-        // 更新 messages 集合中的數據
         chatRoomRef.collection("messages").document(messageId).setData(messageData) { error in
             if let error = error {
                 print("Error sending message: \(error)")
@@ -128,7 +127,7 @@ class ChatViewModel {
             chatRoomRef.setData([
                 "id": self.chatRoomID,
                 "participants": self.participants,
-                "lastMessage": "圖片",  // 可以用"圖片"或者其他提示
+                "lastMessage": "圖片",
                 "lastMessageTimestamp": FieldValue.serverTimestamp()
             ], merge: true)
         }
@@ -160,36 +159,6 @@ class ChatViewModel {
         }
     }
     
-//    func sendAudioMessage(_ audioData: Data) {
-//        let audioId = UUID().uuidString
-//        
-//        UserFirebaseService.shared.uploadAudio(audioData: audioData, audioId: audioId) { [weak self] result in
-//            guard let self = self else { return }
-//            
-//            switch result {
-//            case .success(let url):
-//                let messageData: [String: Any] = [
-//                    "senderID": self.userID,
-//                    "type": 2,  // 假設 '2' 代表音訊消息
-//                    "content": url,
-//                    "timestamp": FieldValue.serverTimestamp(),
-//                    "isSeen": false
-//                ]
-//                
-//                UserFirebaseService.shared.sendMessage(chatRoomID: self.chatRoomID, messageData: messageData) { error in
-//                    if let error = error {
-//                        print("Error sending audio message: \(error.localizedDescription)")
-//                    } else {
-//                        print("Audio message sent successfully")
-//                    }
-//                }
-//                
-//            case .failure(let error):
-//                print("Error uploading audio: \(error.localizedDescription)")
-//            }
-//        }
-//    }
-    
     func markMessageAsSeen(_ message: Message) {
             guard let messageID = message.ID else { return }
             let chatRoomRef = Firestore.firestore().collection("chatRooms").document(chatRoomID)
@@ -205,9 +174,7 @@ class ChatViewModel {
         }
     
     func updateMessageIsSeen(at index: Int) {
-            // Assuming you have a messages array
             messages[index].isSeen = true
-            // Notify observers if necessary
             onMessagesUpdated?()
         }
     
@@ -234,10 +201,8 @@ class ChatViewModel {
                     }
                 }
                 
-                // 更新 messages 陣列
                 self.messages = newMessages
                 
-                // 通知 UI 更新
                 self.onMessagesUpdated?()
             }
     }

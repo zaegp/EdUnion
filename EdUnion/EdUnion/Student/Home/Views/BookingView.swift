@@ -71,7 +71,7 @@ struct BookingView: View {
                             Button(action: {
                                 selectedDate = date
                                 selectedTimes = []
-                                bookedSlots.removeAll()  // 清除之前的預定時段
+                                bookedSlots.removeAll() 
                                 getBookedSlots(for: selectedDate ?? "") { slots in
                                     bookedSlots = slots
                                     _ = generateTimeSlots(from: timeSlots.flatMap { $0.timeRanges }, bookedSlots: bookedSlots)
@@ -123,8 +123,8 @@ struct BookingView: View {
                                             .background(buttonBackgroundColor(for: timeSlot))
                                             .foregroundColor(buttonForegroundColor(for: timeSlot))
                                             .cornerRadius(10)
-                                            .animation(isBooked(timeSlot: timeSlot) ? .easeInOut : nil)
                                     }
+                                    .animation(.easeInOut, value: isBooked(timeSlot: timeSlot))
                                     .disabled(isBooked(timeSlot: timeSlot))
                                 }
                             }
@@ -159,9 +159,7 @@ struct BookingView: View {
             Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("確定")))
         }
     }
-    
-    // 辅助方法
-    
+        
     func formattedDate(_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd"
@@ -246,19 +244,15 @@ struct BookingView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         
-        // 將時間轉換為 Date 類型
         guard let selectedTime = dateFormatter.date(from: timeSlot) else { return }
         
         if let index = selectedTimes.firstIndex(of: timeSlot) {
-            // 嘗試取消選取
             var newSelection = selectedTimes
             newSelection.remove(at: index)
             
             if isSelectionContinuous(newSelection) {
-                // 如果取消後仍然連續，允許取消
                 selectedTimes = newSelection
             } else {
-                // 否則，顯示警告並阻止取消
                 alertMessage = "只能選擇連續的時間段。"
                 showingAlert = true
             }

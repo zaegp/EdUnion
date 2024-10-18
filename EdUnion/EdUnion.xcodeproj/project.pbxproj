@@ -40,12 +40,12 @@
 		519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */; };
 		519C8ECE2C93E804007DFCBA /* AvailableTimeSlotsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */; };
 		519C8ED02C93E883007DFCBA /* ColorTimePickerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */; };
-		519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */; };
-		519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */; };
+		519C8ED62C940B21007DFCBA /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8ED52C940B21007DFCBA /* UIImageView+Ext.swift */; };
+		519C8EE02C954D0C007DFCBA /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EDF2C954D0C007DFCBA /* UIColor+Ext.swift */; };
 		519C8EE42C954D82007DFCBA /* AvailableTimeSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE32C954D82007DFCBA /* AvailableTimeSlot.swift */; };
 		519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */; };
 		519C8EE92C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EE82C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift */; };
-		519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */; };
+		519C8EEB2C95A278007DFCBA /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEA2C95A278007DFCBA /* Color+Ext.swift */; };
 		519C8EED2C95A84C007DFCBA /* CalendarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */; };
 		519C8EEF2C95C31B007DFCBA /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EEE2C95C31B007DFCBA /* TabBarController.swift */; };
 		519C8EF22C95C38B007DFCBA /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C8EF12C95C38B007DFCBA /* ProfileVC.swift */; };
@@ -100,6 +100,9 @@
 		51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B0A2C917BE3006322B7 /* ChatVC.swift */; };
 		51ED0B142C91803A006322B7 /* ChatTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */; };
 		51ED0B162C918080006322B7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 51ED0B152C918080006322B7 /* GoogleService-Info.plist */; };
+		51F4316A2CC1C51D00F018ED /* BookingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F431692CC1C51D00F018ED /* BookingViewModel.swift */; };
+		51F4316C2CC2466700F018ED /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F4316B2CC2466700F018ED /* UITableView+Ext.swift */; };
+		51F4316E2CC2478900F018ED /* UICollectionView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F4316D2CC2478900F018ED /* UICollectionView+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,12 +160,12 @@
 		519C8ECB2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsCell.swift; sourceTree = "<group>"; };
 		519C8ECD2C93E804007DFCBA /* AvailableTimeSlotsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsVC.swift; sourceTree = "<group>"; };
 		519C8ECF2C93E883007DFCBA /* ColorTimePickerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTimePickerVC.swift; sourceTree = "<group>"; };
-		519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+LoadImage.swift"; sourceTree = "<group>"; };
-		519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+HexConvert.swift"; sourceTree = "<group>"; };
+		519C8ED52C940B21007DFCBA /* UIImageView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
+		519C8EDF2C954D0C007DFCBA /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		519C8EE32C954D82007DFCBA /* AvailableTimeSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlot.swift; sourceTree = "<group>"; };
 		519C8EE62C954E73007DFCBA /* UserFirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFirebaseService.swift; sourceTree = "<group>"; };
 		519C8EE82C954FE0007DFCBA /* AvailableTimeSlotsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTimeSlotsViewModel.swift; sourceTree = "<group>"; };
-		519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+HexConvert.swift"; sourceTree = "<group>"; };
+		519C8EEA2C95A278007DFCBA /* Color+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Ext.swift"; sourceTree = "<group>"; };
 		519C8EEC2C95A84C007DFCBA /* CalendarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarVC.swift; sourceTree = "<group>"; };
 		519C8EEE2C95C31B007DFCBA /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		519C8EF12C95C38B007DFCBA /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
@@ -223,6 +226,9 @@
 		51ED0B0A2C917BE3006322B7 /* ChatVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatVC.swift; sourceTree = "<group>"; };
 		51ED0B132C91803A006322B7 /* ChatTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTableViewCell.swift; sourceTree = "<group>"; };
 		51ED0B152C918080006322B7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		51F431692CC1C51D00F018ED /* BookingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingViewModel.swift; sourceTree = "<group>"; };
+		51F4316B2CC2466700F018ED /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
+		51F4316D2CC2478900F018ED /* UICollectionView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UICollectionView+Ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -459,13 +465,15 @@
 		519C8ED42C93EEAA007DFCBA /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				519C8ED52C940B21007DFCBA /* UIImageView+LoadImage.swift */,
+				519C8ED52C940B21007DFCBA /* UIImageView+Ext.swift */,
 				519C8F192C998401007DFCBA /* Date+Ext.swift */,
 				51D25CC02C9F33BA0083EECF /* Calendar+Ext.swift */,
-				519C8EDF2C954D0C007DFCBA /* UIColor+HexConvert.swift */,
-				519C8EEA2C95A278007DFCBA /* Color+HexConvert.swift */,
+				519C8EDF2C954D0C007DFCBA /* UIColor+Ext.swift */,
+				519C8EEA2C95A278007DFCBA /* Color+Ext.swift */,
 				51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */,
 				517E9DF32CB7E702002A2513 /* UIBarButtonItem+Ext.swift */,
+				51F4316B2CC2466700F018ED /* UITableView+Ext.swift */,
+				51F4316D2CC2478900F018ED /* UICollectionView+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -534,12 +542,12 @@
 		519C8F0D2C980E44007DFCBA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				519C8EF82C95C701007DFCBA /* TeacherCell.swift */,
+				51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */,
 				51B619DC2CA06C1A00EAC4B8 /* BaseCollectionVC.swift */,
 				51B619DE2CA06C6D00EAC4B8 /* AllTeacherVC.swift */,
-				51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */,
 				51D25C9F2C9E90B30083EECF /* FollowVC.swift */,
 				51D25CC82CA060100083EECF /* FrequentlyUsedVC.swift */,
+				519C8EF82C95C701007DFCBA /* TeacherCell.swift */,
 				519C8EFC2C95CD45007DFCBA /* TeacherDetailVC.swift */,
 				519C8F022C969D3B007DFCBA /* BookingVC.swift */,
 				519C8F002C95FD2D007DFCBA /* BookingView.swift */,
@@ -550,10 +558,11 @@
 		519C8F0E2C980E62007DFCBA /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				517E9E162CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift */,
 				519C8EF62C95C6D6007DFCBA /* AllTeacherViewModel.swift */,
 				51D25C9D2C9E60C00083EECF /* FollowViewModel.swift */,
 				51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */,
-				517E9E162CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift */,
+				51F431692CC1C51D00F018ED /* BookingViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -879,6 +888,7 @@
 				513BEC0A2CA54ACC000E0DE9 /* IntroVC.swift in Sources */,
 				51993B112CA52A550022C79F /* ChooseRoleVC.swift in Sources */,
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
+				51F4316E2CC2478900F018ED /* UICollectionView+Ext.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
@@ -896,7 +906,7 @@
 				517E9DF62CB82730002A2513 /* BedgeButton.swift in Sources */,
 				51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */,
 				51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */,
-				519C8ED62C940B21007DFCBA /* UIImageView+LoadImage.swift in Sources */,
+				519C8ED62C940B21007DFCBA /* UIImageView+Ext.swift in Sources */,
 				51D25C872C9ACA560083EECF /* AppointmentFirebaseService.swift in Sources */,
 				517E9E092CBBE9B2002A2513 /* VideoCallVC.swift in Sources */,
 				517E9DF22CB71FEE002A2513 /* StudentTableViewCell.swift in Sources */,
@@ -927,8 +937,9 @@
 				51D25C982C9E40790083EECF /* BaseCalendarViewModel.swift in Sources */,
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
 				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,
+				51F4316C2CC2466700F018ED /* UITableView+Ext.swift in Sources */,
 				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,
-				519C8EEB2C95A278007DFCBA /* Color+HexConvert.swift in Sources */,
+				519C8EEB2C95A278007DFCBA /* Color+Ext.swift in Sources */,
 				51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */,
 				51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */,
 				51D25C8E2C9BC3030083EECF /* ColorPickerCalendarView.swift in Sources */,
@@ -939,13 +950,14 @@
 				51B619DF2CA06C6D00EAC4B8 /* AllTeacherVC.swift in Sources */,
 				519C8F012C95FD2D007DFCBA /* BookingView.swift in Sources */,
 				519C8EFD2C95CD45007DFCBA /* TeacherDetailVC.swift in Sources */,
-				519C8EE02C954D0C007DFCBA /* UIColor+HexConvert.swift in Sources */,
+				519C8EE02C954D0C007DFCBA /* UIColor+Ext.swift in Sources */,
 				51D25C9E2C9E60C00083EECF /* FollowViewModel.swift in Sources */,
 				519E14982CA1884200E344CE /* StudentListVC.swift in Sources */,
 				51ED0AD92C916721006322B7 /* SceneDelegate.swift in Sources */,
 				51D25C832C9AC2170083EECF /* ProgressBarView.swift in Sources */,
 				519C8EF72C95C6D6007DFCBA /* AllTeacherViewModel.swift in Sources */,
 				517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */,
+				51F4316A2CC1C51D00F018ED /* BookingViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

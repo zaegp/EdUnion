@@ -37,9 +37,7 @@ class NotePopupView: UIView {
     }
     
     private func setupBackgroundView() {
-        // 背景半透明黑色
         self.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        // 添加點擊手勢，點擊背景關閉彈窗
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
         self.addGestureRecognizer(tapGesture)
     }

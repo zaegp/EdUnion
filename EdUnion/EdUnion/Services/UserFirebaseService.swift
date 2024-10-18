@@ -121,31 +121,25 @@ class UserFirebaseService {
     func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
         let teacherRef = db.collection("teachers").document(teacherID)
         
-        // 使用 Firestore 的 `updateData` 方法更新或創建 studentsNotes 欄位
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
-                // 檢查 studentsNotes 欄位是否存在
                 if var studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
-                    let studentExists = studentsNotes[studentID] != nil  // 檢查 studentID 是否已存在
+                    let studentExists = studentsNotes[studentID] != nil
                     
-                    // 更新已有的 studentsNotes
                     studentsNotes[studentID] = note
                     teacherRef.updateData(["studentsNotes": studentsNotes]) { error in
                         if let error = error {
                             completion(.failure(error))
                         } else {
-                            // 返回 student 是否存在的結果
                             completion(.success(studentExists))
                         }
                     }
                 } else {
-                    // 如果欄位不存在，創建它並返回 student 不存在
                     let newNotes = [studentID: note]
                     teacherRef.updateData(["studentsNotes": newNotes]) { error in
                         if let error = error {
                             completion(.failure(error))
                         } else {
-                            // 返回 student 不存在，因為是新創建的
                             completion(.success(false))
                         }
                     }
@@ -296,18 +290,6 @@ class UserFirebaseService {
             }
         }
     }
-    
-    // MARK: - 更新時間段（舊換新）
-    //    func updateTimeSlot(oldTimeSlot: AvailableTimeSlot, newTimeSlot: AvailableTimeSlot, forTeacher teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-    //        deleteTimeSlot(oldTimeSlot, for: teacherID) { result in
-    //            switch result {
-    //            case .success:
-    //                self.saveTimeSlot(newTimeSlot, forTeacher: teacherID, completion: completion)
-    //            case .failure(let error):
-    //                completion(.failure(error))
-    //            }
-    //        }
-    //    }
     
     // MARK - 聊天室
     func fetchChatRooms(for participantID: String, isTeacher: Bool, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
@@ -492,7 +474,6 @@ class UserFirebaseService {
                     return
                 }
                 
-                // 將下載 URL 保存到 Firestore
                 let collection = (userRole == "teacher") ? "teachers" : "students"
                 let userRef = Firestore.firestore().collection(collection).document(userID)
                 
@@ -500,7 +481,7 @@ class UserFirebaseService {
                     if let error = error {
                         completion(.failure(error))
                     } else {
-                        completion(.success(())) // 成功完成
+                        completion(.success(()))
                     }
                 }
             }

@@ -133,10 +133,8 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         colorPreview.backgroundColor = selectedColor
         colorPreview.isUserInteractionEnabled = true
         
-        // 添加 colorPreviewLabel 到 colorPreview 中
         colorPreview.addSubview(colorPreviewLabel)
         
-        // 設置 colorPreviewLabel 的約束，使其在 colorPreview 的中間
         colorPreviewLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             colorPreviewLabel.centerXAnchor.constraint(equalTo: colorPreview.centerXAnchor),
@@ -233,14 +231,12 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         timePickersVerticalStack.axis = .vertical
         timePickersVerticalStack.spacing = 10
 
-        // 將時間選擇器和新增按鈕水平排列
         let timeSelectionStackView = UIStackView(arrangedSubviews: [timePickersVerticalStack, addTimeSlotButton])
         timeSelectionStackView.axis = .horizontal
         timeSelectionStackView.spacing = 10
         timeSelectionStackView.distribution = .fill
         timeSelectionStackView.alignment = .center
 
-        // 中間區域：時間段列表
         let timeSlotsLabel = UILabel()
         timeSlotsLabel.text = "已選擇的時間段"
         timeSlotsLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -255,7 +251,6 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         buttonsStackView.spacing = 16
         buttonsStackView.distribution = .fillEqually
 
-        // 整體佈局
         let mainStackView = UIStackView(arrangedSubviews: [colorPreview, timeSelectionStackView, timeSlotsContainer, buttonsStackView])
             mainStackView.axis = .vertical
             mainStackView.spacing = 20
@@ -268,7 +263,6 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
 
             view.addSubview(mainStackView)
 
-            // 設置約束
             NSLayoutConstraint.activate([
 //                mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
                 mainStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -281,11 +275,9 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
                 cancelButton.heightAnchor.constraint(equalToConstant: 40),
 
                 colorPreview.heightAnchor.constraint(equalToConstant: 80),
-                // 時間選擇器的大小
                 startTimePicker.heightAnchor.constraint(equalToConstant: 100),
                 endTimePicker.heightAnchor.constraint(equalToConstant: 100),
                 startTimePicker.widthAnchor.constraint(equalToConstant: 200),
-                // 時間段列表高度
                 timeSlotsTableView.heightAnchor.constraint(equalToConstant: 150)
             ])
         }

@@ -66,7 +66,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
                 activityIndicator.center = self.view.center
-                activityIndicator.hidesWhenStopped = true // 在停止時隱藏
+                activityIndicator.hidesWhenStopped = true
                 self.view.addSubview(activityIndicator)
     }
     
@@ -76,7 +76,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             }
         }
         
-        // 隱藏活動指示器
         func hideActivityIndicator() {
             DispatchQueue.main.async {
                 self.activityIndicator.stopAnimating()
@@ -259,13 +258,11 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
 
     func startSendAnimation() {
-        // 創建飛機圖標
         let planeImageView = UIImageView(image: UIImage(systemName: "paperplane.fill"))
         planeImageView.tintColor = .mainOrange
         planeImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(planeImageView)
         
-        // 設置飛機圖標的位置
         NSLayoutConstraint.activate([
             planeImageView.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
             planeImageView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
@@ -273,27 +270,23 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             planeImageView.heightAnchor.constraint(equalToConstant: 30)
         ])
         
-        // 飛機飛走的動畫
         UIView.animate(withDuration: 1.0, animations: {
             planeImageView.transform = CGAffineTransform(translationX: self.view.frame.width, y: -self.view.frame.height / 2)
             planeImageView.alpha = 0
         }, completion: { _ in
             planeImageView.removeFromSuperview()
             
-            // 顯示勾選圖標動畫
             self.showCheckmarkAnimation()
         })
     }
 
     func showCheckmarkAnimation() {
-        // 創建勾選圖標
         let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
         checkmarkImageView.tintColor = .mainOrange
         
         checkmarkImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(checkmarkImageView)
         
-        // 設置勾選圖標的位置在螢幕中心
         NSLayoutConstraint.activate([
             checkmarkImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             checkmarkImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -301,14 +294,12 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             checkmarkImageView.heightAnchor.constraint(equalToConstant: 100)
         ])
         
-        // 動畫效果：從小到大出現
         checkmarkImageView.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         checkmarkImageView.alpha = 0
         UIView.animate(withDuration: 0.5, animations: {
             checkmarkImageView.transform = CGAffineTransform.identity
             checkmarkImageView.alpha = 1
         }, completion: { _ in
-            // 延遲 1 秒後淡出並移除
             UIView.animate(withDuration: 0.5, delay: 1.0, options: [], animations: {
                 checkmarkImageView.alpha = 0
             }, completion: { _ in
@@ -324,7 +315,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     func updateSendButtonState() {
         let canSend = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
         sendButton.isEnabled = canSend
-        sendButton.backgroundColor = canSend ? .mainOrange : .gray // 根據狀態改變背景色
+        sendButton.backgroundColor = canSend ? .mainOrange : .gray
     }
     
     private func previewFile(at url: URL) {
@@ -339,7 +330,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
            }
        }
        
-       // QLPreviewControllerDataSource 方法
        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
            return previewItem == nil ? 0 : 1
        }
@@ -351,7 +341,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
             print("Error: Current user ID is nil.")
-            setCustomEmptyStateView() // 顯示自定義的 empty state
+            setCustomEmptyStateView()
             return
         }
         
@@ -360,9 +350,8 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             self.files = cachedFiles
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
-                self.restoreCollectionView() // 恢復正常背景
+                self.restoreCollectionView()
             }
-            // 如果有緩存的文件，暫時不設置監聽器
             return
         } else {
             setCustomEmptyStateView()
@@ -382,7 +371,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error.localizedDescription)")
-                self?.setCustomEmptyStateView() // 顯示自定義的 empty state
+                self?.setCustomEmptyStateView() 
                 return
             }
 
@@ -834,7 +823,7 @@ extension FilesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath) as! StudentTableViewCell
+        let cell: StudentTableViewCell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath) 
         cell.backgroundColor = .myBackground
         let student = studentInfos[indexPath.row]
         cell.configure(with: student)
@@ -892,7 +881,7 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
 //    }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath) as! FileCell
+        let cell: FileCell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath)
         let fileItem = files[indexPath.item]
         cell.delegate = self
 
@@ -1217,7 +1206,6 @@ extension FilesVC: URLSessionDownloadDelegate {
                     self.files[index] = updatedFileItem
                     self.fileDownloadStatus[url] = false
 
-                    // 刪除進度記錄
                     self.fileDownloadProgress.removeValue(forKey: url)
 
                     self.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])

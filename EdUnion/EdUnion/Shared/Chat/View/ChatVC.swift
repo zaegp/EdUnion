@@ -240,7 +240,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         viewModel.sendMessage(messageText)
         messageTextView.text = nil
         updateSendButtonState()
-        messageTextView.becomeFirstResponder() // 確保鍵盤保持打開
+        messageTextView.becomeFirstResponder() 
     }
     
     @objc private func handleKeyboardWillShow(notification: NSNotification) {
@@ -310,7 +310,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatTableViewCell
+        let cell: ChatTableViewCell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath)
         cell.backgroundColor = .myBackground
         let message = viewModel.message(at: indexPath.row)
         let previousMessage: Message? = indexPath.row > 0 ? viewModel.message(at: indexPath.row - 1) : nil

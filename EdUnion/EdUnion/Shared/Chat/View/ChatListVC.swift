@@ -234,7 +234,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
+        let cell: ChatListCell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) 
         cell.backgroundColor = .myBackground
         let chatRoom = filteredChatRooms[indexPath.row]
         
@@ -242,7 +242,6 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
         
         if let participant = participants[chatRoom.id] {
-            // participant 是 UserProtocol 类型
             let photoURLString = participant.photoURL ?? ""
             cell.configure(name: participant.fullName, lastMessage: lastMessage, time: lastMessageTime, image: photoURLString)
         } else {

@@ -8,13 +8,6 @@
 import UIKit
 
 extension UIViewController {
-//    func setupKeyboardDismissRecognizer() {
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-//        tapGesture.cancelsTouchesInView = false
-//        tapGesture.delegate = self as? UIGestureRecognizerDelegate  
-//        view.addGestureRecognizer(tapGesture)
-//    }
-    
     func setupKeyboardDismissRecognizer() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.delegate = self as? UIGestureRecognizerDelegate
@@ -22,7 +15,6 @@ extension UIViewController {
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        // 防止手勢識別器攔截按鈕的點擊
         if touch.view is UIButton {
             return false
         }

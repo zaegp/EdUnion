@@ -64,7 +64,7 @@ struct ColorPickerCalendarView: View {
                 }
             )
             .sheet(isPresented: Binding<Bool>(
-                get: { selectedDay != nil && showColorPicker },  // 檢查是否有選中的日期
+                get: { selectedDay != nil && showColorPicker },  
                 set: { showColorPicker = $0 }
             )) {
                 Group {

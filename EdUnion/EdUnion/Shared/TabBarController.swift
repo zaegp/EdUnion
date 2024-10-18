@@ -42,11 +42,10 @@ class TabBarController: UITabBarController {
         customTabBarView.layer.shadowOffset = CGSize(width: 0, height: 5)
         customTabBarView.layer.shadowRadius = 10
 
-        // 添加選中背景視圖
-        let selectedHeight: CGFloat = height - 10 // 比 customTabBarView 小一點
+        let selectedHeight: CGFloat = height - 10
         
         let buttonWidth = customTabBarView.frame.width / CGFloat(4)
-        let selectedWidth: CGFloat = buttonWidth - 20 // 比按鈕寬度小 20 點
+        let selectedWidth: CGFloat = buttonWidth - 20
         selectedBackgroundView = UIView(frame: CGRect(x: (buttonWidth - selectedWidth) / 2, y: (height - selectedHeight) / 2, width: selectedWidth, height: selectedHeight))
             selectedBackgroundView.backgroundColor = .myBackground
             selectedBackgroundView.layer.cornerRadius = 25

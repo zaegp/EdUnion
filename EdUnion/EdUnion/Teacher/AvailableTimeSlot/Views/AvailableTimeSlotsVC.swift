@@ -138,7 +138,7 @@ extension AvailableTimeSlotsVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "AvailableTimeSlotsCell", for: indexPath) as! AvailableTimeSlotsCell
+        let cell: AvailableTimeSlotsCell = tableView.dequeueReusableCell(withIdentifier: "AvailableTimeSlotsCell", for: indexPath)
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
         

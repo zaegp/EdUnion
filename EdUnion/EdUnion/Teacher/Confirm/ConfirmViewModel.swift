@@ -86,26 +86,23 @@ class ConfirmViewModel {
             if let document = document, document.exists {
                 let data = document.data()
                 if let _ = data?[studentID] {
-                    // 學生 ID 已經存在，不進行更新
-                    completion(.success(true)) // 假設已存在，傳回 true
+                    completion(.success(true))
                     return
                 } else {
-                    // 學生 ID 不存在，進行更新
                     notesRef.updateData([studentID: note]) { error in
                         if let error = error {
                             completion(.failure(error))
                         } else {
-                            completion(.success(false)) // 更新成功，傳回 false 表示之前不存在
+                            completion(.success(false))
                         }
                     }
                 }
             } else {
-                // 文檔不存在，創建文檔並添加學生 ID 和 note
                 notesRef.setData([studentID: note]) { error in
                     if let error = error {
                         completion(.failure(error))
                     } else {
-                        completion(.success(false)) // 更新成功，傳回 false 表示之前不存在
+                        completion(.success(false)) 
                     }
                 }
             }

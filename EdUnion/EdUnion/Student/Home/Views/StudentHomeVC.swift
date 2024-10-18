@@ -8,20 +8,6 @@
 import UIKit
 
 class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, UIScrollViewDelegate, UISearchBarDelegate {
-
-    private var pageViewController: UIPageViewController!
-    private let viewControllers: [UIViewController] = [FollowVC(), AllTeacherVC(), FrequentlyUsedVC()]
-    private var pageViewControllerTopConstraint: NSLayoutConstraint?
-    
-    private let searchBarView = SearchBarView()
-        
-        private let searchIcon: UIImageView = {
-            let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-            icon.tintColor = .myTint
-            icon.isUserInteractionEnabled = true
-            return icon
-        }()
-    
     private let labelsStackView: UIStackView = {
         let followLabel = UILabel()
         followLabel.text = "關注"
@@ -50,32 +36,39 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         stackView.spacing = 10
         return stackView
     }()
-
     private let underlineView: UIView = {
         let view = UIView()
         view.backgroundColor = .mainOrange
         return view
     }()
+    private let searchIcon: UIImageView = {
+        let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
+        icon.tintColor = .myTint
+        icon.isUserInteractionEnabled = true
+        return icon
+    }()
+    private let searchBarView = SearchBarView()
+    private var pageViewController: UIPageViewController!
+    private var scrollView: UIScrollView?
+    private let viewControllers: [UIViewController] = [FollowVC(), AllTeacherVC(), FrequentlyUsedVC()]
+    
+    private var pageViewControllerTopConstraint: NSLayoutConstraint?
     
     private var selectedIndex: Int?
-    private var scrollView: UIScrollView?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .myBackground
         
-        searchBarView.delegate = self
-
-        selectedIndex = 1
-
         setupLabels()
-        setupPageViewController()
         setupSearchIcon()
+        setupPageViewController()
+        setupScrollView()
         
-        if let scrollView = pageViewController.view.subviews.compactMap({ $0 as? UIScrollView }).first {
-            self.scrollView = scrollView
-            scrollView.delegate = self
-        }
+        searchBarView.delegate = self
+        selectedIndex = 1
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -90,11 +83,11 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-
+        
         selectedIndex = 1
-
+        
         pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: false, completion: nil)
-
+        
         updateUnderlinePosition(to: selectedIndex!)
     }
     
@@ -103,68 +96,81 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         labelsStackView.layoutIfNeeded()
         updateUnderlinePosition(to: selectedIndex!)
     }
-        
+    
+    private func setupScrollView() {
+        if let scrollView = pageViewController.view.subviews.compactMap({ $0 as? UIScrollView }).first {
+            self.scrollView = scrollView
+            scrollView.showsVerticalScrollIndicator = false
+            scrollView.delegate = self
+        }
+    }
+    
     private func setupSearchIcon() {
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(searchIconTapped))
-            searchIcon.addGestureRecognizer(tapGesture)
-
-            view.addSubview(searchIcon)
-            view.addSubview(searchBarView)
-
-            searchBarView.alpha = 0
-
-            searchIcon.translatesAutoresizingMaskIntoConstraints = false
-            searchBarView.translatesAutoresizingMaskIntoConstraints = false
-
-            NSLayoutConstraint.activate([
-                searchIcon.centerYAnchor.constraint(equalTo: labelsStackView.centerYAnchor),
-                searchIcon.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
-                searchBarView.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 8),
-                searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                searchBarView.heightAnchor.constraint(equalToConstant: 50)
-            ])
-        }
-
-    @objc private func searchIconTapped() {
-            UIView.animate(withDuration: 0.3, animations: {
-                self.searchBarView.alpha = self.searchBarView.alpha == 0 ? 1 : 0
-                
-                if self.searchBarView.alpha == 1 {
-                    self.pageViewControllerTopConstraint?.constant = 60
-                } else {
-                    self.pageViewControllerTopConstraint?.constant = 10
-                }
-
-                self.view.layoutIfNeeded()
-            }, completion: { _ in
-                if self.searchBarView.alpha == 1 {
-                    self.searchBarView.focusSearchBar()
-                } else {
-                    self.searchBarView.hideKeyboardAndCancel()
-                }
-            })
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(searchIconTapped))
+        searchIcon.addGestureRecognizer(tapGesture)
+        
+        view.addSubview(searchIcon)
+        view.addSubview(searchBarView)
+        
+        searchBarView.alpha = 0
+        
+        searchIcon.translatesAutoresizingMaskIntoConstraints = false
+        searchBarView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            searchIcon.centerYAnchor.constraint(equalTo: labelsStackView.centerYAnchor),
+            searchIcon.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            self.updateUnderlinePosition(to: self.selectedIndex!)
-        }
-
+            searchBarView.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 8),
+            searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            searchBarView.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    @objc private func searchIconTapped() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.searchBarView.alpha = self.searchBarView.alpha == 0 ? 1 : 0
+            
+            if self.searchBarView.alpha == 1 {
+                self.pageViewControllerTopConstraint?.constant = 60
+            } else {
+                self.pageViewControllerTopConstraint?.constant = 10
+            }
+            
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            if self.searchBarView.alpha == 1 {
+                self.searchBarView.focusSearchBar()
+            } else {
+                self.searchBarView.hideKeyboardAndCancel()
+            }
+        })
+        
+        self.updateUnderlinePosition(to: self.selectedIndex!)
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetX = scrollView.contentOffset.x
         let width = scrollView.frame.width
         
         let progress = (offsetX - width) / width
-   
+        
         updateUnderlinePositionWithProgress(progress)
     }
-
+    
     private func updateUnderlinePositionWithProgress(_ progress: CGFloat) {
         let totalLabels = labelsStackView.arrangedSubviews.count
         let currentLabelIndex = selectedIndex
         let nextLabelIndex = min(max(selectedIndex! + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
         
-        let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex!] as! UILabel
-        let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as! UILabel
+        guard let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex!] as? UILabel else {
+            fatalError("Unable to cast currentLabel to UILabel")
+        }
+
+        guard let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as? UILabel else {
+            fatalError("Unable to cast nextLabel to UILabel")
+        }
         
         let currentX = currentLabel.frame.origin.x
         let nextX = nextLabel.frame.origin.x
@@ -173,24 +179,24 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         
         underlineView.frame.origin.x = newX + labelsStackView.frame.origin.x
     }
-
+    
     private func setupLabels() {
         view.addSubview(labelsStackView)
         labelsStackView.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(underlineView)
         underlineView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
-                labelsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
-                labelsStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                labelsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                labelsStackView.heightAnchor.constraint(equalToConstant: 40),
-                
-                underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
-                underlineView.heightAnchor.constraint(equalToConstant: 3),
-                underlineView.widthAnchor.constraint(equalToConstant: 60),  
-                underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex!].leadingAnchor)
+            labelsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
+            labelsStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            labelsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            labelsStackView.heightAnchor.constraint(equalToConstant: 40),
+            
+            underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
+            underlineView.heightAnchor.constraint(equalToConstant: 3),
+            underlineView.widthAnchor.constraint(equalToConstant: 60),
+            underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex ?? 1].leadingAnchor)
         ])
         
         for (index, label) in labelsStackView.arrangedSubviews.enumerated() {
@@ -202,55 +208,55 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
             }
         }
     }
-
+    
     private func setupPageViewController() {
         pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         pageViewController.delegate = self
         pageViewController.dataSource = self
-
-        pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: true, completion: nil)
-
+        
+        pageViewController.setViewControllers([viewControllers[selectedIndex ?? 1]], direction: .forward, animated: true, completion: nil)
+        
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
-
+        
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
         pageViewControllerTopConstraint = pageViewController.view.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 10)
-
+        
         NSLayoutConstraint.activate([
             pageViewControllerTopConstraint!,
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
+        
         pageViewController.didMove(toParent: self)
     }
-
+    
     // MARK: - UIPageViewControllerDataSource 和 Delegate
-
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let index = viewControllers.firstIndex(of: viewController), index > 0 else { return nil }
         return viewControllers[index - 1]
     }
-
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         guard let index = viewControllers.firstIndex(of: viewController), index < viewControllers.count - 1 else { return nil }
         return viewControllers[index + 1]
     }
-
+    
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
         let index = viewControllers.firstIndex(of: visibleVC)!
         updateUnderlinePosition(to: index)
         selectedIndex = index
     }
-
+    
     private func updateUnderlinePosition(to index: Int) {
         UIView.animate(withDuration: 0.3) {
             self.underlineView.frame.origin.x = self.labelsStackView.arrangedSubviews[index].frame.origin.x + self.labelsStackView.frame.origin.x
         }
-
+        
         for (i, label) in labelsStackView.arrangedSubviews.enumerated() {
             if let label = label as? UILabel {
                 label.textColor = (i == index) ? .myBlack : .gray
@@ -261,55 +267,52 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     @objc private func labelTapped(_ sender: UITapGestureRecognizer) {
         guard let tappedLabel = sender.view as? UILabel else { return }
         let targetIndex = tappedLabel.tag
-
+        
         let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex! ? .forward : .reverse
+        
+        pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true) { [weak self] completed in
+            guard completed else { return }
             
-            pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true) { [weak self] completed in
-                guard completed else { return }  
-
-                self?.selectedIndex = targetIndex
-                
-                self?.updateUnderlinePosition(to: targetIndex)
-            }
+            self?.selectedIndex = targetIndex
+            
+            self?.updateUnderlinePosition(to: targetIndex)
+        }
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let query = searchBar.text else { return }
-
-        // 根據當前的頁面來觸發相應的搜尋邏輯
-        if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
-            currentVC.viewModel.search(query: query)
-        } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
-            currentVC.viewModel.search(query: query)
-        } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
-            currentVC.viewModel.search(query: query)
-        }
+        guard let query = searchBar.text, let viewModel = getCurrentViewModel() else { return }
+        viewModel.search(query: query)
     }
-
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        // 實時搜尋
+        guard let viewModel = getCurrentViewModel() else { return }
+        viewModel.search(query: searchText)
+    }
+    
+    private func getCurrentViewModel() -> BaseCollectionViewModelProtocol? {
         if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
-            currentVC.viewModel.search(query: searchText)
+            return currentVC.viewModel
         } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
-            currentVC.viewModel.search(query: searchText)
+            return currentVC.viewModel
         } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
-            currentVC.viewModel.search(query: searchText)
+            return currentVC.viewModel
         }
+        return nil
     }
 }
 
 extension StudentHomeVC: SearchBarViewDelegate {
     func searchBarView(_ searchBarView: SearchBarView, didChangeText text: String) {
-            if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
-                currentVC.viewModel.search(query: text)
-            } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
-                currentVC.viewModel.search(query: text)
-            } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
-                currentVC.viewModel.search(query: text)
-            }
+        if let currentVC = pageViewController.viewControllers?.first as? AllTeacherVC {
+            currentVC.viewModel.search(query: text)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FollowVC {
+            currentVC.viewModel.search(query: text)
+        } else if let currentVC = pageViewController.viewControllers?.first as? FrequentlyUsedVC {
+            currentVC.viewModel.search(query: text)
         }
-        
-        func searchBarViewDidCancel(_ searchBarView: SearchBarView) {
-           searchIconTapped()
-        }
+    }
+    
+    func searchBarViewDidCancel(_ searchBarView: SearchBarView) {
+        searchIconTapped()
+    }
 }

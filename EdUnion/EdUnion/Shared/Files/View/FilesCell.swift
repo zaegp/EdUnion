@@ -71,7 +71,6 @@ protocol FileCellDelegate: AnyObject {
 
 class FileCell: UICollectionViewCell {
     
-    // 新增的 UIImageView
     let fileImageView = UIImageView()
     let fileNameLabel = UILabel()
     let progressView = UIProgressView(progressViewStyle: .default)
@@ -84,15 +83,13 @@ class FileCell: UICollectionViewCell {
         contentView.backgroundColor = .clear
         backgroundColor = .myBackground
         
-        // 配置 fileImageView
         fileImageView.tintColor = .mainOrange
         fileImageView.contentMode = .scaleAspectFit
         fileImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(fileImageView)
         
-        // 配置 fileNameLabel
         fileNameLabel.textAlignment = .center
-        fileNameLabel.font = UIFont.systemFont(ofSize: 12) // 減小字體大小
+        fileNameLabel.font = UIFont.systemFont(ofSize: 12)
         fileNameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(fileNameLabel)
         
@@ -107,7 +104,6 @@ class FileCell: UICollectionViewCell {
             fileImageView.widthAnchor.constraint(equalToConstant: 48),
             fileImageView.heightAnchor.constraint(equalToConstant: 48), 
             
-            // fileNameLabel 保持中心位置
             fileNameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             fileNameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             fileNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5),

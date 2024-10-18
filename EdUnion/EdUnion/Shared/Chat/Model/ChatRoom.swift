@@ -15,7 +15,6 @@ struct ChatRoom: Decodable {
     let lastMessage: String?
     let lastMessageTimestamp: Timestamp?
 
-    // Firestore 自動解碼時使用的鍵對應
     enum CodingKeys: String, CodingKey {
         case id
         case participants
@@ -38,4 +37,3 @@ struct ChatRoom: Decodable {
 //        self.lastMessageTimestamp = lastMessageTimestamp
 //        self.messages = [] 
 //    }
-

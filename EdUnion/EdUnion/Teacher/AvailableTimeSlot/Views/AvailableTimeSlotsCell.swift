@@ -46,7 +46,6 @@ class AvailableTimeSlotsCell: UITableViewCell {
             containerStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
         
-        // 設置 cell 和 colorView 的背景色
         contentView.backgroundColor = .clear
         colorView.backgroundColor = .clear
         
@@ -62,19 +61,10 @@ class AvailableTimeSlotsCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        // 設置 colorView 為圓形
         colorView.layer.cornerRadius = colorView.frame.size.width / 2
 
-        // 設置 cell 的圓角
         contentView.layer.cornerRadius = 12
         contentView.layer.masksToBounds = true
-
-        // 設置陰影效果
-//        layer.shadowColor = UIColor.black.cgColor
-//        layer.shadowOpacity = 0.1
-//        layer.shadowOffset = CGSize(width: 0, height: 2)
-//        layer.shadowRadius = 4
-//        layer.masksToBounds = false
     }
     
     func configure(with timeSlot: AvailableTimeSlot) {

@@ -152,11 +152,11 @@ class ResumeVC: UIViewController {
     }
     
     private func createStackViews() -> [UIStackView] {
-        let stackView1 = createStackView(with: label1, textField: textField1) // 學歷
-        let stackView2 = createStackView(with: label2, textField: textField2) // 家教經驗
-        let stackView3 = createStackView(with: label3, textField: textField4) // 自我介紹
-        let stackView4 = createStackView(with: label4, textView: textView3) // 時薪
-        let stackView5 = createStackView(with: label5, textField: textField5) // 教學科目
+        let stackView1 = createStackView(with: label1, textField: textField1)
+        let stackView2 = createStackView(with: label2, textField: textField2)
+        let stackView3 = createStackView(with: label3, textField: textField4)
+        let stackView4 = createStackView(with: label4, textView: textView3)
+        let stackView5 = createStackView(with: label5, textField: textField5) 
         
         return [stackView1, stackView2, stackView5, stackView3, stackView4]
     }

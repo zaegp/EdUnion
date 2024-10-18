@@ -16,7 +16,6 @@ import FirebaseFirestore
 //    var isSeen: Bool
 //    let timestamp: Timestamp
 //
-//    // Firestore 自動解碼時使用的鍵對應
 //    enum CodingKeys: String, CodingKey {
 //        case ID
 //        case type
@@ -29,7 +28,6 @@ import FirebaseFirestore
 //    init?(document: QueryDocumentSnapshot) {
 //            let data = document.data()
 //
-//            // 手動提取和轉換字段
 //            guard let type = data["type"] as? Int,
 //                  let content = data["content"] as? String,
 //                  let senderID = data["senderID"] as? String,
@@ -55,7 +53,6 @@ struct Message: Decodable {
     var isSeen: Bool
     let timestamp: Timestamp
 
-    // Firestore 自動解碼時使用的鍵對應
     enum CodingKeys: String, CodingKey {
         case ID
         case type
@@ -65,11 +62,9 @@ struct Message: Decodable {
         case timestamp
     }
     
-    // 用於從 Firestore 文檔初始化
     init?(document: QueryDocumentSnapshot) {
         let data = document.data()
 
-        // 手動提取和轉換字段
         guard let type = data["type"] as? Int,
               let content = data["content"] as? String,
               let senderID = data["senderID"] as? String,
@@ -86,7 +81,6 @@ struct Message: Decodable {
         self.timestamp = timestamp
     }
 
-    // 新增這個初始化器來支持手動創建 Message
     init(ID: String?, type: Int, content: String, senderID: String, isSeen: Bool, timestamp: Timestamp) {
         self.ID = ID
         self.type = type

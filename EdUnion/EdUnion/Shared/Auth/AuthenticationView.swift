@@ -113,7 +113,6 @@ struct AuthenticationView: View {
             SwitchRoleViewControllerRepresentable()
                 .background(Color.myBackground.edgesIgnoringSafeArea(.all))
         }
-        // 使用 `sheet` 顯示 Safari 視圖
         .sheet(isPresented: $showPrivacyPolicy) {
             SafariView(url: URL(string: "https://www.privacypolicies.com/live/8f20be33-d0b5-4f8b-a724-4c02a815b87a")!)
         }

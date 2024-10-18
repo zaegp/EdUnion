@@ -91,7 +91,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     @objc private func textFieldDidChange(_ textField: UITextField) {
         if textField == nameTextField {
             let isNameEmpty = nameTextField.text?.isEmpty ?? true
-            saveButton.isEnabled = !isNameEmpty   // 當名字為空時禁用保存按鈕
+            saveButton.isEnabled = !isNameEmpty
         }
     }
 
@@ -149,14 +149,12 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         nameStackView.axis = .vertical
         nameStackView.spacing = 10
 
-        // 修改為垂直排列的 StackView
         let profileAndNameStackView = UIStackView(arrangedSubviews: [profileImageView, nameStackView])
         profileAndNameStackView.axis = .vertical
         profileAndNameStackView.spacing = 20
         profileAndNameStackView.alignment = .center
         profileAndNameStackView.translatesAutoresizingMaskIntoConstraints = false
 
-        // 根據 userRole 來決定要顯示的內容
         var contentArrangedSubviews: [UIView] = []
 
         if userRole == "teacher" {
@@ -189,38 +187,31 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         containerView.addSubview(profileAndNameStackView)
         containerView.addSubview(stackView)
 
-        // 設置約束
         NSLayoutConstraint.activate([
-            // Scroll View
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            // Container View
             containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
 
-            // Profile and Name Stack View
             profileAndNameStackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             
-            // 根據 userRole 設置不同的約束
             profileAndNameStackView.topAnchor.constraint(equalTo: userRole == "student" ? containerView.centerYAnchor : containerView.topAnchor, constant: userRole == "student" ? -100 : 20),
             
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
 
-            // Stack View
             stackView.topAnchor.constraint(equalTo: profileAndNameStackView.bottomAnchor, constant: 20),
             stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
             stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20)
         ])
 
-        // 調整 nameTextField 寬度
         nameTextField.widthAnchor.constraint(equalTo: containerView.widthAnchor, constant: -40).isActive = true
     }
 
@@ -255,16 +246,13 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
 
     @objc func saveChanges() {
 
-        // 開始加載動畫
         startSaveButtonAnimation()
 
         let db = Firestore.firestore()
         
-        // 根據 userRole 決定存儲的集合
         let collectionName = userRole == "teacher" ? "teachers" : "students"
         let userRef = db.collection(collectionName).document(userID)
 
-        // 收集履歷資料
         var resumeData: [String] = []
         if userRole == "teacher" {
             resumeData = [
@@ -276,11 +264,9 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             ]
         }
 
-        // 無論是學生或教師都要保存名字
         let name = nameTextField.text ?? ""
 
         if profileImageView.image == UIImage(systemName: "person.crop.circle.badge.plus") {
-            // 沒有上傳圖片，直接保存資料
             saveResumeData(userRef: userRef, resumeData: resumeData, name: name, profileImageURL: nil) {
                 self.stopSaveButtonAnimation()
                 self.navigateToMainApp()
@@ -299,7 +285,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                 }
             }
         } else {
-            // 如果沒有圖片，直接保存資料
             saveResumeData(userRef: userRef, resumeData: resumeData, name: name, profileImageURL: nil) {
                 self.stopSaveButtonAnimation()
                 self.navigateToMainApp()

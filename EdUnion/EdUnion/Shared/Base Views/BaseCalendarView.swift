@@ -22,6 +22,31 @@ struct CalendarDay: Identifiable {
     let date: Date?
 }
 
+struct HeaderView: View {
+    let formattedMonthAndYear: String
+    let previousAction: () -> Void
+    let nextAction: () -> Void
+    
+    var body: some View {
+        HStack {
+            Button(action: previousAction) {
+                Image(systemName: "chevron.left")
+                    .foregroundColor(Color(UIColor.systemBackground))
+            }
+            Spacer()
+            Text(formattedMonthAndYear)
+                .font(.headline)
+                .foregroundColor(Color(UIColor.systemBackground))
+            Spacer()
+            Button(action: nextAction) {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(Color(UIColor.systemBackground))
+            }
+        }
+        .padding()
+    }
+}
+
 struct CalendarDayView: View {
     let day: Date?
     let isSelected: Bool
@@ -81,9 +106,123 @@ struct CalendarDayView: View {
     }
 }
 
+struct AppointmentsListView: View {
+    let appointments: [Appointment]
+    let userRole: String
+    let onAppointmentTap: (Appointment) -> Void
+    @ObservedObject var viewModel = BaseCalendarViewModel()
+    
+    var body: some View {
+        List {
+            ForEach(appointments) { appointment in
+                HStack {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            if userRole == "teacher" {
+                                Text(viewModel.participantNames[appointment.studentID] ?? "")
+                                    .onAppear {
+                                        if viewModel.participantNames[appointment.studentID] == nil {
+                                            viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
+                                        }
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(Color(UIColor.myDarkGray))
+                            } else {
+                                Text(viewModel.participantNames[appointment.teacherID] ?? "")
+                                    .onAppear {
+                                        if viewModel.participantNames[appointment.studentID] == nil {
+                                            viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
+                                        }
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(Color(UIColor.myDarkGray))
+                            }
+                            
+                            Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
+                                .font(.body)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                        }
+                    }
+                    Spacer()
+                    
+                    Image(systemName: "arrow.forward")
+                        .foregroundColor(.primary)
+                }
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(.clear)
+                .cornerRadius(20)
+                .padding(.vertical, 5)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.myBackground)
+                .frame(height: 40)
+                .onTapGesture {
+                    onAppointmentTap(appointment)
+                }
+            }
+        }
+        .listStyle(PlainListStyle())
+    }
+}
+
+struct AppointmentDetailCardView: View {
+    let appointment: Appointment
+    let userRole: String
+    let participantName: String
+    let onCancel: () -> Void
+    let onShowNote: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            Text(appointment.date)
+                .font(.headline)
+            if userRole == "student" {
+                Text(participantName)
+                    .font(.title)
+                    .fontWeight(.semibold)
+            } else {
+                Text(participantName)
+                    .font(.title)
+                    .fontWeight(.semibold)
+            }
+            Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
+                .font(.subheadline)
+            
+            if userRole == "student" {
+                Button(action: onCancel) {
+                    Text("取消預約")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.mainOrange)
+                        .cornerRadius(10)
+                }
+            } else if userRole == "teacher" {
+                Button(action: onShowNote) {
+                    Text("顯示備註")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.mainOrange)
+                        .cornerRadius(10)
+                }
+            }
+        }
+        .padding()
+        .background(Color.myBackground)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .padding()
+    }
+}
+
 struct BaseCalendarView: View {
     @Binding var externalDateColors: [Date: Color]?
-    @State private var internalDateColors: [Date: Color] = [:]
+    //    @State private var internalDateColors: [Date: Color] = [:]
     @ObservedObject var viewModel: BaseCalendarViewModel
     @State private var isDataLoaded = false
     @State private var isShowingDetail = false
@@ -95,17 +234,21 @@ struct BaseCalendarView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
+    //    var dateColors: [Date: Color] {
+    //        get {
+    //            externalDateColors ?? internalDateColors
+    //        }
+    //        set {
+    //            if externalDateColors != nil {
+    //                externalDateColors = newValue
+    //            } else {
+    //                internalDateColors = newValue
+    //            }
+    //        }
+    //    }
+    
     var dateColors: [Date: Color] {
-        get {
-            externalDateColors ?? internalDateColors
-        }
-        set {
-            if externalDateColors != nil {
-                externalDateColors = newValue
-            } else {
-                internalDateColors = newValue
-            }
-        }
+        externalDateColors ?? viewModel.internalDateColors
     }
     
     //    @State private var selectedDay: Date? = nil
@@ -132,22 +275,30 @@ struct BaseCalendarView: View {
         ZStack {
             VStack {
                 VStack {
-                    HStack {
-                        Button(action: { previousPeriod() }) {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(Color(UIColor.systemBackground))
-                        }
-                        Spacer()
-                        Text(formattedMonthAndYear(selectedDay ?? currentDate))
-                            .font(.headline)
-                            .foregroundColor(Color(UIColor.systemBackground))
-                        Spacer()
-                        Button(action: { nextPeriod() }) {
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(Color(UIColor.systemBackground))
-                        }
-                    }
+                    HeaderView(
+                        formattedMonthAndYear: formattedMonthAndYear(selectedDay ?? currentDate),
+                        previousAction: previousPeriod,
+                        nextAction: nextPeriod
+                    )
+                    .background(Color.myDarkGray)
+                    .cornerRadius(30)
                     .padding()
+                    //                    HStack {
+                    //                        Button(action: { previousPeriod() }) {
+                    //                            Image(systemName: "chevron.left")
+                    //                                .foregroundColor(Color(UIColor.systemBackground))
+                    //                        }
+                    //                        Spacer()
+                    //                        Text(formattedMonthAndYear(selectedDay ?? currentDate))
+                    //                            .font(.headline)
+                    //                            .foregroundColor(Color(UIColor.systemBackground))
+                    //                        Spacer()
+                    //                        Button(action: { nextPeriod() }) {
+                    //                            Image(systemName: "chevron.right")
+                    //                                .foregroundColor(Color(UIColor.systemBackground))
+                    //                        }
+                    //                    }
+                    //                    .padding()
                     
                     HStack {
                         ForEach(daysOfWeek, id: \.self) { day in
@@ -206,7 +357,6 @@ struct BaseCalendarView: View {
                                                 feedbackGenerator.impactOccurred()
                                             }
                                         } else if value.translation.height > 0 {
-                                            // 向下滑動，切換到月視圖
                                             if isWeekView {
                                                 isWeekView = false
                                                 generateDays(for: selectedDay ?? currentDate)
@@ -221,7 +371,7 @@ struct BaseCalendarView: View {
                         setupView()
                         generateDays(for: selectedDay ?? currentDate)
                         if !isDataLoaded {
-                            fetchAppointments()
+                            viewModel.fetchAppointments(forUserID: userID ?? "", userRole: userRole)
                             viewModel.fetchStudents(for: userID ?? "")
                             isDataLoaded = true
                         }
@@ -234,69 +384,21 @@ struct BaseCalendarView: View {
                 
                 Spacer()
                 
-                if let selectedDay = selectedDay, let activities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
-                    List {
-                        ForEach(viewModel.sortedActivities) { appointment in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        if userRole == "teacher" {
-                                            Text(viewModel.participantNames[appointment.studentID] ?? "")
-                                                .onAppear {
-                                                    if viewModel.participantNames[appointment.studentID] == nil {
-                                                        viewModel.fetchUserData(from: "students", userID: appointment.studentID, as: Student.self)
-                                                    }
-                                                }
-                                                .font(.headline)
-                                                .foregroundColor(Color(UIColor.myDarkGray))
-                                        } else {
-                                            Text(viewModel.participantNames[appointment.teacherID] ?? "")
-                                                .onAppear {
-                                                    if viewModel.participantNames[appointment.studentID] == nil {
-                                                        viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
-                                                    }
-                                                }
-                                                .font(.headline)
-                                                .foregroundColor(Color(UIColor.myDarkGray))
-                                        }
-                                        
-                                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                                            .font(.body)
-                                            .foregroundColor(.primary)
-                                        
-                                        Spacer()
-                                    }
-                                }
-                                Spacer()
-                                
-                                Image(systemName: "arrow.forward")
-                                    .foregroundColor(.primary)
-                            }
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(.clear)
-                            .cornerRadius(20)
-                            //                            .overlay(
-                            //                                RoundedRectangle(cornerRadius: 20)
-                            //                                    .stroke(Color.myBorder, lineWidth: 1)
-                            //                            )
-                            //                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-                            .padding(.vertical, 5)
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.myBackground)
-                            .frame(height: 40)
-                            .onTapGesture {
-                                selectedAppointment = appointment
-                                isShowingCard = true
-                            }
-                        }
-                    }
-                    .listStyle(PlainListStyle())
+                if let selectedDay = selectedDay,
+                   let activities = viewModel.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)] {
+                    AppointmentsListView(
+                        appointments: viewModel.sortedActivities,
+                        userRole: userRole,
+                        onAppointmentTap: { appointment in
+                            selectedAppointment = appointment
+                            isShowingCard = true
+                        }, viewModel: viewModel
+                    )
                     .onAppear {
                         viewModel.loadAndSortActivities(for: activities)
                     }
                     .onChange(of: selectedDay) { newDay in
-                        let newActivities = CalendarService.shared.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
+                        let newActivities = viewModel.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
                         if let newActivities = newActivities {
                             viewModel.loadAndSortActivities(for: newActivities)
                         }
@@ -317,64 +419,40 @@ struct BaseCalendarView: View {
             .background(Color.myBackground)
             
             if isShowingCard, let appointment = selectedAppointment {
-                VStack {
-                    Spacer()
-                    VStack(spacing: 24) {
-                        Text(appointment.date)
-                            .font(.headline)
-                        if userRole == "student" {
-                            Text(viewModel.participantNames[appointment.teacherID] ?? "Unknown")
-                                .font(.title)
-                                .fontWeight(.semibold)
-                        } else {
-                            Text(viewModel.participantNames[appointment.studentID] ?? "Unknown")
-                                .font(.title)
-                                .fontWeight(.semibold)
-                        }
-                        Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
-                            .font(.subheadline)
-                        
-                        if userRole == "student" {
-                            Button(action: {
-                                let appointmentID = appointment.id ?? ""
-                                cancelAppointment(appointmentID: appointmentID)
-                            }) {
-                                Text("取消預約")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.mainOrange)
-                                    .cornerRadius(10)
+                withAnimation(.easeInOut) {
+                    ZStack {
+                        Color.primary.opacity(0.2)
+                            .edgesIgnoringSafeArea(.all)
+                            .onTapGesture {
+                                isShowingCard = false
                             }
-                        } else if userRole == "teacher" {
-                            Button(action: {
+                        
+                        AppointmentDetailCardView(
+                            appointment: appointment,
+                            userRole: userRole,
+                            participantName: userRole == "student"
+                            ? (viewModel.participantNames[appointment.teacherID] ?? "Unknown")
+                            : (viewModel.participantNames[appointment.studentID] ?? "Unknown"),
+                            onCancel: {
+                                if let appointmentID = appointment.id {
+                                    viewModel.cancelAppointment(appointmentID: appointmentID) { result in
+                                        switch result {
+                                        case .success:
+                                            print("取消成功")
+                                            isShowingCard = false
+                                        case .failure(let error):
+                                            print("取消失敗: \(error.localizedDescription)")
+                                        }
+                                    }
+                                }
+                            },
+                            onShowNote: {
                                 selectedStudentID = appointment.studentID
                                 isShowingNotePopup = true
-                            }) {
-                                Text("顯示備註")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.mainOrange)
-                                    .cornerRadius(10)
                             }
-                        }
+                        )
                     }
-                    .padding()
-                    .background(Color.myBackground)
-                    .cornerRadius(15)
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                    .padding()
-                    Spacer()
-                }
-                .background(
-                    Color.primary.opacity(0.2)
-                )
-                .edgesIgnoringSafeArea(.all)
-                .onTapGesture {
-                    isShowingCard = false
+                    .transition(.opacity)
                 }
             }
         }
@@ -410,7 +488,6 @@ struct BaseCalendarView: View {
         let calendar = Calendar.current
         
         if isWeekView {
-            // 找到該週的第一天（通常是週日或週一，取決於日曆設定）
             guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
                 return
             }
@@ -420,23 +497,18 @@ struct BaseCalendarView: View {
                 }
             }
         } else {
-            // 生成整個月的日期
             guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return }
             let numDays = range.count
             
-            // 找到這個月的第一天
             guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return }
             let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
             
-            // 計算需要填充的前導空白
             let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
             
-            // 填充前導空白
             for _ in 0..<leadingEmptyDays {
                 days.append(CalendarDay(date: nil))
             }
             
-            // 填充當月的日期
             for day in 1...numDays {
                 if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
                     days.append(CalendarDay(date: date))
@@ -444,8 +516,6 @@ struct BaseCalendarView: View {
             }
         }
         
-        // 調試打印
-        print("Generated days for \(referenceDate):")
         for day in days {
             if let day = day.date {
                 print(day)
@@ -455,24 +525,6 @@ struct BaseCalendarView: View {
         }
     }
     
-    func cancelAppointment(appointmentID: String) {
-        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceled) { result in
-            switch result {
-            case .success:
-                alertMessage = "已送出取消預約請求"
-                showingAlert = true
-                isShowingCard = false
-                
-                if let selectedDay = selectedDay {
-                    updateAppointmentsForDay(selectedDay)
-                }
-
-            case .failure(let error):
-                print("更新預約狀態失敗: \(error.localizedDescription)")
-            }
-        }
-    }
-
     func updateAppointmentsForDay(_ day: Date) {
         let startOfDay = Calendar.current.startOfDay(for: day)
         
@@ -480,10 +532,10 @@ struct BaseCalendarView: View {
             let hasConfirmedAppointments = appointmentsForDay.contains { $0.status.lowercased() == "confirmed" }
             
             if !hasConfirmedAppointments {
-                internalDateColors.removeValue(forKey: startOfDay)
+                viewModel.internalDateColors.removeValue(forKey: startOfDay)
             }
         } else {
-            internalDateColors.removeValue(forKey: startOfDay)
+            viewModel.internalDateColors.removeValue(forKey: startOfDay)
         }
         
         generateDays(for: selectedDay ?? currentDate)
@@ -513,32 +565,6 @@ struct BaseCalendarView: View {
         generateDays(for: currentDate)
     }
     
-    private func generateMonthDays(for date: Date) -> [Date?] {
-        var days: [Date?] = []
-        var calendar = Calendar.current
-        calendar.firstWeekday = 1
-        
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
-        
-        let range = calendar.range(of: .day, in: .month, for: startOfMonth)!
-        
-        let firstDayOfWeek = calendar.component(.weekday, from: startOfMonth)
-        
-        let paddingDays = firstDayOfWeek - 1
-        
-        for _ in 0..<paddingDays {
-            days.append(nil)
-        }
-        
-        for day in range {
-            if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
-                days.append(date)
-            }
-        }
-        
-        return days
-    }
-    
     func previousPeriod() {
         if isWeekView {
             if let selectedDay = selectedDay {
@@ -559,7 +585,6 @@ struct BaseCalendarView: View {
                     generateDays(for: newSelectedDay)
                 }
             } else {
-                // 沒有選擇日期，基於 currentDate 減去一個月
                 if let newCurrentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate) {
                     self.currentDate = newCurrentDate
                     generateDays(for: newCurrentDate)
@@ -571,13 +596,11 @@ struct BaseCalendarView: View {
     func nextPeriod() {
         if isWeekView {
             if let selectedDay = selectedDay {
-                // 有選擇日期，基於 selectedDay 增加一週
                 if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: selectedDay) {
                     self.selectedDay = newSelectedDay
                     generateDays(for: newSelectedDay)
                 }
             } else {
-                // 沒有選擇日期，基於 currentDate 增加一週
                 if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate) {
                     self.currentDate = newCurrentDate
                     generateDays(for: newCurrentDate)
@@ -585,13 +608,11 @@ struct BaseCalendarView: View {
             }
         } else {
             if let selectedDay = selectedDay {
-                // 有選擇日期，基於 selectedDay 增加一個月
                 if let newSelectedDay = Calendar.current.date(byAdding: .month, value: 1, to: selectedDay) {
                     self.selectedDay = newSelectedDay
                     generateDays(for: newSelectedDay)
                 }
             } else {
-                // 沒有選擇日期，基於 currentDate 增加一個月
                 if let newCurrentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate) {
                     self.currentDate = newCurrentDate
                     generateDays(for: newCurrentDate)
@@ -603,7 +624,6 @@ struct BaseCalendarView: View {
     func formattedMonthAndYear(_ date: Date) -> String {
         let formatter = DateFormatter()
         if isWeekView {
-            // 週視圖顯示當週的日期範圍
             let calendar = Calendar.current
             let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
             let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
@@ -612,84 +632,17 @@ struct BaseCalendarView: View {
             let endString = formatter.string(from: endOfWeek)
             return "\(startString) - \(endString)"
         } else {
-            // 月視圖顯示月份和年份
             formatter.dateFormat = "yyyy MMM"
             return formatter.string(from: date)
         }
     }
-    
-    private func fetchAppointments() {
-        appointmentListener?.remove()
-        
-        appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(
-            forTeacherID: (userRole == "teacher") ? userID : nil,
-            studentID: (userRole == "student") ? userID : nil
-        ) { result in
-            switch result {
-            case .success(let fetchedAppointments):
-                DispatchQueue.main.async {
-                    self.appointments = fetchedAppointments
-                    self.mapAppointmentsToDates()
-                }
-            case .failure(let error):
-                print("獲取預約時出錯：\(error)")
-            }
-        }
-    }
-    
-    private func mapAppointmentsToDates() {
-        CalendarService.shared.activitiesByDate.removeAll()
-        var seenAppointments = Set<String>()
-        var duplicateAppointments = [Appointment]()
-        
-        for appointment in appointments {
-            if seenAppointments.contains(appointment.id!) {
-                duplicateAppointments.append(appointment)
-            } else {
-                seenAppointments.insert(appointment.id!)
-            }
-            
-            if let date = dateFormatter.date(from: appointment.date) {
-                let startOfDay = Calendar.current.startOfDay(for: date)
-                if CalendarService.shared.activitiesByDate[startOfDay] != nil {
-                    CalendarService.shared.activitiesByDate[startOfDay]?.append(appointment)
-                } else {
-                    CalendarService.shared.activitiesByDate[startOfDay] = [appointment]
-                }
-            }
-        }
-        
-        if !duplicateAppointments.isEmpty {
-            print("重複的預約: \(duplicateAppointments.map { $0.id })")
-        }
-        
-        for (date, appointments) in CalendarService.shared.activitiesByDate {
-            // 如果日期的所有課程都被取消，則從 internalDateColors 中移除該日期
-            let hasConfirmedAppointments = appointments.contains { $0.status.lowercased() == "confirmed" }
-            
-            if hasConfirmedAppointments {
-                // 日期下有已確認的課程，顯示點點
-                internalDateColors[date] = .mainOrange
-            } else {
-                // 沒有確認的課程，移除該日期的點點
-                internalDateColors.removeValue(forKey: date)
-            }
-        }
-    }
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        return formatter
-    }()
 }
 
 struct NotePopupViewWrapper: UIViewRepresentable {
     var noteText: String?
     var onSave: (String) -> Void
     var onCancel: () -> Void
-
+    
     func makeUIView(context: Context) -> NotePopupView {
         let notePopupView = NotePopupView()
         notePopupView.onSave = onSave
@@ -697,8 +650,7 @@ struct NotePopupViewWrapper: UIViewRepresentable {
         notePopupView.setExistingNoteText(noteText ?? "")
         return notePopupView
     }
-
+    
     func updateUIView(_ uiView: NotePopupView, context: Context) {
-        // 如果需要更新 UI，可以在这里添加代码
     }
 }

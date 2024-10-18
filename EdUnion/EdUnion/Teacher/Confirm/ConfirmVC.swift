@@ -115,7 +115,7 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
 //    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
+        let cell: ConfirmCell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) 
         cell.backgroundColor = .myBackground
         let appointment = viewModel.appointments[indexPath.row]
         let studentID = appointment.studentID

@@ -176,7 +176,7 @@ class TodayCoursesVC: UIViewController {
                 }
                 self?.tableView.reloadData()
                 
-                // 直接在這裡更新鐘形徽章
+               
                 self?.updateBellBadge()
             }
         }
@@ -194,7 +194,7 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TodayCoursesCell
+        let cell: TodayCoursesCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = .myCell
         configureCell(cell, at: indexPath)
         

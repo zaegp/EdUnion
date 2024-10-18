@@ -9,6 +9,13 @@ import Foundation
 
 class TimeService {
     
+    static let sharedDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current
+        return formatter
+    }()
+    
     static func convertCourseTimeToDisplay(from times: [String]) -> String {
         guard let firstTime = times.first else { return "" }
         
@@ -32,10 +39,10 @@ class TimeService {
     
     static func covertToEnMonth (_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd"  // 原始日期格式
+        inputFormatter.dateFormat = "yyyy-MM-dd"  
         
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "MMM\nd"  // 轉換成 "Sep\n21" 的格式
+        outputFormatter.dateFormat = "MMM\nd" 
         
         if let date = inputFormatter.date(from: dateString) {
             return outputFormatter.string(from: date)
@@ -45,10 +52,9 @@ class TimeService {
     
     static func sortCourses(by activities: [Appointment], ascending: Bool = false) -> [Appointment] {
             let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm" // 根據實際時間格式調整
+            dateFormatter.dateFormat = "HH:mm"
 
             return activities.sorted { (a, b) -> Bool in
-                // 提取開始時間部分
                 guard let timeAFull = a.times.first,
                       let timeBFull = b.times.first,
                       let startTimeAString = timeAFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),

@@ -30,7 +30,6 @@ class TeacherCell: UICollectionViewCell {
     }
     
     private func setupViews() {
-        // 設置圖片
         image.layer.cornerRadius = 40
         image.clipsToBounds = true
         image.contentMode = .scaleAspectFill
@@ -48,14 +47,12 @@ class TeacherCell: UICollectionViewCell {
         educationLabel.textColor = .myMessageCell
         experienceLabel.textColor = .myMessageCell
         
-        // 設置 StackView
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.distribution = .equalSpacing
         stackView.spacing = 8
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
-        // 添加圖片和標籤到 StackView
         stackView.addArrangedSubview(image)
         stackView.addArrangedSubview(nameLabel)
         stackView.addArrangedSubview(subjectLabel)
@@ -65,13 +62,11 @@ class TeacherCell: UICollectionViewCell {
         
         contentView.addSubview(stackView)
         
-        // 設置 cell 的外觀
         contentView.layer.cornerRadius = 12
         contentView.layer.masksToBounds = true
     }
     
     private func setupConstraints() {
-        // 設置 StackView 約束
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
