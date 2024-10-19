@@ -103,6 +103,8 @@
 		51F4316A2CC1C51D00F018ED /* BookingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F431692CC1C51D00F018ED /* BookingViewModel.swift */; };
 		51F4316C2CC2466700F018ED /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F4316B2CC2466700F018ED /* UITableView+Ext.swift */; };
 		51F4316E2CC2478900F018ED /* UICollectionView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F4316D2CC2478900F018ED /* UICollectionView+Ext.swift */; };
+		51F431712CC2A2A400F018ED /* FilesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F431702CC2A2A400F018ED /* FilesViewModel.swift */; };
+		51F431732CC2A66600F018ED /* FileFirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F431722CC2A66600F018ED /* FileFirebaseService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -229,6 +231,8 @@
 		51F431692CC1C51D00F018ED /* BookingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingViewModel.swift; sourceTree = "<group>"; };
 		51F4316B2CC2466700F018ED /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
 		51F4316D2CC2478900F018ED /* UICollectionView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UICollectionView+Ext.swift"; sourceTree = "<group>"; };
+		51F431702CC2A2A400F018ED /* FilesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesViewModel.swift; sourceTree = "<group>"; };
+		51F431722CC2A66600F018ED /* FileFirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileFirebaseService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -324,6 +328,7 @@
 		517E9DEF2CB6398C002A2513 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				51F431702CC2A2A400F018ED /* FilesViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -502,6 +507,7 @@
 				51D25C862C9ACA560083EECF /* AppointmentFirebaseService.swift */,
 				51D25C932C9D4C2D0083EECF /* TimeService.swift */,
 				513BEC0F2CA6820A000E0DE9 /* UserSession.swift */,
+				51F431722CC2A66600F018ED /* FileFirebaseService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -893,6 +899,7 @@
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
+				51F431712CC2A2A400F018ED /* FilesViewModel.swift in Sources */,
 				517E9E172CC19B66002A2513 /* BaseCollectionViewModelProtocol.swift in Sources */,
 				519C8ECC2C93A0EC007DFCBA /* AvailableTimeSlotsCell.swift in Sources */,
 				517E9DF42CB7E702002A2513 /* UIBarButtonItem+Ext.swift in Sources */,
@@ -938,6 +945,7 @@
 				519C8F122C98859D007DFCBA /* FullScreenImageVC.swift in Sources */,
 				51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */,
 				51F4316C2CC2466700F018ED /* UITableView+Ext.swift in Sources */,
+				51F431732CC2A66600F018ED /* FileFirebaseService.swift in Sources */,
 				519C8F182C997FC3007DFCBA /* ConfirmViewModel.swift in Sources */,
 				519C8EEB2C95A278007DFCBA /* Color+Ext.swift in Sources */,
 				51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */,
