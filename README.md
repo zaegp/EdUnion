@@ -1,6 +1,8 @@
 # EdUnion
 ## 介紹
 EdUnion 是一款老師能夠高效設置可選時段，並讓學生能夠在線媒合預約老師的應用程式
+
+[![Download on the App Store](https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg)](https://apps.apple.com/tw/app/edunion/id6692628566)
 ## 功能
 - 媒合預約老師 - 直接預約有興趣的老師，省去溝通成本
 - 可縮放的周/月行事曆 - 方便進行課程管理
