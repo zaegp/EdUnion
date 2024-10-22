@@ -8,29 +8,56 @@
 import XCTest
 @testable import EdUnion
 
-final class EdUnionTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+class MockUserFirebaseService: UserFirebaseServiceProtocol {
+    var followList: [String]?
+    var error: Error?
+    
+    func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void) {
+        completion(followList, error)
     }
+}
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+class TeacherDetailVCTests: XCTestCase {
+    var viewController: TeacherDetailVC!
+    var mockService: MockUserFirebaseService!
+    
+    override func setUp() {
+        super.setUp()
+        viewController = TeacherDetailVC()
+        mockService = MockUserFirebaseService()
+        viewController.userFirebaseService = mockService
+        viewController.teacher = Teacher(id: "teacher123", userID: "user123", fullName: "測試老師", photoURL: nil, totalCourses: 5, resume: ["博士", "5年經驗", "擅長數學", "數學", "高等數學"])
+        _ = viewController.view
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    override func tearDown() {
+        viewController = nil
+        mockService = nil
+        super.tearDown()
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func testCheckIfTeacherIsFavorited_WhenTeacherIsInFollowList_ShouldSetIsFavoriteTrue() {
+        mockService.followList = ["teacher123", "teacher456"]
+        
+        viewController.testable_checkIfTeacherIsFavorited()
+        
+        XCTAssertTrue(viewController.testable_getIsFavorite(), "isFavorite 應該為 true")
     }
+    
+    func testCheckIfTeacherIsFavorited_WhenTeacherIsNotInFollowList_ShouldSetIsFavoriteFalse() {
+        mockService.followList = ["teacher456", "teacher789"]
+        
+        viewController.testable_checkIfTeacherIsFavorited()
 
+        XCTAssertFalse(viewController.testable_getIsFavorite(), "isFavorite 應該為 false")
+    }
+    
+    func testCheckIfTeacherIsFavorited_WhenErrorOccurs_ShouldNotSetIsFavorite() {
+        mockService.followList = nil
+        mockService.error = NSError(domain: "TestError", code: 1, userInfo: nil)
+        
+        viewController.testable_checkIfTeacherIsFavorited()
+
+        XCTAssertFalse(viewController.testable_getIsFavorite(), "isFavorite 應該保持初始值 false")
+    }
 }

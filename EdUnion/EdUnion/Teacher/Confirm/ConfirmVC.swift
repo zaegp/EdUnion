@@ -88,32 +88,6 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         return viewModel.appointments.count
     }
     
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) as! ConfirmCell
-//        cell.backgroundColor = .myBackground
-//        let appointment = viewModel.appointments[indexPath.row]
-//        var isStudentExisting = false
-//        
-//        viewModel.updateStudentNotes(studentID: appointment.studentID, note: "") { result in
-//            switch result {
-//            case .success(let studentExists):
-//                if studentExists {
-//                    isStudentExisting = true
-//                }
-//            case .failure(let error):
-//                print("Failed to update note: \(error.localizedDescription)")
-//            }
-//        }
-//        
-//        viewModel.fetchStudentName(for: appointment) { studentName in
-//            DispatchQueue.main.async {
-//                cell.configureCell(date: appointment.date, title: studentName, times: appointment.times, isStudentExisting: isStudentExisting)
-//            }
-//        }
-//    
-//        return cell
-//    }
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: ConfirmCell = tableView.dequeueReusableCell(withIdentifier: "ConfirmCell", for: indexPath) 
         cell.backgroundColor = .myBackground

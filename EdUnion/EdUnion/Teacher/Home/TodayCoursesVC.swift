@@ -254,7 +254,6 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
         
         expandedIndexPath = (expandedIndexPath == indexPath) ? nil : indexPath
         
-        // 只更新需要的行，避免整個表格刷新
         tableView.reloadRows(at: indexPathsToReload, with: .fade)
     }
     
@@ -274,17 +273,14 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
             notePopupView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
         
-        // 從 ViewModel 中獲取已有的備註
         let existingNote = viewModel.studentNotes[studentID] ?? ""
         notePopupView.setExistingNoteText(existingNote)
         
-        // 用戶保存備註時，將其保存到 Firebase
         notePopupView.onSave = { [weak self, weak notePopupView] noteText in
             self?.viewModel.saveNoteText(noteText, for: studentID, teacherID: self?.userID ?? "") { result in
                 switch result {
                 case .success:
                     notePopupView?.removeFromSuperview()
-                    // 刷新表格中的這一行
                     if let indexPath = self?.viewModel.appointments.firstIndex(where: { $0.studentID == studentID }) {
                         self?.tableView.reloadRows(at: [IndexPath(row: indexPath, section: 0)], with: .automatic)
                     }

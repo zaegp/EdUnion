@@ -49,9 +49,6 @@ class TodayCoursesCell: UITableViewCell {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "circle"), for: .normal)
         button.tintColor = .mainOrange
-//        button.layer.cornerRadius = 8
-//        button.backgroundColor = UIColor(red: 0.15, green: 0.14, blue: 0.13, alpha: 1.00)
-//        button.setTitleColor(UIColor(red: 1.00, green: 0.99, blue: 0.95, alpha: 1.00), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

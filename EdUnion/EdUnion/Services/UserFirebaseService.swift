@@ -16,7 +16,7 @@ protocol UserProtocol {
     var photoURL: String? { get }
 }
 
-class UserFirebaseService {
+class UserFirebaseService: UserFirebaseServiceProtocol {
     static let shared = UserFirebaseService()
     private init() {}
     

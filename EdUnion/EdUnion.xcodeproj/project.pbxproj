@@ -18,7 +18,6 @@
 		517E9DD22CACC3A8002A2513 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD12CACC3A8002A2513 /* FirebaseStorage */; };
 		517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */; };
 		517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DD72CACC3BA002A2513 /* Kingfisher */; };
-		517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */; };
 		517E9DDE2CAE81B4002A2513 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */; };
 		517E9DE02CAEE440002A2513 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DDF2CAEE440002A2513 /* SearchBarView.swift */; };
 		517E9DE42CB0D91F002A2513 /* StudentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517E9DE32CB0D91F002A2513 /* StudentCell.swift */; };
@@ -240,7 +239,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				517E9DDB2CACC3C5002A2513 /* SwiftUIIntrospect in Frameworks */,
 				517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */,
 				517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */,
 				517E9E022CBAB1C2002A2513 /* FirebaseFunctions in Frameworks */,
@@ -717,7 +715,6 @@
 				517E9DD12CACC3A8002A2513 /* FirebaseStorage */,
 				517E9DD42CACC3B1002A2513 /* IQKeyboardManagerSwift */,
 				517E9DD72CACC3BA002A2513 /* Kingfisher */,
-				517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */,
 				517E9E012CBAB1C2002A2513 /* FirebaseFunctions */,
 				517E9E042CBB9497002A2513 /* AgoraUIKit */,
 				517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */,
@@ -798,7 +795,6 @@
 				517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				517E9DD32CACC3B1002A2513 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 				517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */,
 			);
 			productRefGroup = 51ED0AD42C916721006322B7 /* Products */;
@@ -1373,14 +1369,6 @@
 				minimumVersion = 8.0.3;
 			};
 		};
-		517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.0;
-			};
-		};
 		517E9E032CBB944F002A2513 /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AgoraIO-Community/VideoUIKit-iOS.git";
@@ -1421,11 +1409,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517E9DD62CACC3BA002A2513 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
-		};
-		517E9DDA2CACC3C5002A2513 /* SwiftUIIntrospect */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 517E9DD92CACC3C5002A2513 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
-			productName = SwiftUIIntrospect;
 		};
 		517E9E012CBAB1C2002A2513 /* FirebaseFunctions */ = {
 			isa = XCSwiftPackageProductDependency;

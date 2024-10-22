@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol UserFirebaseServiceProtocol {
+    func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void)
+    // 其他方法...
+}
+
 class TeacherDetailVC: UIViewController {
     private var favoriteButton: UIBarButtonItem!
     private var ellipsisButton: UIBarButtonItem!
@@ -22,9 +27,10 @@ class TeacherDetailVC: UIViewController {
     private let bookButton = UIButton(type: .system)
     private let chatButton = UIButton(type: .system)
     
-    private let studentID = UserSession.shared.unwrappedUserID
     var teacher: Teacher?
     private var isFavorite: Bool = false
+    private let studentID = UserSession.shared.unwrappedUserID
+    var userFirebaseService: UserFirebaseServiceProtocol = UserFirebaseService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,7 +120,7 @@ class TeacherDetailVC: UIViewController {
     }
     
     private func checkIfTeacherIsFavorited() {
-        UserFirebaseService.shared.getStudentFollowList(studentID: studentID) { [weak self] followList, error in
+        userFirebaseService.getStudentFollowList(studentID: studentID) { [weak self] followList, error in
             if let error = error {
                 print("檢查 followList 時出錯: \(error.localizedDescription)")
             } else if let followList = followList, let teacherID = self?.teacher?.id {
@@ -280,3 +286,19 @@ class TeacherDetailVC: UIViewController {
         }
     }
 }
+
+#if DEBUG
+extension TeacherDetailVC {
+    func testable_checkIfTeacherIsFavorited() {
+        checkIfTeacherIsFavorited()
+    }
+    
+    func testable_setIsFavorite(_ favorite: Bool) {
+        isFavorite = favorite
+    }
+    
+    func testable_getIsFavorite() -> Bool {
+        return isFavorite
+    }
+}
+#endif

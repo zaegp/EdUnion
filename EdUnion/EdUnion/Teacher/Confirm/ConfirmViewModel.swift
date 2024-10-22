@@ -63,17 +63,7 @@ class ConfirmViewModel {
             }
         }
     }
-    
-//    func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-//        UserFirebaseService.shared.updateStudentNotes(forTeacher: userID, studentID: studentID, note: note) { result in
-//            switch result {
-//            case .success(let studentExists):
-//                completion(.success(studentExists))
-//            case .failure(let error):
-//                completion(.failure(error))
-//            }
-//        }
-//    }
+
     func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
         let notesRef = UserFirebaseService.shared.db.collection("studentsNotes").document("notes")
         

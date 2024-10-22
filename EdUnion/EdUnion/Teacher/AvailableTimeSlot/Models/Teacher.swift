@@ -48,4 +48,28 @@ struct Teacher: UserProtocol, Codable {
         studentsNotes = try container.decodeIfPresent([String: String].self, forKey: .studentsNotes)
         email = try container.decodeIfPresent(String.self, forKey: .email)
     }
+    
+    init(
+        id: String,
+        userID: String,
+        fullName: String,
+        photoURL: String?,
+        totalCourses: Int,
+        resume: [String],
+        selectedTimeSlots: [String: String]? = nil,
+        timeSlots: [AvailableTimeSlot]? = nil,
+        studentsNotes: [String: String]? = nil,
+        email: String? = nil
+    ) {
+        self.id = id
+        self.userID = userID
+        self.fullName = fullName
+        self.photoURL = photoURL
+        self.totalCourses = totalCourses
+        self.resume = resume
+        self.selectedTimeSlots = selectedTimeSlots
+        self.timeSlots = timeSlots
+        self.studentsNotes = studentsNotes
+        self.email = email
+    }
 }

@@ -36,14 +36,13 @@ struct ColorPickerCalendarView: View {
     
     var body: some View {
         VStack {
-            Spacer()
             
             TipView(calendarTip)
                 .tipBackground(.myCell)
                 .tint(.myBlack)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 30)
                 
             BaseCalendarView(
                 externalDateColors: Binding(

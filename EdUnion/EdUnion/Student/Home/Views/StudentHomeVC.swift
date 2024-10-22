@@ -36,17 +36,20 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         stackView.spacing = 10
         return stackView
     }()
+    
     private let underlineView: UIView = {
         let view = UIView()
         view.backgroundColor = .mainOrange
         return view
     }()
+    
     private let searchIcon: UIImageView = {
         let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
         icon.tintColor = .myTint
         icon.isUserInteractionEnabled = true
         return icon
     }()
+    
     private let searchBarView = SearchBarView()
     private var pageViewController: UIPageViewController!
     private var scrollView: UIScrollView?
@@ -54,7 +57,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     
     private var pageViewControllerTopConstraint: NSLayoutConstraint?
     
-    private var selectedIndex: Int?
+    private var selectedIndex: Int = 1  
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,8 +70,6 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         setupScrollView()
         
         searchBarView.delegate = self
-        selectedIndex = 1
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,20 +82,10 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        selectedIndex = 1
-        
-        pageViewController.setViewControllers([viewControllers[selectedIndex!]], direction: .forward, animated: false, completion: nil)
-        
-        updateUnderlinePosition(to: selectedIndex!)
-    }
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         labelsStackView.layoutIfNeeded()
-        updateUnderlinePosition(to: selectedIndex!)
+        updateUnderlinePosition(to: selectedIndex, animated: false)
     }
     
     private func setupScrollView() {
@@ -146,8 +137,6 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
                 self.searchBarView.hideKeyboardAndCancel()
             }
         })
-        
-        self.updateUnderlinePosition(to: self.selectedIndex!)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -162,20 +151,21 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     private func updateUnderlinePositionWithProgress(_ progress: CGFloat) {
         let totalLabels = labelsStackView.arrangedSubviews.count
         let currentLabelIndex = selectedIndex
-        let nextLabelIndex = min(max(selectedIndex! + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
+        let nextLabelIndex = min(max(selectedIndex + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
         
-        guard let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex!] as? UILabel else {
-            fatalError("Unable to cast currentLabel to UILabel")
+        guard let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex] as? UILabel else {
+            return
         }
-
+        
         guard let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as? UILabel else {
-            fatalError("Unable to cast nextLabel to UILabel")
+            return
         }
         
         let currentX = currentLabel.frame.origin.x
         let nextX = nextLabel.frame.origin.x
         
-        let newX = currentX + (nextX - currentX) * abs(progress)
+        let distance = nextX - currentX
+        let newX = currentX + distance * abs(progress)
         
         underlineView.frame.origin.x = newX + labelsStackView.frame.origin.x
     }
@@ -196,7 +186,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
             underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
             underlineView.heightAnchor.constraint(equalToConstant: 3),
             underlineView.widthAnchor.constraint(equalToConstant: 60),
-            underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex ?? 1].leadingAnchor)
+            underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex].leadingAnchor)
         ])
         
         for (index, label) in labelsStackView.arrangedSubviews.enumerated() {
@@ -214,7 +204,7 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         pageViewController.delegate = self
         pageViewController.dataSource = self
         
-        pageViewController.setViewControllers([viewControllers[selectedIndex ?? 1]], direction: .forward, animated: true, completion: nil)
+        pageViewController.setViewControllers([viewControllers[selectedIndex]], direction: .forward, animated: false, completion: nil)
         
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
@@ -248,13 +238,25 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
         let index = viewControllers.firstIndex(of: visibleVC)!
-        updateUnderlinePosition(to: index)
         selectedIndex = index
+        updateUnderlinePosition(to: index, animated: false)
     }
     
-    private func updateUnderlinePosition(to index: Int) {
-        UIView.animate(withDuration: 0.3) {
-            self.underlineView.frame.origin.x = self.labelsStackView.arrangedSubviews[index].frame.origin.x + self.labelsStackView.frame.origin.x
+    private func updateUnderlinePosition(to index: Int, animated: Bool = true) {
+        let targetX = labelsStackView.arrangedSubviews[index].frame.origin.x + labelsStackView.frame.origin.x
+        
+        if underlineView.frame.origin.x == targetX {
+            return
+        }
+        
+        let updatePosition = {
+            self.underlineView.frame.origin.x = targetX
+        }
+        
+        if animated {
+            UIView.animate(withDuration: 0.3, animations: updatePosition)
+        } else {
+            updatePosition()
         }
         
         for (i, label) in labelsStackView.arrangedSubviews.enumerated() {
@@ -268,15 +270,12 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         guard let tappedLabel = sender.view as? UILabel else { return }
         let targetIndex = tappedLabel.tag
         
-        let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex! ? .forward : .reverse
+        let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex ? .forward : .reverse
         
-        pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true) { [weak self] completed in
-            guard completed else { return }
-            
-            self?.selectedIndex = targetIndex
-            
-            self?.updateUnderlinePosition(to: targetIndex)
-        }
+        pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true, completion: nil)
+        
+        selectedIndex = targetIndex
+        updateUnderlinePosition(to: targetIndex, animated: true)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {

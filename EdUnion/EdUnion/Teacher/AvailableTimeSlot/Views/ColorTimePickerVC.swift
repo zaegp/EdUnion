@@ -264,11 +264,9 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
             view.addSubview(mainStackView)
 
             NSLayoutConstraint.activate([
-//                mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
                 mainStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
                 mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
                 mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-//                mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
 
                 addTimeSlotButton.heightAnchor.constraint(equalToConstant: 40),
                 saveButton.heightAnchor.constraint(equalToConstant: 40),
