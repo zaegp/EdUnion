@@ -66,7 +66,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
                 activityIndicator.center = self.view.center
-                activityIndicator.hidesWhenStopped = true // 在停止時隱藏
+                activityIndicator.hidesWhenStopped = true 
                 self.view.addSubview(activityIndicator)
     }
     
@@ -76,7 +76,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             }
         }
         
-        // 隱藏活動指示器
         func hideActivityIndicator() {
             DispatchQueue.main.async {
                 self.activityIndicator.stopAnimating()
@@ -259,13 +258,11 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
 
     func startSendAnimation() {
-        // 創建飛機圖標
         let planeImageView = UIImageView(image: UIImage(systemName: "paperplane.fill"))
         planeImageView.tintColor = .mainOrange
         planeImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(planeImageView)
         
-        // 設置飛機圖標的位置
         NSLayoutConstraint.activate([
             planeImageView.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
             planeImageView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
@@ -273,27 +270,23 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             planeImageView.heightAnchor.constraint(equalToConstant: 30)
         ])
         
-        // 飛機飛走的動畫
         UIView.animate(withDuration: 1.0, animations: {
             planeImageView.transform = CGAffineTransform(translationX: self.view.frame.width, y: -self.view.frame.height / 2)
             planeImageView.alpha = 0
         }, completion: { _ in
             planeImageView.removeFromSuperview()
             
-            // 顯示勾選圖標動畫
             self.showCheckmarkAnimation()
         })
     }
 
     func showCheckmarkAnimation() {
-        // 創建勾選圖標
         let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
         checkmarkImageView.tintColor = .mainOrange
         
         checkmarkImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(checkmarkImageView)
         
-        // 設置勾選圖標的位置在螢幕中心
         NSLayoutConstraint.activate([
             checkmarkImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             checkmarkImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -301,14 +294,12 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             checkmarkImageView.heightAnchor.constraint(equalToConstant: 100)
         ])
         
-        // 動畫效果：從小到大出現
         checkmarkImageView.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         checkmarkImageView.alpha = 0
         UIView.animate(withDuration: 0.5, animations: {
             checkmarkImageView.transform = CGAffineTransform.identity
             checkmarkImageView.alpha = 1
         }, completion: { _ in
-            // 延遲 1 秒後淡出並移除
             UIView.animate(withDuration: 0.5, delay: 1.0, options: [], animations: {
                 checkmarkImageView.alpha = 0
             }, completion: { _ in
@@ -324,7 +315,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     func updateSendButtonState() {
         let canSend = !selectedFiles.isEmpty && !selectedStudentIDs.isEmpty
         sendButton.isEnabled = canSend
-        sendButton.backgroundColor = canSend ? .mainOrange : .gray // 根據狀態改變背景色
+        sendButton.backgroundColor = canSend ? .mainOrange : .gray
     }
     
     private func previewFile(at url: URL) {
@@ -339,7 +330,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
            }
        }
        
-       // QLPreviewControllerDataSource 方法
        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
            return previewItem == nil ? 0 : 1
        }
@@ -351,7 +341,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     func fetchUserFiles() {
         guard let currentUserID = UserSession.shared.currentUserID else {
             print("Error: Current user ID is nil.")
-            setCustomEmptyStateView() // 顯示自定義的 empty state
+            setCustomEmptyStateView()
             return
         }
         
@@ -360,9 +350,8 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             self.files = cachedFiles
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
-                self.restoreCollectionView() // 恢復正常背景
+                self.restoreCollectionView()
             }
-            // 如果有緩存的文件，暫時不設置監聽器
             return
         } else {
             setCustomEmptyStateView()
@@ -382,7 +371,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error.localizedDescription)")
-                self?.setCustomEmptyStateView() // 顯示自定義的 empty state
+                self?.setCustomEmptyStateView()
                 return
             }
 
@@ -390,11 +379,10 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 print("No snapshot received.")
                 self?.files.removeAll()
                 self?.collectionView.reloadData()
-                self?.setCustomEmptyStateView() // 顯示自定義的 empty state
+                self?.setCustomEmptyStateView()
                 return
             }
 
-            // 處理即時變動的文件
             self?.handleFetchedFiles(snapshot)
         }
     }
@@ -424,11 +412,10 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             print("No files found.")
             self.files.removeAll()
             self.collectionView.reloadData()
-            setCustomEmptyStateView() // 設置自定義的 empty state
+            setCustomEmptyStateView()
             return
         }
 
-        // 創建一個臨時的文件列表
         var updatedFiles: [FileItem] = []
         self.fileDownloadStatus.removeAll()
         self.fileURLs.removeAll()
@@ -440,7 +427,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 continue
             }
 
-            // 檢查本地緩存
             if let cachedURL = isFileCached(fileName: fileName) {
                 let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
                 let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
@@ -460,7 +446,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             }
         }
 
-        // 更新 self.files
         self.files = updatedFiles
 
         DispatchQueue.main.async {
@@ -824,7 +809,6 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
             let deselectedFileItem = files[indexPath.item]
             
             if collectionView.allowsMultipleSelection {
-                // 使用 FileItem 的 remoteURL 來查找對應的文件
                 if let index = selectedFiles.firstIndex(where: { $0.remoteURL == deselectedFileItem.remoteURL }) {
                     selectedFiles.remove(at: index)
                 }
@@ -881,72 +865,84 @@ extension FilesVC: FileCellDelegate {
             print("Error: Index out of range.")
             return
         }
-        
+
         let fileItem = files[indexPath.item]
-        guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
-            print("Error: storagePath is nil or empty.")
-            showAlert(title: "刪除失敗", message: "無法刪除文件，文件的存储路径无效。")
-            return
-        }
         
-        print("Storage Path: \(storagePath)")
-        print("Local URL: \(String(describing: fileItem.localURL))")
-        print("Remote URL: \(fileItem.remoteURL)")
-        
-        let storageRef = storage.reference().child(storagePath)
-        
-        storageRef.delete { [weak self] error in
-            if let error = error {
-                print("Error deleting file from Storage: \(error.localizedDescription)")
-                self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
-                return
+        if userRole == .student {
+            if let localURL = fileItem.localURL {
+                do {
+                    try FileManager.default.removeItem(at: localURL)
+                    print("本地文件成功刪除：\(localURL)")
+                } catch {
+                    print("刪除本地文件時出錯：\(error.localizedDescription)")
+                }
             }
             
-            self?.firestore.collection("files")
-                .whereField("storagePath", isEqualTo: storagePath)
-                .getDocuments { snapshot, error in
-                    if let error = error {
-                        print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
-                        return
-                    }
-                    
-                    guard let document = snapshot?.documents.first else {
-                        print("File not found in Firestore.")
-                        return
-                    }
-                    
-                    document.reference.delete { error in
+            DispatchQueue.main.async {
+                self.files.remove(at: indexPath.item)
+                self.collectionView.deleteItems(at: [indexPath])
+                if self.files.isEmpty {
+                    self.setCustomEmptyStateView()
+                }
+            }
+            
+        } else if userRole == .teacher {
+            guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
+                print("Error: storagePath is nil or empty.")
+                showAlert(title: "刪除失敗", message: "無法刪除文件，文件的存儲路徑無效。")
+                return
+            }
+
+            let storageRef = storage.reference().child(storagePath)
+
+            storageRef.delete { [weak self] error in
+                if let error = error {
+                    print("Error deleting file from Storage: \(error.localizedDescription)")
+                    self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
+                    return
+                }
+
+                self?.firestore.collection("files")
+                    .whereField("storagePath", isEqualTo: storagePath)
+                    .getDocuments { snapshot, error in
                         if let error = error {
                             print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
-                        } else {
-                            print("Successfully deleted metadata for file: \(fileItem.fileName)")
-                            
-                            // 删除本地缓存的文件
-                            do {
-                                if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
-                                    try FileManager.default.removeItem(at: localURL)
-                                    print("Local file deleted successfully.")
+                            return
+                        }
+
+                        guard let document = snapshot?.documents.first else {
+                            print("File not found in Firestore.")
+                            return
+                        }
+
+                        document.reference.delete { error in
+                            if let error = error {
+                                print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
+                            } else {
+                                print("Successfully deleted metadata for file: \(fileItem.fileName)")
+
+                                do {
+                                    if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
+                                        try FileManager.default.removeItem(at: localURL)
+                                        print("Local file deleted successfully.")
+                                    }
+                                } catch {
+                                    print("Error deleting local file: \(error.localizedDescription)")
                                 }
-                            } catch {
-                                print("Error deleting local file: \(error.localizedDescription)")
-                            }
-                            
-                            DispatchQueue.main.async { [weak self] in
-                                guard let self = self else { return }
-                                if let currentIndex = self.files.firstIndex(where: { $0.fileName == fileItem.fileName && $0.remoteURL == fileItem.remoteURL }) {
-                                    self.files.remove(at: currentIndex)
-                                    self.collectionView.deleteItems(at: [IndexPath(item: currentIndex, section: 0)])
+
+                                DispatchQueue.main.async {
+                                    guard let self = self else { return }
+                                    self.files.remove(at: indexPath.item)
+                                    self.collectionView.deleteItems(at: [indexPath])
                                     
                                     if self.files.isEmpty {
                                         self.setCustomEmptyStateView()
                                     }
-                                } else {
-                                    self.collectionView.reloadData()
                                 }
                             }
                         }
                     }
-                }
+            }
         }
     }
 }
@@ -957,33 +953,29 @@ extension FilesVC: UIDocumentPickerDelegate {
         guard let selectedURL = urls.first else { return }
         let fileName = selectedURL.lastPathComponent
 
-        // 开始访问安全范围资源
         guard selectedURL.startAccessingSecurityScopedResource() else {
             print("无法访问安全范围资源")
             return
         }
 
-        // 确保在方法结束时停止访问
         defer {
             selectedURL.stopAccessingSecurityScopedResource()
         }
 
-        // 检查文件是否已存在
         checkIfFileExists(fileName: fileName) { [weak self] exists in
             if exists {
                 DispatchQueue.main.async {
-                    self?.showAlert(title: "文件已存在", message: "已存在同名文件，请选择其他文件或更改文件名称。")
+                    self?.showAlert(title: "文件已存在", message: "已存在同名文件，請選擇其他文件或更改文件名稱。")
                 }
             } else {
-                // 上传文件
                 self?.uploadFileToFirebase(selectedURL, fileName: fileName) { result in
                     DispatchQueue.main.async {
                         switch result {
                         case .success(_):
-                            self?.showAlert(title: "上传成功", message: "文件已成功上传。")
+                            self?.showAlert(title: "上傳成功", message: "")
                         case .failure(let error):
-                            print("文件上传失败: \(error.localizedDescription)")
-                            self?.showAlert(title: "上传失败", message: "无法上传文件，请稍后再试。")
+                            print("文件上傳失敗: \(error.localizedDescription)")
+                            self?.showAlert(title: "上傳失敗", message: "無法上傳文件，請稍後再試。")
                         }
                     }
                 }
@@ -1012,10 +1004,8 @@ extension FilesVC: UIDocumentPickerDelegate {
                 }
                 
                 if let documents = snapshot?.documents, !documents.isEmpty {
-                    // 檔案已存在
                     completion(true)
                 } else {
-                    // 檔案不存在
                     completion(false)
                 }
             }

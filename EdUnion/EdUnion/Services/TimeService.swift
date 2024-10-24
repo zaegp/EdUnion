@@ -16,54 +16,74 @@ class TimeService {
         return formatter
     }()
     
+    static let sharedTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        formatter.timeZone = TimeZone.current
+        return formatter
+    }()
+    
+    static let sharedChatRoomFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone.current
+        return formatter
+    }()
+
     static func convertCourseTimeToDisplay(from times: [String]) -> String {
         guard let firstTime = times.first else { return "" }
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
+        let startTime = sharedTimeFormatter.date(from: firstTime)
         
-        if let startTime = dateFormatter.date(from: firstTime) {
+        if let startTime = startTime {
             if times.count == 1 {
                 if let endTime = Calendar.current.date(byAdding: .minute, value: 30, to: startTime) {
-                    return "\(firstTime) - \(dateFormatter.string(from: endTime))"
+                    return "\(firstTime) - \(sharedTimeFormatter.string(from: endTime))"
                 }
-            } else if let lastTime = times.last, let endTime = dateFormatter.date(from: lastTime) {
+            } else if let lastTime = times.last, let endTime = sharedTimeFormatter.date(from: lastTime) {
                 if let extendedEndTime = Calendar.current.date(byAdding: .minute, value: 30, to: endTime) {
-                    return "\(firstTime) - \(dateFormatter.string(from: extendedEndTime))"
+                    return "\(firstTime) - \(sharedTimeFormatter.string(from: extendedEndTime))"
                 }
             }
         }
         
         return ""
     }
-    
-    static func covertToEnMonth (_ dateString: String) -> String {
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd"  
+
+    static func covertToEnMonth(_ dateString: String) -> String {
+        guard let date = sharedDateFormatter.date(from: dateString) else {
+            return dateString
+        }
         
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "MMM\nd" 
-        
-        if let date = inputFormatter.date(from: dateString) {
-            return outputFormatter.string(from: date)
+        outputFormatter.dateFormat = "MMM\nd"
+        return outputFormatter.string(from: date)
+    }
+
+    static func sortCourses(by activities: [Appointment], ascending: Bool = false) -> [Appointment] {
+        return activities.sorted { (a, b) -> Bool in
+            guard let timeAFull = a.times.first,
+                  let timeBFull = b.times.first,
+                  let startTimeAString = timeAFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
+                  let startTimeBString = timeBFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
+                  let dateA = sharedTimeFormatter.date(from: startTimeAString),
+                  let dateB = sharedTimeFormatter.date(from: startTimeBString) else {
+                return false
+            }
+            return ascending ? dateA > dateB : dateA < dateB
         }
-        return dateString
     }
     
-    static func sortCourses(by activities: [Appointment], ascending: Bool = false) -> [Appointment] {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm"
+    static func covertToChatRoomFormat(_ date: Date) -> String {
+        let calendar = Calendar.current
 
-            return activities.sorted { (a, b) -> Bool in
-                guard let timeAFull = a.times.first,
-                      let timeBFull = b.times.first,
-                      let startTimeAString = timeAFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
-                      let startTimeBString = timeBFull.split(separator: "-").first?.trimmingCharacters(in: .whitespaces),
-                      let dateA = dateFormatter.date(from: startTimeAString),
-                      let dateB = dateFormatter.date(from: startTimeBString) else {
-                    return false
-                }
-                return ascending ? dateA > dateB : dateA < dateB
-            }
+        if calendar.isDateInToday(date) {
+            sharedChatRoomFormatter.dateFormat = "HH:mm"
+        } else if calendar.isDateInYesterday(date) {
+            sharedChatRoomFormatter.dateFormat = "昨天 HH:mm"
+        } else {
+            sharedChatRoomFormatter.dateFormat = "MM/dd HH:mm"
         }
+        
+        return sharedChatRoomFormatter.string(from: date)
+    }
 }

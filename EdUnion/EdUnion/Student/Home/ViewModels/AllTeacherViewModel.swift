@@ -22,11 +22,12 @@ class AllTeacherViewModel: BaseCollectionViewModelProtocol {
         fetchBlocklist { [weak self] blocklist in
             self?.blocklist = blocklist
             print(blocklist)
-            UserFirebaseService.shared.fetchTeachersRealTime { [weak self] result in
+            _ = UserFirebaseService.shared.fetchTeachersRealTime { [weak self] result in
                 switch result {
                 case .success(let teachers):
-                    self?.items = teachers.filter {
-                        !blocklist.contains($0.id) && !($0.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    self?.items = teachers.filter { teacher in
+                        !blocklist.contains(teacher.id) &&
+                        !teacher.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     }
                     self?.filteredItems = self?.items ?? []
                     self?.onDataUpdate?()

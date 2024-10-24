@@ -9,7 +9,6 @@ import UIKit
 
 protocol UserFirebaseServiceProtocol {
     func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void)
-    // 其他方法...
 }
 
 class TeacherDetailVC: UIViewController {
@@ -23,6 +22,7 @@ class TeacherDetailVC: UIViewController {
     private let subjectLabel = UILabel()
     private let educationLabel = UILabel()
     private let experienceLabel = UILabel()
+    private let hourlyRateLabel = UILabel()
     private let introduceLabel = UILabel()
     private let bookButton = UIButton(type: .system)
     private let chatButton = UIButton(type: .system)
@@ -58,9 +58,20 @@ class TeacherDetailVC: UIViewController {
     private func setupNavigationBar() {
         navigationItem.title = "老師詳情"
         
-        favoriteButton = UIBarButtonItem(image: UIImage(systemName: isFavorite ? "heart.fill" : "heart"), style: .plain, target: self, action: #selector(favoriteButtonTapped))
+        favoriteButton = UIBarButtonItem(
+            image: UIImage(systemName: isFavorite ? "heart.fill" : "heart"),
+            style: .plain,
+            target: self,
+            action: #selector(favoriteButtonTapped)
+        )
         favoriteButton.tintColor = .mainOrange
-        ellipsisButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain, target: self, action: #selector(ellipsisButtonTapped))
+        
+        ellipsisButton = UIBarButtonItem(
+            image: UIImage(systemName: "ellipsis"),
+            style: .plain,
+            target: self,
+            action: #selector(ellipsisButtonTapped)
+        )
         ellipsisButton.tintColor = .mainOrange
         
         navigationItem.rightBarButtonItems = [ellipsisButton, favoriteButton]
@@ -177,7 +188,8 @@ class TeacherDetailVC: UIViewController {
             ("已上課程數", "\(teacher.totalCourses)"),
             ("教學科目", teacher.resume[3]),
             ("學歷", teacher.resume[0]),
-            ("教學經驗", teacher.resume[1])
+            ("教學經驗", teacher.resume[1]),
+            ("時薪", teacher.resume[4])
         ]
         
         let infoStackView = UIStackView()

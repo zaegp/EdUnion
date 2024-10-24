@@ -68,7 +68,6 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         ])
     }
 
-    
     private func setupEmptyStateLabel() {
         emptyStateLabel = UILabel()
         emptyStateLabel.text = "還沒有關注的老師"

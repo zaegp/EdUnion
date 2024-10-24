@@ -205,7 +205,7 @@ class ChatTableViewCell: UITableViewCell {
         resetContent()
         
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
-            timestampLabel.text = formatDate(message.timestamp.dateValue())
+            timestampLabel.text = TimeService.covertToChatRoomFormat(message.timestamp.dateValue())
             timestampLabel.isHidden = false
         }
         
@@ -338,12 +338,6 @@ class ChatTableViewCell: UITableViewCell {
             activityIndicator.stopAnimating()
             print("無效的圖片URL")
         }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
     
     @objc private func toggleImageButtonTapped() {

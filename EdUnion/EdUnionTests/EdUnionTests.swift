@@ -26,7 +26,7 @@ class TeacherDetailVCTests: XCTestCase {
         viewController = TeacherDetailVC()
         mockService = MockUserFirebaseService()
         viewController.userFirebaseService = mockService
-        viewController.teacher = Teacher(id: "teacher123", userID: "user123", fullName: "測試老師", photoURL: nil, totalCourses: 5, resume: ["博士", "5年經驗", "擅長數學", "數學", "高等數學"])
+        viewController.teacher = Teacher(id: "teacher1", userID: "user1", fullName: "測試老師", photoURL: nil, totalCourses: 5, resume: ["博士", "5年經驗", "擅長數學", "數學", "高等數學"])
         _ = viewController.view
     }
     
@@ -37,7 +37,7 @@ class TeacherDetailVCTests: XCTestCase {
     }
     
     func testCheckIfTeacherIsFavorited_WhenTeacherIsInFollowList_ShouldSetIsFavoriteTrue() {
-        mockService.followList = ["teacher123", "teacher456"]
+        mockService.followList = ["teacher1", "teacher2"]
         
         viewController.testable_checkIfTeacherIsFavorited()
         
@@ -45,7 +45,7 @@ class TeacherDetailVCTests: XCTestCase {
     }
     
     func testCheckIfTeacherIsFavorited_WhenTeacherIsNotInFollowList_ShouldSetIsFavoriteFalse() {
-        mockService.followList = ["teacher456", "teacher789"]
+        mockService.followList = ["teacher2", "teacher3"]
         
         viewController.testable_checkIfTeacherIsFavorited()
 

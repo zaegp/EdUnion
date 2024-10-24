@@ -65,7 +65,7 @@ class BookingViewModel: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         
-        guard let selectedTime = dateFormatter.date(from: timeSlot) else { return }
+        guard dateFormatter.date(from: timeSlot) != nil else { return }
         
         if let index = selectedTimes.firstIndex(of: timeSlot) {
             var newSelection = selectedTimes

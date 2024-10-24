@@ -33,7 +33,7 @@ class ChooseRoleVC: UIViewController {
     
     private let tutorButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("家教", for: .normal)
+        button.setTitle("老師", for: .normal)
         button.layer.borderWidth = 1
         button.setTitleColor(.label, for: .normal)
         button.layer.borderColor = UIColor.myGray.cgColor
@@ -48,27 +48,15 @@ class ChooseRoleVC: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .myBackground
-//        setupBackground()
         setupUI()
     }
     
-//    private func setupBackground() {
-//        let backgroundView = UIHostingController(rootView: GradientBackgroundView())
-//        addChild(backgroundView)
-//        backgroundView.view.frame = view.bounds
-//        backgroundView.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//        view.addSubview(backgroundView.view)
-//        backgroundView.didMove(toParent: self)
-//    }
-    
     private func setupUI() {
-        // Stack View for Buttons
         let buttonStackView = UIStackView(arrangedSubviews: [studentButton, tutorButton])
         buttonStackView.axis = .horizontal
         buttonStackView.spacing = 20
         buttonStackView.distribution = .fillEqually
         
-        // Main Stack View
         let mainStackView = UIStackView(arrangedSubviews: [titleLabel, buttonStackView])
         mainStackView.axis = .vertical
         mainStackView.spacing = 40
@@ -104,18 +92,3 @@ class ChooseRoleVC: UIViewController {
         present(hostingController, animated: true, completion: nil)
     }
 }
-
-//struct GradientBackgroundView: View {
-//    var body: some View {
-//        LinearGradient(gradient: Gradient(colors: [Color(hex: "#E63C3A"), Color(hex: "#D6D4CE")]),
-//                       startPoint: .top,
-//                       endPoint: .bottom)
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//}
-//
-//struct ContentsView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        GradientBackgroundView()
-//    }
-//}

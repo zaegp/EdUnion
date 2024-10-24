@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, UIScrollViewDelegate, UISearchBarDelegate {
+class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate {
     private let labelsStackView: UIStackView = {
         let followLabel = UILabel()
         followLabel.text = "關注"
@@ -223,25 +223,6 @@ class StudentHomeVC: UIViewController, UIPageViewControllerDataSource, UIPageVie
         pageViewController.didMove(toParent: self)
     }
     
-    // MARK: - UIPageViewControllerDataSource 和 Delegate
-    
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let index = viewControllers.firstIndex(of: viewController), index > 0 else { return nil }
-        return viewControllers[index - 1]
-    }
-    
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let index = viewControllers.firstIndex(of: viewController), index < viewControllers.count - 1 else { return nil }
-        return viewControllers[index + 1]
-    }
-    
-    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
-        let index = viewControllers.firstIndex(of: visibleVC)!
-        selectedIndex = index
-        updateUnderlinePosition(to: index, animated: false)
-    }
-    
     private func updateUnderlinePosition(to index: Int, animated: Bool = true) {
         let targetX = labelsStackView.arrangedSubviews[index].frame.origin.x + labelsStackView.frame.origin.x
         
@@ -313,5 +294,39 @@ extension StudentHomeVC: SearchBarViewDelegate {
     
     func searchBarViewDidCancel(_ searchBarView: SearchBarView) {
         searchIconTapped()
+    }
+}
+
+extension StudentHomeVC: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        guard let index = viewControllers.firstIndex(of: viewController),
+              index > 0 else {
+            return nil
+        }
+        return viewControllers[index - 1]
+    }
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        guard let index = viewControllers.firstIndex(of: viewController),
+              index < viewControllers.count - 1 else {
+            return nil
+        }
+        return viewControllers[index + 1]
+    }
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool) {
+        guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
+        let index = viewControllers.firstIndex(of: visibleVC)!
+        selectedIndex = index
+        updateUnderlinePosition(to: index, animated: false)
     }
 }
