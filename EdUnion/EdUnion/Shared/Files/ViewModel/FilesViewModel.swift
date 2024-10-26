@@ -5,11 +5,11 @@
 //  Created by Rowan Su on 2024/10/18.
 //
 
-//import Foundation
-//import FirebaseFirestore
-//import FirebaseStorage
+// import Foundation
+// import FirebaseFirestore
+// import FirebaseStorage
 //
-//class FilesViewModel: NSObject {
+// class FilesViewModel: NSObject {
 //    
 //    // MARK: - Properties
 //    
@@ -381,8 +381,8 @@
 //    }
 //    
 //    // Add other helper methods as needed
-//}
+// }
 //
-//extension FilesViewModel: URLSessionDownloadDelegate {
+// extension FilesViewModel: URLSessionDownloadDelegate {
 //    // URLSessionDownloadDelegate methods are implemented in the class above
-//}
+// }

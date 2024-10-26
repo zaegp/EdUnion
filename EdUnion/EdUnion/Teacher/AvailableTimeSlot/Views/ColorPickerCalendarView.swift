@@ -24,7 +24,7 @@ struct CalendarTip: Tip {
 
 struct ColorPickerCalendarView: View {
     @State private var dateColors: [Date: Color] = [:]
-    @State private var selectedDay: Date? = nil
+    @State private var selectedDay: Date?
     @State private var showColorPicker: Bool = false
     @State private var appointments: [Appointment] = []
     @State private var availableColors: [Color] = []

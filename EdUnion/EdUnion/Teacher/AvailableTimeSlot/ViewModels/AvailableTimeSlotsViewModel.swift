@@ -31,7 +31,7 @@ class AvailableTimeSlotsViewModel {
         }
         UserFirebaseService.shared.modifyTimeSlot(timeSlot, for: userID ?? "", add: true) { [weak self] result in
             switch result {
-            case .success():
+            case .success:
                 self?.timeSlots.append(timeSlot)
                 self?.onTimeSlotsChanged?()
             case .failure(let error):
@@ -44,7 +44,7 @@ class AvailableTimeSlotsViewModel {
         let timeSlot = timeSlots[index]
         UserFirebaseService.shared.modifyTimeSlot(timeSlot, for: userID ?? "", add: false) { [weak self] result in
             switch result {
-            case .success():
+            case .success:
                 self?.timeSlots.remove(at: index)
                 self?.onTimeSlotsChanged?()
             case .failure(let error):
@@ -74,4 +74,3 @@ class AvailableTimeSlotsViewModel {
         }
     }
 }
-

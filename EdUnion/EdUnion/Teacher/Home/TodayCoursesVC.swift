@@ -64,8 +64,6 @@ class TodayCoursesVC: UIViewController {
             
             if let indexPath = tableView.indexPathForRow(at: touchPoint) {
                 let appointment = viewModel.appointments[indexPath.row]
-
-                
                 
                 guard let studentName = viewModel.studentNames[appointment.studentID] else {
                     print("找不到對應的學生姓名")
@@ -175,7 +173,6 @@ class TodayCoursesVC: UIViewController {
                     self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
                 }
                 self?.tableView.reloadData()
-                
                
                 self?.updateBellBadge()
             }
@@ -220,7 +217,6 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
             self?.handleCompletion(for: appointment, cell: cell)
         }
     }
-    
     
     private func updateCellButtonState(_ cell: TodayCoursesCell, appointment: Appointment) {
         if appointment.status == "completed" {

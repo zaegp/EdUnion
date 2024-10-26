@@ -214,7 +214,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             messageTextView.bottomAnchor.constraint(equalTo: messageInputBar.bottomAnchor, constant: -8),
             
             sendButton.trailingAnchor.constraint(equalTo: messageTextView.trailingAnchor, constant: -8),
-            sendButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor),
+            sendButton.centerYAnchor.constraint(equalTo: messageInputBar.centerYAnchor)
         ])
     }
     
@@ -321,7 +321,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     // MARK: - ImagePicker Delegate
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         if let selectedImage = info[.originalImage] as? UIImage {
             viewModel.sendPhotoMessage(selectedImage)
         }

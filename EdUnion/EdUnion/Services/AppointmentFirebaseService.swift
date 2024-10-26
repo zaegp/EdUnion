@@ -115,7 +115,7 @@ class AppointmentFirebaseService {
         var confirmedAppointments: [Appointment] = []
         var completedAppointments: [Appointment] = []
         
-        var errorOccurred: Error? = nil
+        var errorOccurred: Error?
         
         group.enter()
         confirmedQuery.getDocuments { (snapshot, error) in

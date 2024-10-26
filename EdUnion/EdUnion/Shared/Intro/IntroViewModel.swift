@@ -7,7 +7,7 @@
 
 import UIKit
 
-//class IntroViewModel {
+// class IntroViewModel {
 //    var userID = UserSession.shared.unwrappedUserID
 //    var userRole = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
 //    var name: String = ""
@@ -51,4 +51,4 @@ import UIKit
 //            }
 //        }
 //    }
-//}
+// }

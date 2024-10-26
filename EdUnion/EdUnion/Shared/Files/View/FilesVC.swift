@@ -558,7 +558,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             print("Starting upload for file: \(fileName)")
             showActivityIndicator()
             
-            let uploadTask = storageRef.putData(fileData, metadata: metadata) { metadata, error in
+            let uploadTask = storageRef.putData(fileData, metadata: metadata) { _, error in
                 self.hideActivityIndicator()
                 if let error = error {
                     print("Upload failed with error: \(error.localizedDescription)")
@@ -971,7 +971,7 @@ extension FilesVC: UIDocumentPickerDelegate {
                 self?.uploadFileToFirebase(selectedURL, fileName: fileName) { result in
                     DispatchQueue.main.async {
                         switch result {
-                        case .success(_):
+                        case .success:
                             self?.showAlert(title: "上傳成功", message: "")
                         case .failure(let error):
                             print("文件上傳失敗: \(error.localizedDescription)")
@@ -1127,4 +1127,3 @@ extension FilesVC: URLSessionDownloadDelegate {
         }
     }
 }
-

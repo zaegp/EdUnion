@@ -220,7 +220,7 @@ private func saveUserData(userRef: DocumentReference, appleIDCredential: ASAutho
         "userID": appleIDCredential.user,
         "photoURL": "",
         "status": "normal",
-        "blockList": [],
+        "blockList": []
     ]
     
     if userRole == "student" {
@@ -250,7 +250,7 @@ private func saveUserData(userRef: DocumentReference, appleIDCredential: ASAutho
 }
 
 private func randomNonceString(length: Int = 32) -> String {
-    let charset: Array<Character> =
+    let charset: [Character] =
     Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
     var result = ""
     var remainingLength = length

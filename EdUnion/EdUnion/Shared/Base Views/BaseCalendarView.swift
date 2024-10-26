@@ -256,8 +256,8 @@ struct BaseCalendarView: View {
     
     @State private var appointments: [Appointment] = []
     
-    var onDayTap: ((Date) -> Void)? = nil
-    var onDayLongPress: ((Date) -> Void)? = nil
+    var onDayTap: ((Date) -> Void)?
+    var onDayLongPress: ((Date) -> Void)?
     
     @State private var currentDate = Date()
     let daysOfWeek = Calendar.current.shortWeekdaySymbols

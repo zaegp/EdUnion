@@ -5,9 +5,9 @@
 //  Created by Rowan Su on 2024/9/11.
 //
 
-//import UIKit
+// import UIKit
 //
-//class ViewController: UIViewController {
+// class ViewController: UIViewController {
 //  override func viewDidLoad() {
 //      super.viewDidLoad()
 //
@@ -24,5 +24,5 @@
 //      let numbers = [0]
 //      let _ = numbers[1]
 //  }
-//}
+// }
 //

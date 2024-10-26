@@ -75,7 +75,7 @@ class ConfirmViewModel {
             
             if let document = document, document.exists {
                 let data = document.data()
-                if let _ = data?[studentID] {
+                if data?[studentID] != nil {
                     completion(.success(true))
                     return
                 } else {

@@ -291,7 +291,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         }
     }
     
-    // MARK - 聊天室
+    // MARK: - 聊天室
     func fetchChatRooms(for participantID: String, isTeacher: Bool, completion: @escaping ([ChatRoom]?, Error?) -> Void) {
         db.collection("chats")
             .whereField("participants", arrayContains: participantID)
@@ -351,7 +351,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         
         let storageRef = storage.reference().child("chat_images/\(messageId).jpg")
         
-        storageRef.putData(imageData, metadata: nil) { metadata, error in
+        storageRef.putData(imageData, metadata: nil) { _, error in
             if let error = error {
                 completion(nil, error)
                 print("Error uploading image: \(error.localizedDescription)")
@@ -456,7 +456,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
             return
         }
         
-        storageRef.putData(imageData, metadata: nil) { metadata, error in
+        storageRef.putData(imageData, metadata: nil) { _, error in
             if let error = error {
                 completion(.failure(error))
                 return

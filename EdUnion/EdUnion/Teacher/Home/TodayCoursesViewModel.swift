@@ -156,7 +156,7 @@ class TodayCoursesViewModel: ObservableObject {
                     self?.appointments[index].status = "completed"
                 }
                 
-                AppointmentFirebaseService.shared.incrementTeacherTotalCourses() { result in
+                AppointmentFirebaseService.shared.incrementTeacherTotalCourses { result in
                     switch result {
                     case .success:
                         print("Successfully incremented totalCourses for teacher.")
@@ -175,4 +175,3 @@ class TodayCoursesViewModel: ObservableObject {
         return pendingAppointments.count
     }
 }
-

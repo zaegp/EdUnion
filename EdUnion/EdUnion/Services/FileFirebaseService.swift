@@ -5,12 +5,12 @@
 //  Created by Rowan Su on 2024/10/18.
 //
 
-//import Foundation
-//import FirebaseStorage
-//import FirebaseFirestore
+// import Foundation
+// import FirebaseStorage
+// import FirebaseFirestore
 //
 //
-//class FileFirebaseService {
+// class FileFirebaseService {
 //    static let shared = FileFirebaseService()
 //        private let storage = Storage.storage()
 //        private let firestore = Firestore.firestore()
@@ -304,4 +304,4 @@
 //            
 //            return cacheDirectory
 //        }
-//}
+// }

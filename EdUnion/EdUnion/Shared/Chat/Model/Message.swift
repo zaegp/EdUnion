@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-//struct Message: Decodable {
+// struct Message: Decodable {
 //    let ID: String?
 //    let type: Int
 //    var content: String
@@ -43,7 +43,7 @@ import FirebaseFirestore
 //            self.isSeen = isSeen
 //            self.timestamp = timestamp
 //        }
-//}
+// }
 
 struct Message: Decodable {
     let ID: String?

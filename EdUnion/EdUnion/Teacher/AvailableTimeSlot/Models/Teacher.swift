@@ -31,7 +31,6 @@ struct Teacher: UserProtocol, Codable {
             studentsNotes = nil
             email = nil
         }
-
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

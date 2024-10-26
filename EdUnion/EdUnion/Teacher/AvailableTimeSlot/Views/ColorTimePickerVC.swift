@@ -151,7 +151,6 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         colorPicker.selectedColor = selectedColor
         present(colorPicker, animated: true, completion: nil)
     }
-
     
     func setupSelectedSlotDisplay() {
         selectedSlotLabel.font = UIFont.systemFont(ofSize: 16)

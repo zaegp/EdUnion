@@ -352,7 +352,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             return
         }
 
-        storageRef.putData(imageData, metadata: nil) { metadata, error in
+        storageRef.putData(imageData, metadata: nil) { _, error in
             if let error = error {
                 completion(.failure(error))
                 return

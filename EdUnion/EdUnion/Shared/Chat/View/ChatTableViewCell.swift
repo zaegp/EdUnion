@@ -328,7 +328,7 @@ class ChatTableViewCell: UITableViewCell {
             messageImageView.kf.setImage(with: url) { result in
                 self.activityIndicator.stopAnimating()
                 switch result {
-                case .success(_):
+                case .success:
                     break
                 case .failure(let error):
                     print("圖片加載失敗: \(error)")

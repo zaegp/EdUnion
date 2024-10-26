@@ -90,9 +90,21 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
     private func setupMenuItems() {
         if userRole == "teacher" {
             menuItems = [
-                MenuItem(title: "可選時段", icon: "calendar.badge.plus", action: { [weak self] in self?.navigateToAvailableTimeSlots() }),
-                MenuItem(title: "履歷", icon: "list.bullet.clipboard", action: { [weak self] in self?.navigateToResume() }),
-                MenuItem(title: "學生名單", icon: "person.text.rectangle", action: { [weak self] in self?.navigateToAllStudents() }),
+                MenuItem(
+                    title: "可選時段",
+                    icon: "calendar.badge.plus",
+                    action: { [weak self] in self?.navigateToAvailableTimeSlots() }
+                ),
+                MenuItem(
+                    title: "履歷",
+                    icon: "list.bullet.clipboard",
+                    action: { [weak self] in self?.navigateToResume() }
+                ),
+                MenuItem(
+                    title: "學生名單",
+                    icon: "person.text.rectangle",
+                    action: { [weak self] in self?.navigateToAllStudents() }
+                ),
                 MenuItem(title: "教材", icon: "folder", action: { [weak self] in self?.navigateToFiles() }),
                 MenuItem(title: "隱私權政策", icon: "lock.shield", action: { [weak self] in self?.openPrivacyPolicy() }),
                 MenuItem(title: "登出", icon: "door.right.hand.open", action: logoutButtonTapped),
@@ -187,7 +199,9 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
     
     // MARK: - Privacy Policy
     private func openPrivacyPolicy() {
-        guard let url = URL(string: "https://www.privacypolicies.com/live/8f20be33-d0b5-4f8b-a724-4c02a815b87a") else { return }
+        guard let url = URL(
+            string: "https://www.privacypolicies.com/live/8f20be33-d0b5-4f8b-a724-4c02a815b87a"
+        ) else { return }
         let safariVC = SFSafariViewController(url: url)
         present(safariVC, animated: true, completion: nil)
     }
@@ -222,7 +236,10 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
     }
     
     private func deleteAccountAction() {
-        let alertController = UIAlertController(title: "刪除帳號", message: "您在30天內重新登錄此帳號即可保留原本的資料", preferredStyle: .alert)
+        let alertController = UIAlertController(
+            title: "刪除帳號",
+            message: "您在30天內重新登錄此帳號即可保留原本的資料",
+            preferredStyle: .alert)
         
         let deleteAction = UIAlertAction(title: "刪除", style: .destructive) { _ in
             UserSession.shared.deleteAccount(userRole: self.userRole) { error in
@@ -296,7 +313,10 @@ extension ProfileVC: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ProfileVC: UIImagePickerControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
         picker.dismiss(animated: true, completion: nil)
         
         if let editedImage = info[.editedImage] as? UIImage {

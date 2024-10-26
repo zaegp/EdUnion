@@ -58,7 +58,6 @@ class FileCell: UICollectionViewCell {
             progressView.heightAnchor.constraint(equalToConstant: 4)
         ])
         
-        
         self.addInteraction(UIContextMenuInteraction(delegate: self))
     }
     

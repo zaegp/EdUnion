@@ -20,7 +20,6 @@ class BaseCalendarViewModel: ObservableObject {
     
     var onDataUpdated: (() -> Void)?
     
-    
     func loadAndSortActivities(for activities: [Appointment]) {
             sortActivities(by: activities)
         }
