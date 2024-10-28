@@ -37,7 +37,8 @@ class TeacherCell: UICollectionViewCell {
         
         [nameLabel, totalCoursesLabel, subjectLabel, educationLabel, experienceLabel].forEach {
             $0.textAlignment = .center
-            $0.numberOfLines = 0
+            $0.numberOfLines = 1
+            $0.lineBreakMode = .byTruncatingTail 
             $0.font = UIFont.systemFont(ofSize: 14)
         }
         nameLabel.font = UIFont.boldSystemFont(ofSize: 18)

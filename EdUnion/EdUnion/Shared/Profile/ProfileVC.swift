@@ -169,11 +169,19 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
         }
         
         if userRole == "teacher" {
-            UserFirebaseService.shared.fetchUser(from: userCollection, by: userID, as: Teacher.self) { [weak self] result in
+            UserFirebaseService.shared.fetchUser(
+                from: userCollection,
+                by: userID,
+                as: Teacher.self
+            ) { [weak self] result in
                 self?.handleFetchResult(result)
             }
         } else {
-            UserFirebaseService.shared.fetchUser(from: userCollection, by: userID, as: Student.self) { [weak self] result in
+            UserFirebaseService.shared.fetchUser(
+                from: userCollection,
+                by: userID,
+                as: Student.self
+            ) { [weak self] result in
                 self?.handleFetchResult(result)
             }
         }

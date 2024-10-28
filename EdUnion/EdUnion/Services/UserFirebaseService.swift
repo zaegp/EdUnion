@@ -10,12 +10,6 @@ import FirebaseFirestore
 import FirebaseStorage
 import FirebaseAuth
 
-protocol UserProtocol {
-    var id: String { get set }
-    var fullName: String { get }
-    var photoURL: String? { get }
-}
-
 class UserFirebaseService: UserFirebaseServiceProtocol {
     static let shared = UserFirebaseService()
     private init() {}
@@ -23,7 +17,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     let db = Firestore.firestore()
     let storage = Storage.storage()
     
-    let userID = UserSession.shared.currentUserID ?? ""
+    let userID = UserSession.shared.unwrappedUserID
     
     // MARK: - 通用查詢方法
     func fetchData<T: Decodable>(from collection: String, by id: String, as type: T.Type, completion: @escaping (Result<T, Error>) -> Void) {
@@ -90,7 +84,6 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         }
     }
     
-    // 查詢 followList 中的所有老師資料
     private func fetchTeachers(for ids: [String], completion: @escaping (Result<[Teacher], Error>) -> Void) {
         var teachers: [Teacher] = []
         let group = DispatchGroup()
@@ -108,7 +101,6 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
             }
         }
         
-        // 當所有查詢完成後回傳結果
         group.notify(queue: .main) {
             if !teachers.isEmpty {
                 completion(.success(teachers))
@@ -118,38 +110,30 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         }
     }
     
-    func updateStudentNotes(forTeacher teacherID: String, studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+    func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-                if var studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
-                    let studentExists = studentsNotes[studentID] != nil
-                    
-                    studentsNotes[studentID] = note
-                    teacherRef.updateData(["studentsNotes": studentsNotes]) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(studentExists))
-                        }
-                    }
-                } else {
-                    let newNotes = [studentID: note]
-                    teacherRef.updateData(["studentsNotes": newNotes]) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(false))
-                        }
-                    }
-                }
-            } else if let error = error {
-                // 如果獲取老師文檔時出現錯誤
+            if let error = error {
                 completion(.failure(error))
-            } else {
-                // 如果文檔不存在
+                return
+            }
+            
+            guard let document = document, document.exists else {
                 completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
+                return
+            }
+            
+            var studentsNotes = document.data()?["studentsNotes"] as? [String: String] ?? [:]
+            let studentExists = studentsNotes[studentID] != nil
+            
+            studentsNotes[studentID] = note
+            teacherRef.updateData(["studentsNotes": studentsNotes]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(studentExists))
+                }
             }
         }
     }
@@ -159,11 +143,10 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
-                // 取出 studentsNotes 欄位
                 if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
                     completion(.success(studentsNotes))
                 } else {
-                    completion(.success([:]))  // 如果 studentsNotes 不存在，返回空字典
+                    completion(.success([:]))
                 }
             } else if let error = error {
                 completion(.failure(error))
@@ -178,16 +161,14 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
-                // 取出 studentsNotes 欄位
                 if let studentsNotes = document.data()?["studentsNotes"] as? [String: String] {
-                    // 查找特定學生的備註
                     let studentNote = studentsNotes[studentID]
-                    completion(.success(studentNote))  // 如果找到，返回備註
+                    completion(.success(studentNote))
                 } else {
-                    completion(.success(nil))  // 如果沒有找到該學生，返回 nil
+                    completion(.success(nil))
                 }
             } else if let error = error {
-                completion(.failure(error))  // 發生錯誤時返回錯誤信息
+                completion(.failure(error))
             } else {
                 completion(.failure(NSError(domain: "Teacher document not found", code: 404, userInfo: nil)))
             }
@@ -198,7 +179,6 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     func fetchTeachersRealTime(completion: @escaping (Result<[Teacher], Error>) -> Void) -> ListenerRegistration? {
         let teachersRef = db.collection("teachers")
         
-        // 添加實時監聽器
         let listener = teachersRef.addSnapshotListener { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -281,7 +261,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         let teacherRef = db.collection("teachers").document(teacherID)
         
         teacherRef.updateData([
-            "selectedTimeSlots.\(dateString)": colorHex
+            "selectedTimeSlots.\(dateString)": colorHex ?? ""
         ]) { error in
             if let error = error {
                 print("保存日期顏色時出錯：\(error)")
@@ -329,18 +309,15 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
             }
     }
     
-    // 發送訊息
     func sendMessage(chatRoomID: String, messageData: [String: Any], completion: @escaping (Error?) -> Void) {
         let messageId = UUID().uuidString
         db.collection("chats").document(chatRoomID).collection("messages").document(messageId).setData(messageData, completion: completion)
     }
     
-    // 更新訊息
     func updateMessage(chatRoomID: String, messageId: String, updatedData: [String: Any], completion: @escaping (Error?) -> Void) {
         db.collection("chats").document(chatRoomID).collection("messages").document(messageId).updateData(updatedData, completion: completion)
     }
     
-    // 上傳照片
     func uploadPhoto(image: UIImage, messageId: String, completion: @escaping (String?, Error?) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             let conversionError = NSError(domain: "ImageConversionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG format."])
@@ -462,7 +439,6 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
                 return
             }
             
-            // 成功上傳後，獲取下載 URL
             storageRef.downloadURL { url, error in
                 if let error = error {
                     completion(.failure(error))
@@ -490,11 +466,11 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     
     // 共通：刪除帳號
     func updateUserStatusToDeleting(userID: String, userRole: String, completion: @escaping (Error?) -> Void) {
-            let collection = (userRole == "teacher") ? "teachers" : "students"
-            let userRef = Firestore.firestore().collection(collection).document(userID)
-            
-            userRef.updateData(["status": "Deleting"]) { error in
-                completion(error)
-            }
+        let collection = (userRole == "teacher") ? "teachers" : "students"
+        let userRef = Firestore.firestore().collection(collection).document(userID)
+        
+        userRef.updateData(["status": "Deleting"]) { error in
+            completion(error)
         }
+    }
 }

@@ -186,7 +186,9 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
             underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
             underlineView.heightAnchor.constraint(equalToConstant: 3),
             underlineView.widthAnchor.constraint(equalToConstant: 60),
-            underlineView.leadingAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex].leadingAnchor)
+            underlineView.leadingAnchor.constraint(
+                equalTo: labelsStackView.arrangedSubviews[selectedIndex].leadingAnchor
+            )
         ])
         
         for (index, label) in labelsStackView.arrangedSubviews.enumerated() {

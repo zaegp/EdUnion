@@ -51,19 +51,23 @@ class TodayCoursesViewModel: ObservableObject {
         }
     }
     
-    func saveNoteText(_ noteText: String, for studentID: String, teacherID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let noteData = ["note": noteText]
-        
-        db.collection("teachers").document(teacherID).collection("students").document(studentID).setData(noteData, merge: true) { [weak self] error in
-            if let error = error {
-                print("保存備註時發生錯誤: \(error.localizedDescription)")
-                completion(.failure(error))
-            } else {
-                self?.studentNotes[studentID] = noteText
-                print("成功保存備註")
-                completion(.success(()))
+    func saveNoteText(
+        _ noteText: String,
+        for studentID: String,
+        teacherID: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        UserFirebaseService.shared.updateStudentNotes(studentID: studentID, note: noteText) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.studentNotes[studentID] = noteText
+                    print("成功保存備註")
+                    completion(.success(()))
+                case .failure(let error):
+                    print("保存備註時發生錯誤: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
             }
-        }
     }
     
     func fetchStudentNote(for studentID: String, completion: (() -> Void)? = nil) {

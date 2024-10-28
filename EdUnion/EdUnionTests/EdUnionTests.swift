@@ -26,7 +26,14 @@ class TeacherDetailVCTests: XCTestCase {
         viewController = TeacherDetailVC()
         mockService = MockUserFirebaseService()
         viewController.userFirebaseService = mockService
-        viewController.teacher = Teacher(id: "teacher1", userID: "user1", fullName: "測試老師", photoURL: nil, totalCourses: 5, resume: ["博士", "5年經驗", "擅長數學", "數學", "高等數學"])
+        viewController.teacher = Teacher(
+            id: "teacher1",
+            userID: "user1",
+            fullName: "測試老師",
+            photoURL: nil,
+            totalCourses: 5,
+            resume: ["博士", "5年經驗", "擅長數學", "數學", "高等數學"]
+        )
         _ = viewController.view
     }
     
