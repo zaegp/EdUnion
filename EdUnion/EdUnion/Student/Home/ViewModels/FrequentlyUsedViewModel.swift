@@ -6,35 +6,43 @@
 //
 
 class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
-    
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
     private var blocklist: [String] = []
     var onDataUpdate: (() -> Void)?
     
     func fetchData() {
-        guard let userID = UserSession.shared.currentUserID else {
-            print("User ID is nil.")
-            return
-        }
-        
         fetchBlocklist { [weak self] blocklist in
-            self?.blocklist = blocklist
-            UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "usedList") { result in
-                switch result {
-                case .success(let teachers):
-                    let filteredTeachers = teachers.filter { !blocklist.contains($0.id) }
-                    self?.items = filteredTeachers
-                    self?.filteredItems = filteredTeachers
-                    self?.onDataUpdate?()
-                case .failure(let error):
-                    print("Failed to fetch teachers: \(error)")
-                    self?.items = []
-                    self?.filteredItems = []
-                    self?.onDataUpdate?()
-                }
+            guard let self = self else { return }
+            self.blocklist = blocklist
+            self.fetchTeachers()
+        }
+    }
+    
+    private func fetchTeachers() {
+        UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "usedList") { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let teachers):
+                self.updateTeachers(with: teachers)
+            case .failure(let error):
+                print("Failed to fetch teachers: \(error)")
+                self.clearTeachers()
             }
         }
+    }
+
+    private func updateTeachers(with teachers: [Teacher]) {
+        let filteredTeachers = teachers.filter { !blocklist.contains($0.id) }
+        items = filteredTeachers
+        filteredItems = filteredTeachers
+        onDataUpdate?()
+    }
+    
+    private func clearTeachers() {
+        items = []
+        filteredItems = []
+        onDataUpdate?()
     }
     
     private func fetchBlocklist(completion: @escaping ([String]) -> Void) {
@@ -48,17 +56,24 @@ class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
             }
         }
     }
-    
+
     func search(query: String) {
-        filteredItems = filteredTeachers(by: query)
+        filteredItems = query.isEmpty ? items : filteredTeachers(by: query)
         onDataUpdate?()
     }
     
+    private func filteredTeachers(by query: String) -> [Teacher] {
+        return items.filter { teacher in
+            teacher.fullName.lowercased().contains(query.lowercased()) ||
+            teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
+        }
+    }
+
     func numberOfItems() -> Int {
-        return numberOfItems(in: filteredItems)
+        return filteredItems.count
     }
     
     func item(at index: Int) -> Teacher {
-        return item(at: index, in: filteredItems)
+        return filteredItems[index]
     }
 }

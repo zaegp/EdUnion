@@ -49,9 +49,6 @@ struct ColorPickerCalendarView: View {
                     get: { dateColors },
                     set: { dateColors = $0 ?? [:] }
                 ), viewModel: BaseCalendarViewModel(),
-                //            selectedDay: $selectedDay,
-                //            appointments: appointments,
-                //            activitiesByDate: activitiesByDate,
                 onDayTap: { day in
                     self.selectedDay = day
                 },

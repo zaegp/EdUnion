@@ -30,15 +30,15 @@ class BaseCalendarViewModel: ObservableObject {
             case .success(let user):
                 DispatchQueue.main.async {
                     if let student = user as? Student {
-                        self?.participantNames[userID] = student.fullName.isEmpty ? "未知学生" : student.fullName
+                        self?.participantNames[userID] = student.fullName.isEmpty ? "" : student.fullName
                     } else if let teacher = user as? Teacher {
-                        self?.participantNames[userID] = teacher.fullName.isEmpty ? "未知老师" : teacher.fullName
+                        self?.participantNames[userID] = teacher.fullName.isEmpty ? "" : teacher.fullName
                     }
                     completion?()
                 }
             case .failure:
                 DispatchQueue.main.async {
-                    let unknownLabel = collection == "students" ? "未知学生" : "未知老师"
+                    let unknownLabel = "未知"
                     self?.participantNames[userID] = unknownLabel
                     completion?()
                 }

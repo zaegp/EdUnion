@@ -334,7 +334,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
                     }
                 } else {
                     print("Error updating data: \(error.localizedDescription)")
-                    completion() 
+                    completion()
                 }
             } else {
                 print("Data successfully updated.")

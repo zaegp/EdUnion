@@ -261,7 +261,7 @@ struct BaseCalendarView: View {
             VStack {
                 VStack {
                     HeaderView(
-                        formattedMonthAndYear: formattedMonthAndYear(selectedDay ?? currentDate),
+                        formattedMonthAndYear: TimeService.formattedMonthAndYear(for: selectedDay ?? currentDate, isWeekView: isWeekView),
                         previousAction: previousPeriod,
                         nextAction: nextPeriod
                     )
@@ -510,22 +510,14 @@ struct BaseCalendarView: View {
         generateDays(for: selectedDay ?? currentDate)
     }
     
-    func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
-    
     func toggleSingleSelection(for day: Date) {
         if selectedDay == day {
             selectedDay = nil
         } else {
             selectedDay = day
         }
-        print("Selected Day: \(selectedDay)")
         
         if isWeekView {
-            
             generateDays(for: selectedDay ?? currentDate)
         }
     }
@@ -534,76 +526,28 @@ struct BaseCalendarView: View {
         generateDays(for: currentDate)
     }
     
+    func adjustPeriod(by value: Int) {
+        let component: Calendar.Component = isWeekView ? .weekOfYear : .month
+        
+        if let selectedDay = selectedDay {
+            if let newSelectedDay = Calendar.current.date(byAdding: component, value: value, to: selectedDay) {
+                self.selectedDay = newSelectedDay
+                generateDays(for: newSelectedDay)
+            }
+        } else {
+            if let newCurrentDate = Calendar.current.date(byAdding: component, value: value, to: currentDate) {
+                self.currentDate = newCurrentDate
+                generateDays(for: newCurrentDate)
+            }
+        }
+    }
+
     func previousPeriod() {
-        if isWeekView {
-            if let selectedDay = selectedDay {
-                if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: selectedDay) {
-                    self.selectedDay = newSelectedDay
-                    generateDays(for: newSelectedDay)
-                }
-            } else {
-                if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentDate) {
-                    self.currentDate = newCurrentDate
-                    generateDays(for: newCurrentDate)
-                }
-            }
-        } else {
-            if let selectedDay = selectedDay {
-                if let newSelectedDay = Calendar.current.date(byAdding: .month, value: -1, to: selectedDay) {
-                    self.selectedDay = newSelectedDay
-                    generateDays(for: newSelectedDay)
-                }
-            } else {
-                if let newCurrentDate = Calendar.current.date(byAdding: .month, value: -1, to: currentDate) {
-                    self.currentDate = newCurrentDate
-                    generateDays(for: newCurrentDate)
-                }
-            }
-        }
+        adjustPeriod(by: -1)
     }
-    
+
     func nextPeriod() {
-        if isWeekView {
-            if let selectedDay = selectedDay {
-                if let newSelectedDay = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: selectedDay) {
-                    self.selectedDay = newSelectedDay
-                    generateDays(for: newSelectedDay)
-                }
-            } else {
-                if let newCurrentDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate) {
-                    self.currentDate = newCurrentDate
-                    generateDays(for: newCurrentDate)
-                }
-            }
-        } else {
-            if let selectedDay = selectedDay {
-                if let newSelectedDay = Calendar.current.date(byAdding: .month, value: 1, to: selectedDay) {
-                    self.selectedDay = newSelectedDay
-                    generateDays(for: newSelectedDay)
-                }
-            } else {
-                if let newCurrentDate = Calendar.current.date(byAdding: .month, value: 1, to: currentDate) {
-                    self.currentDate = newCurrentDate
-                    generateDays(for: newCurrentDate)
-                }
-            }
-        }
-    }
-    
-    func formattedMonthAndYear(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        if isWeekView {
-            let calendar = Calendar.current
-            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
-            let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
-            formatter.dateFormat = "MMM d"
-            let startString = formatter.string(from: startOfWeek)
-            let endString = formatter.string(from: endOfWeek)
-            return "\(startString) - \(endString)"
-        } else {
-            formatter.dateFormat = "yyyy MMM"
-            return formatter.string(from: date)
-        }
+        adjustPeriod(by: 1)
     }
 }
 

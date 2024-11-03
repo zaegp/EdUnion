@@ -93,7 +93,6 @@ class TodayCoursesCell: UITableViewCell {
             noteLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             
             confirmButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-//            confirmButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 25)
             confirmButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
         ])
     }

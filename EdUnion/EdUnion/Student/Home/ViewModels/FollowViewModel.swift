@@ -12,40 +12,49 @@ class FollowViewModel: BaseCollectionViewModelProtocol {
     var onDataUpdate: (() -> Void)?
     
     func fetchData() {
-            guard let userID = UserSession.shared.currentUserID else {
-                print("User ID is nil.")
-                return
-            }
-
-            fetchBlocklist { [weak self] blocklist in
-                self?.blocklist = blocklist
-                UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "followList") { result in
-                    switch result {
-                    case .success(let teachers):
-                        let filteredTeachers = teachers.filter { !blocklist.contains($0.id) }
-                        self?.items = filteredTeachers
-                        self?.filteredItems = filteredTeachers
-                        self?.onDataUpdate?()
-                    case .failure(let error):
-                        print("Failed to fetch teachers: \(error)")
-                        self?.items = []
-                        self?.filteredItems = []
-                        self?.onDataUpdate?()
-                    }
-                }
+        fetchBlocklist { [weak self] blocklist in
+            guard let self = self else { return }
+            self.blocklist = blocklist
+            self.fetchFollowedTeachers(for: userID)
+        }
+    }
+    
+    private func fetchFollowedTeachers(for userID: String) {
+        UserFirebaseService.shared.fetchTeacherList(forStudentID: userID, listKey: "followList") { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let teachers):
+                self.updateTeachers(with: teachers)
+            case .failure(let error):
+                print("Failed to fetch teachers: \(error)")
+                self.clearTeachers()
             }
         }
+    }
+    
+    private func updateTeachers(with teachers: [Teacher]) {
+        let filteredTeachers = teachers.filter { !blocklist.contains($0.id) }
+        items = filteredTeachers
+        filteredItems = filteredTeachers
+        onDataUpdate?()
+    }
+    
+    private func clearTeachers() {
+        items = []
+        filteredItems = []
+        onDataUpdate?()
+    }
     
     func search(query: String) {
-        if query.isEmpty {
-            filteredItems = items
-        } else {
-            filteredItems = items.filter { teacher in
-                return teacher.fullName.lowercased().contains(query.lowercased()) ||
-                teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
-            }
-        }
+        filteredItems = query.isEmpty ? items : filteredTeachers(by: query)
         onDataUpdate?()
+    }
+    
+    private func filteredTeachers(by query: String) -> [Teacher] {
+        return items.filter { teacher in
+            teacher.fullName.lowercased().contains(query.lowercased()) ||
+            teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
+        }
     }
     
     func numberOfItems() -> Int {

@@ -1074,7 +1074,7 @@ extension FilesVC: URLSessionDownloadDelegate {
         task.resume()
     }
 
-    // MARK: - URLSessionDownloadDelegate 方法
+    // MARK: - URLSessionDownloadDelegate 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
                     didWriteData bytesWritten: Int64,
                     totalBytesWritten: Int64,

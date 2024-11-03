@@ -26,7 +26,6 @@ extension UIViewController {
     }
 }
 
-// MARK: - 手勢返回前一頁
 extension UIViewController {
     
     func enableSwipeToGoBack() {

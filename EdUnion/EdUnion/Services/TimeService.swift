@@ -28,6 +28,24 @@ class TimeService {
         formatter.timeZone = TimeZone.current
         return formatter
     }()
+    
+    static func formattedMonthAndYear(for date: Date, isWeekView: Bool) -> String {
+        let formatter = DateFormatter()
+        if isWeekView {
+            let calendar = Calendar.current
+            guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)),
+                  let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek) else {
+                return ""
+            }
+            formatter.dateFormat = "MMM d"
+            let startString = formatter.string(from: startOfWeek)
+            let endString = formatter.string(from: endOfWeek)
+            return "\(startString) - \(endString)"
+        } else {
+            formatter.dateFormat = "yyyy MMM"
+            return formatter.string(from: date)
+        }
+    }
 
     static func convertCourseTimeToDisplay(from times: [String]) -> String {
         guard let firstTime = times.first else { return "" }

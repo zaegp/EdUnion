@@ -8,6 +8,7 @@
 protocol BaseCollectionViewModelProtocol {
     var items: [Teacher] { get set }
     var onDataUpdate: (() -> Void)? { get set }
+    var userID: String { get }
 
     func fetchData()
     func numberOfItems() -> Int
@@ -17,17 +18,21 @@ protocol BaseCollectionViewModelProtocol {
 }
 
 extension BaseCollectionViewModelProtocol {
+    var userID: String {
+            return UserSession.shared.unwrappedUserID
+        }
+    
     func fetchBlocklist(completion: @escaping ([String]) -> Void) {
-            UserFirebaseService.shared.fetchBlocklist { result in
-                switch result {
-                case .success(let blocklist):
-                    completion(blocklist)
-                case .failure(let error):
-                    print("Error fetching blocklist: \(error)")
-                    completion([])
-                }
+        UserFirebaseService.shared.fetchBlocklist { result in
+            switch result {
+            case .success(let blocklist):
+                completion(blocklist)
+            case .failure(let error):
+                print("Error fetching blocklist: \(error)")
+                completion([])
             }
         }
+    }
     
     func filteredTeachers(by query: String) -> [Teacher] {
         if query.isEmpty {

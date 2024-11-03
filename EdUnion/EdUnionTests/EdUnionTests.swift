@@ -65,6 +65,6 @@ class TeacherDetailVCTests: XCTestCase {
         
         viewController.testable_checkIfTeacherIsFavorited()
 
-        XCTAssertFalse(viewController.testable_getIsFavorite(), "isFavorite 應該保持初始值 false")
+        XCTAssertFalse(viewController.testable_getIsFavorite(), "isFavorite 應該保持 false")
     }
 }

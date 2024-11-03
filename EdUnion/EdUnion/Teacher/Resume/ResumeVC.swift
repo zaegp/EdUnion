@@ -122,8 +122,6 @@ class ResumeVC: UIViewController {
             textField.borderStyle = .none
             textField.textColor = .black
             textField.layer.cornerRadius = 10
-            //            textField.layer.borderWidth = 1
-            //            textField.layer.borderColor = UIColor.mainTint.cgColor
             textField.clipsToBounds = true
             textField.backgroundColor = .myGray
             textField.textAlignment = .left

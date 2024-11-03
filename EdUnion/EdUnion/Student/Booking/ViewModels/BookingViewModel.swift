@@ -73,8 +73,6 @@ class BookingViewModel: ObservableObject {
             
             if isSelectionContinuous(newSelection) {
                 selectedTimes = newSelection
-            } else {
-                // handle non-continuous selection
             }
         } else {
             var newSelection = selectedTimes + [timeSlot]
@@ -82,8 +80,6 @@ class BookingViewModel: ObservableObject {
             
             if isSelectionContinuous(newSelection) {
                 selectedTimes.append(timeSlot)
-            } else {
-                // handle non-continuous selection
             }
         }
     }

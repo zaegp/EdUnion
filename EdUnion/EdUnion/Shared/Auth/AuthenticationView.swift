@@ -22,8 +22,6 @@ struct AuthenticationView: View {
         ZStack {
             Color.myBackground
                 .edgesIgnoringSafeArea(.all)
-            //            RadialGradientView()
-            //                .edgesIgnoringSafeArea(.all)
             VStack {
                 Spacer().frame(height: 50)
                 
@@ -184,7 +182,6 @@ private func handleSignInWithApple(result: Result<ASAuthorization, Error>) {
                     if document?.exists == true {
                         navigateToMainApp()
                     } else {
-                        //                                appleIDCredentialForProfileSetup = appleIDCredential
                         saveUserData(userRef: userRef, appleIDCredential: appleIDCredential)
                     }
                 }
@@ -240,11 +237,6 @@ private func saveUserData(userRef: DocumentReference, appleIDCredential: ASAutho
             print("User data successfully saved to Firestore")
             
             navigateToIntroVC()
-            //                    if userRole == "teacher" {
-            //                        navigateToIntroVC()
-            //                    } else {
-            //                        navigateToMainApp()
-            //                    }
         }
     }
 }

@@ -33,7 +33,6 @@ class SearchBarView: UIView, UISearchBarDelegate {
     
     private func setupUI() {
         searchBar.delegate = self
-//        searchBar.sizeToFit()
         searchBar.backgroundImage = UIImage()
         
         if let searchTextField = searchBar.searchTextField as? UITextField {

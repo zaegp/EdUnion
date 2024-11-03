@@ -113,9 +113,8 @@ class ChatTableViewCell: UITableViewCell {
         contentView.addSubview(bubbleBackgroundView)
         bubbleBackgroundView.addSubview(messageLabel)
         bubbleBackgroundView.addSubview(toggleImageButton)
-        bubbleBackgroundView.addSubview(activityIndicator)
         contentView.addSubview(messageImageView)
-//        messageImageView.addSubview(activityIndicator)
+        contentView.addSubview(activityIndicator)
         contentView.addSubview(timestampLabel)
         
         toggleImageButton.addTarget(self, action: #selector(toggleImageButtonTapped), for: .touchUpInside)
@@ -228,15 +227,6 @@ class ChatTableViewCell: UITableViewCell {
             imageWidthConstraint,
             imageHeightConstraint
         ])
-        
-        NSLayoutConstraint.deactivate([
-            imageTopConstraint,
-            imageBottomConstraint,
-            imageLeadingConstraint,
-            imageTrailingConstraint,
-            imageWidthConstraint,
-            imageHeightConstraint
-        ])
     }
 
     private func setupTimestampLabelConstraints() {
@@ -270,13 +260,13 @@ class ChatTableViewCell: UITableViewCell {
             messageImageView.isHidden = false
             toggleImageButton.isHidden = false
             setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+            activityIndicator.startAnimating()
             
             if let localImage = image {
                 messageImageView.image = localImage
                 activityIndicator.stopAnimating()
             } else {
                 messageImageView.image = nil
-                activityIndicator.startAnimating()
                 loadImage(from: message.content)
             }
             

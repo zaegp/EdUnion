@@ -8,38 +8,46 @@
 import UIKit
 import AgoraUIKit
 
+struct AgoraTokenResponse: Codable {
+    let token: String
+    let appId: String
+}
+
+enum NetworkError: Error, LocalizedError {
+    case invalidURL
+    case encodingError(Error)
+    case networkError(Error)
+    case noData
+    case decodingError(Error)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "無效的 URL"
+        case .encodingError(let error):
+            return "編碼錯誤: \(error.localizedDescription)"
+        case .networkError(let error):
+            return "網絡錯誤: \(error.localizedDescription)"
+        case .noData:
+            return "沒有數據返回"
+        case .decodingError(let error):
+            return "解碼錯誤: \(error.localizedDescription)"
+        }
+    }
+}
+
 class VideoCallVC: UIViewController {
     private var agoraView: AgoraVideoViewer?
     private let activityIndicator = UIActivityIndicatorView(style: .large)
-
+    
     var channelName: String?
+    
     var onCallEnded: (() -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        setupActivityIndicator()
-        
-        guard let channelName = self.channelName, !channelName.isEmpty else {
-            print("無頻道名")
-            return
-        }
-        
-        activityIndicator.startAnimating()
-        
-        fetchAgoraToken(channelName: channelName) { [weak self] token, appId in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                if let token = token, let appId = appId {
-                    self.setupAgoraVideoViewer(token: token, appId: appId, channelName: channelName)
-                    self.activityIndicator.stopAnimating()
-                } else {
-                    print("無法獲取視頻通話 Token 或 App ID")
-                    self.activityIndicator.stopAnimating()
-                }
-            }
-        }
+        setupUI()
+        joinAgoraChannel()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -48,6 +56,11 @@ class VideoCallVC: UIViewController {
         if isBeingDismissed || isMovingFromParent {
             onCallEnded?()
         }
+    }
+    
+    private func setupUI() {
+        view.backgroundColor = .myBackground
+        setupActivityIndicator()
     }
     
     func setupActivityIndicator() {
@@ -61,6 +74,27 @@ class VideoCallVC: UIViewController {
         ])
     }
     
+    private func joinAgoraChannel() {
+        guard let channelName = channelName?.trimmingCharacters(in: .whitespacesAndNewlines), !channelName.isEmpty else {
+            showError(message: "無頻道名")
+            return
+        }
+        
+        activityIndicator.startAnimating()
+        fetchAgoraToken(for: channelName) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.activityIndicator.stopAnimating()
+                switch result {
+                case .success(let tokenResponse):
+                    self.setupAgoraVideoViewer(token: tokenResponse.token, appId: tokenResponse.appId, channelName: channelName)
+                case .failure(let error):
+                    self.showError(message: error.localizedDescription)
+                }
+            }
+        }
+    }
+    
     func setupAgoraVideoViewer(token: String, appId: String, channelName: String) {
         var agSettings = AgoraSettings()
         
@@ -70,7 +104,7 @@ class VideoCallVC: UIViewController {
         agSettings.colors.micButtonNormal = .myGray
         agSettings.colors.camButtonNormal = .myGray
         agSettings.colors.camButtonSelected = .mainOrange
-        agSettings.videoRenderMode = .hidden 
+        agSettings.videoRenderMode = .hidden
         agSettings.colors.micButtonSelected = .mainOrange
         agSettings.colors.buttonTintColor = .white
         
@@ -93,58 +127,58 @@ class VideoCallVC: UIViewController {
         agoraView.join(channel: channelName, as: .broadcaster)
     }
     
-    func fetchAgoraToken(channelName: String, completion: @escaping (String?, String?) -> Void) {
-        let parameters: [String: Any] = [
-            "channelName": channelName
-        ]
-        
-        guard let url = URL(string: "https://us-central1-edunion-e5403.cloudfunctions.net/generateAgoraToken") else {
-            print("無效的 URL")
-            completion(nil, nil)
+    private func fetchAgoraToken(for channelName: String, completion: @escaping (Result<AgoraTokenResponse, Error>) -> Void) {
+        let urlString = "https://us-central1-edunion-e5403.cloudfunctions.net/generateAgoraToken"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NetworkError.invalidURL))
             return
         }
         
+        let parameters = ["channelName": channelName]
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: [])
-            request.httpBody = jsonData
-        } catch let error {
-            print("序列化 JSON 時出錯: \(error)")
-            completion(nil, nil)
+            request.httpBody = try JSONEncoder().encode(parameters)
+        } catch {
+            completion(.failure(NetworkError.encodingError(error)))
             return
         }
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("錯誤: \(error)")
-                completion(nil, nil)
+                completion(.failure(NetworkError.networkError(error)))
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data {
-                do {
-                    if let responseJSON = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                       let token = responseJSON["token"] as? String,
-                       let appId = responseJSON["appId"] as? String {
-                        completion(token, appId)
-                    } else {
-                        print("無法解析 token 或 appId")
-                        completion(nil, nil)
-                    }
-                } catch let jsonError {
-                    print("解析 JSON 時出錯: \(jsonError)")
-                    completion(nil, nil)
-                }
-            } else {
-                print("無法獲取 Token，狀態碼不為200")
-                completion(nil, nil)
+            guard let data = data else {
+                completion(.failure(NetworkError.noData))
+                return
+            }
+            
+            do {
+                let tokenResponse = try JSONDecoder().decode(AgoraTokenResponse.self, from: data)
+                completion(.success(tokenResponse))
+            } catch {
+                completion(.failure(NetworkError.decodingError(error)))
             }
         }
-        
         task.resume()
+    }
+    
+    private func showError(message: String) {
+        let alert = UIAlertController(title: "錯誤", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "確定", style: .default, handler: { [weak self] _ in
+            self?.dismiss(animated: true, completion: nil)
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func leaveChannel(sender: UIButton) {
+        print("離開通話")
+        self.agoraView?.leaveChannel()
+        self.dismiss(animated: true, completion: nil)
     }
 }
 
@@ -161,11 +195,5 @@ extension VideoCallVC: AgoraVideoViewerDelegate {
         leaveButton.addTarget(self, action: #selector(self.leaveChannel), for: .touchUpInside)
         
         return [leaveButton]
-    }
-    
-    @objc func leaveChannel(sender: UIButton) {
-        print("離開通話")
-        self.agoraView?.leaveChannel()
-        self.dismiss(animated: true, completion: nil)
     }
 }
