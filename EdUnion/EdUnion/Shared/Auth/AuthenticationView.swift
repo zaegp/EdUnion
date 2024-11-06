@@ -283,18 +283,6 @@ private func sha256(_ input: String) -> String {
 }
 }
 
-struct RadialGradientView: View {
-    var body: some View {
-        RadialGradient(
-            gradient: Gradient(colors: [Color(hex: "#eeeeee"), Color(hex: "#ff6347"), Color(hex: "#252525")]),
-            center: .bottomLeading,
-            startRadius: 20,
-            endRadius: 300
-        )
-        .edgesIgnoringSafeArea(.all)
-    }
-}
-
 struct SwitchRoleViewControllerRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         let chooseRoleVC = ChooseRoleVC()

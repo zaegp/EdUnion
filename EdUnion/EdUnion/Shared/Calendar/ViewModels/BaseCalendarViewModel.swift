@@ -218,7 +218,10 @@ class BaseCalendarViewModel: ObservableObject {
     }
     
     func cancelAppointment(appointmentID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceled) { result in
+        AppointmentFirebaseService.shared.updateAppointmentStatus(
+            appointmentID: appointmentID,
+            status: .canceled
+        ) { result in
             completion(result)
         }
     }

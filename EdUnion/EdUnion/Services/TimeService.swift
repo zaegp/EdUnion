@@ -121,4 +121,29 @@ class TimeService {
         
         return sharedChatRoomFormatter.string(from: date)
     }
+    
+    // 預約頁面
+    static func formattedDate(_ dateString: String) -> String {
+        let inputFormatter = sharedDateFormatter
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MM月dd日"
+        outputFormatter.timeZone = TimeZone.current
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        }
+        return dateString
+    }
+    
+    static func formattedWeekday(_ dateString: String) -> String {
+        let inputFormatter = sharedDateFormatter
+        let outputFormatter = DateFormatter()
+        outputFormatter.locale = Locale(identifier: "zh_CN")
+        outputFormatter.dateFormat = "EEEE"
+        outputFormatter.timeZone = TimeZone.current
+        if let date = inputFormatter.date(from: dateString) {
+            let weekday = outputFormatter.string(from: date)
+            return weekday
+        }
+        return ""
+    }
 }

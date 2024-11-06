@@ -76,7 +76,7 @@ class VideoCallVC: UIViewController {
     
     private func joinAgoraChannel() {
         guard let channelName = channelName?.trimmingCharacters(in: .whitespacesAndNewlines), !channelName.isEmpty else {
-            showError(message: "無頻道名")
+            showNetworkError()
             return
         }
         
@@ -89,7 +89,7 @@ class VideoCallVC: UIViewController {
                 case .success(let tokenResponse):
                     self.setupAgoraVideoViewer(token: tokenResponse.token, appId: tokenResponse.appId, channelName: channelName)
                 case .failure(let error):
-                    self.showError(message: error.localizedDescription)
+                    self.showNetworkError()
                 }
             }
         }
@@ -107,7 +107,6 @@ class VideoCallVC: UIViewController {
         agSettings.videoRenderMode = .hidden
         agSettings.colors.micButtonSelected = .mainOrange
         agSettings.colors.buttonTintColor = .white
-        
         AgoraVideoViewer.printLevel = .verbose
         
         let agoraView = AgoraVideoViewer(
@@ -167,8 +166,8 @@ class VideoCallVC: UIViewController {
         task.resume()
     }
     
-    private func showError(message: String) {
-        let alert = UIAlertController(title: "錯誤", message: message, preferredStyle: .alert)
+    private func showNetworkError() {
+        let alert = UIAlertController(title: "錯誤", message: "請檢查網路連線", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "確定", style: .default, handler: { [weak self] _ in
             self?.dismiss(animated: true, completion: nil)
         }))

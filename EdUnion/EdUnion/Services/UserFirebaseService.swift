@@ -57,8 +57,8 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         }
     }
     
-    func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void) {
-        let studentRef = db.collection("students").document(studentID)
+    func getStudentFollowList(completion: @escaping ([String]?, Error?) -> Void) {
+        let studentRef = db.collection("students").document(userID)
         
         studentRef.getDocument { document, error in
             if let error = error {
@@ -73,8 +73,8 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     // MARK: - 學生首頁：更新關注和常用老師列表
-    func updateStudentList(studentID: String, teacherID: String, listName: String, add: Bool, completion: @escaping (Error?) -> Void) {
-        let studentRef = db.collection("students").document(studentID)
+    func updateStudentList(teacherID: String, listName: String, add: Bool, completion: @escaping (Error?) -> Void) {
+        let studentRef = db.collection("students").document(userID)
         let operation: FieldValue = add ? FieldValue.arrayUnion([teacherID]) : FieldValue.arrayRemove([teacherID])
         
         studentRef.updateData([
@@ -257,7 +257,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     // MARK: - 老師：存日期顏色對應
     func saveDateColorToFirebase(date: Date, color: Color, teacherID: String) {
         let colorHex = color.toHex()
-        let dateString = dateFormatter.string(from: date)
+        let dateString = TimeService.sharedDateFormatter.string(from: date)
         let teacherRef = db.collection("teachers").document(teacherID)
         
         teacherRef.updateData([
@@ -371,7 +371,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     
     // 老師：取今日課程
     func fetchTodayConfirmedAppointments(completion: @escaping (Result<[Appointment], Error>) -> Void) {
-        let todayDateString = dateFormatter.string(from: Date())
+        let todayDateString = TimeService.sharedDateFormatter.string(from: Date())
         
         db.collection("appointments")
             .whereField("date", isEqualTo: todayDateString)

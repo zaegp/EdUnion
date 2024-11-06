@@ -6,5 +6,5 @@
 //
 
 protocol UserFirebaseServiceProtocol {
-    func getStudentFollowList(studentID: String, completion: @escaping ([String]?, Error?) -> Void)
+    func getStudentFollowList(completion: @escaping ([String]?, Error?) -> Void)
 }

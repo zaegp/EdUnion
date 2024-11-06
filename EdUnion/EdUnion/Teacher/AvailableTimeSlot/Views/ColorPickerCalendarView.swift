@@ -109,9 +109,10 @@ struct ColorPickerCalendarView: View {
             } else if let document = documentSnapshot, document.exists {
                 if let data = document.data(), let selectedTimeSlots = data["selectedTimeSlots"] as? [String: String] {
                     for (dateString, colorHex) in selectedTimeSlots {
-                        if let date = dateFormatter.date(from: dateString) {
+                        if let date = TimeService.sharedDateFormatter.date(from: dateString) {
                             self.dateColors[date] = Color(hex: colorHex)
                         }
+
                     }
                 }
             }
@@ -169,7 +170,7 @@ struct ColorPickerCalendarView: View {
         activitiesByDate.removeAll()
         
         for appointment in appointments {
-            if let date = dateFormatter.date(from: appointment.date) {
+            if let date = TimeService.sharedDateFormatter.date(from: appointment.date) {
                 let startOfDay = Calendar.current.startOfDay(for: date)
                 if activitiesByDate[startOfDay] != nil {
                     activitiesByDate[startOfDay]?.append(appointment)
@@ -184,12 +185,12 @@ struct ColorPickerCalendarView: View {
         UserFirebaseService.shared.saveDateColorToFirebase(date: date, color: color, teacherID: userID ?? "")
     }
     
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        return formatter
-    }()
+//    private let dateFormatter: DateFormatter = {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd"
+//        formatter.timeZone = TimeZone.current
+//        return formatter
+//    }()
 }
 
 struct ColorPickerView: View {
@@ -238,9 +239,3 @@ struct ColorPickerView: View {
 #Preview {
     ColorPickerCalendarView()
 }
-
-let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd"
-    return formatter
-}()

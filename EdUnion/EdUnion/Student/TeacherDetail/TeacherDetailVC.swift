@@ -25,7 +25,7 @@ class TeacherDetailVC: UIViewController {
     
     var teacher: Teacher?
     private var isFavorite: Bool = false
-    private let studentID = UserSession.shared.unwrappedUserID
+    private let userID = UserSession.shared.unwrappedUserID
     var userFirebaseService: UserFirebaseServiceProtocol = UserFirebaseService.shared
     
     override func viewDidLoad() {
@@ -127,7 +127,7 @@ class TeacherDetailVC: UIViewController {
     }
     
     private func checkIfTeacherIsFavorited() {
-        userFirebaseService.getStudentFollowList(studentID: studentID) { [weak self] followList, error in
+        userFirebaseService.getStudentFollowList() { [weak self] followList, error in
             if let error = error {
                 print("檢查 followList 時出錯: \(error.localizedDescription)")
             } else if let followList = followList, let teacherID = self?.teacher?.id {
@@ -267,7 +267,7 @@ class TeacherDetailVC: UIViewController {
     @objc private func chatButtonTapped() {
         let chatVC = ChatVC()
         chatVC.teacher = teacher
-        chatVC.student?.id = studentID
+        chatVC.student?.id = userID
         navigationController?.pushViewController(chatVC, animated: true)
     }
     
@@ -283,7 +283,7 @@ class TeacherDetailVC: UIViewController {
     
     private func toggleFavorite(add: Bool, completion: @escaping (Error?) -> Void) {
         guard let teacherID = teacher?.id else { return }
-        UserFirebaseService.shared.updateStudentList(studentID: studentID, teacherID: teacherID, listName: "followList", add: add) { error in
+        UserFirebaseService.shared.updateStudentList(teacherID: teacherID, listName: "followList", add: add) { error in
             if let error = error {
                 completion(error)
             } else {

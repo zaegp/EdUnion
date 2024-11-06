@@ -267,7 +267,9 @@ class ChatTableViewCell: UITableViewCell {
             
             if let localImage = image {
                 messageImageView.image = localImage
-                activityIndicator.stopAnimating()
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                }
             } else {
                 messageImageView.image = nil
                 loadImage(from: message.content)
@@ -367,16 +369,16 @@ class ChatTableViewCell: UITableViewCell {
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {
             messageImageView.kf.setImage(with: url) { result in
-                self.activityIndicator.stopAnimating()
                 switch result {
                 case .success:
-                    break
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
                 case .failure(let error):
                     print("圖片加載失敗: \(error)")
                 }
             }
         } else {
-            activityIndicator.stopAnimating()
             print("無效的圖片URL")
         }
     }
