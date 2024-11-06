@@ -171,7 +171,6 @@ class AppointmentFirebaseService {
 
     // MARK: - 老師：獲取待確認的預約
     func listenToPendingAppointments(onUpdate: @escaping (Result<[Appointment], Error>) -> Void) {
-        //            listener?.remove()
         
         listener = db.collection("appointments")
             .whereField("teacherID", isEqualTo: userID)

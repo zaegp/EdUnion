@@ -10,6 +10,7 @@ import UIKit
 protocol FileCellDelegate: AnyObject {
     func fileCellDidRequestDelete(_ cell: FileCell)
     func fileCellDidRequestEditName(_ cell: FileCell)
+    func isTeacher() -> Bool
 }
 
 class FileCell: UICollectionViewCell {
@@ -109,6 +110,10 @@ class FileCell: UICollectionViewCell {
 
 extension FileCell: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard delegate?.isTeacher() == true else {
+            return nil 
+        }
+
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
             let editAction = UIAction(title: "編輯文件名稱", image: UIImage(systemName: "pencil")) { [weak self] _ in
                 guard let self = self else { return }

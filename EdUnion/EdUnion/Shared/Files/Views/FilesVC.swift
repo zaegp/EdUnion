@@ -25,13 +25,13 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     
     let storage = Storage.storage()
     let firestore = Firestore.firestore()
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     
     var documentInteractionController: UIDocumentInteractionController?
     var currentUploadTask: StorageUploadTask?
     
     private var userRole: UserRole = UserRole(rawValue: UserDefaults.standard.string(forKey: "userRole") ?? "teacher") ?? .teacher
-
+    
     var fileURLs: [URL: String] = [:]
     var fileDownloadStatus: [URL: Bool] = [:]
     
@@ -46,7 +46,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         if userRole == .teacher {
             setupSendButton()
             setupStudentTableView()
-            setupLongPressGesture()
             setupMenu()
             setupActivityIndicator()
         }
@@ -65,22 +64,22 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
-                activityIndicator.center = self.view.center
-                activityIndicator.hidesWhenStopped = true 
-                self.view.addSubview(activityIndicator)
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        self.view.addSubview(activityIndicator)
     }
     
     func showActivityIndicator() {
-            DispatchQueue.main.async {
-                self.activityIndicator.startAnimating()
-            }
+        DispatchQueue.main.async {
+            self.activityIndicator.startAnimating()
         }
-        
-        func hideActivityIndicator() {
-            DispatchQueue.main.async {
-                self.activityIndicator.stopAnimating()
-            }
+    }
+    
+    func hideActivityIndicator() {
+        DispatchQueue.main.async {
+            self.activityIndicator.stopAnimating()
         }
+    }
     
     private func setupSendButton() {
         sendButton = UIButton(type: .system)
@@ -256,7 +255,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             self.endSendAnimation()
         }
     }
-
+    
     func startSendAnimation() {
         let planeImageView = UIImageView(image: UIImage(systemName: "paperplane.fill"))
         planeImageView.tintColor = .mainOrange
@@ -279,7 +278,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             self.showCheckmarkAnimation()
         })
     }
-
+    
     func showCheckmarkAnimation() {
         let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
         checkmarkImageView.tintColor = .mainOrange
@@ -307,7 +306,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             })
         })
     }
-
+    
     func endSendAnimation() {
         print("文件傳送完成")
     }
@@ -319,32 +318,26 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
     
     private func previewFile(at url: URL) {
-           if FileManager.default.fileExists(atPath: url.path) {
-               previewItem = url as NSURL
-               let previewController = QLPreviewController()
-               previewController.dataSource = self
-               present(previewController, animated: true, completion: nil)
-           } else {
-               print("File does not exist at path: \(url.path)")
-               showAlert(title: "無法預覽", message: "文件不存在或已被刪除。")
-           }
-       }
-       
-       func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
-           return previewItem == nil ? 0 : 1
-       }
-       
-       func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
-           return previewItem!
-       }
+        if FileManager.default.fileExists(atPath: url.path) {
+            previewItem = url as NSURL
+            let previewController = QLPreviewController()
+            previewController.dataSource = self
+            present(previewController, animated: true, completion: nil)
+        } else {
+            print("File does not exist at path: \(url.path)")
+            showAlert(title: "無法預覽", message: "文件不存在或已被刪除。")
+        }
+    }
+    
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+        return previewItem == nil ? 0 : 1
+    }
+    
+    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+        return previewItem!
+    }
     
     func fetchUserFiles() {
-        guard let currentUserID = UserSession.shared.currentUserID else {
-            print("Error: Current user ID is nil.")
-            setCustomEmptyStateView()
-            return
-        }
-        
         let cachedFiles = getCachedFiles()
         if !cachedFiles.isEmpty {
             self.files = cachedFiles
@@ -357,24 +350,24 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             setCustomEmptyStateView()
         }
         
-        setupFirestoreListener(for: currentUserID)
+        setupFirestoreListener(for: userID)
     }
     
     func setupFirestoreListener(for currentUserID: String) {
+        guard userRole == .student else {
+            return
+        }
+        
         let collectionPath = "files"
-        let queryField = userRole == .teacher ? "ownerID" : "authorizedStudents"
-
-        let query = userRole == .teacher ?
-            firestore.collection(collectionPath).whereField(queryField, isEqualTo: currentUserID) :
-            firestore.collection(collectionPath).whereField(queryField, arrayContains: currentUserID)
-
+        let query = firestore.collection(collectionPath).whereField("authorizedStudents", arrayContains: currentUserID)
+        
         query.addSnapshotListener { [weak self] (snapshot, error) in
             if let error = error {
                 print("Error fetching user files: \(error.localizedDescription)")
                 self?.setCustomEmptyStateView()
                 return
             }
-
+            
             guard let snapshot = snapshot else {
                 print("No snapshot received.")
                 self?.files.removeAll()
@@ -382,7 +375,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 self?.setCustomEmptyStateView()
                 return
             }
-
+            
             self?.handleFetchedFiles(snapshot)
         }
     }
@@ -390,11 +383,11 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     func getCachedFiles() -> [FileItem] {
         let fileManager = FileManager.default
         let cacheDirectory = getCacheDirectory()
-
+        
         do {
             let fileURLs = try fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
             var cachedFiles: [FileItem] = []
-
+            
             for fileURL in fileURLs {
                 let fileName = fileURL.lastPathComponent
                 let fileItem = FileItem(localURL: fileURL, remoteURL: fileURL, downloadURL: "", fileName: fileName, storagePath: "files/\(fileName)")
@@ -411,43 +404,40 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         guard let documents = snapshot?.documents else {
             print("No files found.")
             self.files.removeAll()
-            self.collectionView.reloadData()
-            setCustomEmptyStateView()
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+                self.setCustomEmptyStateView()
+            }
             return
         }
-
+        
         var updatedFiles: [FileItem] = []
         self.fileDownloadStatus.removeAll()
         self.fileURLs.removeAll()
-
+        
         for document in documents {
             guard let urlString = document.data()["downloadURL"] as? String,
                   let fileName = document.data()["fileName"] as? String,
                   let remoteURL = URL(string: urlString) else {
                 continue
             }
-
+            
+            let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
             if let cachedURL = isFileCached(fileName: fileName) {
-                let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
                 let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = false
             } else {
-                let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
                 let fileItem = FileItem(localURL: nil, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = true
-
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
-
+                
                 self.downloadFile(from: remoteURL, withName: fileName)
             }
         }
-
+        
         self.files = updatedFiles
-
+        
         DispatchQueue.main.async {
             self.collectionView.reloadData()
             if self.files.isEmpty {
@@ -523,15 +513,14 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         }
         
         guard fileURL.startAccessingSecurityScopedResource() else {
-            print("無法訪問安全範圍資源")
-            completion(.failure(NSError(domain: "FileAccess", code: -1, userInfo: [NSLocalizedDescriptionKey: "無法訪問安全範圍資源"])))
+            print("無法訪問")
+            completion(.failure(NSError(domain: "FileAccess", code: -1, userInfo: [NSLocalizedDescriptionKey: "無法訪問"])))
             return
         }
         defer {
             fileURL.stopAccessingSecurityScopedResource()
         }
         
-        // Step 1: Copy the file to the app's cache directory
         let cacheDirectory = getCacheDirectory()
         let cachedFileURL = cacheDirectory.appendingPathComponent(fileName)
         do {
@@ -634,18 +623,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             } else {
                 print("File metadata saved successfully.")
             }
-        }
-    }
-    
-    func setupLongPressGesture() {
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        collectionView.addGestureRecognizer(longPressGesture)
-    }
-    
-    @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
-        let point = gesture.location(in: collectionView)
-        if let indexPath = collectionView.indexPathForItem(at: point) {
-            editFileName(at: indexPath)
         }
     }
     
@@ -775,21 +752,21 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
         let cell: FileCell = collectionView.dequeueReusableCell(withReuseIdentifier: "fileCell", for: indexPath)
         let fileItem = files[indexPath.item]
         cell.delegate = self
-
+        
         var isDownloading = false
         var progress: Float = 0.0
-
+        
         if let isFileDownloading = fileDownloadStatus[fileItem.remoteURL] {
             isDownloading = isFileDownloading
         }
-
+        
         if let downloadProgress = fileDownloadProgress[fileItem.remoteURL] {
             progress = downloadProgress
         }
-
+        
         cell.configure(with: fileItem, isDownloading: isDownloading, allowsMultipleSelection: collectionView.allowsMultipleSelection)
         cell.updateProgress(progress)
-
+        
         return cell
     }
     
@@ -810,7 +787,7 @@ extension FilesVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColle
             }
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if indexPath.item < files.count {
             let deselectedFileItem = files[indexPath.item]
@@ -844,7 +821,11 @@ extension FilesVC: FileCellDelegate {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         editFileName(at: indexPath)
     }
-
+    
+    func isTeacher() -> Bool {
+        return userRole == .teacher
+    }
+    
     func editFileName(at indexPath: IndexPath) {
         let fileItem = files[indexPath.item]
         let alertController = UIAlertController(title: "編輯文件名稱", message: "請輸入新的文件名稱", preferredStyle: .alert)
@@ -852,7 +833,7 @@ extension FilesVC: FileCellDelegate {
         alertController.addTextField { textField in
             textField.text = fileItem.fileName
         }
-
+        
         let confirmAction = UIAlertAction(title: "確定", style: .default) { [weak self] _ in
             if let newFileName = alertController.textFields?.first?.text, !newFileName.isEmpty {
                 self?.updateFileName(at: indexPath, newName: newFileName)
@@ -863,7 +844,7 @@ extension FilesVC: FileCellDelegate {
         
         alertController.addAction(confirmAction)
         alertController.addAction(cancelAction)
-
+        
         present(alertController, animated: true, completion: nil)
     }
     
@@ -872,7 +853,7 @@ extension FilesVC: FileCellDelegate {
             print("Error: Index out of range.")
             return
         }
-
+        
         let fileItem = files[indexPath.item]
         
         if userRole == .student {
@@ -899,16 +880,16 @@ extension FilesVC: FileCellDelegate {
                 showAlert(title: "刪除失敗", message: "無法刪除文件，文件的存儲路徑無效。")
                 return
             }
-
+            
             let storageRef = storage.reference().child(storagePath)
-
+            
             storageRef.delete { [weak self] error in
                 if let error = error {
                     print("Error deleting file from Storage: \(error.localizedDescription)")
                     self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
                     return
                 }
-
+                
                 self?.firestore.collection("files")
                     .whereField("storagePath", isEqualTo: storagePath)
                     .getDocuments { snapshot, error in
@@ -916,18 +897,18 @@ extension FilesVC: FileCellDelegate {
                             print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                             return
                         }
-
+                        
                         guard let document = snapshot?.documents.first else {
                             print("File not found in Firestore.")
                             return
                         }
-
+                        
                         document.reference.delete { error in
                             if let error = error {
                                 print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                             } else {
                                 print("Successfully deleted metadata for file: \(fileItem.fileName)")
-
+                                
                                 do {
                                     if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
                                         try FileManager.default.removeItem(at: localURL)
@@ -936,7 +917,7 @@ extension FilesVC: FileCellDelegate {
                                 } catch {
                                     print("Error deleting local file: \(error.localizedDescription)")
                                 }
-
+                                
                                 DispatchQueue.main.async {
                                     guard let self = self else { return }
                                     self.files.remove(at: indexPath.item)
@@ -959,15 +940,15 @@ extension FilesVC: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let selectedURL = urls.first else { return }
         let fileName = selectedURL.lastPathComponent
-
+        
         guard selectedURL.startAccessingSecurityScopedResource() else {
             return
         }
-
+        
         defer {
             selectedURL.stopAccessingSecurityScopedResource()
         }
-
+        
         checkIfFileExists(fileName: fileName) { [weak self] exists in
             if exists {
                 DispatchQueue.main.async {
@@ -1066,40 +1047,40 @@ extension FilesVC {
 }
 
 extension FilesVC: URLSessionDownloadDelegate {
-
+    
     func downloadFile(from url: URL, withName fileName: String) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: nil)
         let task = session.downloadTask(with: url)
         task.resume()
     }
-
-    // MARK: - URLSessionDownloadDelegate 
+    
+    // MARK: - URLSessionDownloadDelegate
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
                     didWriteData bytesWritten: Int64,
                     totalBytesWritten: Int64,
                     totalBytesExpectedToWrite: Int64) {
         guard let url = downloadTask.originalRequest?.url else { return }
-
+        
         let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
         DispatchQueue.main.async {
             self.updateDownloadProgress(for: url, progress: progress)
         }
     }
-
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
                     didFinishDownloadingTo location: URL) {
         guard let url = downloadTask.originalRequest?.url else { return }
         let fileName = url.lastPathComponent
         let cacheDirectory = getCacheDirectory()
         let localUrl = cacheDirectory.appendingPathComponent(fileName)
-
+        
         do {
             if FileManager.default.fileExists(atPath: localUrl.path) {
                 try FileManager.default.removeItem(at: localUrl)
             }
             try FileManager.default.moveItem(at: location, to: localUrl)
-
+            
             DispatchQueue.main.async {
                 if let index = self.files.firstIndex(where: { $0.remoteURL == url }) {
                     let updatedFileItem = FileItem(localURL: localUrl,
@@ -1108,9 +1089,9 @@ extension FilesVC: URLSessionDownloadDelegate {
                                                    fileName: self.files[index].fileName)
                     self.files[index] = updatedFileItem
                     self.fileDownloadStatus[url] = false
-
+                    
                     self.fileDownloadProgress.removeValue(forKey: url)
-
+                    
                     self.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
                 }
             }
@@ -1118,11 +1099,11 @@ extension FilesVC: URLSessionDownloadDelegate {
             print("移動文件時出錯: \(error.localizedDescription)")
         }
     }
-
+    
     func updateDownloadProgress(for url: URL, progress: Double) {
         if let index = files.firstIndex(where: { $0.remoteURL == url }) {
             let indexPath = IndexPath(item: index, section: 0)
-
+            
             if let cell = collectionView.cellForItem(at: indexPath) as? FileCell {
                 cell.updateProgress(Float(progress))
             }

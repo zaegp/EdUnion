@@ -25,9 +25,9 @@ class BookingViewModel: ObservableObject {
         let allSlots = timeSlots.filter { $0.colorHex == selectedTimeSlots[selectedDate] }
             .flatMap { generateTimeSlots(from: $0.timeRanges, bookedSlots: bookedSlots) }
         
-        if isToday(selectedDate) {
+        if TimeService.isToday(selectedDate) {
             let now = Date()
-            return allSlots.filter { !isTimeSlotInPast($0, comparedTo: now) }
+            return allSlots.filter { !TimeService.isTimeSlotInPast($0, comparedTo: now) }
         } else {
             return allSlots
         }
@@ -107,27 +107,5 @@ class BookingViewModel: ObservableObject {
         }
         
         return true
-    }
-
-    func isTimeSlotInPast(_ timeSlot: String, comparedTo currentDate: Date) -> Bool {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        
-        guard let slotTime = dateFormatter.date(from: timeSlot) else { return false }
-        
-        let calendar = Calendar.current
-        let slotDate = calendar.date(bySettingHour: calendar.component(.hour, from: slotTime),
-                                    minute: calendar.component(.minute, from: slotTime),
-                                    second: 0, of: currentDate) ?? currentDate
-        
-        return slotDate < currentDate
-    }
-    
-    func isToday(_ dateString: String) -> Bool {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let selectedDate = dateFormatter.date(from: dateString)
-        let calendar = Calendar.current
-        return calendar.isDateInToday(selectedDate ?? Date())
     }
 }

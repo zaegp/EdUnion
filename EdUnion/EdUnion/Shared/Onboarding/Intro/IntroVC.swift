@@ -230,7 +230,6 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         present(imagePicker, animated: true, completion: nil)
     }
 
-    // UIImagePickerControllerDelegate methods
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         if let editedImage = info[.editedImage] as? UIImage {

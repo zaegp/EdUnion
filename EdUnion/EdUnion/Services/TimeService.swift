@@ -29,6 +29,23 @@ class TimeService {
         return formatter
     }()
     
+    static func isTimeSlotInPast(_ timeSlot: String, comparedTo currentDate: Date) -> Bool {
+        guard let slotTime = sharedTimeFormatter.date(from: timeSlot) else { return false }
+        
+        let calendar = Calendar.current
+        let slotDate = calendar.date(bySettingHour: calendar.component(.hour, from: slotTime),
+                                     minute: calendar.component(.minute, from: slotTime),
+                                     second: 0, of: currentDate) ?? currentDate
+        
+        return slotDate < currentDate
+    }
+    
+    static func isToday(_ dateString: String) -> Bool {
+        guard let selectedDate = sharedDateFormatter.date(from: dateString) else { return false }
+        let calendar = Calendar.current
+        return calendar.isDateInToday(selectedDate)
+    }
+    
     static func formattedMonthAndYear(for date: Date, isWeekView: Bool) -> String {
         let formatter = DateFormatter()
         if isWeekView {
@@ -46,7 +63,7 @@ class TimeService {
             return formatter.string(from: date)
         }
     }
-
+    
     static func convertCourseTimeToDisplay(from times: [String]) -> String {
         guard let firstTime = times.first else { return "" }
         
@@ -66,7 +83,7 @@ class TimeService {
         
         return ""
     }
-
+    
     static func covertToEnMonth(_ dateString: String) -> String {
         guard let date = sharedDateFormatter.date(from: dateString) else {
             return dateString
@@ -76,7 +93,7 @@ class TimeService {
         outputFormatter.dateFormat = "MMM\nd"
         return outputFormatter.string(from: date)
     }
-
+    
     static func sortCourses(by activities: [Appointment], ascending: Bool = false) -> [Appointment] {
         return activities.sorted { (a, b) -> Bool in
             guard let timeAFull = a.times.first,
@@ -93,7 +110,7 @@ class TimeService {
     
     static func covertToChatRoomFormat(_ date: Date) -> String {
         let calendar = Calendar.current
-
+        
         if calendar.isDateInToday(date) {
             sharedChatRoomFormatter.dateFormat = "HH:mm"
         } else if calendar.isDateInYesterday(date) {

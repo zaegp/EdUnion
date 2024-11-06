@@ -247,13 +247,10 @@ struct BaseCalendarView: View {
     @State private var currentDate = Date()
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    @State private var days: [CalendarDay] = []
     @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
     @State private var isShowingNotePopup = false
     @State private var noteText = ""
-    
-    @State private var isWeekView: Bool = false
     
     var body: some View {
         let colors = dateColors
@@ -261,7 +258,7 @@ struct BaseCalendarView: View {
             VStack {
                 VStack {
                     HeaderView(
-                        formattedMonthAndYear: TimeService.formattedMonthAndYear(for: selectedDay ?? currentDate, isWeekView: isWeekView),
+                        formattedMonthAndYear: TimeService.formattedMonthAndYear(for: selectedDay ?? currentDate, isWeekView: viewModel.isWeekView),
                         previousAction: previousPeriod,
                         nextAction: nextPeriod
                     )
@@ -279,7 +276,7 @@ struct BaseCalendarView: View {
                     }
                     
                     LazyVGrid(columns: columns) {
-                        ForEach(days) { calendarDay in
+                        ForEach(viewModel.days) { calendarDay in
                             if let day = calendarDay.date {
                                 let isCurrentMonth = Calendar.current.isDate(day, equalTo: currentDate, toGranularity: .month)
                                 
@@ -301,8 +298,8 @@ struct BaseCalendarView: View {
                             }
                         }
                     }
-                    .frame(height: isWeekView ? 80 : nil)
-                    .animation(.easeInOut(duration: 0.3), value: isWeekView)
+                    .frame(height: viewModel.isWeekView ? 80 : nil)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.isWeekView)
                     .gesture(
                         DragGesture()
                             .onEnded { value in
@@ -320,15 +317,15 @@ struct BaseCalendarView: View {
                                 } else {
                                     withAnimation {
                                         if value.translation.height < 0 {
-                                            if !isWeekView {
-                                                isWeekView = true
-                                                generateDays(for: selectedDay ?? currentDate)
+                                            if !viewModel.isWeekView {
+                                                viewModel.isWeekView.toggle()
+                                                viewModel.generateDays(for: selectedDay ?? currentDate)
                                                 feedbackGenerator.impactOccurred()
                                             }
                                         } else if value.translation.height > 0 {
-                                            if isWeekView {
-                                                isWeekView = false
-                                                generateDays(for: selectedDay ?? currentDate)
+                                            if viewModel.isWeekView {
+                                                viewModel.isWeekView.toggle()
+                                                viewModel.generateDays(for: selectedDay ?? currentDate)
                                                 feedbackGenerator.impactOccurred()
                                             }
                                         }
@@ -338,7 +335,7 @@ struct BaseCalendarView: View {
                     )
                     .onAppear {
                         setupView()
-                        generateDays(for: selectedDay ?? currentDate)
+                        viewModel.generateDays(for: selectedDay ?? currentDate)
                         if !isDataLoaded {
                             viewModel.fetchAppointments(forUserID: userID ?? "", userRole: userRole)
                             viewModel.fetchStudents(for: userID ?? "")
@@ -434,9 +431,9 @@ struct BaseCalendarView: View {
                             viewModel.saveNoteText(text, for: selectedStudentID, teacherID: userID ?? "") { result in
                                 switch result {
                                 case .success:
-                                    print("备注已保存")
+                                    print("備註已保存")
                                 case .failure(let error):
-                                    print("保存备注失败: \(error.localizedDescription)")
+                                    print("保存備註失敗: \(error.localizedDescription)")
                                 }
                             }
                             isShowingNotePopup = false
@@ -451,48 +448,6 @@ struct BaseCalendarView: View {
         )
     }
     
-    func generateDays(for referenceDate: Date) {
-        days.removeAll()
-        
-        let calendar = Calendar.current
-        
-        if isWeekView {
-            guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
-                return
-            }
-            for i in 0..<7 {
-                if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
-                    days.append(CalendarDay(date: date))
-                }
-            }
-        } else {
-            guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return }
-            let numDays = range.count
-            
-            guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return }
-            let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
-            
-            let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
-            
-            for _ in 0..<leadingEmptyDays {
-                days.append(CalendarDay(date: nil))
-            }
-            
-            for day in 1...numDays {
-                if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
-                    days.append(CalendarDay(date: date))
-                }
-            }
-        }
-        
-        for day in days {
-            if let day = day.date {
-                print(day)
-            } else {
-                print("nil")
-            }
-        }
-    }
     
     func updateAppointmentsForDay(_ day: Date) {
         let startOfDay = Calendar.current.startOfDay(for: day)
@@ -507,7 +462,7 @@ struct BaseCalendarView: View {
             viewModel.internalDateColors.removeValue(forKey: startOfDay)
         }
         
-        generateDays(for: selectedDay ?? currentDate)
+        viewModel.generateDays(for: selectedDay ?? currentDate)
     }
     
     func toggleSingleSelection(for day: Date) {
@@ -517,35 +472,35 @@ struct BaseCalendarView: View {
             selectedDay = day
         }
         
-        if isWeekView {
-            generateDays(for: selectedDay ?? currentDate)
+        if viewModel.isWeekView {
+            viewModel.generateDays(for: selectedDay ?? currentDate)
         }
     }
     
     private func setupView() {
-        generateDays(for: currentDate)
+        viewModel.generateDays(for: currentDate)
     }
     
     func adjustPeriod(by value: Int) {
-        let component: Calendar.Component = isWeekView ? .weekOfYear : .month
+        let component: Calendar.Component = viewModel.isWeekView ? .weekOfYear : .month
         
         if let selectedDay = selectedDay {
             if let newSelectedDay = Calendar.current.date(byAdding: component, value: value, to: selectedDay) {
                 self.selectedDay = newSelectedDay
-                generateDays(for: newSelectedDay)
+                viewModel.generateDays(for: newSelectedDay)
             }
         } else {
             if let newCurrentDate = Calendar.current.date(byAdding: component, value: value, to: currentDate) {
                 self.currentDate = newCurrentDate
-                generateDays(for: newCurrentDate)
+                viewModel.generateDays(for: newCurrentDate)
             }
         }
     }
-
+    
     func previousPeriod() {
         adjustPeriod(by: -1)
     }
-
+    
     func nextPeriod() {
         adjustPeriod(by: 1)
     }

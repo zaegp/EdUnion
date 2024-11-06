@@ -31,12 +31,12 @@ struct ColorPickerCalendarView: View {
     @State private var activitiesByDate: [Date: [Appointment]] = [:]
     @State private var timeSlots: [AvailableTimeSlot] = []
     let userID = UserSession.shared.currentUserID
+    let viewModel = BaseCalendarViewModel()
     
     let calendarTip = CalendarTip()
     
     var body: some View {
         VStack {
-            
             TipView(calendarTip)
                 .tipBackground(.myCell)
                 .tint(.myBlack)
@@ -48,7 +48,7 @@ struct ColorPickerCalendarView: View {
                 externalDateColors: Binding(
                     get: { dateColors },
                     set: { dateColors = $0 ?? [:] }
-                ), viewModel: BaseCalendarViewModel(),
+                ), viewModel: viewModel,
                 onDayTap: { day in
                     self.selectedDay = day
                 },
@@ -86,6 +86,9 @@ struct ColorPickerCalendarView: View {
                 fetchDateColors()
                 fetchTimeSlots()
                 fetchAppointments()
+                
+                let today = Calendar.current.startOfDay(for: Date())
+                viewModel.generateDays(for: selectedDay ?? today)
             }
             .task {
                 try? Tips.resetDatastore()

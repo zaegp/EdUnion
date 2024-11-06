@@ -9,10 +9,12 @@ import SwiftUI
 import FirebaseFirestore
 
 class BaseCalendarViewModel: ObservableObject {
+    @Published var days: [CalendarDay] = []
     @Published var participantNames: [String: String] = [:]
     @Published var sortedActivities: [Appointment] = []
     @Published var internalDateColors: [Date: Color] = [:]
     @Published var activitiesByDate: [Date: [Appointment]] = [:]
+    @Published var isWeekView: Bool = false
     
     var students: [Student] = []
     @Published var studentsNotes: [String: String] = [:]
@@ -21,8 +23,8 @@ class BaseCalendarViewModel: ObservableObject {
     var onDataUpdated: (() -> Void)?
     
     func loadAndSortActivities(for activities: [Appointment]) {
-            sortActivities(by: activities)
-        }
+        sortActivities(by: activities)
+    }
     
     func fetchUserData<T: UserProtocol & Decodable>(from collection: String, userID: String, as type: T.Type, completion: (() -> Void)? = nil) {
         UserFirebaseService.shared.fetchUser(from: collection, by: userID, as: type) { [weak self] result in
@@ -46,10 +48,45 @@ class BaseCalendarViewModel: ObservableObject {
         }
     }
     
+    func generateDays(for referenceDate: Date) {
+        days.removeAll()
+        
+        let calendar = Calendar.current
+        
+        if isWeekView {
+            guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
+                return
+            }
+            for i in 0..<7 {
+                if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
+                    days.append(CalendarDay(date: date))
+                }
+            }
+        } else {
+            guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return }
+            let numDays = range.count
+            
+            guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return }
+            let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
+            
+            let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
+            
+            for _ in 0..<leadingEmptyDays {
+                days.append(CalendarDay(date: nil))
+            }
+            
+            for day in 1...numDays {
+                if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
+                    days.append(CalendarDay(date: date))
+                }
+            }
+        }
+    }
+    
     func sortActivities(by activities: [Appointment], ascending: Bool = false) {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm" 
-
+        dateFormatter.dateFormat = "HH:mm"
+        
         sortedActivities = activities.sorted { (a, b) -> Bool in
             guard let timeAFull = a.times.first,
                   let timeBFull = b.times.first,
@@ -115,97 +152,74 @@ class BaseCalendarViewModel: ObservableObject {
     }
     
     func fetchAppointments(forUserID userID: String, userRole: String) {
-            appointmentListener?.remove()
-            appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(
-                forTeacherID: (userRole == "teacher") ? userID : nil,
-                studentID: (userRole == "student") ? userID : nil
-            ) { result in
-                switch result {
-                case .success(let fetchedAppointments):
-                    DispatchQueue.main.async {
-                        self.mapAppointmentsToDates(appointments: fetchedAppointments)
-                    }
-                case .failure(let error):
-                    print("獲取預約時出錯：\(error)")
+        appointmentListener?.remove()
+        appointmentListener = AppointmentFirebaseService.shared.fetchConfirmedAppointments(
+            forTeacherID: (userRole == "teacher") ? userID : nil,
+            studentID: (userRole == "student") ? userID : nil
+        ) { result in
+            switch result {
+            case .success(let fetchedAppointments):
+                DispatchQueue.main.async {
+                    self.mapAppointmentsToDates(appointments: fetchedAppointments)
+                    self.updateDateColors(for: fetchedAppointments)
+                }
+            case .failure(let error):
+                print("獲取預約時出錯：\(error)")
+            }
+        }
+    }
+    
+    private func updateDateColors(for appointments: [Appointment]) {
+        internalDateColors.removeAll()
+        for (date, appointmentsOnDate) in activitiesByDate {
+            let hasConfirmedAppointments = appointmentsOnDate.contains { $0.status.lowercased() == "confirmed" }
+            if hasConfirmedAppointments {
+                internalDateColors[date] = .mainOrange
+            } else {
+                internalDateColors[date] = .clear
+            }
+        }
+    }
+    
+    private func mapAppointmentsToDates(appointments: [Appointment]) {
+        activitiesByDate.removeAll()
+        var seenAppointments = Set<String>()
+        var duplicateAppointments = [Appointment]()
+        
+        for appointment in appointments {
+            if seenAppointments.contains(appointment.id!) {
+                duplicateAppointments.append(appointment)
+            } else {
+                seenAppointments.insert(appointment.id!)
+            }
+            
+            if let date = TimeService.sharedDateFormatter.date(from: appointment.date) {
+                let startOfDay = Calendar.current.startOfDay(for: date)
+                if activitiesByDate[startOfDay] != nil {
+                    activitiesByDate[startOfDay]?.append(appointment)
+                } else {
+                    activitiesByDate[startOfDay] = [appointment]
                 }
             }
         }
         
-        private func mapAppointmentsToDates(appointments: [Appointment]) {
-            activitiesByDate.removeAll()
-            var seenAppointments = Set<String>()
-            var duplicateAppointments = [Appointment]()
-            
-            for appointment in appointments {
-                if seenAppointments.contains(appointment.id!) {
-                    duplicateAppointments.append(appointment)
-                } else {
-                    seenAppointments.insert(appointment.id!)
-                }
-                
-                if let date = TimeService.sharedDateFormatter.date(from: appointment.date) {
-                    let startOfDay = Calendar.current.startOfDay(for: date)
-                    if activitiesByDate[startOfDay] != nil {
-                        activitiesByDate[startOfDay]?.append(appointment)
-                    } else {
-                        activitiesByDate[startOfDay] = [appointment]
-                    }
-                }
-            }
-            
-            if !duplicateAppointments.isEmpty {
-                print("重複的預約: \(duplicateAppointments.map { $0.id })")
-            }
-            
-            for (date, appointments) in activitiesByDate {
-                let hasConfirmedAppointments = appointments.contains { $0.status.lowercased() == "confirmed" }
-                if hasConfirmedAppointments {
-                    internalDateColors[date] = .mainOrange
-                } else {
-                    internalDateColors.removeValue(forKey: date)
-                }
+        if !duplicateAppointments.isEmpty {
+            print("重複的預約: \(duplicateAppointments.map { $0.id })")
+        }
+        
+        for (date, appointments) in activitiesByDate {
+            let hasConfirmedAppointments = appointments.contains { $0.status.lowercased() == "confirmed" }
+            if hasConfirmedAppointments {
+                internalDateColors[date] = .mainOrange
+            } else {
+                internalDateColors.removeValue(forKey: date)
             }
         }
+    }
     
     func cancelAppointment(appointmentID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-            AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceled) { result in
-                completion(result)
-            }
+        AppointmentFirebaseService.shared.updateAppointmentStatus(appointmentID: appointmentID, status: .canceled) { result in
+            completion(result)
         }
-        
-        func generateDays(for referenceDate: Date, isWeekView: Bool) -> [CalendarDay] {
-            var days: [CalendarDay] = []
-            let calendar = Calendar.current
-            
-            if isWeekView {
-                guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
-                    return []
-                }
-                for i in 0..<7 {
-                    if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
-                        days.append(CalendarDay(date: date))
-                    }
-                }
-            } else {
-                guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return [] }
-                let numDays = range.count
-                
-                guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return [] }
-                let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
-                
-                let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
-                
-                for _ in 0..<leadingEmptyDays {
-                    days.append(CalendarDay(date: nil))
-                }
-                
-                for day in 1...numDays {
-                    if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
-                        days.append(CalendarDay(date: date))
-                    }
-                }
-            }
-            
-            return days
-        }
+    }
 }

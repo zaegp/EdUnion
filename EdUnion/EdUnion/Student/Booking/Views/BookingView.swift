@@ -97,39 +97,11 @@ struct BookingView: View {
                 if let selectedDate = selectedDate, let colorHex = selectedTimeSlots[selectedDate] {
                     let slotsForDate = timeSlots.filter { $0.colorHex == colorHex }
                     
-                    if slotsForDate.isEmpty {
-                        VStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                                .foregroundColor(.gray)
-                            Text("該日期暫無可用的時間段")
-                                .font(.headline)
-                                .foregroundColor(.gray)
-                        }
-                        .padding()
+                    if availableTimeSlotsForSelectedDate.isEmpty {
                         Spacer()
+                        noAvailableTimeSlotsView()
                     } else {
-                        ScrollView(.vertical, showsIndicators: false) {
-                            LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
-                                ForEach(availableTimeSlotsForSelectedDate, id: \.self) { timeSlot in
-                                    Button(action: {
-                                        toggleSelection(of: timeSlot)
-                                    }) {
-                                        Text(timeSlot)
-                                            .frame(height: 50)
-                                            .frame(maxWidth: .infinity)
-                                            .background(buttonBackgroundColor(for: timeSlot))
-                                            .foregroundColor(buttonForegroundColor(for: timeSlot))
-                                            .cornerRadius(10)
-                                    }
-                                    .animation(.easeInOut, value: isBooked(timeSlot: timeSlot))
-                                    .disabled(isBooked(timeSlot: timeSlot))
-                                }
-                            }
-                            .padding()
-                        }
+                        availableTimeSlotsView()
                     }
                 } else {
                     Text("請選擇日期")
@@ -158,6 +130,45 @@ struct BookingView: View {
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("確定")))
         }
+    }
+    
+    private func noAvailableTimeSlotsView() -> some View {
+        return VStack {
+            Image(systemName: "clock.arrow.circlepath")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.gray)
+            Text("該日期暫無可用的時間段")
+                .font(.headline)
+                .foregroundColor(.gray)
+        }
+    }
+
+    private func availableTimeSlotsView() -> some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
+                ForEach(availableTimeSlotsForSelectedDate, id: \.self) { timeSlot in
+                    timeSlotButton(timeSlot)
+                }
+            }
+            .padding()
+        }
+    }
+
+    private func timeSlotButton(_ timeSlot: String) -> some View {
+        Button(action: {
+            toggleSelection(of: timeSlot)
+        }) {
+            Text(timeSlot)
+                .frame(height: 50)
+                .frame(maxWidth: .infinity)
+                .background(buttonBackgroundColor(for: timeSlot))
+                .foregroundColor(buttonForegroundColor(for: timeSlot))
+                .cornerRadius(10)
+        }
+        .animation(.easeInOut, value: isBooked(timeSlot: timeSlot))
+        .disabled(isBooked(timeSlot: timeSlot))
     }
         
     func formattedDate(_ dateString: String) -> String {

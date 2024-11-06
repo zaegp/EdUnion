@@ -27,7 +27,7 @@ enum NetworkError: Error, LocalizedError {
         case .encodingError(let error):
             return "編碼錯誤: \(error.localizedDescription)"
         case .networkError(let error):
-            return "網絡錯誤: \(error.localizedDescription)"
+            return "網路錯誤: \(error.localizedDescription)"
         case .noData:
             return "沒有數據返回"
         case .decodingError(let error):

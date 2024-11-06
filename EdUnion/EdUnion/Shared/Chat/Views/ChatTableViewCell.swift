@@ -260,7 +260,10 @@ class ChatTableViewCell: UITableViewCell {
             messageImageView.isHidden = false
             toggleImageButton.isHidden = false
             setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            activityIndicator.startAnimating()
+            
+            DispatchQueue.main.async {
+                self.activityIndicator.startAnimating()
+            }
             
             if let localImage = image {
                 messageImageView.image = localImage
