@@ -12,6 +12,7 @@
 		513BEC122CA8507C000E0DE9 /* ChatListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC112CA8507C000E0DE9 /* ChatListCell.swift */; };
 		513BEC242CAAC7B7000E0DE9 /* FilesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */; };
 		514F866F2CD67FE50053F3E3 /* IntroVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514F866E2CD67FE50053F3E3 /* IntroVC.swift */; };
+		514F86792CDC4C380053F3E3 /* TimeSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514F86782CDC4C380053F3E3 /* TimeSlot.swift */; };
 		5159A0AB2CCFC86700B34584 /* UserProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5159A0AA2CCFC86700B34584 /* UserProtocol.swift */; };
 		5159A0AE2CCFC95500B34584 /* UserFirebaseServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5159A0AD2CCFC95500B34584 /* UserFirebaseServiceProtocol.swift */; };
 		517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517E9DCB2CACC3A8002A2513 /* FirebaseAnalytics */; };
@@ -140,6 +141,7 @@
 		513BEC112CA8507C000E0DE9 /* ChatListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListCell.swift; sourceTree = "<group>"; };
 		513BEC232CAAC7B7000E0DE9 /* FilesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesCell.swift; sourceTree = "<group>"; };
 		514F866E2CD67FE50053F3E3 /* IntroVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVC.swift; sourceTree = "<group>"; };
+		514F86782CDC4C380053F3E3 /* TimeSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeSlot.swift; sourceTree = "<group>"; };
 		5159A0AA2CCFC86700B34584 /* UserProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProtocol.swift; sourceTree = "<group>"; };
 		5159A0AD2CCFC95500B34584 /* UserFirebaseServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFirebaseServiceProtocol.swift; sourceTree = "<group>"; };
 		517E9DDD2CAE81B4002A2513 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
@@ -272,6 +274,14 @@
 			path = Intro;
 			sourceTree = "<group>";
 		};
+		514F86772CDC4C270053F3E3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				514F86782CDC4C380053F3E3 /* TimeSlot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		5159A09D2CCFA8CF00B34584 /* TeacherDetail */ = {
 			isa = PBXGroup;
 			children = (
@@ -283,6 +293,7 @@
 		5159A09E2CCFA90600B34584 /* Booking */ = {
 			isa = PBXGroup;
 			children = (
+				514F86772CDC4C270053F3E3 /* Models */,
 				5159A09F2CCFA94A00B34584 /* ViewModels */,
 				5159A0A02CCFA96400B34584 /* Views */,
 			);
@@ -949,6 +960,7 @@
 				519C8F0B2C980570007DFCBA /* ConfirmCell.swift in Sources */,
 				51F4316E2CC2478900F018ED /* UICollectionView+Ext.swift in Sources */,
 				51ED0B0B2C917BE3006322B7 /* ChatVC.swift in Sources */,
+				514F86792CDC4C380053F3E3 /* TimeSlot.swift in Sources */,
 				519C8EE72C954E73007DFCBA /* UserFirebaseService.swift in Sources */,
 				517E9DF92CB8B5AC002A2513 /* File.swift in Sources */,
 				51D25CC12C9F33BA0083EECF /* Calendar+Ext.swift in Sources */,
