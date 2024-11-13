@@ -11,10 +11,11 @@ class TodayCoursesViewModel: ObservableObject {
     
     private let db = Firestore.firestore()
     let userID = UserSession.shared.currentUserID ?? ""
-    
+    @Published var pendingAppointmentsCount: Int = 0
     @Published var appointments: [Appointment] = [] {
         didSet {
             self.updateUI?()
+            checkCoursesEmpty()
         }
     }
     
@@ -26,6 +27,7 @@ class TodayCoursesViewModel: ObservableObject {
     
     @Published var studentNames: [String: String] = [:]
     @Published var studentNotes: [String: String] = [:]
+    @Published var isCoursesEmpty: Bool = true
     
     var updateUI: (() -> Void)?
     
@@ -136,6 +138,7 @@ class TodayCoursesViewModel: ObservableObject {
             switch result {
             case .success(let fetchedAppointments):
                 self?.pendingAppointments = fetchedAppointments
+                self?.pendingAppointmentsCount = fetchedAppointments.count
             case .failure(let error):
                 print("Error listening to pending appointments: \(error.localizedDescription)")
             }
@@ -177,5 +180,9 @@ class TodayCoursesViewModel: ObservableObject {
     
     func getPendingAppointmentsCount() -> Int {
         return pendingAppointments.count
+    }
+    
+    private func checkCoursesEmpty() {
+        isCoursesEmpty = appointments.isEmpty
     }
 }

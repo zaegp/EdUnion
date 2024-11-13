@@ -25,7 +25,13 @@ class BookingVC: UIViewController {
     }
     
     func setupBookingView(teacherID: String, selectedTimeSlots: [String: String], timeSlots: [AvailableTimeSlot]) {
-        let bookingView = BookingView(viewModel: BookingViewModel(teacherID: teacherID, timeSlots: timeSlots, selectedTimeSlots: selectedTimeSlots))
+        let bookingView = BookingView(
+            viewModel: BookingViewModel(
+                teacherID: teacherID,
+                timeSlots: timeSlots,
+                selectedTimeSlots: selectedTimeSlots
+            )
+        )
         let hostingController = UIHostingController(rootView: bookingView)
         
         addChild(hostingController)

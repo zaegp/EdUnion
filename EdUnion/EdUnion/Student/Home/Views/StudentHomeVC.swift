@@ -37,17 +37,17 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
         return stackView
     }()
     
-    private let underlineView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .mainOrange
-        return view
-    }()
-    
     private let searchIcon: UIImageView = {
         let icon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
         icon.tintColor = .myTint
         icon.isUserInteractionEnabled = true
         return icon
+    }()
+    
+    private let underlineView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .mainOrange
+        return view
     }()
     
     private let searchBarView = SearchBarView()
@@ -57,7 +57,7 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
     
     private var pageViewControllerTopConstraint: NSLayoutConstraint?
     
-    private var selectedIndex: Int = 1  
+    private var selectedIndex: Int = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -202,11 +202,20 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
     }
     
     private func setupPageViewController() {
-        pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+        pageViewController = UIPageViewController(
+            transitionStyle: .scroll,
+            navigationOrientation: .horizontal,
+            options: nil
+        )
         pageViewController.delegate = self
         pageViewController.dataSource = self
         
-        pageViewController.setViewControllers([viewControllers[selectedIndex]], direction: .forward, animated: false, completion: nil)
+        pageViewController.setViewControllers(
+            [viewControllers[selectedIndex]],
+            direction: .forward,
+            animated: false,
+            completion: nil
+        )
         
         addChild(pageViewController)
         view.addSubview(pageViewController.view)

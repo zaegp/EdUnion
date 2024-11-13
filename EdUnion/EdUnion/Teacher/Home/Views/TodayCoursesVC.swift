@@ -7,6 +7,7 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 struct Courses {
     var title: String
@@ -16,19 +17,17 @@ struct Courses {
 
 class TodayCoursesVC: UIViewController {
     
-    let tableView = UITableView()
+    private let tableView = UITableView()
     private var viewModel = TodayCoursesViewModel()
-    
     private let progressBarHostingController = UIHostingController(rootView: ProgressBarView(value: 0.0))
-    let titleLabel = UILabel()
-    let noCoursesLabel = UILabel()
-    let stackView = UIStackView()
-    var expandedIndexPath: IndexPath?
-    let userID = UserSession.shared.currentUserID
-    
-    let bellButton = BadgeButton(type: .system)
-    
+    private let titleLabel = UILabel()
+    private let noCoursesLabel = UILabel()
+    private let stackView = UIStackView()
+    private var expandedIndexPath: IndexPath?
+    private let userID = UserSession.shared.currentUserID
+    private let bellButton = BadgeButton(type: .system)
     private let loadingIndicator = UIActivityIndicatorView(style: .large)
+    private var cancellables = Set<AnyCancellable>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,87 +36,63 @@ class TodayCoursesVC: UIViewController {
         setupNavigationBar()
         setupConstraints()
         setupViewModel()
+        addTableViewGesture()
+        
+        bindViewModel()
+        
         tableView.reloadData()
         viewModel.listenToPendingAppointments()
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-                tableView.addGestureRecognizer(longPressGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setCustomTabBarHidden(false, animated: true)
-        }
-        
+        setupTabBar()
         loadingIndicator.startAnimating()
-                viewModel.fetchTodayAppointments { [weak self] in
-                    self?.loadingIndicator.stopAnimating()
-                }
+        viewModel.fetchTodayAppointments { [weak self] in
+            self?.loadingIndicator.stopAnimating()
+        }
         updateBellBadge()
     }
     
-    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
-        if gestureRecognizer.state == .began {
-            let touchPoint = gestureRecognizer.location(in: self.tableView)
-            
-            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
-                let appointment = viewModel.appointments[indexPath.row]
-                
-                guard let studentName = viewModel.studentNames[appointment.studentID] else {
-                    print("找不到對應的學生姓名")
-                    return
-                }
-                
-                let student = Student.self
-                
-                showAddNoteView(for: appointment.studentID)
-            }
-        }
-    }
-    
-    @objc func updateBellBadge() {
-        let pendingCount = viewModel.getPendingAppointmentsCount()
-        bellButton.setBadge(number: pendingCount)
-        print("Bell badge updated: \(pendingCount)")
-    }
-
-    private func createTableHeader() -> UIView {
-        let headerView = UIView()
-        headerView.backgroundColor = .myCell
-        
-        return headerView
-    }
-    
+    // MARK: - UI Setup
     private func configureUI() {
-        noCoursesLabel.isHidden = true
         view.backgroundColor = .myBackground
-        progressBarHostingController.view.backgroundColor = .myBackground
-        
+        noCoursesLabel.isHidden = true
+        configureTitleLabel()
+        configureNoCoursesLabel()
+        configureProgressBar()
+        configureTableView()
+    }
+    
+    private func configureTitleLabel() {
         titleLabel.text = "Today's Courses"
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
-        
+    }
+    
+    private func configureNoCoursesLabel() {
         noCoursesLabel.text = "今日無課程"
         noCoursesLabel.font = UIFont.systemFont(ofSize: 24, weight: .medium)
         noCoursesLabel.textAlignment = .center
         view.addSubview(noCoursesLabel)
-        
+    }
+    
+    private func configureProgressBar() {
         addChild(progressBarHostingController)
+        progressBarHostingController.view.backgroundColor = .myBackground
         view.addSubview(progressBarHostingController.view)
         progressBarHostingController.didMove(toParent: self)
-        
+    }
+    
+    private func configureTableView() {
         tableView.layer.cornerRadius = 20
-        tableView.layer.masksToBounds = true
         tableView.backgroundColor = .myCell
         tableView.separatorStyle = .none
-        tableView.register(TodayCoursesCell.self, forCellReuseIdentifier: "Cell")
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.register(TodayCoursesCell.self, forCellReuseIdentifier: "Cell")
         tableView.tableHeaderView = createTableHeader()
-        tableView.tableHeaderView?.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 20)
         view.addSubview(tableView)
     }
     
@@ -130,17 +105,12 @@ class TodayCoursesVC: UIViewController {
         navigationItem.rightBarButtonItem = bellBarButtonItem
     }
     
-    @objc private func pushToConfirmVC() {
-        let pendingAppointments = viewModel.pendingAppointments
-        let confirmVC = ConfirmVC(appointments: pendingAppointments)
-        navigationController?.pushViewController(confirmVC, animated: true)
+    private func setupTabBar() {
+        (tabBarController as? TabBarController)?.setCustomTabBarHidden(false, animated: true)
     }
     
     private func setupConstraints() {
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        noCoursesLabel.translatesAutoresizingMaskIntoConstraints = false
-        progressBarHostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        [titleLabel, noCoursesLabel, progressBarHostingController.view, tableView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
@@ -161,25 +131,119 @@ class TodayCoursesVC: UIViewController {
         ])
     }
     
+    // MARK: - ViewModel Binding
     private func setupViewModel() {
         viewModel.updateUI = { [weak self] in
             DispatchQueue.main.async {
-                if self?.viewModel.appointments.isEmpty == true {
-                    self?.noCoursesLabel.isHidden = false
-                    self?.tableView.backgroundView = self?.noCoursesLabel
-                } else {
-                    self?.noCoursesLabel.isHidden = true
-                    self?.tableView.backgroundView = nil
-                    self?.progressBarHostingController.rootView.value = self?.viewModel.progressValue ?? 0.0
-                }
                 self?.tableView.reloadData()
-               
                 self?.updateBellBadge()
             }
         }
     }
+    
+    private func bindViewModel() {
+        viewModel.$pendingAppointmentsCount
+            .sink { [weak self] count in
+                self?.bellButton.setBadge(number: count)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$appointments
+            .sink { [weak self] appointments in
+                self?.noCoursesLabel.isHidden = !appointments.isEmpty
+                self?.tableView.backgroundView = appointments.isEmpty ? self?.noCoursesLabel : nil
+            }
+            .store(in: &cancellables)
+    }
+    
+    // MARK: - Table Header
+    private func createTableHeader() -> UIView {
+        let headerView = UIView()
+        headerView.backgroundColor = .myCell
+        
+        headerView.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 20)
+        
+        return headerView
+    }
+    
+    // MARK: - TableView Gesture
+    private func addTableViewGesture() {
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        tableView.addGestureRecognizer(longPressGesture)
+    }
+    
+    // MARK: - Bell Badge Update
+    @objc func updateBellBadge() {
+        let pendingCount = viewModel.getPendingAppointmentsCount()
+        bellButton.setBadge(number: pendingCount)
+        print("Bell badge updated: \(pendingCount)")
+    }
+    
+    // MARK: - Actions
+    @objc private func pushToConfirmVC() {
+        let pendingAppointments = viewModel.pendingAppointments
+        let confirmVC = ConfirmVC(appointments: pendingAppointments)
+        navigationController?.pushViewController(confirmVC, animated: true)
+    }
+    
+    @objc private func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            let touchPoint = gestureRecognizer.location(in: self.tableView)
+            
+            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
+                let appointment = viewModel.appointments[indexPath.row]
+                
+                guard let studentName = viewModel.studentNames[appointment.studentID] else {
+                    print("找不到對應的學生姓名")
+                    return
+                }
+                
+                let student = Student.self
+                
+                showAddNoteView(for: appointment.studentID)
+            }
+        }
+    }
+    
+    private func showAddNoteView(for studentID: String) {
+        let notePopupView = NotePopupView()
+        setupNotePopupViewConstraints(notePopupView)
+        
+        notePopupView.setExistingNoteText(viewModel.studentNotes[studentID] ?? "")
+        
+        notePopupView.onSave = { [weak self, weak notePopupView] noteText in
+            self?.viewModel.saveNoteText(noteText, for: studentID, teacherID: self?.userID ?? "") { result in
+                if case .success = result {
+                    notePopupView?.removeFromSuperview()
+                    self?.reloadRowForStudent(studentID)
+                }
+            }
+        }
+        
+        notePopupView.onCancel = {
+            notePopupView.removeFromSuperview()
+        }
+    }
+    
+    private func setupNotePopupViewConstraints(_ notePopupView: NotePopupView) {
+        view.addSubview(notePopupView)
+        notePopupView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            notePopupView.topAnchor.constraint(equalTo: view.topAnchor),
+            notePopupView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            notePopupView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            notePopupView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
+    private func reloadRowForStudent(_ studentID: String) {
+        if let indexPath = viewModel.appointments.firstIndex(where: { $0.studentID == studentID }) {
+            tableView.reloadRows(at: [IndexPath(row: indexPath, section: 0)], with: .automatic)
+        }
+    }
 }
-// MARK: - UITableViewDataSource
+
+// MARK: - UITableViewDataSource & UITableViewDelegate
 extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -200,7 +264,7 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     private func configureCell(_ cell: TodayCoursesCell, at indexPath: IndexPath) {
         let appointment = viewModel.appointments[indexPath.row]
-        let studentID = appointment.studentID ?? ""
+        let studentID = appointment.studentID
         let studentName = viewModel.studentNames[studentID] ?? ""
         let studentNote = viewModel.studentNotes[studentID] ?? "沒有備註"
         
@@ -255,39 +319,5 @@ extension TodayCoursesVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .delete
-    }
-    
-    private func showAddNoteView(for studentID: String) {
-        let notePopupView = NotePopupView()
-        notePopupView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(notePopupView)
-        
-        NSLayoutConstraint.activate([
-            notePopupView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            notePopupView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            notePopupView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            notePopupView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
-        ])
-        
-        let existingNote = viewModel.studentNotes[studentID] ?? ""
-        notePopupView.setExistingNoteText(existingNote)
-        
-        notePopupView.onSave = { [weak self, weak notePopupView] noteText in
-            self?.viewModel.saveNoteText(noteText, for: studentID, teacherID: self?.userID ?? "") { result in
-                switch result {
-                case .success:
-                    notePopupView?.removeFromSuperview()
-                    if let indexPath = self?.viewModel.appointments.firstIndex(where: { $0.studentID == studentID }) {
-                        self?.tableView.reloadRows(at: [IndexPath(row: indexPath, section: 0)], with: .automatic)
-                    }
-                case .failure(let error):
-                    print("保存備註失敗: \(error.localizedDescription)")
-                }
-            }
-        }
-        
-        notePopupView.onCancel = {
-            notePopupView.removeFromSuperview()
-        }
     }
 }

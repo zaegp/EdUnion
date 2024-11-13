@@ -39,6 +39,7 @@ class TodayCoursesCell: UITableViewCell {
     
     let noteLabel: UILabel = {
         let label = UILabel()
+        label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false

@@ -8,6 +8,7 @@
 import UIKit
 
 class TeacherDetailVC: UIViewController {
+    
     private var favoriteButton: UIBarButtonItem!
     private var ellipsisButton: UIBarButtonItem!
     private let scrollView = UIScrollView()

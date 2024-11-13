@@ -133,8 +133,7 @@ class ChatTableViewCell: UITableViewCell {
         setupTimestampLabelConstraints()
     }
 
-    // MARK: - Helper Methods for Constraints
-
+    // MARK: - Constraints
     private func setupBubbleConstraints() {
         bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
         bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(

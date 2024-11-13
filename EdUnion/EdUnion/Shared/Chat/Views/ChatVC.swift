@@ -50,10 +50,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         viewModel.onMessagesUpdated = { [weak self] in
             self?.tableView.reloadData()
-            self?.scrollToBottom()
+            self?.scrollToBottom(animated: false)
             self?.messageTextView.becomeFirstResponder()
         }
-        
         messageTextView.delegate = self
     }
     
@@ -72,12 +71,17 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         super.viewWillDisappear(animated)
         
         IQKeyboardManager.shared.enable = true
-        
         if self.isMovingFromParent {
             if let chatListVC = navigationController?.viewControllers.first(where: { $0 is ChatListVC }) {
                 navigationController?.popToViewController(chatListVC, animated: true)
             }
         }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        scrollToBottom(animated: false)
     }
     
     private func updateSendButtonState() {
@@ -228,10 +232,10 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         ])
     }
     
-    private func scrollToBottom() {
+    private func scrollToBottom(animated: Bool = true) {
         if viewModel.numberOfMessages() > 0 {
             let indexPath = IndexPath(row: viewModel.numberOfMessages() - 1, section: 0)
-            tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: animated)
         }
     }
     

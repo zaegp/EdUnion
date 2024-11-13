@@ -282,6 +282,24 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		514F867E2CDC9F6E0053F3E3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */,
+				51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */,
+				51D25C822C9AC2170083EECF /* ProgressBarView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		514F867F2CDC9F830053F3E3 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		5159A09D2CCFA8CF00B34584 /* TeacherDetail */ = {
 			isa = PBXGroup;
 			children = (
@@ -681,10 +699,8 @@
 		51D25C7D2C9AC1870083EECF /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */,
-				51D25C842C9AC5F10083EECF /* TodayCoursesViewModel.swift */,
-				51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */,
-				51D25C822C9AC2170083EECF /* ProgressBarView.swift */,
+				514F867F2CDC9F830053F3E3 /* ViewModels */,
+				514F867E2CDC9F6E0053F3E3 /* Views */,
 			);
 			path = Home;
 			sourceTree = "<group>";
