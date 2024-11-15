@@ -69,6 +69,16 @@ class ChatTableViewCell: UITableViewCell {
         return button
     }()
     
+    private let readReceiptLabel: UILabel = {
+            let label = UILabel()
+            label.font = UIFont.preferredFont(forTextStyle: .caption2)
+            label.textColor = .gray
+            label.text = "已讀"
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.isHidden = true
+            return label
+        }()
+    
     weak var delegate: ChatTableViewCellDelegate?
     
     private var message: Message?
@@ -90,6 +100,9 @@ class ChatTableViewCell: UITableViewCell {
     
     private var imageTopConstraint: NSLayoutConstraint!
     private var imageBottomConstraint: NSLayoutConstraint!
+    
+    private var readReceiptTrailingConstraint: NSLayoutConstraint!
+       
     
     var isSentByCurrentUser: Bool = false {
         didSet {
@@ -116,6 +129,7 @@ class ChatTableViewCell: UITableViewCell {
         contentView.addSubview(messageImageView)
         contentView.addSubview(activityIndicator)
         contentView.addSubview(timestampLabel)
+        contentView.addSubview(readReceiptLabel)
         
         toggleImageButton.addTarget(self, action: #selector(toggleImageButtonTapped), for: .touchUpInside)
         
@@ -131,6 +145,7 @@ class ChatTableViewCell: UITableViewCell {
         setupActivityIndicatorConstraints()
         setupImageViewConstraints()
         setupTimestampLabelConstraints()
+        setupReadReceiptLabelConstraints()
     }
 
     // MARK: - Constraints
@@ -235,60 +250,108 @@ class ChatTableViewCell: UITableViewCell {
         ])
     }
     
+    private func setupReadReceiptLabelConstraints() {
+        readReceiptTrailingConstraint = readReceiptLabel.trailingAnchor.constraint(equalTo: bubbleBackgroundView.leadingAnchor, constant: -4)
+
+        NSLayoutConstraint.activate([
+            readReceiptLabel.heightAnchor.constraint(equalToConstant: 14),
+            readReceiptLabel.bottomAnchor.constraint(equalTo: bubbleBackgroundView.bottomAnchor)
+        ])
+    }
+    
     func configure(with message: Message, previousMessage: Message?, image: UIImage?) {
         self.message = message
-        
         self.isSentByCurrentUser = (message.senderID == userID)
         resetContent()
-        
+
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
             timestampLabel.text = TimeService.covertToChatRoomFormat(message.timestamp.dateValue())
             timestampLabel.isHidden = false
         }
-        
+
         switch message.type {
         case 0:
-            bubbleBackgroundView.isHidden = false
-            messageImageView.isHidden = true
-            toggleImageButton.isHidden = true
-            setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            messageLabel.text = " " + message.content + " "
-            messageLabel.isHidden = false
+            configureTextMessage(message: message)
+
         case 1:
-            bubbleBackgroundView.isHidden = true
-            messageImageView.isHidden = false
-            toggleImageButton.isHidden = false
-            setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
-            
-            DispatchQueue.main.async {
-                self.activityIndicator.startAnimating()
-            }
-            
-            if let localImage = image {
-                messageImageView.image = localImage
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                }
-            } else {
-                messageImageView.image = nil
-                loadImage(from: message.content)
-            }
-            
-        case 2:  
-                bubbleBackgroundView.isHidden = false
-                messageImageView.isHidden = true
-                toggleImageButton.isHidden = true
-                setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
-                messageLabel.text = " 已離開課堂 "
-                messageLabel.isHidden = false
+            configureImageMessage(message: message, image: image)
+
+        case 2:
+            configureSystemMessage(message: message)
+
         default:
-            bubbleBackgroundView.isHidden = true
-            messageImageView.isHidden = true
-            toggleImageButton.isHidden = true
-            messageLabel.isHidden = true
+            hideAllViews()
+        }
+
+        if !isSentByCurrentUser {
+            readReceiptLabel.isHidden = true
         }
         
         updateBubbleAppearance()
+    }
+
+    private func configureTextMessage(message: Message) {
+        bubbleBackgroundView.isHidden = false
+        messageImageView.isHidden = true
+        toggleImageButton.isHidden = true
+
+        setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+        messageLabel.text = " " + message.content + " "
+        messageLabel.isHidden = false
+
+        if isSentByCurrentUser && message.isSeen {
+            readReceiptTrailingConstraint.isActive = true
+            readReceiptLabel.isHidden = false
+        } else {
+            readReceiptLabel.isHidden = true
+        }
+    }
+
+    private func configureImageMessage(message: Message, image: UIImage?) {
+        bubbleBackgroundView.isHidden = true
+        messageImageView.isHidden = false
+        toggleImageButton.isHidden = false
+
+        setupImageConstraints(isSentByCurrentUser: isSentByCurrentUser)
+
+        if let localImage = image {
+            messageImageView.image = localImage
+            activityIndicator.stopAnimating()
+        } else {
+            messageImageView.image = nil
+            loadImage(from: message.content)
+            activityIndicator.startAnimating()
+        }
+
+        if isSentByCurrentUser && message.isSeen {
+            NSLayoutConstraint.activate([
+                readReceiptLabel.trailingAnchor.constraint(equalTo: messageImageView.leadingAnchor, constant: -4),
+                readReceiptLabel.bottomAnchor.constraint(equalTo: messageImageView.bottomAnchor)
+            ])
+            readReceiptLabel.isHidden = false
+        } else {
+            readReceiptLabel.isHidden = true
+        }
+    }
+
+    private func configureSystemMessage(message: Message) {
+        bubbleBackgroundView.isHidden = false
+        messageImageView.isHidden = true
+        toggleImageButton.isHidden = true
+
+        setupBubbleConstraints(isSentByCurrentUser: isSentByCurrentUser)
+        messageLabel.text = " 已離開課堂 "
+        messageLabel.isHidden = false
+
+        readReceiptLabel.isHidden = true
+    }
+
+    private func hideAllViews() {
+        bubbleBackgroundView.isHidden = true
+        messageImageView.isHidden = true
+        toggleImageButton.isHidden = true
+        messageLabel.isHidden = true
+        readReceiptLabel.isHidden = true
     }
     
     private func shouldShowTimestamp(for message: Message, previousMessage: Message?) -> Bool {

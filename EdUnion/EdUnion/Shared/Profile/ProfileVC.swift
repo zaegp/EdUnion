@@ -23,7 +23,7 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
     private let userID = UserSession.shared.unwrappedUserID
     private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     private var userCollection: String {
-        return (userRole == "teacher") ? "teachers" : "students"
+        return (userRole == "teacher") ? "teachers" : Constants.studentsCollection
     }
     private var menuItems: [MenuItem] = []
     

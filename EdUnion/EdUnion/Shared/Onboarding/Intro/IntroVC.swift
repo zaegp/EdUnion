@@ -249,7 +249,7 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
 
         let db = Firestore.firestore()
         
-        let collectionName = userRole == "teacher" ? "teachers" : "students"
+        let collectionName = userRole == "teacher" ? "teachers" : Constants.studentsCollection
         let userRef = db.collection(collectionName).document(userID)
 
         var resumeData: [String] = []

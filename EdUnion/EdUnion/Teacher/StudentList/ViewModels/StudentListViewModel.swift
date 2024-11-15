@@ -32,7 +32,7 @@ class StudentListViewModel {
         for (studentID, _) in studentsNotes {
             dispatchGroup.enter()
             
-            UserFirebaseService.shared.fetchUser(from: "students", by: studentID, as: Student.self) { result in
+            UserFirebaseService.shared.fetchUser(from: Constants.studentsCollection, by: studentID, as: Student.self) { result in
                 defer { dispatchGroup.leave() }
                 
                 switch result {

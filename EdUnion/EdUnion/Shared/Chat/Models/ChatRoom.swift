@@ -11,7 +11,7 @@ import FirebaseFirestore
 struct ChatRoom: Decodable {
     let id: String
     let participants: [String]
-    let messages: [Message]?
+    let messages: [Message]? = nil
     let lastMessage: String?
     let lastMessageTimestamp: Timestamp?
 
@@ -22,4 +22,16 @@ struct ChatRoom: Decodable {
         case lastMessageTimestamp
         case messages
     }
+    
+    init?(document: DocumentSnapshot) {
+            guard
+                let data = document.data(),
+                let participants = data["participants"] as? [String]
+            else { return nil }
+            
+            self.id = document.documentID
+            self.participants = participants
+            self.lastMessage = data["lastMessage"] as? String
+            self.lastMessageTimestamp = data["lastMessageTimestamp"] as? Timestamp
+        }
 }

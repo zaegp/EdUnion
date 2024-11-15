@@ -204,4 +204,71 @@ class ChatViewModel {
             }
     }
     
+    func markMessageAsSeen(documentID: String) {
+        let messageRef = UserFirebaseService.shared.db
+            .collection("chats")
+            .document(chatRoomID)
+            .collection("messages")
+            .document(documentID)
+
+        messageRef.updateData(["isSeen": true]) { error in
+            if let error = error {
+                print("Error marking message \(documentID) as seen: \(error.localizedDescription)")
+            } else {
+                print("Message \(documentID) marked as seen.")
+            }
+        }
+    }
+    
+    func setupRealtimeListener() {
+        let messagesRef = UserFirebaseService.shared.db
+            .collection("chats")
+            .document(chatRoomID)
+            .collection("messages")
+            .whereField("senderID", isNotEqualTo: userID)
+
+        listener = messagesRef.addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error listening for message changes: \(error.localizedDescription)")
+                return
+            }
+
+            guard let snapshot = snapshot else {
+                print("No snapshot data available.")
+                return
+            }
+
+            snapshot.documentChanges.forEach { change in
+                let documentID = change.document.documentID
+                let data = change.document.data()
+                let isSeen = data["isSeen"] as? Bool ?? false
+
+                switch change.type {
+                case .added:
+                    print("New message added: \(documentID)")
+                    if let message = Message(document: change.document) {
+                        self.messages.append(message)
+                        if !isSeen {
+                            self.markMessageAsSeen(documentID: documentID)                        }
+                    }
+                case .modified:
+                    print("Message modified: \(documentID)")
+                    self.updateMessageStatus(documentID: documentID, isSeen: isSeen)
+                case .removed:
+                    print("Message removed: \(documentID)")
+                    self.messages.removeAll { $0.ID == documentID }
+                }
+            }
+        }
+    }
+
+    func updateMessageStatus(documentID: String, isSeen: Bool) {
+        guard let index = messages.firstIndex(where: { $0.ID == documentID }) else { return }
+        messages[index].isSeen = isSeen
+        print("Message \(documentID) updated: isSeen = \(isSeen)")
+        // 可在此處觸發更細粒度的 UI 更新，例如刷新單行
+    }
+       
 }

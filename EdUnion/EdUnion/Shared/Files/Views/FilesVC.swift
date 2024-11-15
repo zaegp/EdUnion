@@ -1,9 +1,9 @@
-//
+
 //  FilesVC.swift
 //  EdUnion
 //
 //  Created by Rowan Su on 2024/9/26.
-//
+
 
 import UIKit
 import FirebaseStorage
@@ -137,9 +137,9 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             studentTableView.bottomAnchor.constraint(equalTo: sendButton.topAnchor)
         ])
         
-        fetchStudentsNotes(forTeacherID: userID ?? "") { [weak self] notes in
+        fetchStudentsNotes(forTeacherID: userID) { [weak self] notes in
             for (studentID, _) in notes {
-                self?.fetchUser(from: "students", userID: studentID, as: Student.self)
+                self?.fetchUser(from: Constants.studentsCollection, userID: studentID, as: Student.self)
             }
         }
     }
@@ -204,11 +204,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
     
     @objc func sendFilesToSelectedStudents() {
-        guard !selectedFiles.isEmpty, !selectedStudentIDs.isEmpty else {
-            print("沒有選擇任何文件或學生")
-            return
-        }
-        
         startSendAnimation()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
@@ -218,7 +213,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                     
                     let fileName = fileItem.fileName
                     
-                    self.firestore.collection("files")
+                    self.firestore.collection(Constants.filesCollection)
                         .whereField("fileName", isEqualTo: fileName)
                         .getDocuments { (snapshot, error) in
                             if let error = error {
@@ -345,12 +340,29 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 self.collectionView.reloadData()
                 self.restoreCollectionView()
             }
-            return
         } else {
             setCustomEmptyStateView()
         }
         
-        setupFirestoreListener(for: userID)
+        if userRole == .student {
+                setupFirestoreListener(for: userID)
+            } else if userRole == .teacher {
+                fetchTeacherFiles()
+            }
+    }
+    
+    func fetchTeacherFiles() {
+        firestore.collection(Constants.filesCollection)
+            .whereField("ownerID", isEqualTo: userID)
+            .getDocuments { [weak self] (snapshot, error) in
+                if let error = error {
+                    print("Error fetching teacher files: \(error.localizedDescription)")
+                    self?.setCustomEmptyStateView()
+                    return
+                }
+
+                self?.handleFetchedFiles(snapshot)
+            }
     }
     
     func setupFirestoreListener(for currentUserID: String) {
@@ -358,7 +370,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             return
         }
         
-        let collectionPath = "files"
+        let collectionPath = Constants.filesCollection
         let query = firestore.collection(collectionPath).whereField("authorizedStudents", arrayContains: currentUserID)
         
         query.addSnapshotListener { [weak self] (snapshot, error) in
@@ -410,34 +422,52 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             }
             return
         }
-        
+
+        // Create a mapping from remoteURL to FileItem
+        var remoteURLToFileItem: [URL: FileItem] = [:]
+        for fileItem in self.files {
+            remoteURLToFileItem[fileItem.remoteURL] = fileItem
+        }
+
         var updatedFiles: [FileItem] = []
         self.fileDownloadStatus.removeAll()
         self.fileURLs.removeAll()
-        
+
         for document in documents {
             guard let urlString = document.data()["downloadURL"] as? String,
                   let fileName = document.data()["fileName"] as? String,
                   let remoteURL = URL(string: urlString) else {
                 continue
             }
-            
+
             let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
-            if let cachedURL = isFileCached(fileName: fileName) {
+
+            if let existingFileItem = remoteURLToFileItem[remoteURL] {
+                // File is already in self.files
+                updatedFiles.append(existingFileItem)
+                self.fileDownloadStatus[remoteURL] = false
+            } else if let cachedURL = isFileCached(fileName: fileName) {
+                // File is cached but not in self.files
                 let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = false
+                self.files.append(fileItem)
             } else {
+                // File is not cached and not in self.files
                 let fileItem = FileItem(localURL: nil, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = true
-                
+                self.files.append(fileItem)
+
                 self.downloadFile(from: remoteURL, withName: fileName)
             }
         }
-        
-        self.files = updatedFiles
-        
+
+        // Remove files that are no longer in Firestore
+        self.files = self.files.filter { fileItem in
+            updatedFiles.contains(where: { $0.remoteURL == fileItem.remoteURL })
+        }
+
         DispatchQueue.main.async {
             self.collectionView.reloadData()
             if self.files.isEmpty {
@@ -506,23 +536,33 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
     
     func uploadFileToFirebase(_ fileURL: URL, fileName: String, retryCount: Int = 3, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let currentUserID = UserSession.shared.currentUserID else {
-            print("Error: Current user ID is nil.")
-            completion(.failure(NSError(domain: "UserSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "Current user ID is nil."])))
-            return
-        }
-        
-        guard fileURL.startAccessingSecurityScopedResource() else {
-            print("無法訪問")
+        guard prepareFileForUpload(fileURL, fileName: fileName) else {
             completion(.failure(NSError(domain: "FileAccess", code: -1, userInfo: [NSLocalizedDescriptionKey: "無法訪問"])))
             return
         }
-        defer {
-            fileURL.stopAccessingSecurityScopedResource()
-        }
         
-        let cacheDirectory = getCacheDirectory()
-        let cachedFileURL = cacheDirectory.appendingPathComponent(fileName)
+        let storagePath = "files/\(fileName)"
+        let storageRef = storage.reference().child(storagePath)
+        let cachedFileURL = getCacheDirectory().appendingPathComponent(fileName)
+        
+        uploadData(to: storageRef, fileURL: cachedFileURL, fileName: fileName) { [weak self] result in
+            switch result {
+            case .success(let url):
+                self?.handleSuccessfulUpload(url: url, fileName: fileName, storagePath: storagePath, cachedFileURL: cachedFileURL, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    private func prepareFileForUpload(_ fileURL: URL, fileName: String) -> Bool {
+        guard fileURL.startAccessingSecurityScopedResource() else {
+            print("無法訪問")
+            return false
+        }
+        defer { fileURL.stopAccessingSecurityScopedResource() }
+        
+        let cachedFileURL = getCacheDirectory().appendingPathComponent(fileName)
         do {
             if FileManager.default.fileExists(atPath: cachedFileURL.path) {
                 try FileManager.default.removeItem(at: cachedFileURL)
@@ -530,100 +570,81 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             try FileManager.default.copyItem(at: fileURL, to: cachedFileURL)
             print("成功複製文件到緩存：\(cachedFileURL.path)")
         } catch {
-            print("Error copying file to cache directory: \(error.localizedDescription)")
-            completion(.failure(error))
-            return
+            print("複製文件到緩存時發生錯誤：\(error.localizedDescription)")
+            return false
         }
-        
-        let storagePath = "files/\(fileName)"
-        let storageRef = storage.reference().child(storagePath)
-        
+        return true
+    }
+
+    private func uploadData(to storageRef: StorageReference, fileURL: URL, fileName: String, completion: @escaping (Result<URL, Error>) -> Void) {
+        showActivityIndicator()
         do {
-            let fileData = try Data(contentsOf: cachedFileURL)
+            let fileData = try Data(contentsOf: fileURL)
             let metadata = StorageMetadata()
             metadata.contentType = "application/octet-stream"
-            metadata.customMetadata = ["ownerId": currentUserID]
+            metadata.customMetadata = ["ownerId": userID]
             
-            print("Starting upload for file: \(fileName)")
-            showActivityIndicator()
-            
-            let uploadTask = storageRef.putData(fileData, metadata: metadata) { _, error in
-                self.hideActivityIndicator()
+            storageRef.putData(fileData, metadata: metadata) { [weak self] _, error in
+                self?.hideActivityIndicator()
                 if let error = error {
-                    print("Upload failed with error: \(error.localizedDescription)")
-                    print("Error details: \(error)")
+                    print("上傳失敗：\(error.localizedDescription)")
                     completion(.failure(error))
                     return
                 }
-                
-                print("Upload completed, fetching download URL.")
-                
                 storageRef.downloadURL { url, error in
                     if let error = error {
-                        print("Download URL fetch failed with error: \(error.localizedDescription)")
+                        print("下載 URL 獲取失敗：\(error.localizedDescription)")
                         completion(.failure(error))
                     } else if let url = url {
-                        print("Upload successful. Download URL: \(url.absoluteString)")
-                        
-                        self.saveFileMetadataToFirestore(
-                            downloadURL: url.absoluteString,
-                            storagePath: storagePath,
-                            fileName: fileName
-                        )
-                        
-                        let newFileItem = FileItem(localURL: cachedFileURL, remoteURL: url, downloadURL: url.absoluteString, fileName: fileName, storagePath: storagePath)
-                        DispatchQueue.main.async {
-                            self.files.append(newFileItem)
-                            self.collectionView.reloadData()
-                        }
-                        
-                        completion(.success(url.absoluteString))
+                        completion(.success(url))
                     }
                 }
             }
-            
-            uploadTask.observe(.progress) { snapshot in
-                if let progress = snapshot.progress {
-                    let percentComplete = 100.0 * Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
-                    DispatchQueue.main.async {
-                    }
-                }
-            }
-            
-            uploadTask.observe(.failure) { snapshot in
-                self.hideActivityIndicator()
-                if let error = snapshot.error {
-                    print("Upload failed during progress update: \(error.localizedDescription)")
-                    print("Error details: \(error)")
-                    completion(.failure(error))
-                }
-            }
-            
-            self.currentUploadTask = uploadTask
         } catch {
-            print("Error reading file data: \(error.localizedDescription)")
+            hideActivityIndicator()
+            print("讀取文件數據時發生錯誤：\(error.localizedDescription)")
             completion(.failure(error))
         }
     }
+
+    private func handleSuccessfulUpload(
+        url: URL, fileName: String,
+        storagePath: String,
+        cachedFileURL: URL,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        Task {
+            do {
+                try await saveFileMetadataToFirestore(downloadURL: url.absoluteString, storagePath: storagePath, fileName: fileName)
+                DispatchQueue.main.async {
+                                let newFileItem = FileItem(localURL: cachedFileURL, remoteURL: url, downloadURL: url.absoluteString, fileName: fileName, storagePath: storagePath)
+                                self.files.append(newFileItem)
+                                
+                                if self.files.count == 1 {
+                                    self.restoreCollectionView()
+                                }
+                                self.collectionView.reloadData()
+                            }
+                completion(.success(url.absoluteString))
+            } catch {
+                print("保存文件元數據時發生錯誤：\(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }
+    }
     
-    func saveFileMetadataToFirestore(downloadURL: String, storagePath: String, fileName: String) {
-        let currentUserID = UserSession.shared.currentUserID ?? "unknown_user"
+    func saveFileMetadataToFirestore(downloadURL: String, storagePath: String, fileName: String) async throws {
         let fileData: [String: Any] = [
             "fileName": fileName,
             "downloadURL": downloadURL,
             "storagePath": storagePath,
             "createdAt": Timestamp(),
-            "ownerID": currentUserID,
+            "ownerID": userID,
             "authorizedStudents": []
         ]
         
-        firestore.collection("files").addDocument(data: fileData) { error in
-            if let error = error {
-                print("Error saving file metadata: \(error.localizedDescription)")
-            } else {
-                print("File metadata saved successfully.")
-            }
-        }
+        try await firestore.collection(Constants.filesCollection).addDocument(data: fileData)
+        print("文件元數據保存成功。")
     }
     
     func updateFileName(at indexPath: IndexPath, newName: String) {
@@ -646,7 +667,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                 files[indexPath.item] = fileItem
             } catch {
                 print("Error renaming local file: \(error.localizedDescription)")
-                showAlert(title: "重命名失敗", message: "無法重命名本地文件。")
+                showAlert(title: "重命名失敗", message: "無法重命名文件。")
                 return
             }
         }
@@ -657,7 +678,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
     
     func updateFileMetadataInFirestore(for fileItem: FileItem, newFileName: String) {
-        firestore.collection("files")
+        firestore.collection(Constants.filesCollection)
             .whereField("downloadURL", isEqualTo: fileItem.downloadURL)
             .getDocuments { snapshot, error in
                 if let error = error {
@@ -683,7 +704,10 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     // MARK: - Cache
     func getCacheDirectory() -> URL {
         let fileManager = FileManager.default
-        let cacheDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("FileCache")
+        guard let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            fatalError("無法訪問")
+        }
+        let cacheDirectory = documentDirectory.appendingPathComponent("FileCache")
         
         if !fileManager.fileExists(atPath: cacheDirectory.path) {
             do {
@@ -850,93 +874,123 @@ extension FilesVC: FileCellDelegate {
     
     func deleteFile(at indexPath: IndexPath) {
         guard indexPath.item < files.count else {
-            print("Error: Index out of range.")
+            logError("Index out of range while deleting file.")
             return
         }
         
         let fileItem = files[indexPath.item]
         
         if userRole == .student {
-            if let localURL = fileItem.localURL {
-                do {
-                    try FileManager.default.removeItem(at: localURL)
-                    print("本地文件成功刪除：\(localURL)")
-                } catch {
-                    print("刪除本地文件時出錯：\(error.localizedDescription)")
-                }
-            }
-            
-            DispatchQueue.main.async {
-                self.files.remove(at: indexPath.item)
-                self.collectionView.deleteItems(at: [indexPath])
-                if self.files.isEmpty {
-                    self.setCustomEmptyStateView()
-                }
-            }
-            
+            deleteLocalFile(fileItem, at: indexPath)
         } else if userRole == .teacher {
-            guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
-                print("Error: storagePath is nil or empty.")
-                showAlert(title: "刪除失敗", message: "無法刪除文件，文件的存儲路徑無效。")
+            deleteFileForTeacher(fileItem, at: indexPath)
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    private func deleteLocalFile(_ fileItem: FileItem, at indexPath: IndexPath) {
+        guard let localURL = fileItem.localURL else { return }
+        
+        do {
+            try FileManager.default.removeItem(at: localURL)
+            logInfo("Local file deleted: \(localURL)")
+        } catch {
+            logError("Error deleting local file: \(error.localizedDescription)")
+        }
+        
+        DispatchQueue.main.async {
+            self.files.remove(at: indexPath.item)
+            self.collectionView.deleteItems(at: [indexPath])
+            if self.files.isEmpty {
+                self.setCustomEmptyStateView()
+            }
+        }
+    }
+
+    private func deleteFileForTeacher(_ fileItem: FileItem, at indexPath: IndexPath) {
+        guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
+            logError("Storage path is invalid or empty.")
+            showAlert(title: "刪除失敗", message: "無法刪除文件，文件的路徑無效。")
+            return
+        }
+        
+        let storageRef = storage.reference().child(storagePath)
+        
+        storageRef.delete { [weak self] error in
+            if let error = error {
+                self?.logError("Error deleting file from Storage: \(error.localizedDescription)")
+                self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
                 return
             }
             
-            let storageRef = storage.reference().child(storagePath)
-            
-            storageRef.delete { [weak self] error in
+            self?.deleteFileMetadata(fileItem, at: indexPath, storagePath: storagePath)
+        }
+    }
+
+    private func deleteFileMetadata(_ fileItem: FileItem, at indexPath: IndexPath, storagePath: String) {
+        firestore.collection(Constants.filesCollection)
+            .whereField("storagePath", isEqualTo: storagePath)
+            .getDocuments { [weak self] snapshot, error in
                 if let error = error {
-                    print("Error deleting file from Storage: \(error.localizedDescription)")
-                    self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
+                    self?.logError("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                     return
                 }
                 
-                self?.firestore.collection("files")
-                    .whereField("storagePath", isEqualTo: storagePath)
-                    .getDocuments { snapshot, error in
-                        if let error = error {
-                            print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
-                            return
-                        }
-                        
-                        guard let document = snapshot?.documents.first else {
-                            print("File not found in Firestore.")
-                            return
-                        }
-                        
-                        document.reference.delete { error in
-                            if let error = error {
-                                print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
-                            } else {
-                                print("Successfully deleted metadata for file: \(fileItem.fileName)")
-                                
-                                do {
-                                    if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
-                                        try FileManager.default.removeItem(at: localURL)
-                                        print("Local file deleted successfully.")
-                                    }
-                                } catch {
-                                    print("Error deleting local file: \(error.localizedDescription)")
-                                }
-                                
-                                DispatchQueue.main.async {
-                                    guard let self = self else { return }
-                                    self.files.remove(at: indexPath.item)
-                                    self.collectionView.deleteItems(at: [indexPath])
-                                    
-                                    if self.files.isEmpty {
-                                        self.setCustomEmptyStateView()
-                                    }
-                                }
-                            }
-                        }
+                guard let document = snapshot?.documents.first else {
+                    self?.logError("File not found in Firestore.")
+                    return
+                }
+                
+                document.reference.delete { error in
+                    if let error = error {
+                        self?.logError("Error deleting file metadata: \(error.localizedDescription)")
+                    } else {
+                        self?.logInfo("Successfully deleted metadata for file: \(fileItem.fileName)")
+                        self?.deleteLocalFileIfExists(fileItem, at: indexPath)
                     }
+                }
+            }
+    }
+
+    private func deleteLocalFileIfExists(_ fileItem: FileItem, at indexPath: IndexPath) {
+        if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
+            do {
+                try FileManager.default.removeItem(at: localURL)
+                logInfo("Local file deleted successfully.")
+            } catch {
+                logError("Error deleting local file: \(error.localizedDescription)")
             }
         }
+        
+        DispatchQueue.main.async {
+            self.files.remove(at: indexPath.item)
+            self.collectionView.deleteItems(at: [indexPath])
+            
+            if self.files.isEmpty {
+                self.setCustomEmptyStateView()
+            }
+        }
+    }
+
+    private func logInfo(_ message: String) {
+        #if DEBUG
+        print("[INFO]: \(message)")
+        #else
+        os_log("%@", type: .info, message)
+        #endif
+    }
+
+    private func logError(_ message: String) {
+        #if DEBUG
+        print("[ERROR]: \(message)")
+        #else
+        os_log("%@", type: .error, message)
+        #endif
     }
 }
 
 extension FilesVC: UIDocumentPickerDelegate {
-    
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let selectedURL = urls.first else { return }
         let fileName = selectedURL.lastPathComponent
@@ -975,14 +1029,10 @@ extension FilesVC: UIDocumentPickerDelegate {
     }
     
     func checkIfFileExists(fileName: String, completion: @escaping (Bool) -> Void) {
-        guard let currentUserID = UserSession.shared.currentUserID else {
-            completion(false)
-            return
-        }
         
-        firestore.collection("files")
+        firestore.collection(Constants.filesCollection)
             .whereField("fileName", isEqualTo: fileName)
-            .whereField("ownerID", isEqualTo: currentUserID)
+            .whereField("ownerID", isEqualTo: userID)
             .getDocuments { snapshot, error in
                 if let error = error {
                     print("Error checking if file exists: \(error.localizedDescription)")

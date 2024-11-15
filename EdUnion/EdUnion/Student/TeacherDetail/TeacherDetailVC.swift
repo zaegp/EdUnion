@@ -117,7 +117,7 @@ class TeacherDetailVC: UIViewController {
     
     private func blockUser() {
         guard let teacherID = teacher?.id else { return }
-        UserFirebaseService.shared.blockUser(blockID: teacherID, userCollection: "students") { error in
+        UserFirebaseService.shared.blockUser(blockID: teacherID, userCollection: Constants.studentsCollection) { error in
             if let error = error {
                 print("封鎖老師失敗: \(error.localizedDescription)")
             } else {

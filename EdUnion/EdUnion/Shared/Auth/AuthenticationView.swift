@@ -170,7 +170,7 @@ private func handleSignInWithApple(result: Result<ASAuthorization, Error>) {
                 guard let uid = authResult?.user.uid else { return }
                 
                 let db = Firestore.firestore()
-                let collectionName = (userRole == "teacher") ? "teachers" : "students"
+                let collectionName = (userRole == "teacher") ? "teachers" : Constants.studentsCollection
                 let userRef = db.collection(collectionName).document(uid)
                 
                 userRef.getDocument { (document, error) in

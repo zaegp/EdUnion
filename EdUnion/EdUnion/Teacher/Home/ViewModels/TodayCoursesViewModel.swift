@@ -37,7 +37,7 @@ class TodayCoursesViewModel: ObservableObject {
             return
         }
         
-        UserFirebaseService.shared.fetchName(from: "students", by: studentID) { [weak self] result in
+        UserFirebaseService.shared.fetchName(from: Constants.studentsCollection, by: studentID) { [weak self] result in
             switch result {
             case .success(let studentName):
                 DispatchQueue.main.async {

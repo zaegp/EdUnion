@@ -13,6 +13,7 @@ class ChatListVC: UIViewController {
     
     var theTeacher: Teacher?
     var theStudent: Student?
+    let userID = UserSession.shared.unwrappedUserID
     
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
@@ -92,12 +93,12 @@ class ChatListVC: UIViewController {
         }
         
         setupUI()
+        observeChatRooms()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        observeChatRooms()
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
 
@@ -111,6 +112,7 @@ class ChatListVC: UIViewController {
         super.viewWillDisappear(animated)
         
         chatRoomListener?.remove()
+        
     }
     
     private func setupUI() {
@@ -177,7 +179,71 @@ class ChatListVC: UIViewController {
 
             self?.fetchParticipants(for: chatRooms, isTeacher: isTeacher) {
                 self?.updateUI(for: chatRooms)
+                self?.listenForNewMessages()
             }
+        }
+    }
+    
+    private func listenForNewMessages() {
+        guard let userID = participantID else { return }
+        
+        let chatRoomsRef = Firestore.firestore().collection("chats")
+            .whereField("participants", arrayContains: userID)
+            .order(by: "lastMessageTimestamp", descending: true)
+        
+        chatRoomListener = chatRoomsRef.addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error listening for chat rooms: \(error)")
+                return
+            }
+            
+            guard let snapshot = snapshot else {
+                print("No chat rooms snapshot found.")
+                return
+            }
+            
+            snapshot.documentChanges.forEach { change in
+                let document = change.document
+                guard let chatRoom = ChatRoom(document: document) else { return }
+                
+                switch change.type {
+                case .added:
+                    self.handleAddedChatRoom(chatRoom)
+                case .modified:
+                    self.handleModifiedChatRoom(chatRoom)
+                case .removed:
+                    self.handleRemovedChatRoom(chatRoom)
+                }
+            }
+            
+        }
+    }
+    
+    private func handleAddedChatRoom(_ chatRoom: ChatRoom) {
+        if chatRooms.contains(where: { $0.id == chatRoom.id }) {
+            return
+        }
+
+        chatRooms.append(chatRoom)
+        filteredChatRooms = chatRooms
+        tableView.insertRows(at: [IndexPath(row: chatRooms.count - 1, section: 0)], with: .automatic)
+    }
+    
+    private func handleModifiedChatRoom(_ chatRoom: ChatRoom) {
+        if let index = chatRooms.firstIndex(where: { $0.id == chatRoom.id }) {
+            chatRooms[index] = chatRoom
+            filteredChatRooms[index] = chatRoom
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
+    }
+    
+    private func handleRemovedChatRoom(_ chatRoom: ChatRoom) {
+        if let index = chatRooms.firstIndex(where: { $0.id == chatRoom.id }) {
+            chatRooms.remove(at: index)
+            filteredChatRooms.remove(at: index)
+            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
         }
     }
     
@@ -190,7 +256,7 @@ class ChatListVC: UIViewController {
 
             if isTeacher {
                 UserFirebaseService.shared.fetchUser(
-                    from: "students",
+                    from: Constants.studentsCollection,
                     by: participantId,
                     as: Student.self
                 ) { [weak self] result in
@@ -225,6 +291,27 @@ class ChatListVC: UIViewController {
         noChatRoomsView.isHidden = !chatRooms.isEmpty
         tableView.reloadData()
     }
+    
+    private func fetchUnreadCount(for chatRoomID: String, completion: @escaping (Int) -> Void) {
+        let messagesRef = Firestore.firestore()
+            .collection("chats")
+            .document(chatRoomID)
+            .collection("messages")
+        
+        messagesRef
+            .whereField("senderID", isNotEqualTo: userID)
+            .whereField("isSeen", isEqualTo: false)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching unread count: \(error)")
+                    completion(0)
+                    return
+                }
+                
+                let unreadCount = snapshot?.documents.count ?? 0
+                completion(unreadCount)
+            }
+    }
 }
 
 extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
@@ -256,14 +343,17 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         
         if let participant = participants[chatRoom.id] {
             let photoURLString = participant.photoURL ?? ""
-            cell.configure(
-                name: participant.fullName,
-                lastMessage: lastMessage,
-                time: lastMessageTime,
-                image: photoURLString
-            )
-        } else {
-            cell.configure(name: "未知用户", lastMessage: lastMessage, time: lastMessageTime, image: "")
+            fetchUnreadCount(for: chatRoom.id) { unreadCount in
+                    DispatchQueue.main.async {
+                        cell.configure(
+                            name: participant.fullName,
+                            lastMessage: lastMessage,
+                            time: lastMessageTime,
+                            image: photoURLString,
+                            unreadCount: unreadCount
+                        )
+                    }
+                }
         }
         
         return cell
@@ -285,6 +375,10 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
                     chatVC.teacher = teacher
                 }
             }
+        }
+        
+        if let cell = tableView.cellForRow(at: indexPath) as? ChatListCell {
+            cell.updateUnreadCount(0)
         }
         
         navigationController?.pushViewController(chatVC, animated: true)

@@ -8,9 +8,9 @@
 import FirebaseCore
 
 struct FileItem {
-    let localURL: URL?
+    var localURL: URL?
     let remoteURL: URL
     let downloadURL: String
-    let fileName: String
+    var fileName: String
     var storagePath: String?
 }

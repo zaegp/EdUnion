@@ -71,6 +71,7 @@
 		51B619E12CA06CC700EAC4B8 /* StudentHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */; };
 		51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */; };
 		51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */; };
+		51C778C12CE62D7000613BF1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C778C02CE62D7000613BF1 /* Constants.swift */; };
 		51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7B2C9A81D80083EECF /* ResumeVC.swift */; };
 		51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */; };
 		51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */; };
@@ -192,6 +193,7 @@
 		51B619E02CA06CC700EAC4B8 /* StudentHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentHomeVC.swift; sourceTree = "<group>"; };
 		51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequentlyUsedViewModel.swift; sourceTree = "<group>"; };
 		51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
+		51C778C02CE62D7000613BF1 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		51D25C7B2C9A81D80083EECF /* ResumeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeVC.swift; sourceTree = "<group>"; };
 		51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesVC.swift; sourceTree = "<group>"; };
 		51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCoursesCell.swift; sourceTree = "<group>"; };
@@ -359,6 +361,7 @@
 				519E14952CA16CF100E344CE /* Student.swift */,
 				517E9E062CBBD2EA002A2513 /* UserRole.swift */,
 				519C8F052C96E807007DFCBA /* Appointment.swift */,
+				51C778C02CE62D7000613BF1 /* Constants.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1046,6 +1049,7 @@
 				517E9DE62CB0E004002A2513 /* NotePopupView.swift in Sources */,
 				5159A0AB2CCFC86700B34584 /* UserProtocol.swift in Sources */,
 				51F4316A2CC1C51D00F018ED /* BookingViewModel.swift in Sources */,
+				51C778C12CE62D7000613BF1 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

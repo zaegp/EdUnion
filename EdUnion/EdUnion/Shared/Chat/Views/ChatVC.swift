@@ -65,8 +65,14 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(true, animated: true)
         }
+        viewModel.setupRealtimeListener()
     }
     
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        viewModel.markMessagesAsSeen()
+//    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
@@ -233,9 +239,16 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     private func scrollToBottom(animated: Bool = true) {
-        if viewModel.numberOfMessages() > 0 {
-            let indexPath = IndexPath(row: viewModel.numberOfMessages() - 1, section: 0)
+        let numberOfMessages = viewModel.numberOfMessages()
+        guard numberOfMessages > 0 else { return } 
+        
+        let lastRowIndex = numberOfMessages - 1
+        let indexPath = IndexPath(row: lastRowIndex, section: 0)
+        
+        if tableView.numberOfRows(inSection: 0) > lastRowIndex {
             tableView.scrollToRow(at: indexPath, at: .bottom, animated: animated)
+        } else {
+            print("Attempted to scroll to an out-of-bounds row (\(lastRowIndex)) when there are only \(tableView.numberOfRows(inSection: 0)) rows.")
         }
     }
     
