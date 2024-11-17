@@ -11,4 +11,5 @@ enum Constants {
     static let filesCollection = "files"
     static let studentsCollection = "students"
     static let teachersCollection = "teachers"
+    static let appointmentsCollection = "appointments"
 }

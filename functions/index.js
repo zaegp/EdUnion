@@ -1,30 +1,29 @@
-const { https } = require('firebase-functions/v2');
+const { onRequest } = require('firebase-functions/v2/https');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const admin = require('firebase-admin');
+
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 const app = express();
-
-// 启用 CORS，允许所有来源访问
 app.use(cors({ origin: true }));
-
-// 解析传入的 JSON 请求
 app.use(express.json());
 
 app.post('/', (req, res) => {
-  // 日志打印请求内容
   console.log('Request body received:', req.body);
 
-  // 从环境变量中获取 appId 和 appCertificate
   const appId = process.env.AGORA_APP_ID;
   const appCertificate = process.env.AGORA_APP_CERTIFICATE;
 
-  // 检查 appId 和 appCertificate 是否存在
   if (!appId || !appCertificate) {
-    console.error('AGORA_APP_ID 或 AGORA_APP_CERTIFICATE 未在环境变量中设置。');
+    console.error('AGORA_APP_ID 或 AGORA_APP_CERTIFICATE 未在環境變數中設置。');
     return res.status(500).json({
       error: {
-        message: "服务器配置错误。",
+        message: "server 配置錯誤。",
         status: "INTERNAL_ERROR"
       }
     });
@@ -32,12 +31,11 @@ app.post('/', (req, res) => {
 
   const channelName = req.body.channelName;
 
-  // 检查 channelName 是否正确
   if (!channelName) {
     console.log('缺少 channelName。');
     return res.status(400).json({
       error: {
-        message: "必须提供 channelName。",
+        message: "必須提供 channelName。",
         status: "INVALID_ARGUMENT"
       }
     });
@@ -45,7 +43,7 @@ app.post('/', (req, res) => {
 
   const uid = 0;
   const role = RtcRole.PUBLISHER;
-  const expireTimeInSeconds = 2 * 3600; // 设置为2小时
+  const expireTimeInSeconds = 2 * 3600; 
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpireTime = currentTimestamp + expireTimeInSeconds;
 
@@ -62,7 +60,7 @@ app.post('/', (req, res) => {
     console.log('生成的 token:', token);
     res.json({ token, appId });
   } catch (error) {
-    console.error('生成 token 时出错:', error);
+    console.error('生成 token 時出錯:', error);
     res.status(500).json({
       error: {
         message: "Internal Server Error",
@@ -72,5 +70,57 @@ app.post('/', (req, res) => {
   }
 });
 
-// 导出函数，确保这一行在文件末尾，并且在 app 配置之后
-exports.generateAgoraToken = https.onRequest(app);
+exports.generateAgoraToken = onRequest(app);
+
+exports.notifyTeacherOnNewAppointment = onDocumentCreated("appointments/{appointmentID}", async (event) => {
+  const snapshot = event.data;
+  const appointmentData = snapshot.data();
+
+  if (!appointmentData) {
+    console.log("No data in the created document.");
+    return null;
+  }
+
+  const teacherID = appointmentData.teacherID;
+
+  if (!teacherID) {
+    console.log("No teacherID found in appointment, skipping notification.");
+    return null;
+  }
+
+  try {
+    const teacherDoc = await admin.firestore().collection("teachers").doc(teacherID).get();
+    const teacherData = teacherDoc.data();
+
+    if (!teacherData) {
+      console.log(`No data found for teacher ${teacherID}`);
+      return null;
+    }
+
+    const fcmToken = teacherData.fcmToken;
+
+    if (!fcmToken) {
+      console.log(`No FCM token found for teacher ${teacherID}`);
+      return null;
+    }
+
+    const message = {
+      token: fcmToken,
+      notification: {
+        title: "EdUnion",
+        body: `您有一个新的課程預約`,
+      },
+      data: {
+        appointmentID: event.params.appointmentID,
+        status: appointmentData.status,
+      },
+    };
+
+    await admin.messaging().send(message);
+    console.log(`Notification sent to teacher ${teacherID}`);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+
+  return null;
+});
