@@ -146,4 +146,19 @@ class TimeService {
         }
         return ""
     }
+    
+    static func dateFrom(dateString: String, timeString: String) -> Date? {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm"
+            formatter.timeZone = TimeZone.current
+            return formatter.date(from: "\(dateString) \(timeString)")
+        }
+    
+    static func compareTimes(_ lhs: String, _ rhs: String) -> Bool {
+            guard let left = sharedTimeFormatter.date(from: lhs),
+                  let right = sharedTimeFormatter.date(from: rhs) else {
+                return false
+            }
+            return left < right
+        }
 }

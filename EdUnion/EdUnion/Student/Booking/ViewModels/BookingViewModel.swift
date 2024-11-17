@@ -15,9 +15,9 @@ class BookingViewModel: ObservableObject {
     @Published var showingAlert = false
     @Published var alertMessage = ""
 
-    let teacherID: String
-    let userID = UserSession.shared.unwrappedUserID
-    let timeSlots: [AvailableTimeSlot]
+    private let teacherID: String
+    private let userID = UserSession.shared.unwrappedUserID
+    private let timeSlots: [AvailableTimeSlot]
     let selectedTimeSlots: [String: String]
 
     init(teacherID: String, timeSlots: [AvailableTimeSlot], selectedTimeSlots: [String: String]) {
@@ -27,14 +27,11 @@ class BookingViewModel: ObservableObject {
     }
 
     var availableDates: [String] {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        
         let today = Date()
         let calendar = Calendar.current
-        
+
         return Array(selectedTimeSlots.keys).filter { dateString in
-            if let date = dateFormatter.date(from: dateString) {
+            if let date = TimeService.sharedDateFormatter.date(from: dateString) {
                 return calendar.isDate(date, inSameDayAs: today) || date > today
             }
             return false
@@ -63,58 +60,38 @@ class BookingViewModel: ObservableObject {
     }
 
     func toggleSelection(of timeSlot: String) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
+        guard TimeService.sharedTimeFormatter.date(from: timeSlot) != nil else { return }
         
-        guard dateFormatter.date(from: timeSlot) != nil else { return }
+        var updatedSelection = selectedTimes
         
-        if let index = selectedTimes.firstIndex(of: timeSlot) {
-            var newSelection = selectedTimes
-            newSelection.remove(at: index)
-            
-            if isSelectionContinuous(newSelection) {
-                selectedTimes = newSelection
-            } else {
-                alertMessage = "只能選擇連續的時間段。"
-                showingAlert = true
-            }
+        if let index = updatedSelection.firstIndex(of: timeSlot) {
+            updatedSelection.remove(at: index)
         } else {
-            var newSelection = selectedTimes + [timeSlot]
-            newSelection.sort()
-            
-            if isSelectionContinuous(newSelection) {
-                selectedTimes = newSelection
-            } else {
-                alertMessage = "只能選擇連續的時間段。"
-                showingAlert = true
-            }
+            updatedSelection.append(timeSlot)
+            updatedSelection.sort()
+        }
+        
+        if isSelectionContinuous(updatedSelection) {
+            selectedTimes = updatedSelection
+        } else {
+            alertUser(with: "只能選擇連續的時間段。")
         }
     }
 
-    func isSelectionContinuous(_ times: [String]) -> Bool {
-        guard times.count > 1 else { return true }
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        
-        let sortedTimes = times.sorted {
-            dateFormatter.date(from: $0)! < dateFormatter.date(from: $1)!
-        }
-        
-        for i in 0..<(sortedTimes.count - 1) {
-            guard let firstTime = dateFormatter.date(from: sortedTimes[i]),
-                  let secondTime = dateFormatter.date(from: sortedTimes[i + 1]) else {
-                return false
-            }
+    private func isSelectionContinuous(_ times: [String]) -> Bool {
+            guard times.count > 1 else { return true }
             
-            let difference = Calendar.current.dateComponents([.minute], from: firstTime, to: secondTime).minute
-            if difference != 30 {
-                return false
+            let sortedTimes = times.sorted(by: TimeService.compareTimes)
+            
+            for i in 0..<(sortedTimes.count - 1) {
+                guard let first = TimeService.sharedTimeFormatter.date(from: sortedTimes[i]),
+                      let second = TimeService.sharedTimeFormatter.date(from: sortedTimes[i + 1]) else { return false }
+                
+                let difference = Calendar.current.dateComponents([.minute], from: first, to: second).minute
+                if difference != 30 { return false }
             }
+            return true
         }
-        
-        return true
-    }
 
     func generateTimeSlots(from timeRanges: [String]) -> [TimeSlot] {
         var timeSlots: [TimeSlot] = []
@@ -147,34 +124,27 @@ class BookingViewModel: ObservableObject {
     }
 
     func isToday(_ dateString: String) -> Bool {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        guard let selectedDate = dateFormatter.date(from: dateString) else { return false }
-        let calendar = Calendar.current
-        return calendar.isDateInToday(selectedDate)
+        guard let date = TimeService.sharedDateFormatter.date(from: dateString) else { return false }
+        return Calendar.current.isDateInToday(date)
     }
 
     func isTimeSlotInPast(_ timeSlot: String, comparedTo currentDate: Date) -> Bool {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        
-        guard let slotTime = dateFormatter.date(from: timeSlot),
-              let selectedDate = selectedDate,
-              let fullDate = DateFormatter.dateFrom(dateString: selectedDate, timeString: timeSlot) else {
-            return false
+            guard let slotTime = TimeService.sharedTimeFormatter.date(from: timeSlot),
+                  let selectedDate = selectedDate,
+                  let fullDate = TimeService.dateFrom(dateString: selectedDate, timeString: timeSlot) else {
+                return false
+            }
+            return fullDate < currentDate
         }
-        
-        return fullDate < currentDate
-    }
+
 
     func submitBooking() {
         guard let date = selectedDate, !selectedTimes.isEmpty else {
-            alertMessage = "請選擇日期和至少一個時間段。"
-            showingAlert = true
+            alertUser(with: "請選擇日期和至少一個時間段。")
             return
         }
         
-        let bookingRef = UserFirebaseService.shared.db.collection("appointments").document()
+        let bookingRef = UserFirebaseService.shared.db.collection(Constants.appointmentsCollection).document()
         let documentID = bookingRef.documentID
         
         let bookingData: [String: Any] = [
@@ -209,32 +179,21 @@ class BookingViewModel: ObservableObject {
     }
 
     func getBookedSlots(for date: String) {
-        AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { result in
+        AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { [weak self] result in
             switch result {
             case .success(let appointments):
-                let filteredAppointments = appointments.filter { appointment in
-                    appointment.date == date
-                }
-                
-                let bookedSlots = filteredAppointments.flatMap { $0.times }
-                DispatchQueue.main.async {
-                    self.bookedSlots = bookedSlots
-                }
-                
+                self?.bookedSlots = appointments
+                    .filter { $0.date == date }
+                    .flatMap { $0.times }
             case .failure(let error):
                 print("Error fetching appointments: \(error)")
-                DispatchQueue.main.async {
-                    self.bookedSlots = []
-                }
+                self?.bookedSlots = []
             }
         }
     }
-}
-
-extension DateFormatter {
-    static func dateFrom(dateString: String, timeString: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm"
-        return formatter.date(from: "\(dateString) \(timeString)")
-    }
+    
+    private func alertUser(with message: String) {
+            alertMessage = message
+            showingAlert = true
+        }
 }
