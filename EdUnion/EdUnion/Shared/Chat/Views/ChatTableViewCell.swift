@@ -232,15 +232,21 @@ class ChatTableViewCell: UITableViewCell {
         )
         imageWidthConstraint = messageImageView.widthAnchor.constraint(equalToConstant: 200)
         imageHeightConstraint = messageImageView.heightAnchor.constraint(equalToConstant: 200)
+    }
+    
+    private func setupImageConstraints(isSentByCurrentUser: Bool) {
+        imageTopConstraint.isActive = true
+        imageBottomConstraint.isActive = true
+        imageWidthConstraint.isActive = true
+        imageHeightConstraint.isActive = true
         
-        NSLayoutConstraint.activate([
-            imageTopConstraint,
-            imageBottomConstraint,
-            imageLeadingConstraint,
-            imageTrailingConstraint,
-            imageWidthConstraint,
-            imageHeightConstraint
-        ])
+        if isSentByCurrentUser {
+            imageLeadingConstraint.isActive = false
+            imageTrailingConstraint.isActive = true
+        } else {
+            imageTrailingConstraint.isActive = false
+            imageLeadingConstraint.isActive = true
+        }
     }
 
     private func setupTimestampLabelConstraints() {
@@ -265,7 +271,7 @@ class ChatTableViewCell: UITableViewCell {
         resetContent()
 
         if shouldShowTimestamp(for: message, previousMessage: previousMessage) {
-            timestampLabel.text = TimeService.covertToChatRoomFormat(message.timestamp.dateValue())
+            timestampLabel.text = TimeService.formattedChatDate(from: message.timestamp.dateValue())
             timestampLabel.isHidden = false
         }
 
@@ -409,23 +415,6 @@ class ChatTableViewCell: UITableViewCell {
             bubbleTrailingConstraint.isActive = false
             bubbleLeadingConstraintGreater.isActive = false
         }
-    }
-    
-    private func setupImageConstraints(isSentByCurrentUser: Bool) {
-        if isSentByCurrentUser {
-            imageLeadingConstraint.isActive = false
-            imageTrailingConstraint.isActive = true
-        } else {
-            imageTrailingConstraint.isActive = false
-            imageLeadingConstraint.isActive = true
-        }
-        
-        NSLayoutConstraint.activate([
-            imageTopConstraint,
-            imageBottomConstraint,
-            imageWidthConstraint,
-            imageHeightConstraint
-        ])
     }
     
     private func loadImage(from urlString: String) {

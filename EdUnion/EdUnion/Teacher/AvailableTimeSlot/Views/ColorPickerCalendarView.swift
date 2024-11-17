@@ -184,13 +184,6 @@ struct ColorPickerCalendarView: View {
     private func saveDateColorToFirebase(date: Date, color: Color) {
         UserFirebaseService.shared.saveDateColorToFirebase(date: date, color: color, teacherID: userID ?? "")
     }
-    
-//    private let dateFormatter: DateFormatter = {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "yyyy-MM-dd"
-//        formatter.timeZone = TimeZone.current
-//        return formatter
-//    }()
 }
 
 struct ColorPickerView: View {

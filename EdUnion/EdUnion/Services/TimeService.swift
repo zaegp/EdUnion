@@ -40,12 +40,6 @@ class TimeService {
         return slotDate < currentDate
     }
     
-    static func isToday(_ dateString: String) -> Bool {
-        guard let selectedDate = sharedDateFormatter.date(from: dateString) else { return false }
-        let calendar = Calendar.current
-        return calendar.isDateInToday(selectedDate)
-    }
-    
     static func formattedMonthAndYear(for date: Date, isWeekView: Bool) -> String {
         let formatter = DateFormatter()
         if isWeekView {
@@ -108,31 +102,29 @@ class TimeService {
         }
     }
     
-    static func covertToChatRoomFormat(_ date: Date) -> String {
+    // 聊天室日期
+    static func formattedChatDate(from date: Date) -> String {
         let calendar = Calendar.current
-        
         if calendar.isDateInToday(date) {
             sharedChatRoomFormatter.dateFormat = "HH:mm"
         } else if calendar.isDateInYesterday(date) {
             sharedChatRoomFormatter.dateFormat = "昨天 HH:mm"
-        } else {
+        } else if calendar.isDate(date, equalTo: Date(), toGranularity: .year) {
             sharedChatRoomFormatter.dateFormat = "MM/dd HH:mm"
+        } else {
+            sharedChatRoomFormatter.dateFormat = "yyyy/MM/dd HH:mm"
         }
-        
         return sharedChatRoomFormatter.string(from: date)
     }
     
-    // 預約頁面
-    static func formattedDate(_ dateString: String) -> String {
-        let inputFormatter = sharedDateFormatter
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "MM月dd日"
-        outputFormatter.timeZone = TimeZone.current
-        if let date = inputFormatter.date(from: dateString) {
+    // 預約頁面日期
+    static func formattedDate(_ dateString: String, outputFormat: String = "MM月dd日") -> String {
+            guard let date = sharedDateFormatter.date(from: dateString) else { return dateString }
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = outputFormat
+            outputFormatter.timeZone = TimeZone.current
             return outputFormatter.string(from: date)
         }
-        return dateString
-    }
     
     static func formattedWeekday(_ dateString: String) -> String {
         let inputFormatter = sharedDateFormatter
