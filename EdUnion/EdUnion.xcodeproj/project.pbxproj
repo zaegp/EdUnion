@@ -72,6 +72,7 @@
 		51B619E32CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E22CA0F68400EAC4B8 /* FrequentlyUsedViewModel.swift */; };
 		51B619E52CA0FA3400EAC4B8 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B619E42CA0FA3400EAC4B8 /* UIViewController+Ext.swift */; };
 		51C778C12CE62D7000613BF1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C778C02CE62D7000613BF1 /* Constants.swift */; };
+		51C778C52CE7B21400613BF1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 51C778C42CE7B21400613BF1 /* FirebaseMessaging */; };
 		51D25C7C2C9A81D80083EECF /* ResumeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7B2C9A81D80083EECF /* ResumeVC.swift */; };
 		51D25C7F2C9AC1A00083EECF /* TodayCoursesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C7E2C9AC1A00083EECF /* TodayCoursesVC.swift */; };
 		51D25C812C9AC1E10083EECF /* TodayCoursesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D25C802C9AC1E10083EECF /* TodayCoursesCell.swift */; };
@@ -241,6 +242,7 @@
 			files = (
 				517E9DD82CACC3BA002A2513 /* Kingfisher in Frameworks */,
 				517E9DD52CACC3B1002A2513 /* IQKeyboardManagerSwift in Frameworks */,
+				51C778C52CE7B21400613BF1 /* FirebaseMessaging in Frameworks */,
 				517E9E022CBAB1C2002A2513 /* FirebaseFunctions in Frameworks */,
 				517E9DCC2CACC3A8002A2513 /* FirebaseAnalytics in Frameworks */,
 				517E9E052CBB9497002A2513 /* AgoraUIKit in Frameworks */,
@@ -551,9 +553,9 @@
 			isa = PBXGroup;
 			children = (
 				51D25C7D2C9AC1870083EECF /* Home */,
+				519C8F102C980F85007DFCBA /* Confirm */,
 				517E9DE92CB637DA002A2513 /* StudentList */,
 				51D25C7A2C9A81B40083EECF /* Resume */,
-				519C8F102C980F85007DFCBA /* Confirm */,
 				519C8F0F2C980F2B007DFCBA /* AvailableTimeSlot */,
 			);
 			path = Teacher;
@@ -806,6 +808,7 @@
 				517E9E012CBAB1C2002A2513 /* FirebaseFunctions */,
 				517E9E042CBB9497002A2513 /* AgoraUIKit */,
 				517E9E0F2CBD1F2E002A2513 /* FirebaseCrashlytics */,
+				51C778C42CE7B21400613BF1 /* FirebaseMessaging */,
 			);
 			productName = EdUnion;
 			productReference = 51ED0AD32C916721006322B7 /* EdUnion.app */;
@@ -1238,6 +1241,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EdUnion/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "For the purpose of using the camera. For example, for a call or live interactive streaming session.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "For the purpose of using the microphone. For example, for a call or live interactive streaming session.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "我們需要訪問您的相簿來選擇照片，使用於聊天室和個人檔案大頭貼。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -1275,6 +1282,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EdUnion/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "For the purpose of using the camera. For example, for a call or live interactive streaming session.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "For the purpose of using the microphone. For example, for a call or live interactive streaming session.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "我們需要訪問您的相簿來選擇照片，使用於聊天室和個人檔案大頭貼。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -1512,6 +1523,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		51C778C42CE7B21400613BF1 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517E9DCA2CACC3A8002A2513 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
