@@ -10,7 +10,7 @@ import FirebaseFirestore
 class TodayCoursesViewModel: ObservableObject {
     
     private let db = Firestore.firestore()
-    let userID = UserSession.shared.currentUserID ?? ""
+    private let userID = UserSession.shared.unwrappedUserID
     @Published var pendingAppointmentsCount: Int = 0
     @Published var appointments: [Appointment] = [] {
         didSet {

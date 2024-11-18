@@ -227,7 +227,7 @@ struct BaseCalendarView: View {
     @State private var isShowingDetail = false
     @State private var selectedAppointment: Appointment?
     @State private var appointmentListener: ListenerRegistration?
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     @State private var isShowingCard = false
     @State private var showingAlert = false
@@ -363,8 +363,8 @@ struct BaseCalendarView: View {
                     .onAppear {
                         viewModel.loadAndSortActivities(for: activities)
                     }
-                    .onChange(of: selectedDay) { newDay in
-                        let newActivities = viewModel.activitiesByDate[Calendar.current.startOfDay(for: newDay)]
+                    .onChange(of: selectedDay) {
+                        let newActivities = viewModel.activitiesByDate[Calendar.current.startOfDay(for: selectedDay)]
                         if let newActivities = newActivities {
                             viewModel.loadAndSortActivities(for: newActivities)
                         }
@@ -428,7 +428,7 @@ struct BaseCalendarView: View {
                     NotePopupViewWrapper(
                         noteText: viewModel.studentsNotes[selectedStudentID] ?? "",
                         onSave: { text in
-                            viewModel.saveNoteText(text, for: selectedStudentID, teacherID: userID ?? "") { result in
+                            viewModel.saveNoteText(text, for: selectedStudentID, teacherID: userID) { result in
                                 switch result {
                                 case .success:
                                     print("備註已保存")
@@ -447,8 +447,7 @@ struct BaseCalendarView: View {
             }
         )
     }
-    
-    
+        
     func updateAppointmentsForDay(_ day: Date) {
         let startOfDay = Calendar.current.startOfDay(for: day)
         

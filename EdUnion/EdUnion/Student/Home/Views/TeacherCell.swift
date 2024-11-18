@@ -10,12 +10,12 @@ import Kingfisher
 
 class TeacherCell: UICollectionViewCell {
     
-    let image = UIImageView()
-    let nameLabel = UILabel()
-    let totalCoursesLabel = UILabel()
-    let subjectLabel = UILabel()
-    let educationLabel = UILabel()
-    let experienceLabel = UILabel()
+    private let image = UIImageView()
+    private let nameLabel = UILabel()
+    private let totalCoursesLabel = UILabel()
+    private let subjectLabel = UILabel()
+    private let educationLabel = UILabel()
+    private let experienceLabel = UILabel()
     private let stackView = UIStackView()
     
     override init(frame: CGRect) {

@@ -12,7 +12,7 @@ class ChatViewModel {
     
     private var messages: [Message] = []
     let chatRoomID: String
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     private var pendingImages: [String: UIImage] = [:]
     private var participants: [String] = []
     private var listener: ListenerRegistration?
@@ -268,7 +268,6 @@ class ChatViewModel {
         guard let index = messages.firstIndex(where: { $0.ID == documentID }) else { return }
         messages[index].isSeen = isSeen
         print("Message \(documentID) updated: isSeen = \(isSeen)")
-        // 可在此處觸發更細粒度的 UI 更新，例如刷新單行
     }
        
 }

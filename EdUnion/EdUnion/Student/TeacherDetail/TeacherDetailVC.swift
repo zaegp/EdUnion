@@ -146,6 +146,18 @@ class TeacherDetailVC: UIViewController {
     private func setupUI() {
         guard let teacher = teacher else { return }
         
+        setupImageView(for: teacher)
+        setupNameLabel(for: teacher)
+        addSeparator()
+        setupInfoLabels(for: teacher)
+        addSeparator()
+        setupIntroduceLabel(for: teacher)
+        addSeparator()
+        addSpacingView()
+        setupButtons()
+    }
+
+    private func setupImageView(for teacher: Teacher) {
         if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
             imageView.kf.setImage(
                 with: url,
@@ -160,6 +172,7 @@ class TeacherDetailVC: UIViewController {
         imageView.layer.cornerRadius = 50
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        
         let imageContainer = UIView()
         imageContainer.addSubview(imageView)
         contentStackView.addArrangedSubview(imageContainer)
@@ -171,16 +184,22 @@ class TeacherDetailVC: UIViewController {
             imageView.widthAnchor.constraint(equalToConstant: 100),
             imageView.heightAnchor.constraint(equalToConstant: 100)
         ])
-        
+    }
+
+    private func setupNameLabel(for teacher: Teacher) {
         nameLabel.text = teacher.fullName
         nameLabel.textAlignment = .center
         nameLabel.font = UIFont.boldSystemFont(ofSize: 24)
         nameLabel.textColor = .myBlack
         contentStackView.addArrangedSubview(nameLabel)
-        
-        let separator1 = createSeparator()
-        contentStackView.addArrangedSubview(separator1)
-        
+    }
+
+    private func addSeparator() {
+        let separator = createSeparator()
+        contentStackView.addArrangedSubview(separator)
+    }
+
+    private func setupInfoLabels(for teacher: Teacher) {
         let infoLabels = [
             ("已上課程數", "\(teacher.totalCourses)"),
             ("教學科目", teacher.resume[3]),
@@ -202,25 +221,27 @@ class TeacherDetailVC: UIViewController {
             label.textColor = .myBlack
             infoStackView.addArrangedSubview(label)
         }
-        
-        let separator2 = createSeparator()
-        contentStackView.addArrangedSubview(separator2)
-        
-        introduceLabel.text = teacher.resume[2].isEmpty ? "自我介紹 \n\n老師目前沒有提供介紹喔！" : "自我介紹\n\n\(teacher.resume[2])"
+    }
+
+    private func setupIntroduceLabel(for teacher: Teacher) {
+        introduceLabel.text = teacher.resume[2].isEmpty ?
+            "自我介紹 \n\n老師目前沒有提供介紹喔！" :
+            "自我介紹\n\n\(teacher.resume[2])"
         introduceLabel.numberOfLines = 0
         introduceLabel.textAlignment = .center
         introduceLabel.font = UIFont.systemFont(ofSize: 16)
         introduceLabel.textColor = .myBlack
         contentStackView.addArrangedSubview(introduceLabel)
-        
-        let separator3 = createSeparator()
-        contentStackView.addArrangedSubview(separator3)
-        
+    }
+
+    private func addSpacingView() {
         let spacingView = UIView()
         spacingView.translatesAutoresizingMaskIntoConstraints = false
         spacingView.heightAnchor.constraint(equalToConstant: 30).isActive = true
         contentStackView.addArrangedSubview(spacingView)
-        
+    }
+
+    private func setupButtons() {
         let buttonStackView = UIStackView()
         buttonStackView.axis = .vertical
         buttonStackView.spacing = 16

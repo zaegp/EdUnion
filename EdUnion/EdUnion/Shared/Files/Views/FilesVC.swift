@@ -1,9 +1,8 @@
-
+//
 //  FilesVC.swift
 //  EdUnion
 //
 //  Created by Rowan Su on 2024/9/26.
-
 
 import UIKit
 import FirebaseStorage
@@ -402,7 +401,13 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             
             for fileURL in fileURLs {
                 let fileName = fileURL.lastPathComponent
-                let fileItem = FileItem(localURL: fileURL, remoteURL: fileURL, downloadURL: "", fileName: fileName, storagePath: "files/\(fileName)")
+                let fileItem = FileItem(
+                    localURL: fileURL,
+                    remoteURL: fileURL,
+                    downloadURL: "",
+                    fileName: fileName,
+                    storagePath: "files/\(fileName)"
+                )
                 cachedFiles.append(fileItem)
             }
             return cachedFiles
@@ -423,7 +428,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             return
         }
 
-        // Create a mapping from remoteURL to FileItem
         var remoteURLToFileItem: [URL: FileItem] = [:]
         for fileItem in self.files {
             remoteURLToFileItem[fileItem.remoteURL] = fileItem
@@ -443,17 +447,14 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             let storagePath = document.data()["storagePath"] as? String ?? "files/\(fileName)"
 
             if let existingFileItem = remoteURLToFileItem[remoteURL] {
-                // File is already in self.files
                 updatedFiles.append(existingFileItem)
                 self.fileDownloadStatus[remoteURL] = false
             } else if let cachedURL = isFileCached(fileName: fileName) {
-                // File is cached but not in self.files
                 let fileItem = FileItem(localURL: cachedURL, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = false
                 self.files.append(fileItem)
             } else {
-                // File is not cached and not in self.files
                 let fileItem = FileItem(localURL: nil, remoteURL: remoteURL, downloadURL: urlString, fileName: fileName, storagePath: storagePath)
                 updatedFiles.append(fileItem)
                 self.fileDownloadStatus[remoteURL] = true
@@ -463,7 +464,6 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
             }
         }
 
-        // Remove files that are no longer in Firestore
         self.files = self.files.filter { fileItem in
             updatedFiles.contains(where: { $0.remoteURL == fileItem.remoteURL })
         }
@@ -535,7 +535,12 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         return "\(uuid)_\(originalName)"
     }
     
-    func uploadFileToFirebase(_ fileURL: URL, fileName: String, retryCount: Int = 3, completion: @escaping (Result<String, Error>) -> Void) {
+    func uploadFileToFirebase(
+        _ fileURL: URL,
+        fileName: String,
+        retryCount: Int = 3,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
         guard prepareFileForUpload(fileURL, fileName: fileName) else {
             completion(.failure(NSError(domain: "FileAccess", code: -1, userInfo: [NSLocalizedDescriptionKey: "無法訪問"])))
             return
@@ -627,7 +632,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
                             }
                 completion(.success(url.absoluteString))
             } catch {
-                print("保存文件元數據時發生錯誤：\(error.localizedDescription)")
+                print("保存檔案時發生錯誤：\(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
@@ -644,7 +649,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
         ]
         
         try await firestore.collection(Constants.filesCollection).addDocument(data: fileData)
-        print("文件元數據保存成功。")
+        print("檔案保存成功。")
     }
     
     func updateFileName(at indexPath: IndexPath, newName: String) {
@@ -886,8 +891,6 @@ extension FilesVC: FileCellDelegate {
             deleteFileForTeacher(fileItem, at: indexPath)
         }
     }
-
-    // MARK: - Helper Methods
 
     private func deleteLocalFile(_ fileItem: FileItem, at indexPath: IndexPath) {
         guard let localURL = fileItem.localURL else { return }

@@ -30,7 +30,7 @@ class ResumeVC: UIViewController {
     
     let saveButton = UIButton(type: .system)
     
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -175,7 +175,7 @@ class ResumeVC: UIViewController {
     
     func fetchResumeData() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(userID ?? "")
+        let teacherRef = db.collection("teachers").document(userID)
         
         teacherRef.getDocument { [weak self] (document, error) in
             if let error = error {
@@ -201,7 +201,7 @@ class ResumeVC: UIViewController {
     
     @objc func saveChanges() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(userID ?? "")
+        let teacherRef = db.collection("teachers").document(userID)
         
         let updatedResume = [
             textField1.text ?? "",

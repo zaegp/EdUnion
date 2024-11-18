@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseCore
+import SwiftUI
 
 class BookingViewModel: ObservableObject {
     @Published var selectedDate: String?
@@ -14,22 +15,22 @@ class BookingViewModel: ObservableObject {
     @Published var bookedSlots: [String] = []
     @Published var showingAlert = false
     @Published var alertMessage = ""
-
+    
     private let teacherID: String
     private let userID = UserSession.shared.unwrappedUserID
     private let timeSlots: [AvailableTimeSlot]
     let selectedTimeSlots: [String: String]
-
+    
     init(teacherID: String, timeSlots: [AvailableTimeSlot], selectedTimeSlots: [String: String]) {
         self.teacherID = teacherID
         self.timeSlots = timeSlots
         self.selectedTimeSlots = selectedTimeSlots
     }
-
+    
     var availableDates: [String] {
         let today = Date()
         let calendar = Calendar.current
-
+        
         return Array(selectedTimeSlots.keys).filter { dateString in
             if let date = TimeService.sharedDateFormatter.date(from: dateString) {
                 return calendar.isDate(date, inSameDayAs: today) || date > today
@@ -37,7 +38,7 @@ class BookingViewModel: ObservableObject {
             return false
         }.sorted()
     }
-
+    
     var availableTimeSlotsForSelectedDate: [TimeSlot] {
         guard let selectedDate = selectedDate else { return [] }
         let allSlots = timeSlots.filter { $0.colorHex == selectedTimeSlots[selectedDate] }
@@ -50,15 +51,15 @@ class BookingViewModel: ObservableObject {
             return allSlots
         }
     }
-
+    
     func isSelected(timeSlot: String) -> Bool {
         return selectedTimes.contains(timeSlot)
     }
-
+    
     func isBooked(timeSlot: String) -> Bool {
         return bookedSlots.contains(timeSlot)
     }
-
+    
     func toggleSelection(of timeSlot: String) {
         guard TimeService.sharedTimeFormatter.date(from: timeSlot) != nil else { return }
         
@@ -77,22 +78,22 @@ class BookingViewModel: ObservableObject {
             alertUser(with: "只能選擇連續的時間段。")
         }
     }
-
+    
     private func isSelectionContinuous(_ times: [String]) -> Bool {
-            guard times.count > 1 else { return true }
+        guard times.count > 1 else { return true }
+        
+        let sortedTimes = times.sorted(by: TimeService.compareTimes)
+        
+        for i in 0..<(sortedTimes.count - 1) {
+            guard let first = TimeService.sharedTimeFormatter.date(from: sortedTimes[i]),
+                  let second = TimeService.sharedTimeFormatter.date(from: sortedTimes[i + 1]) else { return false }
             
-            let sortedTimes = times.sorted(by: TimeService.compareTimes)
-            
-            for i in 0..<(sortedTimes.count - 1) {
-                guard let first = TimeService.sharedTimeFormatter.date(from: sortedTimes[i]),
-                      let second = TimeService.sharedTimeFormatter.date(from: sortedTimes[i + 1]) else { return false }
-                
-                let difference = Calendar.current.dateComponents([.minute], from: first, to: second).minute
-                if difference != 30 { return false }
-            }
-            return true
+            let difference = Calendar.current.dateComponents([.minute], from: first, to: second).minute
+            if difference != 30 { return false }
         }
-
+        return true
+    }
+    
     func generateTimeSlots(from timeRanges: [String]) -> [TimeSlot] {
         var timeSlots: [TimeSlot] = []
         
@@ -122,22 +123,21 @@ class BookingViewModel: ObservableObject {
         }
         return timeSlots
     }
-
+    
     func isToday(_ dateString: String) -> Bool {
         guard let date = TimeService.sharedDateFormatter.date(from: dateString) else { return false }
         return Calendar.current.isDateInToday(date)
     }
-
+    
     func isTimeSlotInPast(_ timeSlot: String, comparedTo currentDate: Date) -> Bool {
-            guard let slotTime = TimeService.sharedTimeFormatter.date(from: timeSlot),
-                  let selectedDate = selectedDate,
-                  let fullDate = TimeService.dateFrom(dateString: selectedDate, timeString: timeSlot) else {
-                return false
-            }
-            return fullDate < currentDate
+        guard let slotTime = TimeService.sharedTimeFormatter.date(from: timeSlot),
+              let selectedDate = selectedDate,
+              let fullDate = TimeService.dateFrom(dateString: selectedDate, timeString: timeSlot) else {
+            return false
         }
-
-
+        return fullDate < currentDate
+    }
+    
     func submitBooking() {
         guard let date = selectedDate, !selectedTimes.isEmpty else {
             alertUser(with: "請選擇日期和至少一個時間段。")
@@ -177,7 +177,7 @@ class BookingViewModel: ObservableObject {
             }
         }
     }
-
+    
     func getBookedSlots(for date: String) {
         AppointmentFirebaseService.shared.fetchAllAppointments(forTeacherID: teacherID) { [weak self] result in
             switch result {
@@ -193,7 +193,29 @@ class BookingViewModel: ObservableObject {
     }
     
     private func alertUser(with message: String) {
-            alertMessage = message
-            showingAlert = true
+        alertMessage = message
+        showingAlert = true
+    }
+    
+    var isSubmitButtonEnabled: Bool {
+            selectedDate != nil && !selectedTimes.isEmpty
+        }
+
+    func backgroundColor(for timeSlot: TimeSlot) -> Color {
+            if timeSlot.isBooked {
+                return .gray
+            } else if isSelected(timeSlot: timeSlot.time) {
+                return .mainOrange
+            } else {
+                return .myMessageCell
+            }
+        }
+
+        func foregroundColor(for timeSlot: TimeSlot) -> Color {
+            if timeSlot.isBooked || isSelected(timeSlot: timeSlot.time) {
+                return .white
+            } else {
+                return Color(UIColor.systemBackground)
+            }
         }
 }

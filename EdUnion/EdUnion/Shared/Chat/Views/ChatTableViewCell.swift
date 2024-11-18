@@ -16,7 +16,7 @@ protocol ChatTableViewCellDelegate: AnyObject {
 class ChatTableViewCell: UITableViewCell {
     
     private var isImageLoaded = false
-    let userID = UserSession.shared.currentUserID
+    private let userID = UserSession.shared.unwrappedUserID
     
     private let bubbleBackgroundView: UIView = {
         let view = UIView()
@@ -103,7 +103,6 @@ class ChatTableViewCell: UITableViewCell {
     
     private var readReceiptTrailingConstraint: NSLayoutConstraint!
        
-    
     var isSentByCurrentUser: Bool = false {
         didSet {
             updateBubbleAppearance()

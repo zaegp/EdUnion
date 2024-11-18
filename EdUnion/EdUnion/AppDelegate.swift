@@ -96,7 +96,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
     // MARK: - Keyboard Setup
     private func configureKeyboard() {
         IQKeyboardManager.shared.enable = true
-        IQKeyboardManager.shared.enableAutoToolbar = false
     }
     
     // MARK: - UISceneSession Lifecycle

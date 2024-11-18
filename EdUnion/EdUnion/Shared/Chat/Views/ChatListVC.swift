@@ -13,16 +13,15 @@ class ChatListVC: UIViewController {
     
     var theTeacher: Teacher?
     var theStudent: Student?
-    let userID = UserSession.shared.unwrappedUserID
+    private let userID = UserSession.shared.unwrappedUserID
+    private var isLoading: Bool = true
     
     private var chatRooms: [ChatRoom] = []
     private var filteredChatRooms: [ChatRoom] = []
-    private var participantID: String?
     private var participants: [String: UserProtocol] = [:]
     private let tableView = UITableView()
     private let searchBarView = SearchBarView()
-
-    private var chatRoomListener: ListenerRegistration?
+    private var isDataReloadNeeded = true
     
     private let noChatRoomsView: UIView = {
         let view = UIView()
@@ -86,14 +85,7 @@ class ChatListVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .myBackground
         
-        if let currentUserID = Auth.auth().currentUser?.uid {
-            participantID = currentUserID
-        } else {
-            print("Error: Unable to get current user ID.")
-        }
-        
         setupUI()
-        observeChatRooms()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -101,18 +93,21 @@ class ChatListVC: UIViewController {
         
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
-
+        
         tabBarController?.tabBar.isHidden = true
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setCustomTabBarHidden(false, animated: true)
         }
+        
+        if isDataReloadNeeded {
+                observeChatRooms()
+            }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        chatRoomListener?.remove()
-        
+        isDataReloadNeeded = true
     }
     
     private func setupUI() {
@@ -150,143 +145,101 @@ class ChatListVC: UIViewController {
     }
     
     private func observeChatRooms() {
+        isLoading = true
         noChatRoomsView.isHidden = true
         noSearchResultsView.isHidden = true
-
+        tableView.reloadData()
+        
         guard let userRole = UserDefaults.standard.string(forKey: "userRole") else {
             print("Error: Unable to get user role from UserDefaults.")
+            isLoading = false
+            updateUI(for: [])
             return
         }
-
+        
         let isTeacher = (userRole == "teacher")
-
+        
         UserFirebaseService.shared.fetchChatRooms(
-            for: participantID ?? "",
+            for: userID,
             isTeacher: isTeacher
         ) { [weak self] (chatRooms, error) in
-            if let error = error {
-                print("Error fetching chat rooms: \(error.localizedDescription)")
-                return
-            }
-
-            guard let chatRooms = chatRooms else {
-                print("No chat rooms found.")
-                return
-            }
-
-            self?.chatRooms = chatRooms
-            self?.filteredChatRooms = chatRooms
-
-            self?.fetchParticipants(for: chatRooms, isTeacher: isTeacher) {
-                self?.updateUI(for: chatRooms)
-                self?.listenForNewMessages()
-            }
-        }
-    }
-    
-    private func listenForNewMessages() {
-        guard let userID = participantID else { return }
-        
-        let chatRoomsRef = Firestore.firestore().collection("chats")
-            .whereField("participants", arrayContains: userID)
-            .order(by: "lastMessageTimestamp", descending: true)
-        
-        chatRoomListener = chatRoomsRef.addSnapshotListener { [weak self] snapshot, error in
             guard let self = self else { return }
             
+            self.isLoading = false
+            
             if let error = error {
-                print("Error listening for chat rooms: \(error)")
+                print("Error fetching chat rooms: \(error.localizedDescription)")
+                self.chatRooms = []
+                self.filteredChatRooms = []
+                self.updateUI(for: [])
                 return
             }
             
-            guard let snapshot = snapshot else {
-                print("No chat rooms snapshot found.")
+            guard let chatRooms = chatRooms, !chatRooms.isEmpty else {
+                print("No chat rooms found.")
+                self.chatRooms = []
+                self.filteredChatRooms = []
+                self.updateUI(for: [])
                 return
             }
             
-            snapshot.documentChanges.forEach { change in
-                let document = change.document
-                guard let chatRoom = ChatRoom(document: document) else { return }
-                
-                switch change.type {
-                case .added:
-                    self.handleAddedChatRoom(chatRoom)
-                case .modified:
-                    self.handleModifiedChatRoom(chatRoom)
-                case .removed:
-                    self.handleRemovedChatRoom(chatRoom)
-                }
-            }
+            self.chatRooms = chatRooms
+            self.filteredChatRooms = chatRooms
             
-        }
-    }
-    
-    private func handleAddedChatRoom(_ chatRoom: ChatRoom) {
-        if chatRooms.contains(where: { $0.id == chatRoom.id }) {
-            return
-        }
-
-        chatRooms.append(chatRoom)
-        filteredChatRooms = chatRooms
-        tableView.insertRows(at: [IndexPath(row: chatRooms.count - 1, section: 0)], with: .automatic)
-    }
-    
-    private func handleModifiedChatRoom(_ chatRoom: ChatRoom) {
-        if let index = chatRooms.firstIndex(where: { $0.id == chatRoom.id }) {
-            chatRooms[index] = chatRoom
-            filteredChatRooms[index] = chatRoom
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        }
-    }
-    
-    private func handleRemovedChatRoom(_ chatRoom: ChatRoom) {
-        if let index = chatRooms.firstIndex(where: { $0.id == chatRoom.id }) {
-            chatRooms.remove(at: index)
-            filteredChatRooms.remove(at: index)
-            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            self.fetchParticipants(for: chatRooms, isTeacher: isTeacher) {
+                self.filteredChatRooms = self.chatRooms
+                self.updateUI(for: self.filteredChatRooms)
+            }
         }
     }
     
     private func fetchParticipants(for chatRooms: [ChatRoom], isTeacher: Bool, completion: @escaping () -> Void) {
         let dispatchGroup = DispatchGroup()
-
+        
         for chatRoom in chatRooms {
             dispatchGroup.enter()
-            let participantId = chatRoom.participants.first { $0 != self.participantID } ?? "未知用戶"
-
+            let participantId = chatRoom.participants.first { $0 != self.userID } ?? "未知用戶"
+            
             if isTeacher {
                 UserFirebaseService.shared.fetchUser(
                     from: Constants.studentsCollection,
                     by: participantId,
                     as: Student.self
                 ) { [weak self] result in
-                    self?.handleFetchResult(result, for: chatRoom.id, as: Student.self)
+                    self?.handleFetchResult(result, for: chatRoom.id)
                     dispatchGroup.leave()
                 }
             } else {
                 UserFirebaseService.shared.fetchUser(
-                    from: "teachers",
+                    from: Constants.teachersCollection,
                     by: participantId,
                     as: Teacher.self
                 ) { [weak self] result in
-                    self?.handleFetchResult(result, for: chatRoom.id, as: Teacher.self)
+                    self?.handleFetchResult(result, for: chatRoom.id)
                     dispatchGroup.leave()
                 }
             }
         }
-
-        dispatchGroup.notify(queue: .main, execute: completion)
+        
+        dispatchGroup.notify(queue: .main) {
+            // 確保僅保留有參與者數據的聊天室
+            self.chatRooms = self.chatRooms.filter { self.participants[$0.id] != nil }
+            self.filteredChatRooms = self.chatRooms
+            self.tableView.reloadData() // 更新列表
+            completion()
+        }
     }
-
-    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>, for chatRoomID: String, as type: T.Type) {
+    
+    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>, for chatRoomID: String) {
         switch result {
         case .success(let user):
             participants[chatRoomID] = user
-        case .failure:
-            participants[chatRoomID] = type as? any UserProtocol
+        case .failure(let error):
+            print("Error fetching participant for chat room \(chatRoomID): \(error.localizedDescription)")
+            participants[chatRoomID] = nil
         }
     }
-
+    
     private func updateUI(for chatRooms: [ChatRoom]) {
         noChatRoomsView.isHidden = !chatRooms.isEmpty
         tableView.reloadData()
@@ -330,31 +283,31 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
             noSearchResultsView.isHidden = true
         }
         
-        return filteredChatRooms.count
+        return isLoading ? 10 : filteredChatRooms.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: ChatListCell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) 
-        cell.backgroundColor = .myBackground
-        let chatRoom = filteredChatRooms[indexPath.row]
         
-        let lastMessage = chatRoom.lastMessage ?? "沒有消息"
-        let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
         
-        if let participant = participants[chatRoom.id] {
-            let photoURLString = participant.photoURL ?? ""
-            fetchUnreadCount(for: chatRoom.id) { unreadCount in
-                    DispatchQueue.main.async {
-                        cell.configure(
-                            name: participant.fullName,
-                            lastMessage: lastMessage,
-                            time: lastMessageTime,
-                            image: photoURLString,
-                            unreadCount: unreadCount
-                        )
-                    }
-                }
+        if isLoading {
+            cell.isSkeleton = true
+        } else {
+            let chatRoom = filteredChatRooms[indexPath.row]
+            let lastMessage = chatRoom.lastMessage ?? "沒有消息"
+            let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
+            
+            if let participant = participants[chatRoom.id] {
+                cell.configure(
+                    name: participant.fullName,
+                    lastMessage: lastMessage,
+                    time: lastMessageTime,
+                    image: participant.photoURL ?? "",
+                    unreadCount: 0
+                )
+            }
         }
+        cell.backgroundColor = .myBackground
         
         return cell
     }
@@ -377,6 +330,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
             }
         }
         
+        isDataReloadNeeded = false
         if let cell = tableView.cellForRow(at: indexPath) as? ChatListCell {
             cell.updateUnreadCount(0)
         }
@@ -394,11 +348,11 @@ extension ChatListVC: UIScrollViewDelegate {
 extension ChatListVC: SearchBarViewDelegate {
     func searchBarView(_ searchBarView: SearchBarView, didChangeText text: String) {
         if text.isEmpty {
-            filteredChatRooms = chatRooms
+            filteredChatRooms = chatRooms.filter { self.participants[$0.id] != nil }
         } else {
             filteredChatRooms = chatRooms.filter { chatRoom in
-                if let participantName = participants[chatRoom.id] as? String {
-                    return participantName.lowercased().contains(text.lowercased())
+                if let participant = participants[chatRoom.id] {
+                    return participant.fullName.lowercased().contains(text.lowercased())
                 }
                 return false
             }

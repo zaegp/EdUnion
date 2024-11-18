@@ -153,21 +153,18 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
         let currentLabelIndex = selectedIndex
         let nextLabelIndex = min(max(selectedIndex + (progress > 0 ? 1 : -1), 0), totalLabels - 1)
         
-        guard let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex] as? UILabel else {
+        guard let currentLabel = labelsStackView.arrangedSubviews[currentLabelIndex] as? UILabel,
+              let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as? UILabel else {
             return
         }
         
-        guard let nextLabel = labelsStackView.arrangedSubviews[nextLabelIndex] as? UILabel else {
-            return
-        }
+        let currentCenterX = currentLabel.center.x + labelsStackView.frame.origin.x
+        let nextCenterX = nextLabel.center.x + labelsStackView.frame.origin.x
         
-        let currentX = currentLabel.frame.origin.x
-        let nextX = nextLabel.frame.origin.x
+        let distance = nextCenterX - currentCenterX
+        let newCenterX = currentCenterX + distance * abs(progress)
         
-        let distance = nextX - currentX
-        let newX = currentX + distance * abs(progress)
-        
-        underlineView.frame.origin.x = newX + labelsStackView.frame.origin.x
+        underlineView.center.x = newCenterX
     }
     
     private func setupLabels() {
@@ -186,9 +183,7 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
             underlineView.topAnchor.constraint(equalTo: labelsStackView.bottomAnchor, constant: 2),
             underlineView.heightAnchor.constraint(equalToConstant: 3),
             underlineView.widthAnchor.constraint(equalToConstant: 60),
-            underlineView.leadingAnchor.constraint(
-                equalTo: labelsStackView.arrangedSubviews[selectedIndex].leadingAnchor
-            )
+            underlineView.centerXAnchor.constraint(equalTo: labelsStackView.arrangedSubviews[selectedIndex].centerXAnchor)
         ])
         
         for (index, label) in labelsStackView.arrangedSubviews.enumerated() {
@@ -222,7 +217,10 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
         
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        pageViewControllerTopConstraint = pageViewController.view.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 10)
+        pageViewControllerTopConstraint = pageViewController.view.topAnchor.constraint(
+            equalTo: underlineView.bottomAnchor,
+            constant: 10
+        )
         
         NSLayoutConstraint.activate([
             pageViewControllerTopConstraint!,
@@ -235,14 +233,10 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
     }
     
     private func updateUnderlinePosition(to index: Int, animated: Bool = true) {
-        let targetX = labelsStackView.arrangedSubviews[index].frame.origin.x + labelsStackView.frame.origin.x
-        
-        if underlineView.frame.origin.x == targetX {
-            return
-        }
+        let targetCenterX = labelsStackView.arrangedSubviews[index].center.x + labelsStackView.frame.origin.x
         
         let updatePosition = {
-            self.underlineView.frame.origin.x = targetX
+            self.underlineView.center.x = targetCenterX
         }
         
         if animated {
@@ -262,12 +256,23 @@ class StudentHomeVC: UIViewController, UIScrollViewDelegate, UISearchBarDelegate
         guard let tappedLabel = sender.view as? UILabel else { return }
         let targetIndex = tappedLabel.tag
         
+        if targetIndex == selectedIndex {
+            return
+        }
+        
         let direction: UIPageViewController.NavigationDirection = targetIndex > selectedIndex ? .forward : .reverse
         
-        pageViewController.setViewControllers([viewControllers[targetIndex]], direction: direction, animated: true, completion: nil)
-        
-        selectedIndex = targetIndex
-        updateUnderlinePosition(to: targetIndex, animated: true)
+        pageViewController.setViewControllers(
+            [viewControllers[targetIndex]],
+            direction: direction,
+            animated: true,
+            completion: { finished in
+                if finished {
+                    self.selectedIndex = targetIndex
+                    self.updateUnderlinePosition(to: targetIndex, animated: true)
+                }
+            }
+        )
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -323,21 +328,24 @@ extension StudentHomeVC: UIPageViewControllerDataSource, UIPageViewControllerDel
     func pageViewController(
         _ pageViewController: UIPageViewController,
         viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let index = viewControllers.firstIndex(of: viewController),
-              index < viewControllers.count - 1 else {
-            return nil
+            guard let index = viewControllers.firstIndex(of: viewController),
+                  index < viewControllers.count - 1 else {
+                return nil
+            }
+            return viewControllers[index + 1]
         }
-        return viewControllers[index + 1]
-    }
     
     func pageViewController(
         _ pageViewController: UIPageViewController,
         didFinishAnimating finished: Bool,
         previousViewControllers: [UIViewController],
         transitionCompleted completed: Bool) {
-        guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
-        let index = viewControllers.firstIndex(of: visibleVC)!
-        selectedIndex = index
-        updateUnderlinePosition(to: index, animated: false)
-    }
+            guard completed, let visibleVC = pageViewController.viewControllers?.first else { return }
+            let index = viewControllers.firstIndex(of: visibleVC)!
+            
+            
+            
+            selectedIndex = index
+            updateUnderlinePosition(to: index, animated: false)
+        }
 }

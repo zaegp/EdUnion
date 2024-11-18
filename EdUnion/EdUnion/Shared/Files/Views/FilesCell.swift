@@ -15,9 +15,9 @@ protocol FileCellDelegate: AnyObject {
 
 class FileCell: UICollectionViewCell {
     
-    let fileImageView = UIImageView()
-    let fileNameLabel = UILabel()
-    let progressView = UIProgressView(progressViewStyle: .default)
+    private let fileImageView = UIImageView()
+    private let fileNameLabel = UILabel()
+    private let progressView = UIProgressView(progressViewStyle: .default)
     
     weak var delegate: FileCellDelegate?
     

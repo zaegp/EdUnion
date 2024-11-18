@@ -23,7 +23,7 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate {
     private let userID = UserSession.shared.unwrappedUserID
     private var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     private var userCollection: String {
-        return (userRole == "teacher") ? "teachers" : Constants.studentsCollection
+        return (userRole == "teacher") ? Constants.teachersCollection : Constants.studentsCollection
     }
     private var menuItems: [MenuItem] = []
     
@@ -280,37 +280,41 @@ extension ProfileVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.backgroundColor = .myBackground
+        
         let menuItem = menuItems[indexPath.row]
-        
-        let titleLabel = UILabel()
-        titleLabel.text = menuItem.title
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        titleLabel.textColor = .myBlack
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-        let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
-        iconImageView.tintColor = .myBlack
-        iconImageView.contentMode = .scaleAspectFit
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        cell.contentView.addSubview(iconImageView)
-        cell.contentView.addSubview(titleLabel)
-        
-        NSLayoutConstraint.activate([
-            iconImageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
-            iconImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 40),
-            iconImageView.heightAnchor.constraint(equalToConstant: 40),
-            
-            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 30),
-            titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
-        ])
-        
+
+        if cell.contentView.subviews.isEmpty {
+            let titleLabel = UILabel()
+            titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            titleLabel.textColor = .myBlack
+            titleLabel.translatesAutoresizingMaskIntoConstraints = false
+            cell.contentView.addSubview(titleLabel)
+
+            let boldConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+            let iconImageView = UIImageView(image: UIImage(systemName: menuItem.icon, withConfiguration: boldConfig))
+            iconImageView.tintColor = .myBlack
+            iconImageView.translatesAutoresizingMaskIntoConstraints = false
+            cell.contentView.addSubview(iconImageView)
+
+            NSLayoutConstraint.activate([
+                iconImageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+                iconImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                iconImageView.widthAnchor.constraint(equalToConstant: 40),
+                iconImageView.heightAnchor.constraint(equalToConstant: 40),
+                
+                titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 30),
+                titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                titleLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -20)
+            ])
+        }
+
+        if let titleLabel = cell.contentView.subviews.compactMap({ $0 as? UILabel }).first {
+            titleLabel.text = menuItem.title
+        }
+
         cell.accessoryType = .disclosureIndicator
-        cell.imageView?.tintColor = .myBlack
         cell.selectionStyle = .none
+
         return cell
     }
     

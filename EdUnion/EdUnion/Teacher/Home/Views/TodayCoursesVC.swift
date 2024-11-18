@@ -24,7 +24,7 @@ class TodayCoursesVC: UIViewController {
     private let noCoursesLabel = UILabel()
     private let stackView = UIStackView()
     private var expandedIndexPath: IndexPath?
-    private let userID = UserSession.shared.currentUserID
+    private let userID = UserSession.shared.unwrappedUserID
     private let bellButton = BadgeButton(type: .system)
     private let loadingIndicator = UIActivityIndicatorView(style: .large)
     private var cancellables = Set<AnyCancellable>()
@@ -110,7 +110,9 @@ class TodayCoursesVC: UIViewController {
     }
     
     private func setupConstraints() {
-        [titleLabel, noCoursesLabel, progressBarHostingController.view, tableView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        [titleLabel, noCoursesLabel, progressBarHostingController.view, tableView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
@@ -193,12 +195,12 @@ class TodayCoursesVC: UIViewController {
             if let indexPath = tableView.indexPathForRow(at: touchPoint) {
                 let appointment = viewModel.appointments[indexPath.row]
                 
-                guard let studentName = viewModel.studentNames[appointment.studentID] else {
+                guard viewModel.studentNames[appointment.studentID] != nil else {
                     print("找不到對應的學生姓名")
                     return
                 }
                 
-                let student = Student.self
+                _ = Student.self
                 
                 showAddNoteView(for: appointment.studentID)
             }

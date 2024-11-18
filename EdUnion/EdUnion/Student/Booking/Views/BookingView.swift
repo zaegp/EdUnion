@@ -10,7 +10,7 @@ import FirebaseCore
 
 struct BookingView: View {
     @ObservedObject var viewModel: BookingViewModel
-
+    
     var body: some View {
         VStack {
             if viewModel.availableDates.isEmpty {
@@ -34,25 +34,29 @@ struct BookingView: View {
             
             Spacer()
             
-            Button(action: viewModel.submitBooking) {
-                Text("確定預約")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background((viewModel.selectedDate != nil && !viewModel.selectedTimes.isEmpty) ? Color.mainOrange : Color.gray)
-                    .cornerRadius(10)
-                    .padding([.horizontal, .bottom])
-            }
-            .disabled(viewModel.selectedDate == nil || viewModel.selectedTimes.isEmpty)
-            .alert(isPresented: $viewModel.showingAlert) {
-                Alert(title: Text("通知"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("確定")))
-            }
+            submitButton
         }
         .frame(maxHeight: .infinity)
         .background(Color.myBackground)
     }
-
+    
+    private var submitButton: some View {
+        Button(action: viewModel.submitBooking) {
+            Text("確定預約")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(viewModel.isSubmitButtonEnabled ? Color.mainOrange : Color.gray)
+                .cornerRadius(10)
+                .padding([.horizontal, .bottom])
+        }
+        .disabled(!viewModel.isSubmitButtonEnabled)
+        .alert(isPresented: $viewModel.showingAlert) {
+            Alert(title: Text("通知"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("確定")))
+        }
+    }
+    
     private func noAvailableDatesView() -> some View {
         return VStack {
             Image(systemName: "calendar.badge.exclamationmark")
@@ -65,17 +69,17 @@ struct BookingView: View {
                 .foregroundColor(.gray)
         }
     }
-
+    
     private func dateSelectionView() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 15) {
-                ForEach(viewModel.availableDates, id: \.self) { date in
+                ForEach(viewModel.availableDates, id: \.self, content: { date in
                     Button(action: {
                         viewModel.selectedDate = date
                         viewModel.selectedTimes = []
                         viewModel.bookedSlots.removeAll()
                         viewModel.getBookedSlots(for: date)
-                    }) {
+                    }, label: {
                         VStack {
                             Text(TimeService.formattedDate(date))
                                 .font(.headline)
@@ -87,13 +91,13 @@ struct BookingView: View {
                         .padding()
                         .background(viewModel.selectedDate == date ? Color.mainOrange : Color.myMessageCell)
                         .cornerRadius(10)
-                    }
-                }
+                    })
+                })
             }
             .padding()
         }
     }
-
+    
     private func availableTimeSlotsView() -> some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 20) {
@@ -104,7 +108,7 @@ struct BookingView: View {
             .padding()
         }
     }
-
+    
     private func timeSlotButton(_ timeSlot: TimeSlot) -> some View {
         Button(action: {
             viewModel.toggleSelection(of: timeSlot.time)
@@ -128,7 +132,7 @@ struct BookingView: View {
             return Color.myMessageCell
         }
     }
-
+    
     func buttonForegroundColor(for timeSlot: TimeSlot) -> Color {
         if timeSlot.isBooked {
             return Color.white
@@ -138,7 +142,7 @@ struct BookingView: View {
             return Color(UIColor.systemBackground)
         }
     }
-
+    
     func buttonBackgroundColor(for timeSlot: String) -> Color {
         if viewModel.isBooked(timeSlot: timeSlot) {
             return Color.gray
@@ -148,7 +152,7 @@ struct BookingView: View {
             return Color.myMessageCell
         }
     }
-
+    
     func buttonForegroundColor(for timeSlot: String) -> Color {
         if viewModel.isBooked(timeSlot: timeSlot) {
             return Color.white
@@ -158,7 +162,7 @@ struct BookingView: View {
             return Color(UIColor.systemBackground)
         }
     }
-
+    
     private func noAvailableTimeSlotsView() -> some View {
         VStack {
             Image(systemName: "clock.arrow.circlepath")

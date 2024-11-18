@@ -14,9 +14,9 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var viewModel: ConfirmViewModel!
     
     init(appointments: [Appointment]) {
-            self.viewModel = ConfirmViewModel(appointments: appointments, userID: UserSession.shared.currentUserID ?? "")
-            super.init(nibName: nil, bundle: nil)
-        }
+        self.viewModel = ConfirmViewModel(appointments: appointments, userID: UserSession.shared.unwrappedUserID)
+        super.init(nibName: nil, bundle: nil)
+    }
     
     required init?(coder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
@@ -107,7 +107,12 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
             self?.viewModel.fetchStudentName(for: appointment) { studentName in
                 DispatchQueue.main.async {
                     if let currentCell = tableView.cellForRow(at: indexPath) as? ConfirmCell {
-                        currentCell.configureCell(date: appointment.date, title: studentName, times: appointment.times, isStudentExisting: isStudentExisting)
+                        currentCell.configureCell(
+                            date: appointment.date,
+                            title: studentName,
+                            times: appointment.times,
+                            isStudentExisting: isStudentExisting
+                        )
                     }
                 }
             }

@@ -8,7 +8,7 @@
 import UIKit
 
 class StudentTableViewCell: UITableViewCell {
-    let nameLabel = UILabel()
+    private let nameLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

@@ -12,7 +12,7 @@ class StudentListVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     private let emptyStateLabel = UILabel()
     private var viewModel = StudentListViewModel()
     
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,7 +22,7 @@ class StudentListVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         setupTableView()
         setupEmptyStateLabel()
         bindViewModel()
-        viewModel.fetchStudents(for: userID ?? "")
+        viewModel.fetchStudents(for: userID)
         enableSwipeToGoBack()
     }
     
@@ -141,12 +141,8 @@ class StudentListVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         let alertController = UIAlertController(title: "封鎖並檢舉", message: "你確定要封鎖並檢舉這位學生嗎？", preferredStyle: .alert)
         
         let confirmAction = UIAlertAction(title: "確認", style: .destructive) { _ in
-            guard let userID = self.userID else {
-                print("錯誤: 無法取得當前使用者 ID")
-                return
-            }
             
-            self.viewModel.blockStudent(student, teacherID: userID) { result in
+            self.viewModel.blockStudent(student, teacherID: self.userID) { result in
                 switch result {
                 case .success:
                     print("成功封鎖並移除學生")

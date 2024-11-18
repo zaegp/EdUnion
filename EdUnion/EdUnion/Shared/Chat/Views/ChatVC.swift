@@ -20,7 +20,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     var teacher: Teacher?
     var student: Student?
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     var userRole: String = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
     
     private let imageView = UIImageView()
@@ -43,9 +43,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         enableSwipeToGoBack()
         
         if userRole == "teacher" {
-            viewModel = ChatViewModel(chatRoomID: (userID ?? "") + "_" + (student?.id ?? ""))
+            viewModel = ChatViewModel(chatRoomID: (userID) + "_" + (student?.id ?? ""))
         } else {
-            viewModel = ChatViewModel(chatRoomID: (teacher?.id ?? "") + "_" + (userID ?? ""))
+            viewModel = ChatViewModel(chatRoomID: (teacher?.id ?? "") + "_" + (userID))
         }
         
         viewModel.onMessagesUpdated = { [weak self] in
@@ -67,11 +67,6 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         viewModel.setupRealtimeListener()
     }
-    
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
-//        viewModel.markMessagesAsSeen()
-//    }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

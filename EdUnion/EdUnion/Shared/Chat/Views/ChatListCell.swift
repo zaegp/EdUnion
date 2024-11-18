@@ -7,6 +7,115 @@
 
 import UIKit
 
+//class ChatListCell: UITableViewCell {
+//    
+//    private let profileImageView = UIImageView()
+//    private let nameLabel = UILabel()
+//    private let lastMessageLabel = UILabel()
+//    private let timeLabel = UILabel()
+//    private let badgeView = UIView()
+//        private let badgeLabel = UILabel()
+//    
+//    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+//        super.init(style: style, reuseIdentifier: reuseIdentifier)
+//        setupUI()
+//        
+//        self.selectionStyle = .none
+//    }
+//    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//    
+//    private func setupUI() {
+//        profileImageView.contentMode = .scaleAspectFill
+//        profileImageView.layer.cornerRadius = 30
+//        profileImageView.clipsToBounds = true
+//        profileImageView.translatesAutoresizingMaskIntoConstraints = false
+//        profileImageView.tintColor = .myMessageCell
+//        profileImageView.contentMode = .scaleAspectFill
+//        
+//        nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
+//        nameLabel.textColor = .label
+//        
+//        lastMessageLabel.font = UIFont.systemFont(ofSize: 14)
+//        lastMessageLabel.textColor = .secondaryLabel
+//        
+//        timeLabel.font = UIFont.systemFont(ofSize: 12)
+//        timeLabel.textColor = .secondaryLabel
+//        
+//        badgeView.backgroundColor = .mainOrange
+//        badgeView.layer.cornerRadius = 10
+//        badgeView.translatesAutoresizingMaskIntoConstraints = false
+//        badgeView.isHidden = true
+//        
+//        badgeLabel.font = UIFont.systemFont(ofSize: 12)
+//        badgeLabel.textColor = .white
+//        badgeLabel.textAlignment = .center
+//        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        badgeView.addSubview(badgeLabel)
+//        
+//        contentView.addSubview(profileImageView)
+//        contentView.addSubview(nameLabel)
+//        contentView.addSubview(timeLabel)
+//        contentView.addSubview(lastMessageLabel)
+//        contentView.addSubview(badgeView)
+//        
+//        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+//        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+//        lastMessageLabel.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        NSLayoutConstraint.activate([
+//            profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+//            profileImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+//            profileImageView.widthAnchor.constraint(equalToConstant: 60),
+//            profileImageView.heightAnchor.constraint(equalToConstant: 60),
+//            
+//            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+//            nameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 12),
+//            
+//            timeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+//            timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+//            
+//            lastMessageLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+//            lastMessageLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 12),
+//            lastMessageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+//            
+//            badgeView.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 8),
+//            badgeView.trailingAnchor.constraint(equalTo: timeLabel.trailingAnchor),
+//            badgeView.widthAnchor.constraint(equalToConstant: 20),
+//            badgeView.heightAnchor.constraint(equalToConstant: 20),
+//            
+//            badgeLabel.centerXAnchor.constraint(equalTo: badgeView.centerXAnchor),
+//                        badgeLabel.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor)
+//        ])
+//    }
+//    
+//    func configure(name: String, lastMessage: String, time: String, image: String, unreadCount: Int) {
+//        print(name)
+//        nameLabel.text = name
+//        lastMessageLabel.text = lastMessage
+//        timeLabel.text = time
+//        
+//        if let imageURL = URL(string: image) {
+//            profileImageView.kf.setImage(with: imageURL, placeholder: UIImage(systemName: "person.crop.circle.fill"))
+//        } else {
+//            profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+//        }
+//        
+//        updateUnreadCount(unreadCount)
+//    }
+//    
+//    func updateUnreadCount(_ unreadCount: Int) {
+//        if unreadCount > 0 {
+//            badgeLabel.text = unreadCount > 99 ? "99+" : "\(unreadCount)"
+//            badgeView.isHidden = false
+//        } else {
+//            badgeView.isHidden = true
+//        }
+//    }
+//}
 class ChatListCell: UITableViewCell {
     
     private let profileImageView = UIImageView()
@@ -14,13 +123,22 @@ class ChatListCell: UITableViewCell {
     private let lastMessageLabel = UILabel()
     private let timeLabel = UILabel()
     private let badgeView = UIView()
-        private let badgeLabel = UILabel()
+    private let badgeLabel = UILabel()
+    
+    // 骨架屏视图
+    private let skeletonProfileView = UIView()
+    private let skeletonNameView = UIView()
+    private let skeletonMessageView = UIView()
+    
+    var isSkeleton: Bool = false {
+        didSet {
+            configureSkeletonState()
+        }
+    }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        
-        self.selectionStyle = .none
     }
     
     required init?(coder: NSCoder) {
@@ -28,26 +146,29 @@ class ChatListCell: UITableViewCell {
     }
     
     private func setupUI() {
+        // 正常视图设置
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.cornerRadius = 30
         profileImageView.clipsToBounds = true
-        profileImageView.translatesAutoresizingMaskIntoConstraints = false
         profileImageView.tintColor = .myMessageCell
-        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.translatesAutoresizingMaskIntoConstraints = false
         
         nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
         nameLabel.textColor = .label
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         lastMessageLabel.font = UIFont.systemFont(ofSize: 14)
         lastMessageLabel.textColor = .secondaryLabel
+        lastMessageLabel.translatesAutoresizingMaskIntoConstraints = false
         
         timeLabel.font = UIFont.systemFont(ofSize: 12)
         timeLabel.textColor = .secondaryLabel
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
         
         badgeView.backgroundColor = .mainOrange
         badgeView.layer.cornerRadius = 10
-        badgeView.translatesAutoresizingMaskIntoConstraints = false
         badgeView.isHidden = true
+        badgeView.translatesAutoresizingMaskIntoConstraints = false
         
         badgeLabel.font = UIFont.systemFont(ofSize: 12)
         badgeLabel.textColor = .white
@@ -58,14 +179,31 @@ class ChatListCell: UITableViewCell {
         
         contentView.addSubview(profileImageView)
         contentView.addSubview(nameLabel)
-        contentView.addSubview(timeLabel)
         contentView.addSubview(lastMessageLabel)
+        contentView.addSubview(timeLabel)
         contentView.addSubview(badgeView)
         
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        lastMessageLabel.translatesAutoresizingMaskIntoConstraints = false
+        // 骨架屏视图设置
+        skeletonProfileView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
+        skeletonProfileView.layer.cornerRadius = 30
+        skeletonProfileView.translatesAutoresizingMaskIntoConstraints = false
+        skeletonProfileView.isHidden = true
         
+        skeletonNameView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
+        skeletonNameView.layer.cornerRadius = 5
+        skeletonNameView.translatesAutoresizingMaskIntoConstraints = false
+        skeletonNameView.isHidden = true
+        
+        skeletonMessageView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
+        skeletonMessageView.layer.cornerRadius = 5
+        skeletonMessageView.translatesAutoresizingMaskIntoConstraints = false
+        skeletonMessageView.isHidden = true
+        
+        contentView.addSubview(skeletonProfileView)
+        contentView.addSubview(skeletonNameView)
+        contentView.addSubview(skeletonMessageView)
+        
+        // 布局
         NSLayoutConstraint.activate([
             profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             profileImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -88,12 +226,43 @@ class ChatListCell: UITableViewCell {
             badgeView.heightAnchor.constraint(equalToConstant: 20),
             
             badgeLabel.centerXAnchor.constraint(equalTo: badgeView.centerXAnchor),
-                        badgeLabel.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor)
+            badgeLabel.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
+            
+            // 骨架屏布局
+            skeletonProfileView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            skeletonProfileView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            skeletonProfileView.widthAnchor.constraint(equalToConstant: 60),
+            skeletonProfileView.heightAnchor.constraint(equalToConstant: 60),
+            
+            skeletonNameView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            skeletonNameView.leadingAnchor.constraint(equalTo: skeletonProfileView.trailingAnchor, constant: 12),
+            skeletonNameView.widthAnchor.constraint(equalToConstant: 120),
+            skeletonNameView.heightAnchor.constraint(equalToConstant: 16),
+            
+            skeletonMessageView.topAnchor.constraint(equalTo: skeletonNameView.bottomAnchor, constant: 8),
+            skeletonMessageView.leadingAnchor.constraint(equalTo: skeletonProfileView.trailingAnchor, constant: 12),
+            skeletonMessageView.widthAnchor.constraint(equalToConstant: 180),
+            skeletonMessageView.heightAnchor.constraint(equalToConstant: 14)
         ])
     }
     
+    private func configureSkeletonState() {
+        let isHidden = !isSkeleton
+        
+        // 切换正常视图和骨架视图
+        profileImageView.isHidden = !isHidden
+        nameLabel.isHidden = !isHidden
+        lastMessageLabel.isHidden = !isHidden
+        timeLabel.isHidden = !isHidden
+        badgeView.isHidden = !isHidden
+        
+        skeletonProfileView.isHidden = isHidden
+        skeletonNameView.isHidden = isHidden
+        skeletonMessageView.isHidden = isHidden
+    }
+    
     func configure(name: String, lastMessage: String, time: String, image: String, unreadCount: Int) {
-        print(name)
+        isSkeleton = false
         nameLabel.text = name
         lastMessageLabel.text = lastMessage
         timeLabel.text = time

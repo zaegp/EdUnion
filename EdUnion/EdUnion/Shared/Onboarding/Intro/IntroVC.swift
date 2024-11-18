@@ -145,6 +145,38 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
 
     private func setupScrollViewAndContainer() {
+        let scrollView = createScrollView()
+        let containerView = createContainerView(in: scrollView)
+        let profileAndNameStackView = createProfileAndNameStackView()
+        let stackView = createContentStackView()
+
+        containerView.addSubview(profileAndNameStackView)
+        containerView.addSubview(stackView)
+
+        setupConstraints(
+            scrollView: scrollView,
+            containerView: containerView,
+            profileAndNameStackView: profileAndNameStackView,
+            stackView: stackView
+        )
+    }
+
+    private func createScrollView() -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.backgroundColor = .clear
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        return scrollView
+    }
+
+    private func createContainerView(in scrollView: UIScrollView) -> UIView {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(containerView)
+        return containerView
+    }
+
+    private func createProfileAndNameStackView() -> UIStackView {
         let nameStackView = UIStackView(arrangedSubviews: [nameLabel, nameTextField])
         nameStackView.axis = .vertical
         nameStackView.spacing = 10
@@ -155,6 +187,10 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         profileAndNameStackView.alignment = .center
         profileAndNameStackView.translatesAutoresizingMaskIntoConstraints = false
 
+        return profileAndNameStackView
+    }
+
+    private func createContentStackView() -> UIStackView {
         var contentArrangedSubviews: [UIView] = []
 
         if userRole == "teacher" {
@@ -175,18 +211,15 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
         stackView.spacing = 20
         stackView.translatesAutoresizingMaskIntoConstraints = false
 
-        let scrollView = UIScrollView()
-        scrollView.backgroundColor = .clear
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
+        return stackView
+    }
 
-        let containerView = UIView()
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(containerView)
-
-        containerView.addSubview(profileAndNameStackView)
-        containerView.addSubview(stackView)
-
+    private func setupConstraints(
+        scrollView: UIScrollView,
+        containerView: UIView,
+        profileAndNameStackView: UIStackView,
+        stackView: UIStackView
+    ) {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -200,9 +233,11 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
             containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
 
             profileAndNameStackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            
-            profileAndNameStackView.topAnchor.constraint(equalTo: userRole == "student" ? containerView.centerYAnchor : containerView.topAnchor, constant: userRole == "student" ? -100 : 20),
-            
+            profileAndNameStackView.topAnchor.constraint(
+                equalTo: userRole == "student" ? containerView.centerYAnchor : containerView.topAnchor,
+                constant: userRole == "student" ? -100 : 20
+            ),
+
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
 
@@ -292,9 +327,12 @@ class IntroVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCo
     }
     
     private func startSaveButtonAnimation() {
-        saveButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        saveButton.semanticContentAttribute = .forceRightToLeft
-        saveButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+        var configuration = UIButton.Configuration.plain()
+        configuration.image = UIImage(systemName: "ellipsis")
+        configuration.imagePadding = 8
+        configuration.imagePlacement = .trailing
+        saveButton.configuration = configuration
+
         saveButton.imageView?.addSymbolEffect(.variableColor.iterative.nonReversing)
     }
 

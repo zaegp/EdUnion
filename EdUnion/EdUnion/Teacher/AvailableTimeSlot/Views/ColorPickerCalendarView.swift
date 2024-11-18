@@ -30,7 +30,7 @@ struct ColorPickerCalendarView: View {
     @State private var availableColors: [Color] = []
     @State private var activitiesByDate: [Date: [Appointment]] = [:]
     @State private var timeSlots: [AvailableTimeSlot] = []
-    let userID = UserSession.shared.currentUserID
+    let userID = UserSession.shared.unwrappedUserID
     let viewModel = BaseCalendarViewModel()
     
     let calendarTip = CalendarTip()
@@ -101,7 +101,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func fetchDateColors() {
-        let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(userID ?? "")
+        let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(userID)
         
         teacherRef.getDocument { (documentSnapshot, error) in
             if let error = error {
@@ -134,7 +134,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func fetchTimeSlots() {
-        UserFirebaseService.shared.fetchTimeSlots(forTeacher: userID ?? "") { result in
+        UserFirebaseService.shared.fetchTimeSlots(forTeacher: userID) { result in
             switch result {
             case .success(let fetchedTimeSlots):
                 DispatchQueue.main.async {
