@@ -205,7 +205,7 @@ struct AuthenticationView: View {
     
     private func checkUserExistence(uid: String, appleIDCredential: ASAuthorizationAppleIDCredential) {
         let db = Firestore.firestore()
-        let collectionName = (userRole == "teacher") ? "teachers" : Constants.studentsCollection
+        let collectionName = (userRole == "teacher") ? Constants.teachersCollection : Constants.studentsCollection
         let userRef = db.collection(collectionName).document(uid)
         
         userRef.getDocument { (document, error) in

@@ -22,6 +22,7 @@ class ChatListVC: UIViewController {
     private let tableView = UITableView()
     private let searchBarView = SearchBarView()
     private var isDataReloadNeeded = true
+    private var unreadCounts: [String: Int] = [:]
     
     private let noChatRoomsView: UIView = {
         let view = UIView()
@@ -83,8 +84,8 @@ class ChatListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .myBackground
         
+        tableView.allowsSelection = !isLoading
         setupUI()
     }
     
@@ -111,6 +112,8 @@ class ChatListVC: UIViewController {
     }
     
     private func setupUI() {
+        view.backgroundColor = .myBackground
+        
         searchBarView.delegate = self
         navigationItem.titleView = searchBarView
         searchBarView.layer.borderWidth = 0
@@ -200,14 +203,32 @@ class ChatListVC: UIViewController {
             dispatchGroup.enter()
             let participantId = chatRoom.participants.first { $0 != self.userID } ?? "未知用戶"
             
+            let fetchUserCompletion: (Result<UserProtocol, Error>) -> Void = { [weak self] result in
+                guard let self = self else { return }
+                self.handleFetchResult(result, for: chatRoom.id)
+                
+                self.fetchUnreadCount(for: chatRoom.id) { unreadCount in
+                    self.unreadCounts[chatRoom.id] = unreadCount
+                    dispatchGroup.leave()
+                }
+            }
+            
             if isTeacher {
                 UserFirebaseService.shared.fetchUser(
                     from: Constants.studentsCollection,
                     by: participantId,
                     as: Student.self
                 ) { [weak self] result in
-                    self?.handleFetchResult(result, for: chatRoom.id)
-                    dispatchGroup.leave()
+                    guard let self = self else { return }
+                    
+                    let convertedResult: Result<any UserProtocol, Error> = result.map { $0 as any UserProtocol }
+                    self.handleFetchResult(convertedResult, for: chatRoom.id)
+                    
+                    self.fetchUnreadCount(for: chatRoom.id) { unreadCount in
+                        self.unreadCounts[chatRoom.id] = unreadCount
+                        print("Unread count set for chatRoomID \(chatRoom.id): \(unreadCount)")
+                        dispatchGroup.leave()
+                    }
                 }
             } else {
                 UserFirebaseService.shared.fetchUser(
@@ -215,25 +236,38 @@ class ChatListVC: UIViewController {
                     by: participantId,
                     as: Teacher.self
                 ) { [weak self] result in
-                    self?.handleFetchResult(result, for: chatRoom.id)
-                    dispatchGroup.leave()
+                    guard let self = self else { return }
+                    
+                    let convertedResult: Result<any UserProtocol, Error> = result.map { $0 as any UserProtocol }
+                    self.handleFetchResult(convertedResult, for: chatRoom.id)
+                    
+                    self.fetchUnreadCount(for: chatRoom.id) { unreadCount in
+                        self.unreadCounts[chatRoom.id] = unreadCount
+                        print("Unread count set for chatRoomID \(chatRoom.id): \(unreadCount)")
+                        dispatchGroup.leave()
+                    }
                 }
             }
         }
         
         dispatchGroup.notify(queue: .main) {
-            // 確保僅保留有參與者數據的聊天室
             self.chatRooms = self.chatRooms.filter { self.participants[$0.id] != nil }
             self.filteredChatRooms = self.chatRooms
-            self.tableView.reloadData() // 更新列表
+            self.tableView.reloadData()
             completion()
         }
     }
     
-    private func handleFetchResult<T: UserProtocol>(_ result: Result<T, Error>, for chatRoomID: String) {
+    private func handleFetchResult(_ result: Result<any UserProtocol, Error>, for chatRoomID: String) {
         switch result {
         case .success(let user):
-            participants[chatRoomID] = user
+            if let student = user as? Student {
+                participants[chatRoomID] = student
+            } else if let teacher = user as? Teacher {
+                participants[chatRoomID] = teacher
+            } else {
+                print("Error: User type is unknown or mismatched.")
+            }
         case .failure(let error):
             print("Error fetching participant for chat room \(chatRoomID): \(error.localizedDescription)")
             participants[chatRoomID] = nil
@@ -261,8 +295,8 @@ class ChatListVC: UIViewController {
                     return
                 }
                 
-                let unreadCount = snapshot?.documents.count ?? 0
-                completion(unreadCount)
+                let unreadCount = snapshot?.documents.count
+                completion(unreadCount ?? 0)
             }
     }
 }
@@ -287,7 +321,6 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
         
         if isLoading {
@@ -298,12 +331,13 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
             let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
             
             if let participant = participants[chatRoom.id] {
+                let unreadCount = unreadCounts[chatRoom.id] ?? 0
                 cell.configure(
                     name: participant.fullName,
                     lastMessage: lastMessage,
                     time: lastMessageTime,
                     image: participant.photoURL ?? "",
-                    unreadCount: 0
+                    unreadCount: unreadCount
                 )
             }
         }
@@ -314,6 +348,7 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
         
         let selectedChatRoom = filteredChatRooms[indexPath.row]
         let chatVC = ChatVC()

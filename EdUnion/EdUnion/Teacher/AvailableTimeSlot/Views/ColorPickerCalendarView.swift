@@ -101,7 +101,7 @@ struct ColorPickerCalendarView: View {
     }
     
     private func fetchDateColors() {
-        let teacherRef = UserFirebaseService.shared.db.collection("teachers").document(userID)
+        let teacherRef = UserFirebaseService.shared.db.collection(Constants.teachersCollection).document(userID)
         
         teacherRef.getDocument { (documentSnapshot, error) in
             if let error = error {

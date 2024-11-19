@@ -68,7 +68,7 @@ class AvailableTimeSlotsViewModel {
             case .success:
                 self?.onTimeSlotsChanged?()
             case .failure(let error):
-                print("更新时间段时出错：\(error)")
+                print("更新時間段時出錯：\(error)")
                 self?.timeSlots[index] = oldTimeSlot
             }
         }

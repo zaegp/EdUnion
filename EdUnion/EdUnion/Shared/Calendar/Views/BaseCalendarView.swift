@@ -131,7 +131,7 @@ struct AppointmentsListView: View {
                                 Text(viewModel.participantNames[appointment.teacherID] ?? "")
                                     .onAppear {
                                         if viewModel.participantNames[appointment.studentID] == nil {
-                                            viewModel.fetchUserData(from: "teachers", userID: appointment.teacherID, as: Teacher.self)
+                                            viewModel.fetchUserData(from: Constants.teachersCollection, userID: appointment.teacherID, as: Teacher.self)
                                         }
                                     }
                                     .font(.headline)

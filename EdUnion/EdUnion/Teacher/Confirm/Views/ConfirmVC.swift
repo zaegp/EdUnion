@@ -69,7 +69,6 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    // MARK: - TableView
     func setupTableView() {
         tableView = UITableView(frame: view.bounds, style: .plain)
         tableView.dataSource = self

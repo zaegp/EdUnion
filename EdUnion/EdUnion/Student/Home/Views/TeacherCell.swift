@@ -18,9 +18,20 @@ class TeacherCell: UICollectionViewCell {
     private let experienceLabel = UILabel()
     private let stackView = UIStackView()
     
+    private let skeletonImageView = UIView()
+    private let skeletonNameView = UIView()
+    private let skeletonSubjectView = UIView()
+    private let skeletonEducationView = UIView()
+    private let skeletonExperienceView = UIView()
+    
+    var isSkeleton: Bool = false {
+        didSet {
+            configureSkeletonState()
+        }
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         setupViews()
         setupConstraints()
     }
@@ -38,15 +49,11 @@ class TeacherCell: UICollectionViewCell {
         [nameLabel, totalCoursesLabel, subjectLabel, educationLabel, experienceLabel].forEach {
             $0.textAlignment = .center
             $0.numberOfLines = 1
-            $0.lineBreakMode = .byTruncatingTail 
+            $0.lineBreakMode = .byTruncatingTail
             $0.font = UIFont.systemFont(ofSize: 14)
         }
         nameLabel.font = UIFont.boldSystemFont(ofSize: 18)
         nameLabel.textColor = .myMessageCell
-        totalCoursesLabel.textColor = .myMessageCell
-        subjectLabel.textColor = .myMessageCell
-        educationLabel.textColor = .myMessageCell
-        experienceLabel.textColor = .myMessageCell
         
         stackView.axis = .vertical
         stackView.alignment = .center
@@ -63,8 +70,21 @@ class TeacherCell: UICollectionViewCell {
         
         contentView.addSubview(stackView)
         
-        contentView.layer.cornerRadius = 12
-        contentView.layer.masksToBounds = true
+        setupSkeletonViews()
+    }
+    
+    private func setupSkeletonViews() {
+        let skeletons = [skeletonImageView, skeletonNameView, skeletonSubjectView, skeletonEducationView, skeletonExperienceView]
+        skeletons.forEach {
+            $0.backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
+            $0.layer.cornerRadius = 8
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.isHidden = true
+            contentView.addSubview($0)
+        }
+        
+        skeletonImageView.layer.cornerRadius = 40
+        skeletonImageView.clipsToBounds = true
     }
     
     private func setupConstraints() {
@@ -79,22 +99,61 @@ class TeacherCell: UICollectionViewCell {
             image.widthAnchor.constraint(equalToConstant: 80),
             image.heightAnchor.constraint(equalToConstant: 80)
         ])
+        
+        NSLayoutConstraint.activate([
+            skeletonImageView.widthAnchor.constraint(equalToConstant: 80),
+            skeletonImageView.heightAnchor.constraint(equalToConstant: 80),
+            skeletonImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            skeletonImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            
+            skeletonNameView.topAnchor.constraint(equalTo: skeletonImageView.bottomAnchor, constant: 16),
+            skeletonNameView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            skeletonNameView.widthAnchor.constraint(equalToConstant: 120),
+            skeletonNameView.heightAnchor.constraint(equalToConstant: 16),
+            
+            skeletonSubjectView.topAnchor.constraint(equalTo: skeletonNameView.bottomAnchor, constant: 8),
+            skeletonSubjectView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            skeletonSubjectView.widthAnchor.constraint(equalToConstant: 100),
+            skeletonSubjectView.heightAnchor.constraint(equalToConstant: 14),
+            
+            skeletonEducationView.topAnchor.constraint(equalTo: skeletonSubjectView.bottomAnchor, constant: 8),
+            skeletonEducationView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            skeletonEducationView.widthAnchor.constraint(equalToConstant: 140),
+            skeletonEducationView.heightAnchor.constraint(equalToConstant: 14),
+            
+            skeletonExperienceView.topAnchor.constraint(equalTo: skeletonEducationView.bottomAnchor, constant: 8),
+            skeletonExperienceView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            skeletonExperienceView.widthAnchor.constraint(equalToConstant: 160),
+            skeletonExperienceView.heightAnchor.constraint(equalToConstant: 14)
+        ])
+    }
+    
+    private func configureSkeletonState() {
+        let isHidden = !isSkeleton
+        
+        image.isHidden = isSkeleton
+        nameLabel.isHidden = isSkeleton
+        totalCoursesLabel.isHidden = isSkeleton
+        subjectLabel.isHidden = isSkeleton
+        educationLabel.isHidden = isSkeleton
+        experienceLabel.isHidden = isSkeleton
+        
+        skeletonImageView.isHidden = isHidden
+        skeletonNameView.isHidden = isHidden
+        skeletonSubjectView.isHidden = isHidden
+        skeletonEducationView.isHidden = isHidden
+        skeletonExperienceView.isHidden = isHidden
     }
     
     func configure(with teacher: Teacher) {
+        isSkeleton = false
         
-        image.image = nil
-
         if let photoURL = teacher.photoURL, let url = URL(string: photoURL) {
-            image.kf.setImage(with: url, completionHandler: { [weak self] _ in
-                self?.setNeedsLayout()
-                self?.layoutIfNeeded()
-            })
+            image.kf.setImage(with: url, placeholder: UIImage(systemName: "person.crop.circle.fill"))
         } else {
             image.image = UIImage(systemName: "person.crop.circle.fill")
-            image.tintColor = .myMessageCell
         }
-        
+        image.tintColor = .myMessageCell
         nameLabel.text = teacher.fullName
         totalCoursesLabel.text = "已在平台上 \(teacher.totalCourses) 節課"
         subjectLabel.text = "教學科目: \(teacher.resume[3])"

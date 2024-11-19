@@ -39,8 +39,8 @@ struct ProgressBarView: View {
                 .rotationEffect(.degrees(-90))
                 .animation(.easeInOut(duration: 0.8), value: value)
             
-            ForEach(0..<segments) { i in
-                let angle = Angle(degrees: (360.0 / Double(segments)) * Double(i))
+            ForEach(0..<segments, id: \.self) { i in
+                let angle = Angle(degrees: 360.0 / Double(segments) * Double(i))
                 Rectangle()
                     .fill(separatorColor)
                     .frame(width: separatorWidth, height: lineWidth)

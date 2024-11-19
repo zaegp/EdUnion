@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Teacher: UserProtocol, Codable {
+struct Teacher: Equatable, UserProtocol, Codable {
     var id: String = ""
     var userID: String
     var resume: [String]

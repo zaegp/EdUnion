@@ -158,7 +158,11 @@ extension AvailableTimeSlotsVC: UITableViewDelegate, UITableViewDataSource {
             cell.frame = cell.frame.inset(by: cellMargins)
         }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    func tableView(
+        _ tableView: UITableView,
+        commit editingStyle: UITableViewCell.EditingStyle,
+        forRowAt indexPath: IndexPath
+    ) {
         if editingStyle == .delete {
             viewModel.deleteTimeSlot(at: indexPath.row)
         }

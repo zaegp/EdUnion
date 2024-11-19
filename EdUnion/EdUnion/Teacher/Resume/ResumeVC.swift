@@ -10,31 +10,30 @@ import FirebaseFirestore
 
 class ResumeVC: UIViewController {
     
-    let nameLabel = UILabel()
-    let nameTextField = PaddedTextField()
+    private let nameLabel = UILabel()
+    private let nameTextField = PaddedTextField()
     
-    let label1 = UILabel()
-    let textField1 = PaddedTextField()
+    private let label1 = UILabel()
+    private let textField1 = PaddedTextField()
     
-    let label2 = UILabel()
-    let textField2 = PaddedTextField()
+    private let label2 = UILabel()
+    private let textField2 = PaddedTextField()
     
-    let label3 = UILabel()
-    let textView3 = UITextView()
+    private let label3 = UILabel()
+    private let textView3 = UITextView()
     
-    let label4 = UILabel()
-    let textField4 = PaddedTextField()
+    private let label4 = UILabel()
+    private let textField4 = PaddedTextField()
     
-    let label5 = UILabel()
-    let textField5 = PaddedTextField()
+    private let label5 = UILabel()
+    private let textField5 = PaddedTextField()
     
-    let saveButton = UIButton(type: .system)
+    private let saveButton = UIButton(type: .system)
     
-    let userID = UserSession.shared.unwrappedUserID
+    private let userID = UserSession.shared.unwrappedUserID
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .myBackground
         
         setupUI()
         fetchResumeData()
@@ -51,6 +50,8 @@ class ResumeVC: UIViewController {
     }
     
     func setupUI() {
+        view.backgroundColor = .myBackground
+        
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = false
@@ -175,7 +176,7 @@ class ResumeVC: UIViewController {
     
     func fetchResumeData() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(userID)
+        let teacherRef = db.collection(Constants.teachersCollection).document(userID)
         
         teacherRef.getDocument { [weak self] (document, error) in
             if let error = error {
@@ -201,7 +202,7 @@ class ResumeVC: UIViewController {
     
     @objc func saveChanges() {
         let db = Firestore.firestore()
-        let teacherRef = db.collection("teachers").document(userID)
+        let teacherRef = db.collection(Constants.teachersCollection).document(userID)
         
         let updatedResume = [
             textField1.text ?? "",

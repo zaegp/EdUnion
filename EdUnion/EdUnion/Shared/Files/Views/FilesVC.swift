@@ -169,7 +169,7 @@ class FilesVC: UIViewController, QLPreviewControllerDataSource {
     }
     
     func fetchStudentsNotes(forTeacherID teacherID: String, completion: @escaping ([String: String]) -> Void) {
-        firestore.collection("teachers").document(teacherID).getDocument { (snapshot, error) in
+        firestore.collection(Constants.teachersCollection).document(teacherID).getDocument { (snapshot, error) in
             if let error = error {
                 print("Error fetching studentsNotes: \(error.localizedDescription)")
                 completion([:])

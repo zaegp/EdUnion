@@ -108,7 +108,7 @@ exports.notifyTeacherOnNewAppointment = onDocumentCreated("appointments/{appoint
       token: fcmToken,
       notification: {
         title: "EdUnion",
-        body: `您有一个新的課程預約`,
+        body: `您有一個新的課程預約`,
       },
       data: {
         appointmentID: event.params.appointmentID,

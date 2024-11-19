@@ -46,7 +46,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func fetchTeacherList(forStudentID studentID: String, listKey: String, completion: @escaping (Result<[Teacher], Error>) -> Void) {
-        db.collection("students").document(studentID).getDocument { snapshot, error in
+        db.collection(Constants.studentsCollection).document(studentID).getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
             } else if let data = snapshot?.data(), let idList = data[listKey] as? [String] {
@@ -58,7 +58,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func getStudentFollowList(completion: @escaping ([String]?, Error?) -> Void) {
-        let studentRef = db.collection("students").document(userID)
+        let studentRef = db.collection(Constants.studentsCollection).document(userID)
         
         studentRef.getDocument { document, error in
             if let error = error {
@@ -74,7 +74,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     
     // MARK: - 學生首頁：更新關注和常用老師列表
     func updateStudentList(teacherID: String, listName: String, add: Bool, completion: @escaping (Error?) -> Void) {
-        let studentRef = db.collection("students").document(userID)
+        let studentRef = db.collection(Constants.studentsCollection).document(userID)
         let operation: FieldValue = add ? FieldValue.arrayUnion([teacherID]) : FieldValue.arrayRemove([teacherID])
         
         studentRef.updateData([
@@ -90,7 +90,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
         
         for id in ids {
             group.enter()
-            db.collection("teachers").document(id).getDocument { snapshot, error in
+            db.collection(Constants.teachersCollection).document(id).getDocument { snapshot, error in
                 if let error = error {
                     print("Error fetching teacher with id \(id): \(error)")
                 } else if var teacher = try? snapshot?.data(as: Teacher.self) {
@@ -111,7 +111,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func updateStudentNotes(studentID: String, note: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(userID)
+        let teacherRef = db.collection(Constants.teachersCollection).document(userID)
         
         teacherRef.getDocument { (document, error) in
             if let error = error {
@@ -139,7 +139,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func fetchTeacherStudentList(teacherID: String, completion: @escaping (Result<[String: String], Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(teacherID)
+        let teacherRef = db.collection(Constants.teachersCollection).document(teacherID)
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
@@ -157,7 +157,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func fetchStudentNote(studentID: String, completion: @escaping (Result<String?, Error>) -> Void) {
-        let teacherRef = db.collection("teachers").document(userID)
+        let teacherRef = db.collection(Constants.teachersCollection).document(userID)
         
         teacherRef.getDocument { (document, error) in
             if let document = document, document.exists {
@@ -197,7 +197,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     
     func fetchBlocklist(completion: @escaping (Result<[String], Error>) -> Void) {
         
-        let userRef = db.collection("students").document(userID)
+        let userRef = db.collection(Constants.studentsCollection).document(userID)
         userRef.getDocument { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -415,7 +415,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     }
     
     func removeStudentFromTeacherNotes(teacherID: String, studentID: String, completion: @escaping (Error?) -> Void) {
-        let teacherRef = Firestore.firestore().collection("teachers").document(teacherID)
+        let teacherRef = Firestore.firestore().collection(Constants.teachersCollection).document(teacherID)
         teacherRef.updateData([
             "studentsNotes.\(studentID)": FieldValue.delete()
         ]) { error in
@@ -450,7 +450,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
                     return
                 }
                 
-                let collection = (userRole == "teacher") ? "teachers" : "students"
+                let collection = (userRole == "teacher") ? Constants.teachersCollection : Constants.studentsCollection
                 let userRef = Firestore.firestore().collection(collection).document(userID)
                 
                 userRef.updateData(["photoURL": downloadURL.absoluteString]) { error in
@@ -466,7 +466,7 @@ class UserFirebaseService: UserFirebaseServiceProtocol {
     
     // 共通：刪除帳號
     func updateUserStatusToDeleting(userID: String, userRole: String, completion: @escaping (Error?) -> Void) {
-        let collection = (userRole == "teacher") ? "teachers" : "students"
+        let collection = (userRole == "teacher") ? "teachers" : Constants.studentsCollection
         let userRef = Firestore.firestore().collection(collection).document(userID)
         
         userRef.updateData(["status": "Deleting"]) { error in

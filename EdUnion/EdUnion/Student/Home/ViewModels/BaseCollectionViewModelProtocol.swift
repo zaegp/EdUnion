@@ -9,7 +9,8 @@ protocol BaseCollectionViewModelProtocol {
     var items: [Teacher] { get set }
     var onDataUpdate: (() -> Void)? { get set }
     var userID: String { get }
-
+    var isLoading: Bool { get set }
+    
     func fetchData()
     func numberOfItems() -> Int
     func item(at index: Int) -> Teacher
@@ -19,8 +20,8 @@ protocol BaseCollectionViewModelProtocol {
 
 extension BaseCollectionViewModelProtocol {
     var userID: String {
-            return UserSession.shared.unwrappedUserID
-        }
+        return UserSession.shared.unwrappedUserID
+    }
     
     func fetchBlocklist(completion: @escaping ([String]) -> Void) {
         UserFirebaseService.shared.fetchBlocklist { result in
@@ -43,13 +44,5 @@ extension BaseCollectionViewModelProtocol {
                 teacher.resume.prefix(4).contains { $0.lowercased().contains(query.lowercased()) }
             }
         }
-    }
-    
-    func numberOfItems(in filteredItems: [Teacher]) -> Int {
-        return filteredItems.count
-    }
-    
-    func item(at index: Int, in filteredItems: [Teacher]) -> Teacher {
-        return filteredItems[index]
     }
 }

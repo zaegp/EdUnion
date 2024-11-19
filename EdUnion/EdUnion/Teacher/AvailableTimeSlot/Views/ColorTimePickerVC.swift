@@ -7,14 +7,14 @@
 
 import UIKit
 
-class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
+class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate {
     
     var editingTimeSlot: AvailableTimeSlot?
     var onTimeSlotSelected: ((AvailableTimeSlot) -> Void)?
+    var onTimeSlotEdited: ((AvailableTimeSlot) -> Void)?
     var existingTimeRanges: [String] = []
     var existingColors: [String] = []
     var existingTimeSlots: [AvailableTimeSlot] = []
-    var onTimeSlotEdited: ((AvailableTimeSlot) -> Void)?
     
     let saveButton = UIButton(type: .system)
     let cancelButton = UIButton(type: .system)
@@ -111,7 +111,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         let startTimeString = String(format: "%02d:%@", selectedStartHour, selectedStartMinute)
         let endTimeString = String(format: "%02d:%@", selectedEndHour, selectedEndMinute)
         
-        guard let startTime = dateFromString(startTimeString), let endTime = dateFromString(endTimeString) else {
+        guard let startTime = TimeService.sharedTimeFormatter.date(from: startTimeString), let endTime = TimeService.sharedTimeFormatter.date(from: endTimeString) else {
             return
         }
         
@@ -285,7 +285,7 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         
         let timeRange = "\(startTimeString) - \(endTimeString)"
         
-        guard let startTime = dateFromString(startTimeString), let endTime = dateFromString(endTimeString) else {
+        guard let startTime = TimeService.sharedTimeFormatter.date(from: startTimeString), let endTime = TimeService.sharedTimeFormatter.date(from: endTimeString) else {
             return
         }
         
@@ -336,8 +336,8 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         for timeRange in selectedTimeRanges {
             let times = timeRange.components(separatedBy: " - ")
             if times.count == 2,
-               let existingStart = dateFromString(times[0]),
-               let existingEnd = dateFromString(times[1]) {
+               let existingStart = TimeService.sharedTimeFormatter.date(from: times[0]),
+               let existingEnd = TimeService.sharedTimeFormatter.date(from: times[1]) {
                 if start < existingEnd && end > existingStart {
                     return true
                 }
@@ -346,21 +346,15 @@ class ColorTimePickerVC: UIViewController, UIColorPickerViewControllerDelegate, 
         return false
     }
     
-    func dateFromString(_ timeString: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.date(from: timeString)
-    }
-    
-    // MARK: - ColorPicker Delegate
     func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
         selectedColor = viewController.selectedColor
         colorPreview.backgroundColor = selectedColor
         
         colorPreviewLabel.isHidden = true
     }
-    
-    // MARK: - TableView
+}
+
+extension ColorTimePickerVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         updateEmptyState()
         return selectedTimeRanges.count

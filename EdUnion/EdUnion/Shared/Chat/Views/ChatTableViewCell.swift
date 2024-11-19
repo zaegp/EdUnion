@@ -147,7 +147,6 @@ class ChatTableViewCell: UITableViewCell {
         setupReadReceiptLabelConstraints()
     }
 
-    // MARK: - Constraints
     private func setupBubbleConstraints() {
         bubbleTopConstraint = bubbleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
         bubbleBottomConstraint = bubbleBackgroundView.bottomAnchor.constraint(

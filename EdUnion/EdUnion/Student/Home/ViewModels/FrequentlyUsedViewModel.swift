@@ -6,6 +6,8 @@
 //
 
 class FrequentlyUsedViewModel: BaseCollectionViewModelProtocol {
+    var isLoading: Bool = false
+
     var items: [Teacher] = []
     private var filteredItems: [Teacher] = []
     private var blocklist: [String] = []

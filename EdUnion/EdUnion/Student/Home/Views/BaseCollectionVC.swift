@@ -87,23 +87,22 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
 // MARK: - UICollectionViewDataSource
 extension BaseCollectionVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.numberOfItems()
+        return viewModel.isLoading ? 6 : viewModel.numberOfItems() 
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let totalItems = viewModel.numberOfItems()
-        
-        guard indexPath.row < totalItems else {
-            print("Index out of bounds. Total items: \(totalItems), requested index: \(indexPath.row)")
-            return UICollectionViewCell()
-        }
-        
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TeacherCell", for: indexPath) as? TeacherCell else {
             return UICollectionViewCell()
         }
         
-        let item = viewModel.item(at: indexPath.item)
-        cell.configure(with: item)
+        if viewModel.isLoading {
+            cell.isSkeleton = true
+        } else {
+            cell.isSkeleton = false
+            let item = viewModel.item(at: indexPath.item)
+            cell.configure(with: item)
+        }
+        
         cell.contentView.layer.cornerRadius = 30
         cell.contentView.layer.borderWidth = 1.0
         cell.contentView.layer.borderColor = UIColor.myGray.cgColor
