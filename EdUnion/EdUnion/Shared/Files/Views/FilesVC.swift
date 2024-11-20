@@ -879,7 +879,7 @@ extension FilesVC: FileCellDelegate {
     
     func deleteFile(at indexPath: IndexPath) {
         guard indexPath.item < files.count else {
-            logError("Index out of range while deleting file.")
+            print("Index out of range while deleting file.")
             return
         }
         
@@ -897,9 +897,9 @@ extension FilesVC: FileCellDelegate {
         
         do {
             try FileManager.default.removeItem(at: localURL)
-            logInfo("Local file deleted: \(localURL)")
+            print("Local file deleted: \(localURL)")
         } catch {
-            logError("Error deleting local file: \(error.localizedDescription)")
+            print("Error deleting local file: \(error.localizedDescription)")
         }
         
         DispatchQueue.main.async {
@@ -913,7 +913,7 @@ extension FilesVC: FileCellDelegate {
 
     private func deleteFileForTeacher(_ fileItem: FileItem, at indexPath: IndexPath) {
         guard let storagePath = fileItem.storagePath, !storagePath.isEmpty else {
-            logError("Storage path is invalid or empty.")
+            print("Storage path is invalid or empty.")
             showAlert(title: "刪除失敗", message: "無法刪除文件，文件的路徑無效。")
             return
         }
@@ -922,7 +922,7 @@ extension FilesVC: FileCellDelegate {
         
         storageRef.delete { [weak self] error in
             if let error = error {
-                self?.logError("Error deleting file from Storage: \(error.localizedDescription)")
+                print("Error deleting file from Storage: \(error.localizedDescription)")
                 self?.showAlert(title: "刪除失敗", message: "無法刪除文件，請稍後再試。")
                 return
             }
@@ -931,25 +931,26 @@ extension FilesVC: FileCellDelegate {
         }
     }
 
+
     private func deleteFileMetadata(_ fileItem: FileItem, at indexPath: IndexPath, storagePath: String) {
         firestore.collection(Constants.filesCollection)
             .whereField("storagePath", isEqualTo: storagePath)
             .getDocuments { [weak self] snapshot, error in
                 if let error = error {
-                    self?.logError("Error deleting file metadata from Firestore: \(error.localizedDescription)")
+                    print("Error deleting file metadata from Firestore: \(error.localizedDescription)")
                     return
                 }
                 
                 guard let document = snapshot?.documents.first else {
-                    self?.logError("File not found in Firestore.")
+                    print("File not found in Firestore.")
                     return
                 }
                 
                 document.reference.delete { error in
                     if let error = error {
-                        self?.logError("Error deleting file metadata: \(error.localizedDescription)")
+                        print("Error deleting file metadata: \(error.localizedDescription)")
                     } else {
-                        self?.logInfo("Successfully deleted metadata for file: \(fileItem.fileName)")
+                        print("Successfully deleted metadata for file: \(fileItem.fileName)")
                         self?.deleteLocalFileIfExists(fileItem, at: indexPath)
                     }
                 }
@@ -960,9 +961,9 @@ extension FilesVC: FileCellDelegate {
         if let localURL = fileItem.localURL, FileManager.default.fileExists(atPath: localURL.path) {
             do {
                 try FileManager.default.removeItem(at: localURL)
-                logInfo("Local file deleted successfully.")
+                print("Local file deleted successfully.")
             } catch {
-                logError("Error deleting local file: \(error.localizedDescription)")
+                print("Error deleting local file: \(error.localizedDescription)")
             }
         }
         
@@ -974,22 +975,6 @@ extension FilesVC: FileCellDelegate {
                 self.setCustomEmptyStateView()
             }
         }
-    }
-
-    private func logInfo(_ message: String) {
-        #if DEBUG
-        print("[INFO]: \(message)")
-        #else
-        os_log("%@", type: .info, message)
-        #endif
-    }
-
-    private func logError(_ message: String) {
-        #if DEBUG
-        print("[ERROR]: \(message)")
-        #else
-        os_log("%@", type: .error, message)
-        #endif
     }
 }
 

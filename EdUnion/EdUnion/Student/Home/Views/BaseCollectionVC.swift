@@ -23,6 +23,12 @@ class BaseCollectionVC: UIViewController, UICollectionViewDelegateFlowLayout {
         viewModel.fetchData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        collectionView.isUserInteractionEnabled = false
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -98,6 +104,7 @@ extension BaseCollectionVC: UICollectionViewDataSource {
         if viewModel.isLoading {
             cell.isSkeleton = true
         } else {
+            collectionView.isUserInteractionEnabled = true
             cell.isSkeleton = false
             let item = viewModel.item(at: indexPath.item)
             cell.configure(with: item)

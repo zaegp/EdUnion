@@ -85,12 +85,13 @@ class ChatListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.allowsSelection = !isLoading
         setupUI()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        tableView.allowsSelection = false
         
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
@@ -326,6 +327,8 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
         if isLoading {
             cell.isSkeleton = true
         } else {
+            tableView.allowsSelection = true
+
             let chatRoom = filteredChatRooms[indexPath.row]
             let lastMessage = chatRoom.lastMessage ?? "沒有消息"
             let lastMessageTime = chatRoom.lastMessageTimestamp?.dateValue().formattedChatDate() ?? ""
