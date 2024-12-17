@@ -37,7 +37,6 @@ class CalendarVC: UIViewController {
         
         NSLayoutConstraint.activate([
             calendarHostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            calendarHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             calendarHostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarHostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             calendarHostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)

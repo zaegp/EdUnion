@@ -53,23 +53,34 @@ struct CalendarDayView: View {
     let isCurrentMonth: Bool
     let color: Color
     
+    private var foregroundColor: Color {
+        if isToday && isSelected {
+            return Color(UIColor.systemBackground)
+        } else if isSelected {
+            return Color(UIColor.label)
+        } else if isToday {
+            return Color.mainOrange
+        } else {
+            return Color(UIColor.systemBackground)
+        }
+    }
+    
+    private var isToday: Bool {
+        guard let day = day else { return false }
+        return Calendar.current.isDateInToday(day)
+    }
+    
+    private var isPastDate: Bool {
+        guard let day = day else { return false }
+        return Calendar.current.isDateInYesterdayOrEarlier(day)
+    }
+    
     var body: some View {
         VStack(spacing: 5) {
             if let day = day {
-                let isPastDate = Calendar.current.isDateInYesterdayOrEarlier(day)
-                let isToday = Calendar.current.isDateInToday(day)
-                
                 Text(day.formatted(.dateTime.day()))
                     .fontWeight(.bold)
-                    .foregroundColor(
-                        isToday && isSelected
-                        ? Color(UIColor.systemBackground)
-                        : isSelected
-                        ? Color(UIColor.label)
-                        : isToday
-                        ? Color.mainOrange
-                        : Color(UIColor.systemBackground)
-                    )
+                    .foregroundColor(foregroundColor)
                     .strikethrough(isPastDate, color: Color(UIColor.systemBackground))
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
@@ -84,22 +95,10 @@ struct CalendarDayView: View {
                         }
                     )
                 
-                ZStack {
-                    Circle()
-                        .fill(color != .clear ? color : Color.clear)
-                        .frame(width: 8, height: 8)
-                }
-                .frame(height: 10)
-            } else {
-                Text("")
-                    .frame(maxWidth: .infinity, minHeight: 40)
-                
-                ZStack {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 8, height: 8)
-                }
-                .frame(height: 10)
+                Circle()
+                    .fill(color != .clear ? color : Color.clear)
+                    .frame(width: 8, height: 8)
+                    .frame(height: 10)
             }
         }
         .frame(height: 60)
@@ -118,7 +117,7 @@ struct AppointmentsListView: View {
                 HStack {
                     VStack(alignment: .leading) {
                         HStack {
-                            if userRole == "teacher" {
+                            if userRole == UserRole.teacher.rawValue {
                                 Text(viewModel.participantNames[appointment.studentID] ?? "")
                                     .onAppear {
                                         if viewModel.participantNames[appointment.studentID] == nil {
@@ -178,7 +177,7 @@ struct AppointmentDetailCardView: View {
         VStack(spacing: 24) {
             Text(appointment.date)
                 .font(.headline)
-            if userRole == "student" {
+            if userRole == UserRole.student.rawValue {
                 Text(participantName)
                     .font(.title)
                     .fontWeight(.semibold)
@@ -190,7 +189,7 @@ struct AppointmentDetailCardView: View {
             Text(TimeService.convertCourseTimeToDisplay(from: appointment.times))
                 .font(.subheadline)
             
-            if userRole == "student" {
+            if userRole == UserRole.student.rawValue {
                 Button(action: onCancel) {
                     Text("取消預約")
                         .font(.headline)
@@ -200,7 +199,7 @@ struct AppointmentDetailCardView: View {
                         .background(Color.mainOrange)
                         .cornerRadius(10)
                 }
-            } else if userRole == "teacher" {
+            } else {
                 Button(action: onShowNote) {
                     Text("顯示備註")
                         .font(.headline)
@@ -223,15 +222,12 @@ struct AppointmentDetailCardView: View {
 struct BaseCalendarView: View {
     @Binding var externalDateColors: [Date: Color]?
     @ObservedObject var viewModel: BaseCalendarViewModel
-    @State private var isDataLoaded = false
     @State private var isShowingDetail = false
     @State private var selectedAppointment: Appointment?
     @State private var appointmentListener: ListenerRegistration?
+    @State private var isShowingCard = false
     let userID = UserSession.shared.unwrappedUserID
     let userRole = UserDefaults.standard.string(forKey: "userRole") ?? "teacher"
-    @State private var isShowingCard = false
-    @State private var showingAlert = false
-    @State private var alertMessage = ""
     
     var dateColors: [Date: Color] {
         externalDateColors ?? viewModel.internalDateColors
@@ -247,7 +243,6 @@ struct BaseCalendarView: View {
     @State private var currentDate = Date()
     let daysOfWeek = Calendar.current.shortWeekdaySymbols
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    @State private var isShowingChat = false
     @State private var selectedStudentID: String = ""
     @State private var isShowingNotePopup = false
     @State private var noteText = ""
@@ -287,8 +282,13 @@ struct BaseCalendarView: View {
                                     color: dateColors[day] ?? .clear
                                 )
                                 .onTapGesture {
-                                    toggleSingleSelection(for: day)
                                     onDayTap?(day)
+                                    
+                                    if selectedDay == day {
+                                        selectedDay = nil
+                                    } else {
+                                        selectedDay = day
+                                    }
                                 }
                                 .onLongPressGesture {
                                     onDayLongPress?(day)
@@ -300,47 +300,11 @@ struct BaseCalendarView: View {
                     }
                     .frame(height: viewModel.isWeekView ? 80 : nil)
                     .animation(.easeInOut(duration: 0.3), value: viewModel.isWeekView)
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
-                                feedbackGenerator.prepare()
-                                
-                                if abs(value.translation.width) > abs(value.translation.height) {
-                                    if value.translation.width < 0 {
-                                        nextPeriod()
-                                        feedbackGenerator.impactOccurred()
-                                    } else if value.translation.width > 0 {
-                                        previousPeriod()
-                                        feedbackGenerator.impactOccurred()
-                                    }
-                                } else {
-                                    withAnimation {
-                                        if value.translation.height < 0 {
-                                            if !viewModel.isWeekView {
-                                                viewModel.isWeekView.toggle()
-                                                viewModel.generateDays(for: selectedDay ?? currentDate)
-                                                feedbackGenerator.impactOccurred()
-                                            }
-                                        } else if value.translation.height > 0 {
-                                            if viewModel.isWeekView {
-                                                viewModel.isWeekView.toggle()
-                                                viewModel.generateDays(for: selectedDay ?? currentDate)
-                                                feedbackGenerator.impactOccurred()
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                    )
+                    .gesture(dragHandler())
                     .onAppear {
-                        setupView()
-                        viewModel.generateDays(for: selectedDay ?? currentDate)
-                        if !isDataLoaded {
-                            viewModel.fetchAppointments(forUserID: userID ?? "", userRole: userRole)
-                            viewModel.fetchStudents(for: userID ?? "")
-                            isDataLoaded = true
-                        }
+                        viewModel.generateDays(for: currentDate)
+                        viewModel.fetchAppointments(forUserID: userID, userRole: userRole)
+                        viewModel.fetchStudents(for: userID)
                     }
                 }
                 .padding()
@@ -358,7 +322,8 @@ struct BaseCalendarView: View {
                         onAppointmentTap: { appointment in
                             selectedAppointment = appointment
                             isShowingCard = true
-                        }, viewModel: viewModel
+                        },
+                        viewModel: viewModel
                     )
                     .onAppear {
                         viewModel.loadAndSortActivities(for: activities)
@@ -396,9 +361,9 @@ struct BaseCalendarView: View {
                         AppointmentDetailCardView(
                             appointment: appointment,
                             userRole: userRole,
-                            participantName: userRole == "student"
-                            ? (viewModel.participantNames[appointment.teacherID] ?? "Unknown")
-                            : (viewModel.participantNames[appointment.studentID] ?? "Unknown"),
+                            participantName: userRole == UserRole.student.rawValue
+                            ? (viewModel.participantNames[appointment.teacherID] ?? "")
+                            : (viewModel.participantNames[appointment.studentID] ?? ""),
                             onCancel: {
                                 if let appointmentID = appointment.id {
                                     viewModel.cancelAppointment(appointmentID: appointmentID) { result in
@@ -447,38 +412,6 @@ struct BaseCalendarView: View {
             }
         )
     }
-        
-    func updateAppointmentsForDay(_ day: Date) {
-        let startOfDay = Calendar.current.startOfDay(for: day)
-        
-        if let appointmentsForDay = CalendarService.shared.activitiesByDate[startOfDay] {
-            let hasConfirmedAppointments = appointmentsForDay.contains { $0.status.lowercased() == "confirmed" }
-            
-            if !hasConfirmedAppointments {
-                viewModel.internalDateColors.removeValue(forKey: startOfDay)
-            }
-        } else {
-            viewModel.internalDateColors.removeValue(forKey: startOfDay)
-        }
-        
-        viewModel.generateDays(for: selectedDay ?? currentDate)
-    }
-    
-    func toggleSingleSelection(for day: Date) {
-        if selectedDay == day {
-            selectedDay = nil
-        } else {
-            selectedDay = day
-        }
-        
-        if viewModel.isWeekView {
-            viewModel.generateDays(for: selectedDay ?? currentDate)
-        }
-    }
-    
-    private func setupView() {
-        viewModel.generateDays(for: currentDate)
-    }
     
     func adjustPeriod(by value: Int) {
         let component: Calendar.Component = viewModel.isWeekView ? .weekOfYear : .month
@@ -504,6 +437,63 @@ struct BaseCalendarView: View {
         adjustPeriod(by: 1)
     }
 }
+
+extension BaseCalendarView {
+    private func dragHandler() -> some Gesture {
+            DragGesture()
+                .onEnded(handleDragEnded)
+        }
+        
+        private func handleDragEnded(_ value: DragGesture.Value) {
+            let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+            feedbackGenerator.prepare()
+            
+            if abs(value.translation.width) > abs(value.translation.height) {
+                handleHorizontalDrag(value.translation.width)
+            } else {
+                handleVerticalDrag(value.translation.height)
+            }
+            
+            feedbackGenerator.impactOccurred()
+        }
+    
+    private func handleHorizontalDrag(_ width: CGFloat) {
+        if width < 0 {
+            nextPeriod()
+        } else {
+            previousPeriod()
+        }
+    }
+    
+    private func handleVerticalDrag(_ height: CGFloat) {
+        withAnimation {
+            if height < 0 && !viewModel.isWeekView {
+                viewModel.isWeekView.toggle()
+                viewModel.generateDays(for: selectedDay ?? currentDate)
+            } else if height > 0 && viewModel.isWeekView {
+                viewModel.isWeekView.toggle()
+                viewModel.generateDays(for: selectedDay ?? currentDate)
+            }
+        }
+    }
+
+    func updateAppointmentsForDay(_ day: Date) {
+        let startOfDay = Calendar.current.startOfDay(for: day)
+        
+        if let appointmentsForDay = CalendarService.shared.activitiesByDate[startOfDay] {
+            let hasConfirmedAppointments = appointmentsForDay.contains { $0.status.lowercased() == "confirmed" }
+            
+            if !hasConfirmedAppointments {
+                viewModel.internalDateColors.removeValue(forKey: startOfDay)
+            }
+        } else {
+            viewModel.internalDateColors.removeValue(forKey: startOfDay)
+        }
+        
+        viewModel.generateDays(for: selectedDay ?? currentDate)
+    }
+}
+
 
 struct NotePopupViewWrapper: UIViewRepresentable {
     var noteText: String?

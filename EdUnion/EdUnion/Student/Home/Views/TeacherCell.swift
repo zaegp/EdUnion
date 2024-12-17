@@ -154,10 +154,26 @@ class TeacherCell: UICollectionViewCell {
             image.image = UIImage(systemName: "person.crop.circle.fill")
         }
         image.tintColor = .myMessageCell
+        
         nameLabel.text = teacher.fullName
         totalCoursesLabel.text = "已在平台上 \(teacher.totalCourses) 節課"
         subjectLabel.text = "教學科目: \(teacher.resume[3])"
         educationLabel.text = "學歷: \(teacher.resume[0])"
         experienceLabel.text = "家教經驗: \(teacher.resume[1])"
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        image.image = nil
+        image.kf.cancelDownloadTask()
+        
+        nameLabel.text = nil
+        totalCoursesLabel.text = nil
+        subjectLabel.text = nil
+        educationLabel.text = nil
+        experienceLabel.text = nil
+        
+        isSkeleton = false
     }
 }

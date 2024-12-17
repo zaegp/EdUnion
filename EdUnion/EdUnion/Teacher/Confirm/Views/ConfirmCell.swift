@@ -75,6 +75,10 @@ class ConfirmCell: UITableViewCell {
         selectionStyle = .none
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             
@@ -109,9 +113,5 @@ class ConfirmCell: UITableViewCell {
         titleLabel.text = title
         timeLabel.text = TimeService.convertCourseTimeToDisplay(from: times)
         newStudentLabel.isHidden = isStudentExisting
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
