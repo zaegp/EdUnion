@@ -176,14 +176,21 @@ class ConfirmVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
                 completionHandler(true)
             }))
             
-            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { _ in
-                completionHandler(false)
-            }))
+            alert.addAction(UIAlertAction(title: "拒絕", style: .destructive) { _ in
+                self.viewModel.rejectAppointment(appointmentID: appointment.id ?? "")
+                self.deleteAppointment(at: indexPath, in: tableView)
+            })
             
             self.present(alert, animated: true, completion: nil)
         }
         
         return UISwipeActionsConfiguration(actions: [cancelAction])
+    }
+    
+    private func deleteAppointment(at indexPath: IndexPath, in tableView: UITableView) {
+        viewModel.appointments.remove(at: indexPath.row)
+
+        tableView.deleteRows(at: [indexPath], with: .automatic)
     }
 }
 

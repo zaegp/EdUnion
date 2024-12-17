@@ -91,8 +91,6 @@ class ChatListVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        tableView.allowsSelection = false
-        
         navigationController?.navigationBar.barTintColor = .myBackground
         navigationController?.navigationBar.shadowImage = UIImage()
         
@@ -324,10 +322,14 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatListCell", for: indexPath) as! ChatListCell
         
+        cell.selectionStyle = .none
+        cell.backgroundColor = .myBackground
+        
         if isLoading {
             cell.isSkeleton = true
+            cell.isUserInteractionEnabled = false
         } else {
-            tableView.allowsSelection = true
+            cell.isUserInteractionEnabled = true
 
             let chatRoom = filteredChatRooms[indexPath.row]
             let lastMessage = chatRoom.lastMessage ?? "沒有消息"
@@ -344,14 +346,12 @@ extension ChatListVC: UITableViewDataSource, UITableViewDelegate {
                 )
             }
         }
-        cell.backgroundColor = .myBackground
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
         
         let selectedChatRoom = filteredChatRooms[indexPath.row]
         let chatVC = ChatVC()

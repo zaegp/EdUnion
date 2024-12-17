@@ -54,35 +54,43 @@ class BaseCalendarViewModel: ObservableObject {
         let calendar = Calendar.current
         
         if isWeekView {
-            guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
-                return
-            }
-            for i in 0..<7 {
-                if let date = calendar.date(byAdding: .day, value: i, to: startOfWeek) {
-                    days.append(CalendarDay(date: date))
-                }
-            }
+            generateWeekDays(for: referenceDate, calendar: calendar)
         } else {
-            guard let range = calendar.range(of: .day, in: .month, for: referenceDate) else { return }
-            let numDays = range.count
-            
-            guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)) else { return }
-            let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
-            
-            let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
-            
-            for _ in 0..<leadingEmptyDays {
-                days.append(CalendarDay(date: nil))
-            }
-            
-            for day in 1...numDays {
-                if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
-                    days.append(CalendarDay(date: date))
-                }
+            generateMonthDays(for: referenceDate, calendar: calendar)
+        }
+    }
+
+    private func generateWeekDays(for referenceDate: Date, calendar: Calendar) {
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)) else {
+            return
+        }
+        
+        (0..<7).forEach { offset in
+            if let date = calendar.date(byAdding: .day, value: offset, to: startOfWeek) {
+                days.append(CalendarDay(date: date))
             }
         }
     }
-    
+
+    private func generateMonthDays(for referenceDate: Date, calendar: Calendar) {
+        guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: referenceDate)),
+              let range = calendar.range(of: .day, in: .month, for: referenceDate) else {
+            return
+        }
+        
+        let numDays = range.count
+        let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
+        let leadingEmptyDays = (weekdayOfFirstDay + 6) % 7
+        
+        days.append(contentsOf: Array(repeating: CalendarDay(date: nil), count: leadingEmptyDays))
+        
+        (1...numDays).forEach { day in
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDayOfMonth) {
+                days.append(CalendarDay(date: date))
+            }
+        }
+    }
+
     func sortActivities(by activities: [Appointment], ascending: Bool = false) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
